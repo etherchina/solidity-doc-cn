@@ -1,4 +1,3 @@
-# solidity-docs-cn
 # Solidity中文官方文档 
 
 ## 工作指南
