@@ -1,3 +1,4 @@
+# solidity-docs-cn
 # Solidity中文官方文档 
 
 ## 工作指南
@@ -22,13 +23,10 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 
 ## 工作进度
 
-1. index.rst: 翻译完成，未校对 （commit 01ba8b7e1fbdcb1b26820fd7b8908e43fb367e82）
+示例：<文件名>: [@github-id] [翻译中|翻译完成] [审校人] [未审校|审校中|审校完成] (英文源文件commit hash)  
 
-
-## 翻译认领
-
-1. index.rst: 左洪斌
-2. ...
+1. index.rst: @hongbinzuo 翻译完成 未审校 （01ba8b7e1fbdcb1b26820fd7b8908e43fb367e82）
+2. structure-of-a-contract.rst: @bobjiang 翻译中 (f58024b9744f557dbc77d5f7bfbc4319bde2e0c7)
 
 
 ## 贡献者列表
@@ -38,9 +36,7 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 
 ## 常见问题
 1. fork出的仓库如何同步源的内容：https://www.zhihu.com/question/28676261
-2. 如何检查文件的提交哈希：`git log filename.rst`
-3. 文档如何构建：https://solidity-cn.rtfd.io 是我们的托管地址，readthedocument这个网站是免费的，可以关联多个仓库，并且可以由git push触发自动构建，以达到文档更新的目的。
-4. 原英文文档更新怎么办：我们需要人去定期检查英文文档的更新，使用commit hash来比较更新，如果有更新，我们发起翻译请求，翻译后提交。后续我们会开发跟踪脚本，每天检查文档文件的更新，以确定是否有新的翻译工作。
+2. 如何检查文件(参考[Solidity英文文档仓库](https://github.com/ethereum/solidity))的提交哈希：`git log filename.rst`
 
 ## 术语表
 此表需要单独文件给出
