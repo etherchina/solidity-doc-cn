@@ -43,4 +43,7 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 5. rst文档中中文斜体无法展示，此问题尚待解决
 
 ## 术语表
-此表需要单独文件给出
+参见glossaries.md
+
+## 参考资料
+参见references.md
