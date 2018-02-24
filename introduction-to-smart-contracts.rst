@@ -1,11 +1,11 @@
 ###############################
-Introduction to Smart Contracts
+智能合约概述
 ###############################
 
 .. _simple-smart-contract:
 
 ***********************
-A Simple Smart Contract
+简单的智能合约
 ***********************
 
 Let us begin with the most basic example. It is fine if you do not understand everything
@@ -201,7 +201,7 @@ a "blockchain explorer" that tracks transactions and balances of your new coin.
 .. _blockchain-basics:
 
 *****************
-Blockchain Basics
+区块链基础
 *****************
 
 Blockchains as a concept are not too hard to understand for programmers. The reason is that
@@ -266,7 +266,7 @@ likely it will be.
 .. index:: !evm, ! ethereum virtual machine
 
 ****************************
-The Ethereum Virtual Machine
+以太坊虚拟机
 ****************************
 
 Overview
