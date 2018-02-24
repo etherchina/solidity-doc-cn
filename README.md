@@ -40,6 +40,7 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 2. 如何检查文件(参考[Solidity英文文档仓库](https://github.com/ethereum/solidity))的提交哈希：`git log filename.rst`
 3. 文档如何构建：https://solidity-cn.rtfd.io 是我们的托管地址，readthedocument这个网站是免费的，可以关联多个仓库，并且可以由git push触发自动构建，以达到文档更新的目的。
 4. 原英文文档更新怎么办：我们需要人去定期检查英文文档的更新，使用commit hash来比较更新，如果有更新，我们发起翻译请求，翻译后提交。后续我们会开发跟踪脚本，每天检查文档文件的更新，以确定是否有新的翻译工作。
+5. rst文档中中文斜体无法展示，此问题尚待解决
 
 ## 术语表
 此表需要单独文件给出

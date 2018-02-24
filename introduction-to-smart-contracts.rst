@@ -8,8 +8,7 @@
 简单的智能合约
 ***********************
 
-Let us begin with the most basic example. It is fine if you do not understand everything
-right now, we will go into more detail later.
+让我们先看一下最基本的例子。现在就算你都不理解也不要紧，后面我们会有更深入的讲解。
 
 Storage
 =======
@@ -30,16 +29,9 @@ Storage
         }
     }
 
-The first line simply tells that the source code is written for
-Solidity version 0.4.0 or anything newer that does not break functionality
-(up to, but not including, version 0.5.0). This is to ensure that the
-contract does not suddenly behave differently with a new compiler version. The keyword ``pragma`` is called that way because, in general,
-pragmas are instructions for the compiler about how to treat the
-source code (e.g. `pragma once <https://en.wikipedia.org/wiki/Pragma_once>`_).
+第一行就是告诉大家源代码使用Solidity版本0.4.0写的，并且使用0.4.0以上版本运行也没问题（最高到0.5.0，但是不包含0.5.0）。这是为了确保合约不会在新的编译器版本中突然行为异常。关键字 ``pragma`` 的含义是，一般来说，编译指示（pragmas）是告知编译器关于如何处理源代码的指令（例如，`pragma once <https://en.wikipedia.org/wiki/Pragma_once>`_）。
 
-A contract in the sense of Solidity is a collection of code (its *functions*) and
-data (its *state*) that resides at a specific address on the Ethereum
-blockchain. The line ``uint storedData;`` declares a state variable called ``storedData`` of
+Solidity中合约的意义就是一组代码（它的 *功能*)和数据（它的 *状态*），它们位于以太坊区块链的一个特定地址上。 The line ``uint storedData;`` declares a state variable called ``storedData`` of
 type ``uint`` (unsigned integer of 256 bits). You can think of it as a single slot
 in a database that can be queried and altered by calling functions of the
 code that manages the database. In the case of Ethereum, this is always the owning
