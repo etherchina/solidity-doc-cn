@@ -18,7 +18,7 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 4. develop: 在README中更新，认领需要翻译的章节，请务必加入commit hash值，命令见常见问题。
 5. develop: 翻译，完成后提交PR
 6. develop: 在提交PR或git push的时候注意：一定要先同步主仓库源，见常见问题
-7. develop: Reviewed审核之后merge，由校对人员校对
+7. develop: Reviewer审核之后merge，由校对人员校对
 8. master: 确认质量后由admin合并入master
 
 ## 工作进度
