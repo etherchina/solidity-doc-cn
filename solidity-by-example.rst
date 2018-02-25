@@ -10,56 +10,37 @@
 投票
 ******
 
-The following contract is quite complex, but showcases
-a lot of Solidity's features. It implements a voting
-contract. Of course, the main problems of electronic
-voting is how to assign voting rights to the correct
-persons and how to prevent manipulation. We will not
-solve all problems here, but at least we will show
-how delegated voting can be done so that vote counting
-is **automatic and completely transparent** at the
-same time.
+下面的合约就十分的复杂, 但是的确是展现出了`Solidity`的许多特性. 它实现了一个投票的合约. 当然, 电子投票的主要的问题, 如何给正确的人分配投票权和如何阻止暗箱操作. 在这里我们并不会解决所有的问题, 但是 至少我们将展现如何进行一场**自动化记票和完全透明**的委托投票
 
-The idea is to create one contract per ballot,
-providing a short name for each option.
-Then the creator of the contract who serves as
-chairperson will give the right to vote to each
-address individually.
+主要的思路是是对每次投票创建一个合约, 对每个选项提供一个短的名称. 合约的创建者 就作为这次投票的主持人(chairperson)将会给与其他独立地址的投票权利
 
-The persons behind the addresses can then choose
-to either vote themselves or to delegate their
-vote to a person they trust.
+这些账户(可投票)的拥有者可以自己投这一票, 或者把自己的票委托(delegate)给他们信任的人.
 
-At the end of the voting time, ``winningProposal()``
-will return the proposal with the largest number
-of votes.
+在这次投票结束的时候, `winningProposal()` (function)将会返回这个票数最多的人
+
 
 ::
 
     pragma solidity ^0.4.16;
 
-    /// @title Voting with delegation.
+	/// @title 委托投票.
     contract Ballot {
-        // This declares a new complex type which will
-        // be used for variables later.
-        // It will represent a single voter.
-        struct Voter {
-            uint weight; // weight is accumulated by delegation
-            bool voted;  // if true, that person already voted
-            address delegate; // person delegated to
-            uint vote;   // index of the voted proposal
-        }
+        // 声明一个新的复杂类型将会成为一个变量, 会代表其中的一个投票者)
+	    struct Voter {
+	        uint weight; // 权重会随着委托数量累积
+	        bool voted;  // 如果 true 说明这个人已经投过票了
+	        address delegate; // 你的委托人
+	        uint vote;   // 投票候选人索引号
 
-        // This is a type for a single proposal.
-        struct Proposal {
-            bytes32 name;   // short name (up to 32 bytes)
-            uint voteCount; // number of accumulated votes
-        }
+	    // 这是一个候选人的数据类型
+	    struct Proposal {
+	        bytes32 name;   // 短名称 (至多 32 bytes)
+	        uint voteCount; // 累计票数
+	    }
 
         address public chairperson;
 
-        // This declares a state variable that
-        // stores a `Voter` struct for each possible address.
+        // 这里创建里一个状态变量(映射), 用于给每个可能的地址分配一个`Voter`的结构
         mapping(address => Voter) public voters;
 
         // A dynamically-sized array of `Proposal` structs.
