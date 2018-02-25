@@ -28,7 +28,7 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 1. `index.rst`: @hongbinzuo 翻译完成 未审校 （01ba8b7e1fbdcb1b26820fd7b8908e43fb367e82）
 2. `introduction-to-smart-contracts.rst`: @hongbinzuo 翻译中(f58024b9744f557dbc77d5f7bfbc4319bde2e0c7)
 3. `structure-of-a-contract.rst`: @bobjiang 翻译中 (f58024b9744f557dbc77d5f7bfbc4319bde2e0c7)
-4. `solidity-by-example.rst`: @R4y 翻译中 ()
+4. `solidity-by-example.rst`: @R4y 翻译中 (de6ef6eb7ca46ac8f2f1bd4bba527f6e447cbfc3)
 
 
 ## 贡献者列表
