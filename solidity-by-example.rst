@@ -43,21 +43,19 @@
         // 这里创建里一个状态变量(映射), 用于给每个可能的地址分配一个`Voter`的结构
         mapping(address => Voter) public voters;
 
-        // A dynamically-sized array of `Proposal` structs.
+        // 一个动态大小的候选人(`proposal`)数组
         Proposal[] public proposals;
 
-        /// Create a new ballot to choose one of `proposalNames`.
+        /// 使用候选人名称数组(`proposalNames`)创建一轮新的投票 
         function Ballot(bytes32[] proposalNames) public {
             chairperson = msg.sender;
             voters[chairperson].weight = 1;
 
-            // For each of the provided proposal names,
-            // create a new proposal object and add it
-            // to the end of the array.
+            // 对每一个候选人的名字创建一个`proposal`的对象, 
+            // 并且添加到数组(Array)的尾部	     
             for (uint i = 0; i < proposalNames.length; i++) {
-                // `Proposal({...})` creates a temporary
-                // Proposal object and `proposals.push(...)`
-                // appends it to the end of `proposals`.
+                // `Proposal({...})` 创建了一个临时的 `Proposal` 对象 ,
+                // 并且使用 `proposals.push(...)` 把它追加在`proposals`的末尾.
                 proposals.push(Proposal({
                     name: proposalNames[i],
                     voteCount: 0
@@ -65,71 +63,66 @@
             }
         }
 
-        // Give `voter` the right to vote on this ballot.
-        // May only be called by `chairperson`.
+        // 给与地址投票者的权益
+	    // 只可能是被投票主持人所调用
         function giveRightToVote(address voter) public {
-            // If the argument of `require` evaluates to `false`,
-            // it terminates and reverts all changes to
-            // the state and to Ether balances. It is often
-            // a good idea to use this if functions are
-            // called incorrectly. But watch out, this
-            // will currently also consume all provided gas
-            // (this is planned to change in the future).
+		 	// 如何要求(require)的值是 false , 这个函数将会被终结, 并且回滚所有的已做的改变
+	    	// 对于函数的非法调用这将是很好的防止办法
+	        // 但是值得注意的是, 这个操作将会消耗当前所有的gas(在未来可能有所改善)
             require((msg.sender == chairperson) && !voters[voter].voted && (voters[voter].weight == 0));
             voters[voter].weight = 1;
         }
 
-        /// Delegate your vote to the voter `to`.
+        /// 将你的票委托到其他的可信投票者
         function delegate(address to) public {
-            // assigns reference
+            // 分配 投票者引用
             Voter storage sender = voters[msg.sender];
             require(!sender.voted);
 
-            // Self-delegation is not allowed.
+            // 不允许把票委托给自己
             require(to != msg.sender);
 
-            // Forward the delegation as long as
-            // `to` also delegated.
-            // In general, such loops are very dangerous,
-            // because if they run too long, they might
-            // need more gas than is available in a block.
-            // In this case, the delegation will not be executed,
-            // but in other situations, such loops might
-            // cause a contract to get "stuck" completely.
+	        // 委托权在被委托人那里将会再次被委托
+	        // 事实上这种循环是十分危险的
+	        // 因为这件运行十分久
+	        // 需要的GAS 可能超出一个区块的可用值
+	        // 一方面下, 这个委托就不会被执行
+	        // 但是另一方面, 这样的循环将会导致这个合约完全的卡住了
+            
+            (这里避免一个循环委托的可能性 , 如果A委托给B, B委托给其他人,最终到了A)
             while (voters[to].delegate != address(0)) {
                 to = voters[to].delegate;
 
-                // We found a loop in the delegation, not allowed.
+	            // 发现了一个循环委托, 不允许!
                 require(to != msg.sender);
             }
 
-            // Since `sender` is a reference, this
-            // modifies `voters[msg.sender].voted`
+            // 因为 `sender` 是一个引用,
+	        // 所以这里改变投票状态 `voters[msg.sender].voted`
             sender.voted = true;
             sender.delegate = to;
             Voter storage delegate = voters[to];
             if (delegate.voted) {
-                // If the delegate already voted,
-                // directly add to the number of votes
+               	// 如果委托人的票已经投过, 
+                // 那么这里直接修改被选举人的票数(委托人投的那个)
                 proposals[delegate.vote].voteCount += sender.weight;
             } else {
-                // If the delegate did not vote yet,
-                // add to her weight.
+                // 如果委托人还没投票, 
+                // 那么我们增加委托人的票的权重
                 delegate.weight += sender.weight;
             }
         }
 
-        /// Give your vote (including votes delegated to you)
-        /// to proposal `proposals[proposal].name`.
+	    /// 投票 (包含委托给你的) 
+        /// 给 `proposals[proposal].name`.(被选举人)
         function vote(uint proposal) public {
             Voter storage sender = voters[msg.sender];
             require(!sender.voted);
             sender.voted = true;
             sender.vote = proposal;
 
-            // If `proposal` is out of the range of the array,
-            // this will throw automatically and revert all
-            // changes.
+            // 如果意向被选举人超出了索引范围, 
+            // 将会自动的抛出异常并回滚所有数据.
             proposals[proposal].voteCount += sender.weight;
         }
 
