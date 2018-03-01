@@ -7,5 +7,4 @@
  - keypair: 密钥对
  - light client: 轻客户端
  - constructor: 构造函数
- - Ether：以太币
 
