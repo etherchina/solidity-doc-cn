@@ -17,15 +17,15 @@
 创建并发布一个最基本的能用的合约
 ================================
 
-这是个最简单的例子： `greeter <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/05_greeter.sol>`_
+这是个最简单的例子： `greeter <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/05_greeter.sol>`_。
 
 可以在特定的区块上进行操作吗？(比如发布一个合约或执行一笔交易)
 ==============================================================
 
-鉴于交易信息的写入是由矿工决定的而不是由提交者决定的，谁也无法保证交易一定会发生在下一个或未来哪一个特定的区块上。这个结论适用于功能调用/交易以及合约的创建。
+鉴于交易数据的写入是由矿工决定的而不是由提交者决定的，谁也无法保证交易一定会发生在下一个或未来某一个特定的区块上。这个结论适用于功能调用/交易以及合约的创建。
 
 如果你希望你的合约被定时调用，可以使用：
-`alarm clock <http://www.ethereum-alarm-clock.com/>`_.
+`alarm clock <http://www.ethereum-alarm-clock.com/>`_。
 
 什么是交易的“有效载荷”？
 ========================
@@ -35,7 +35,7 @@
 存在反编译程序吗？
 ==================
 
-除了`Porosity <https://github.com/comaeio/porosity>`_有点接近之外，Solidity没有严格意义上的反编译程序。由于诸如变量名、注释、代码格式等会在编译过程中丢失，所以完全反编译回源代码是没有可能的。
+除了`Porosity <https://github.com/comaeio/porosity>`_ 有点接近之外，Solidity没有严格意义上的反编译程序。由于诸如变量名、注释、代码格式等会在编译过程中丢失，所以完全反编译回源代码是没有可能的。
 
 很多区块链管理器都能将字节码分解为一系列操作码。
 
@@ -44,7 +44,7 @@
 创建一个可以被中止并退款的合约
 ==============================
 
-首先，提前给你一点警告：中止合约听起来是一个好主意，垃圾自己打扫干净是个好习惯。但从宏观来看，合约是不会被真正清理干净的。退一步讲，假设这真会发生，就会出现被用作移除合约的以太币凭空消失的事情。
+首先，给你一个警告：中止合约听起来是一个好主意，把垃圾打扫干净是个好习惯，但如上所述，合约是不会被真正清理干净的。更有甚者，被发送至已移除合约的以太币，会从此丢失。
 
 If you want to deactivate your contracts, it is preferable to **disable** them by changing some
 internal state which causes all functions to throw. This will make it impossible
