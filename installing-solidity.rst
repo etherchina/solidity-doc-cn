@@ -9,38 +9,24 @@
 版本
 ==========
 
-Solidity versions follow `semantic versioning <https://semver.org>`_ and in addition to
-releases, **nightly development builds** are also made available.  The nightly builds
-are not guaranteed to be working and despite best efforts they might contain undocumented
-and/or broken changes. We recommend using the latest release. Package installers below
-will use the latest release.
+Solidity的版本遵循`语义化版本原则 <https://semver.org>`_ ，除了正式发布的版本外，Solidity还有一个**每夜开发版本**（nightly development builds）可用。这个每晚构建的版本不保证能够正常工作，尽管尽了最大的努力，但仍可能包含无文档的或重大的改动。我们建议使用最新版本。 下面的包安装程序将使用最新版本。
 
 Remix
 =====
 
-*We recommend Remix for small contracts and for quickly learning Solidity.*
+  推荐使用 Remix 来开发简单合约和快速学习 Solidity。
 
-`Access Remix online <https://remix.ethereum.org/>`_, you don't need to install anything.
-If you want to use it without connection to the Internet, go to
-https://github.com/ethereum/browser-solidity/tree/gh-pages and download the .ZIP file as
-explained on that page.
+`Remix <https://remix.ethereum.org/>`_ 可在线使用，而无需安装任何东西。如果你想离线使用，可按 https://github.com/ethereum/browser-solidity/tree/gh-pages 的页面说明下载 zip 文件来使用。
+该页面有进一步详细说明如何安装 solidity 命令行编译器到你计算机上。如果你刚好要处理大型合约，或者需要更多的编译选项，那么你应该选择使用命令行编译器 solc。
 
-Further options on this page detail installing commandline Solidity compiler software
-on your computer. Choose a commandline compiler if you are working on a larger contract
-or if you require more compilation options.
 
 npm / Node.js
 =============
+使用`npm`可以便捷的安装Solidity编译器solcjs。但该`solcjs`程序的功能相对于本页下面的所有其他选项都要少。在`使用编译器 <using-the-compiler.html>`文档中，我们假定你使用的是完整功能的编译器。 所以如果你是从 npm 安装 solcjs ，就此打住，直接跳到 `solc-js  <https://github.com/ethereum/solc-js>`_ 去了解。
 
-Use `npm` for a convenient and portable way to install `solcjs`, a Solidity compiler. The
-`solcjs` program has less features than all options further down this page. Our 
-`Using the compiler <using-the-compiler.html>` documentation assumes you are using
-the full-featured compiler, `solc`. So if you install `solcjs` from `npm` then you will
-stop reading the documentation here and then continue to <https://github.com/ethereum/solc-js>,
 
-Note: The `solc-js <https://github.com/ethereum/solc-js>` project is derived from the C++
-`solc` by using Emscripten. `solc-js` can be used in JavaScript projects directly (such as Remix).
-Please refer to the `solc-js <https://github.com/ethereum/solc-js>`_ repository for instructions.
+Note: `solc-js <https://github.com/ethereum/solc-js>`_ 是利用 Emscripten 从 C++ 版的 solc 跨平台编译为 JavaScript 的，因此，可在 JavaScript 项目中使用 solcjs (如同 Remix)。
+具体介绍请查看 `solc-js <https://github.com/ethereum/solc-js>`_ 代码库。
 
 .. code:: bash
 
@@ -48,33 +34,28 @@ Please refer to the `solc-js <https://github.com/ethereum/solc-js>`_ repository 
 
 .. note::
 
-    The commandline is named `solcjs`.
-
-    The comandline options of `solcjs` are not compatible with `solc` and tools (such as `geth`)
-    expecting the behaviour of `solc` will not work with `solcjs`.
+    在命令行中，使用 `solcjs`而非`solc`。
+    solcjs 的命令行选项同 solc 和一些工具（如 geth )是不兼容的，因此不要期望`solcjs`能像`solc`一样工作。
 
 Docker
 ======
 
-We provide up to date docker builds for the compiler. The ``stable``
-repository contains released versions while the ``nightly``
-repository contains potentially unstable changes in the develop branch.
+我们为solc编译器提供了最新的docker版本。``stable``仓库包含已发布的版本，``nightl``
+仓库则包含在开发分支中的带有不稳定的更改的版本。
 
 .. code:: bash
 
     docker run ethereum/solc:stable solc --version
 
-Currently, the docker image only contains the compiler executable,
-so you have to do some additional work to link in the source and
-output directories.
+目前，docker 镜像只含有 solc 的可执行程序，因此你需要额外的工作去链接源和输出目录。
+
 
 二进制包
 ===============
 
-Binary packages of Solidity are available at
-`solidity/releases <https://github.com/ethereum/solidity/releases>`_.
+可在`solidity/releases <https://github.com/ethereum/solidity/releases>`_下载 Solidity 的二进制安装包。
 
-We also have PPAs for Ubuntu.  For the latest stable version.
+对于Unbuntu，我们也提供PPAs。以下，可获取最新的稳定版本：
 
 .. code:: bash
 
@@ -82,7 +63,7 @@ We also have PPAs for Ubuntu.  For the latest stable version.
     sudo apt-get update
     sudo apt-get install solc
 
-If you want to use the cutting edge developer version:
+当然，你也可安装尝鲜的开发者版本：
 
 .. code:: bash
 
@@ -90,29 +71,26 @@ If you want to use the cutting edge developer version:
     sudo add-apt-repository ppa:ethereum/ethereum-dev
     sudo apt-get update
     sudo apt-get install solc
-    
-We are also releasing a `snap package <https://snapcraft.io/>`_, which is installable in all the `supported Linux distros <https://snapcraft.io/docs/core/install>`_. To install the latest stable version of solc:
+
+同时也提供 `snap package <https://snapcraft.io/>`_, 可安装在 `所有支持的Linux <https://snapcraft.io/docs/core/install>`_版本下。安装最新稳定版命令如下：
 
 .. code:: bash
 
     sudo snap install solc
 
-Or if you want to help testing the unstable solc with the most recent changes from the development branch:
+或者，如果你想测试 develop 分支下的最新变更，可如下安装：
 
 .. code:: bash
 
     sudo snap install solc --edge
 
-Arch Linux also has packages, albeit limited to the latest development version:
+同样，Arch Linux 也有提供安装包，仅限于最新开发版：
 
 .. code:: bash
 
     pacman -S solidity
 
-Homebrew is missing pre-built bottles at the time of writing,
-following a Jenkins to TravisCI migration, but Homebrew
-should still work just fine as a means to build-from-source.
-We will re-add the pre-built bottles soon.
+在写本文时，从 Jenkins 迁移到 TravisCI 后还没有准备好 Homebrew 构建所需的二进制包。 现在，还得从源码安装，我们将尽快提供 homebrew 下二进制安装包。
 
 .. code:: bash
 
@@ -122,16 +100,12 @@ We will re-add the pre-built bottles soon.
     brew install solidity
     brew linkapps solidity
 
-If you need a specific version of Solidity you can install a 
-Homebrew formula directly from Github.
 
-View 
+如果你需要特定版本的 Solidity ，你需要从 Github 上安装一个 Homebrew formula。
+你可查阅
 `solidity.rb commits on Github <https://github.com/ethereum/homebrew-ethereum/commits/master/solidity.rb>`_.
+的提交记录，去寻找指向``solidity.rb``文件的特殊提交。然后使用``brew``进行安装：
 
-Follow the history links until you have a raw file link of a 
-specific commit of ``solidity.rb``.
-
-Install it using ``brew``:
 
 .. code:: bash
 
@@ -139,7 +113,7 @@ Install it using ``brew``:
     # Install 0.4.8
     brew install https://raw.githubusercontent.com/ethereum/homebrew-ethereum/77cce03da9f289e5a3ffe579840d3c5dc0a62717/solidity.rb
 
-Gentoo Linux also provides a solidity package that can be installed using ``emerge``:
+Gentoo Linux 下也提供了安装包，可使用``emerge``安装：
 
 .. code:: bash
 
@@ -150,66 +124,61 @@ Gentoo Linux also provides a solidity package that can be installed using ``emer
 从源代码编译
 ====================
 
-Clone the Repository
+克隆代码库
 --------------------
 
-To clone the source code, execute the following command:
+执行以下命令，克隆源代码：
 
 .. code:: bash
 
     git clone --recursive https://github.com/ethereum/solidity.git
     cd solidity
 
-If you want to help developing Solidity,
-you should fork Solidity and add your personal fork as a second remote:
+如果你想参与 Solidity 的开发, 你可 Fork Solidity 后，用你自个人的 Fork 库作为第二远程源：
 
 .. code:: bash
 
     cd solidity
     git remote add personal git@github.com:[username]/solidity.git
 
-Solidity has git submodules.  Ensure they are properly loaded:
+Solidity 有 Git 子模块，需确保完全加载它们：
 
 .. code:: bash
 
    git submodule update --init --recursive
 
-Prerequisites - macOS
+先决条件 - macOS
 ---------------------
 
-For macOS, ensure that you have the latest version of
-`Xcode installed <https://developer.apple.com/xcode/download/>`_.
-This contains the `Clang C++ compiler <https://en.wikipedia.org/wiki/Clang>`_, the
-`Xcode IDE <https://en.wikipedia.org/wiki/Xcode>`_ and other Apple development
-tools which are required for building C++ applications on OS X.
-If you are installing Xcode for the first time, or have just installed a new
-version then you will need to agree to the license before you can do
-command-line builds:
+在 macOS 中，需确保有安装最新版的
+`Xcode <https://developer.apple.com/xcode/download/>`_，
+Xcode 包含 `Clang C++ 编译器 <https://en.wikipedia.org/wiki/Clang>`_， 而
+`Xcode IDE <https://en.wikipedia.org/wiki/Xcode>`_ 和其他苹果开发工具是 OS X 下编译 C++ 应用所必须的。
+如果你是第一次安装 Xcode 或者刚好更新了 Xcode 新版本，则在使用命令行构建前，需同意 Xcode 的使用协议：
 
 .. code:: bash
 
     sudo xcodebuild -license accept
 
-Our OS X builds require you to `install the Homebrew <http://brew.sh>`_
-package manager for installing external dependencies.
-Here's how to `uninstall Homebrew
-<https://github.com/Homebrew/homebrew/blob/master/share/doc/homebrew/FAQ.md#how-do-i-uninstall-homebrew>`_,
-if you ever want to start again from scratch.
+Solidity 在 OS X 下构建，必须 `安装 Homebrew <http://brew.sh>`_
+包管理器来安装依赖。
+如果你想从头开始，这里是 `卸载 Homebrew 的方法
+<https://github.com/Homebrew/homebrew/blob/master/share/doc/homebrew/FAQ.md#how-do-i-uninstall-homebrew>`_。
 
 
-Prerequisites - Windows
+先决条件 - Windows
 -----------------------
 
-You will need to install the following dependencies for Windows builds of Solidity:
+在Windows下构建Solidity，需下载的依赖软件包：
 
 +------------------------------+-------------------------------------------------------+
-| Software                     | Notes                                                 |
+| 软件                     |  备注                                                 |
 +==============================+=======================================================+
-| `Git for Windows`_           | Command-line tool for retrieving source from Github.  |
+| `Git for Windows`_           | 从Github上获取源码的命令行工具  |
 +------------------------------+-------------------------------------------------------+
-| `CMake`_                     | Cross-platform build file generator.                  |
+| `CMake`_                     | 跨平台构建文件生成器                 |
 +------------------------------+-------------------------------------------------------+
-| `Visual Studio 2015`_        | C++ compiler and dev environment.                     |
+| `Visual Studio 2015`_        | C++ 编译开发环境                    |
 +------------------------------+-------------------------------------------------------+
 
 .. _Git for Windows: https://git-scm.com/download/win
@@ -217,31 +186,28 @@ You will need to install the following dependencies for Windows builds of Solidi
 .. _Visual Studio 2015: https://www.visualstudio.com/products/vs-2015-product-editions
 
 
-External Dependencies
+外部依赖
 ---------------------
 
-We now have a "one button" script which installs all required external dependencies
-on macOS, Windows and on numerous Linux distros.  This used to be a multi-step
-manual process, but is now a one-liner:
+在 macOS、Windows和其他 Linux 发行版上，有一个一键脚本可安装所需的外部依赖库。本来是需要人工参与的多步操作，现在可一键执行:
 
 .. code:: bash
 
     ./scripts/install_deps.sh
 
-Or, on Windows:
+Windows 下执行：
 
 .. code:: bat
 
     scripts\install_deps.bat
 
 
-Command-Line Build
+命令行构建
 ------------------
 
-**Be sure to install External Dependencies (see above) before build.**
+**确保你已安装外部依赖（见上面）**
 
-Solidity project uses CMake to configure the build.
-Building Solidity is quite similar on Linux, macOS and other Unices:
+Solidity 使用 CMake 来配置构建。在 Linux、macOS 和其他 Unix系统安装都差不多：
 
 .. code:: bash
 
@@ -249,14 +215,14 @@ Building Solidity is quite similar on Linux, macOS and other Unices:
     cd build
     cmake .. && make
 
-or even easier:
+也有更简单的：
 
 .. code:: bash
-    
-    #note: this will install binaries solc and soltest at usr/local/bin
+
+    #note: 将安装 solc 和 soltest 到 usr/local/bin 目录
     ./scripts/build.sh
 
-And even for Windows:
+对于 Windows 执行：
 
 .. code:: bash
 
@@ -264,12 +230,9 @@ And even for Windows:
     cd build
     cmake -G "Visual Studio 14 2015 Win64" ..
 
-This latter set of instructions should result in the creation of
-**solidity.sln** in that build directory.  Double-clicking on that file
-should result in Visual Studio firing up.  We suggest building
-**RelWithDebugInfo** configuration, but all others work.
+命令的最后一行会在 build 目录下创建一个 **solidity.sln** 文件，双击后，默认会使用 Visual Studio 打开。我们建议在VS上创建 RelWithDebugInfo 配置文件。
 
-Alternatively, you can build for Windows on the command-line, like so:
+或者用命令创建：
 
 .. code:: bash
 
@@ -278,41 +241,37 @@ Alternatively, you can build for Windows on the command-line, like so:
 CMake参数
 =============
 
-If you are interested what CMake options are available run ``cmake .. -LH``.
+如果你对 CMake 命令选项有兴趣，可执行 cmake .. -LH查看。
 
 版本号字符串详解
 ============================
 
-The Solidity version string contains four parts:
+Solidity 版本名包含四部分：
 
-- the version number
-- pre-release tag, usually set to ``develop.YYYY.MM.DD`` or ``nightly.YYYY.MM.DD``
-- commit in the format of ``commit.GITHASH``
-- platform has arbitrary number of items, containing details about the platform and compiler
+- 版本号
+- 先行版本号，通常为 ``develop.YYYY.MM.DD`` 或者 ``nightly.YYYY.MM.DD``
+- 以 ``commit.GITHASH`` 格式展示的提交号
+- 含平台和编译器的详细信息的多条目内容
 
-If there are local modifications, the commit will be postfixed with ``.mod``.
+如果本地有修改，则 commit 部分有后缀 ``.mod``.
 
-These parts are combined as required by Semver, where the Solidity pre-release tag equals to the Semver pre-release
-and the Solidity commit and platform combined make up the Semver build metadata.
+此四部分按照 Semver 要求组成，第2部分等同 Semver 先行版本号，第三和四部分组成 Semver 版本编译信息。
 
-A release example: ``0.4.8+commit.60cc1668.Emscripten.clang``.
+发行版样例：``0.4.8+commit.60cc1668.Emscripten.clang``.
 
-A pre-release example: ``0.4.9-nightly.2017.1.17+commit.6ecb4aa3.Emscripten.clang``
+先行版样例： ``0.4.9-nightly.2017.1.17+commit.6ecb4aa3.Emscripten.clang``
 
 版本信息详情
 ======================================
 
-After a release is made, the patch version level is bumped, because we assume that only
-patch level changes follow. When changes are merged, the version should be bumped according
-to semver and the severity of the change. Finally, a release is always made with the version
-of the current nightly build, but without the ``prerelease`` specifier.
+在版本发布之后，补丁版本号会增加，因为我们假定只有修补程序级别发生变化。当变更被合并后，版本应该根据semver和更改的严重程度进行调整。最后，发行版本总是与当前夜间版本的版本的版本号一致，但没有``先行版``说明符。
 
-Example:
+例如：
 
-0. the 0.4.0 release is made
-1. nightly build has a version of 0.4.1 from now on
-2. non-breaking changes are introduced - no change in version
-3. a breaking change is introduced - version is bumped to 0.5.0
-4. the 0.5.0 release is made
+0. 0.4.0 版本发布
+1. 从现在开始，每晚构建为 0.4.1 版本
+2. 引入非破坏性变更 - 不改变版本号
+3. 引入破坏性变更 - 版本跳跃到 0.5.0
+4. 0.5.0 版本发布
 
-This behaviour works well with the  :ref:`version pragma <version_pragma>`.
+该方式与 :ref:`version pragma <version_pragma>` 下运行良好。
