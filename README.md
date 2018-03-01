@@ -13,13 +13,15 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 ### 工作流
 
 1. 注册Github帐号
-2. 申请加入[Solidity翻译团队](https://github.com/orgs/etherchina/teams/solidity-translation-team/)
+2. 加入[Solidity翻译团队](https://github.com/orgs/etherchina/teams/solidity-translation-team/)
 3. fork仓库: https://github.com/etherchina/solidity-doc-cn
-4. develop: 在README中更新，认领需要翻译的章节，请务必加入commit hash值，命令见常见问题。
-5. develop: 翻译，完成后提交PR
+4. develop: admin负责README更新，记录需要翻译的章节，请务必加入commit hash值，命令见常见问题。
+5. develop: 译者翻译，完成后提交PR
 6. develop: 在提交PR或git push的时候注意：一定要先同步主仓库源，见常见问题
-7. develop: Reviewer审核之后merge，由校对人员校对
+7. develop: 一名Reviewer审核之后, 有问题退回修改，提交后另一名Reviewer再审核
 8. master: 确认质量后由admin合并入master
+
+详细说明：第4步及后续步骤关于翻译工作的认领，请遵循如下流程：管理员把译者加入Github上的翻译团队，翻译的内容在Github上issue上跟踪，可由管理员或译者开issue，可以在管理员开的issue下回复认领翻译工作，然后管理员更新Readme（注意commit hash），译者开始翻译，翻译初稿完成后提交PR，提交PR时注明对应的issue＃，然后进入两轮审校，译者修改并最终审校完成后提交到develop，由管理员提交PR合并到master分支
 
 ## 工作进度
 
