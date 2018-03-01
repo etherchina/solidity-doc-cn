@@ -27,16 +27,21 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 
 示例：<文件名>: [@github-id] [翻译中|翻译完成] [审校人] [未审校|审校中|审校完成] (英文源文件commit hash)  
 
-1. `index.rst`: @hongbinzuo 翻译完成 未审校 （01ba8b7e1fbdcb1b26820fd7b8908e43fb367e82）
-2. `introduction-to-smart-contracts.rst`: @hongbinzuo 翻译中(f58024b9744f557dbc77d5f7bfbc4319bde2e0c7)
+1. `index.rst`: @hongbinzuo 翻译完成 @toyab 审校中 （01ba8b7e1fbdcb1b26820fd7b8908e43fb367e82）
+2. `introduction-to-smart-contracts.rst`: @oldcodeoberyn @ysqi 翻译完成 @hongbinzuo 审校完成 @toyab 审校中 (f58024b9744f557dbc77d5f7bfbc4319bde2e0c7)
 3. `structure-of-a-contract.rst`: @bobjiang 翻译中 (f58024b9744f557dbc77d5f7bfbc4319bde2e0c7)
-4. 
+4. `frequently-asked-questions.rst`: @ghostrd 翻译中（5770458826bfe72201393f4f02729a970bac926e） 
 
 
 ## 贡献者列表
 
 1. 姜信宝 
 2. 左洪斌
+3. 侯伯薇
+4. toyab
+5. 李捷
+6. 虞是乎ysqi
+7. 周锷
 
 ## 常见问题
 1. fork出的仓库如何同步源的内容：https://www.zhihu.com/question/28676261
