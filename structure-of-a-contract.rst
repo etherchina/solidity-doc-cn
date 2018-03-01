@@ -3,20 +3,21 @@
 .. _contract_structure:
 
 ***********************
-合约的结构
+合约代码结构
 ***********************
 
-Contracts in Solidity are similar to classes in object-oriented languages.
-Each contract can contain declarations of :ref:`structure-state-variables`, :ref:`structure-functions`,
-:ref:`structure-function-modifiers`, :ref:`structure-events`, :ref:`structure-struct-types` and :ref:`structure-enum-types`.
-Furthermore, contracts can inherit from other contracts.
+
+在 Solidity 中合约类似于面向对象编程语言中的类。
+每个合约中可定义 :ref:`structure-state-variables`、 :ref:`structure-functions`、
+:ref:`structure-function-modifiers`、:ref:`structure-events`、 :ref:`structure-struct-types`、
+和 :ref:`structure-enum-types`，且合约可从其他合约继承。
 
 .. _structure-state-variables:
 
-State Variables
+状态变量
 ===============
 
-State variables are values which are permanently stored in contract storage.
+状态变量是永久存储在合约存储器中的值。
 
 ::
 
@@ -27,17 +28,14 @@ State variables are values which are permanently stored in contract storage.
         // ...
     }
 
-See the :ref:`types` section for valid state variable types and
-:ref:`visibility-and-getters` for possible choices for
-visibility.
+在 :ref:`types` 章节查看有效的状态变量类型。状态变量的可见性见 :ref:`visibility-and-getters`。
 
 .. _structure-functions:
 
-Functions
+函数
 =========
 
-Functions are the executable units of code within a contract.
-
+函数是合约中的可执行单元。
 ::
 
     pragma solidity ^0.4.0;
@@ -48,17 +46,14 @@ Functions are the executable units of code within a contract.
         }
     }
 
-:ref:`function-calls` can happen internally or externally
-and have different levels of visibility (:ref:`visibility-and-getters`)
-towards other contracts.
+:ref:`function-calls` 可在合约内部或外部执行，且函数对不同其他合约有不同的可见性（详见合约章节中的 :ref:`visibility-and-getters`）。 
 
 .. _structure-function-modifiers:
 
-Function Modifiers
+函数修饰符
 ==================
 
-Function modifiers can be used to amend the semantics of functions in a declarative way
-(see :ref:`modifiers` in contracts section).
+函数修饰符可以用来以声明的方式修改函数语义（详见合约章节的 :ref:`modifiers`)）。 
 
 ::
 
@@ -79,10 +74,10 @@ Function modifiers can be used to amend the semantics of functions in a declarat
 
 .. _structure-events:
 
-Events
+事件
 ======
 
-Events are convenience interfaces with the EVM logging facilities.
+事件是记录日志到 EVM（太坊虚拟机）日志组件的便利入口。
 
 ::
 
@@ -97,16 +92,14 @@ Events are convenience interfaces with the EVM logging facilities.
         }
     }
 
-See :ref:`events` in contracts section for information on how events are declared
-and can be used from within a dapp.
+参见合约章节中 :ref:`events` 以了解如何定义事件和如何在 dapp 中使用事件。 
 
 .. _structure-struct-types:
 
-Struct Types
+结构类型
 =============
 
-Structs are custom defined types that can group several variables (see
-:ref:`structs` in types section).
+结构是可以分组定义多个变量的自定义类型（详见类型章节中的 :ref:`structs`）。
 
 ::
 
@@ -123,11 +116,10 @@ Structs are custom defined types that can group several variables (see
 
 .. _structure-enum-types:
 
-Enum Types
+枚举类型
 ==========
 
-Enums can be used to create custom types with a finite set of values (see
-:ref:`enums` in types section).
+枚举可用来创建拥有有限的多个值的自定义类型（详见类型章节中的 :ref:`enums`）。 
 
 ::
 
