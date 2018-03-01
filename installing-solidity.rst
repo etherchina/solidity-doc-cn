@@ -22,10 +22,11 @@ Remix
 
 npm / Node.js
 =============
-使用`npm`可以便捷的安装Solidity编译器solcjs。但该`solcjs`程序的功能相对于本页下面的所有其他选项都要少。在`使用编译器 <using-the-compiler.html>`文档中，我们假定你使用的是完整功能的编译器。 所以如果你是从 npm 安装 solcjs ，就此打住，直接跳到 `solc-js  <https://github.com/ethereum/solc-js>`_ 去了解。
+
+使用 `npm` 可以便捷的安装Solidity编译器solcjs。但该 `solcjs` 程序的功能相对于本页下面的所有其他选项都要少。在 :ref:`commandline-compiler` 一章中，我们假定你使用的是完整功能的编译器。 所以，如果你是从 npm 安装 solcjs ，就此打住，直接跳到 `solc-js  <https://github.com/ethereum/solc-js>`_ 去了解。
 
 
-Note: `solc-js <https://github.com/ethereum/solc-js>`_ 是利用 Emscripten 从 C++ 版的 solc 跨平台编译为 JavaScript 的，因此，可在 JavaScript 项目中使用 solcjs (如同 Remix)。
+注意: `solc-js <https://github.com/ethereum/solc-js>`_ 是利用 Emscripten 从 C++ 版的 solc 跨平台编译为 JavaScript 的，因此，可在 JavaScript 项目中使用 solcjs（如同 Remix）。
 具体介绍请查看 `solc-js <https://github.com/ethereum/solc-js>`_ 代码库。
 
 .. code:: bash
@@ -34,14 +35,14 @@ Note: `solc-js <https://github.com/ethereum/solc-js>`_ 是利用 Emscripten 从 
 
 .. note::
 
-    在命令行中，使用 `solcjs`而非`solc`。
-    solcjs 的命令行选项同 solc 和一些工具（如 geth )是不兼容的，因此不要期望`solcjs`能像`solc`一样工作。
+    在命令行中，使用 `solcjs` 而非 `solc` 。
+    `solcjs` 的命令行选项同 `solc` 和一些工具（如 `geth` )是不兼容的，因此不要期望 `solcjs` 能像 `solc` 一样工作。
 
 Docker
 ======
 
-我们为solc编译器提供了最新的docker版本。``stable``仓库包含已发布的版本，``nightl``
-仓库则包含在开发分支中的带有不稳定的更改的版本。
+我们为solc编译器提供了最新的docker版本。``stable``仓库里的是已发布的版本，``nightly``
+仓库则是在开发分支中的带有不稳定变更的版本。
 
 .. code:: bash
 
@@ -55,7 +56,7 @@ Docker
 
 可在`solidity/releases <https://github.com/ethereum/solidity/releases>`_下载 Solidity 的二进制安装包。
 
-对于Unbuntu，我们也提供PPAs。以下，可获取最新的稳定版本：
+对于Unbuntu，我们也提供PPAs。通过以下命令，可获取最新的稳定版本：
 
 .. code:: bash
 
@@ -72,25 +73,25 @@ Docker
     sudo apt-get update
     sudo apt-get install solc
 
-同时也提供 `snap package <https://snapcraft.io/>`_, 可安装在 `所有支持的Linux <https://snapcraft.io/docs/core/install>`_版本下。安装最新稳定版命令如下：
+同时，也提供可安装`所有支持的Linux版本 <https://snapcraft.io/docs/core/install>`_下的`snap package <https://snapcraft.io/>`_。通过以下命令，可获取最新的稳定版本：
 
 .. code:: bash
 
     sudo snap install solc
 
-或者，如果你想测试 develop 分支下的最新变更，可如下安装：
+或者，如果你想测试 develop 分支下的最新变更，可通过如下方式安装开发者版本：
 
 .. code:: bash
 
     sudo snap install solc --edge
 
-同样，Arch Linux 也有提供安装包，仅限于最新开发版：
+同样，Arch Linux 也有提供安装包，但仅限于最新的开发者版本：
 
 .. code:: bash
 
     pacman -S solidity
 
-在写本文时，从 Jenkins 迁移到 TravisCI 后还没有准备好 Homebrew 构建所需的二进制包。 现在，还得从源码安装，我们将尽快提供 homebrew 下二进制安装包。
+在写本文时，Homebrew 上还没有提供预构建的二进制包（因为我们从 Jenkins 迁移到了 TravisCI ）。 我们将尽快提供 homebrew 下的二进制安装包，但至少从源码构建的方式还是行得通的：
 
 .. code:: bash
 
@@ -103,8 +104,8 @@ Docker
 
 如果你需要特定版本的 Solidity ，你需要从 Github 上安装一个 Homebrew formula。
 你可查阅
-`solidity.rb commits on Github <https://github.com/ethereum/homebrew-ethereum/commits/master/solidity.rb>`_.
-的提交记录，去寻找指向``solidity.rb``文件的特殊提交。然后使用``brew``进行安装：
+`solidity.rb commits on Github <https://github.com/ethereum/homebrew-ethereum/commits/master/solidity.rb>`_
+的提交记录，去寻找包含``solidity.rb``文件改动的特殊提交。然后使用``brew``进行安装：
 
 
 .. code:: bash
@@ -113,7 +114,7 @@ Docker
     # Install 0.4.8
     brew install https://raw.githubusercontent.com/ethereum/homebrew-ethereum/77cce03da9f289e5a3ffe579840d3c5dc0a62717/solidity.rb
 
-Gentoo Linux 下也提供了安装包，可使用``emerge``安装：
+Gentoo Linux 下也提供了安装包，可使用``emerge``进行安装：
 
 .. code:: bash
 
@@ -172,7 +173,7 @@ Solidity 在 OS X 下构建，必须 `安装 Homebrew <http://brew.sh>`_
 在Windows下构建Solidity，需下载的依赖软件包：
 
 +------------------------------+-------------------------------------------------------+
-| 软件                     |  备注                                                 |
+| 软件                           备注                                            |
 +==============================+=======================================================+
 | `Git for Windows`_           | 从Github上获取源码的命令行工具  |
 +------------------------------+-------------------------------------------------------+
@@ -207,7 +208,7 @@ Windows 下执行：
 
 **确保你已安装外部依赖（见上面）**
 
-Solidity 使用 CMake 来配置构建。在 Linux、macOS 和其他 Unix系统安装都差不多：
+Solidity 使用 CMake 来配置构建。Linux、macOS 和其他 Unix系统上的构建方式都差不多：
 
 .. code:: bash
 
@@ -241,7 +242,7 @@ Solidity 使用 CMake 来配置构建。在 Linux、macOS 和其他 Unix系统�
 CMake参数
 =============
 
-如果你对 CMake 命令选项有兴趣，可执行 cmake .. -LH查看。
+如果你对 CMake 命令选项有兴趣，可执行 ``cmake .. -LH`` 进行查看。
 
 版本号字符串详解
 ============================
@@ -253,7 +254,7 @@ Solidity 版本名包含四部分：
 - 以 ``commit.GITHASH`` 格式展示的提交号
 - 含平台和编译器的详细信息的多条目内容
 
-如果本地有修改，则 commit 部分有后缀 ``.mod``.
+如果本地有修改，则 commit 部分有后缀 ``.mod``。
 
 此四部分按照 Semver 要求组成，第2部分等同 Semver 先行版本号，第三和四部分组成 Semver 版本编译信息。
 
