@@ -3,6 +3,7 @@
 ###########################
 
 This list was originally compiled by `fivedogit <mailto:fivedogit@gmail.com>`_.
+这份清单最早是由 `fivedogit <mailto:fivedogit@gmail.com>`_收集整理的。
 
 
 ***************
@@ -11,52 +12,74 @@ This list was originally compiled by `fivedogit <mailto:fivedogit@gmail.com>`_.
 
 Example contracts
 =================
+合约范本
+========
 
 There are some `contract examples <https://github.com/fivedogit/solidity-baby-steps/tree/master/contracts/>`_ by fivedogit and
 there should be a `test contract <https://github.com/ethereum/solidity/blob/develop/test/libsolidity/SolidityEndToEndTest.cpp>`_ for every single feature of Solidity.
+请参考由fivedogit收集整理的一些 `合约范本 <https://github.com/fivedogit/solidity-baby-steps/tree/master/contracts/>`_，另外请为Solidity的每一个特征建立一份 `测试合约 <https://github.com/ethereum/solidity/blob/develop/test/libsolidity/SolidityEndToEndTest.cpp>`_。
 
 Create and publish the most basic contract possible
 ===================================================
+创建并发布一个最基本的能用的合约
+================================
 
 A quite simple contract is the `greeter <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/05_greeter.sol>`_
+这是个最简单的例子： `greeter <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/05_greeter.sol>`_
 
 Is it possible to do something on a specific block number? (e.g. publish a contract or execute a transaction)
 =============================================================================================================
+可以在特定的区块上进行操作吗？(比如发布一个合约或执行一笔交易)
+==============================================================
 
 Transactions are not guaranteed to happen on the next block or any future
 specific block, since it is up to the miners to include transactions and not up
 to the submitter of the transaction. This applies to function calls/transactions and contract
 creation transactions.
+鉴于交易信息的写入是由矿工决定的而不是由提交者决定的，谁也无法保证交易一定会发生在下一个或未来哪一个特定的区块上。这个结论适用于功能调用/交易以及合约的创建。
 
 If you want to schedule future calls of your contract, you can use the
+`alarm clock <http://www.ethereum-alarm-clock.com/>`_.
+如果你希望你的合约被定时调用，可以使用：
 `alarm clock <http://www.ethereum-alarm-clock.com/>`_.
 
 What is the transaction "payload"?
 ==================================
+什么是交易的“有效载荷”？
+========================
 
 This is just the bytecode "data" sent along with the request.
+就是随交易一起发送的字节码“数据”。
 
 Is there a decompiler available?
 ================================
+存在反编译程序吗？
+==================
 
 There is no exact decompiler to Solidity, but
 `Porosity <https://github.com/comaeio/porosity>`_ is close. 
 Because some information like variable names, comments, and 
 source code formatting is lost in the compilation process, 
 it is not possible to completely recover the original source code.
+除了`Porosity <https://github.com/comaeio/porosity>`_有点接近之外，Solidity没有严格意义上的反编译程序。由于诸如变量名、注释、代码格式等会在编译过程中丢失，所以完全反编译回源代码是没有可能的。
 
 Bytecode can be disassembled to opcodes, a service that is provided by
 several blockchain explorers.
+很多区块链管理器都能将字节码分解为一系列操作码。
 
 Contracts on the blockchain should have their original source
 code published if they are to be used by third parties.
+如果区块链上的合约会被第三方使用，那么最好将源代码一起进行发布。
 
 Create a contract that can be killed and return funds
 =====================================================
+创建一个可以被中止并退款的合约
+==============================
 
 First, a word of warning: Killing contracts sounds like a good idea, because "cleaning up"
 is always good, but as seen above, it does not really clean up. Furthermore,
 if Ether is sent to removed contracts, the Ether will be forever lost.
+首先，提前给你一点警告：中止合约听起来是一个好主意，垃圾自己打扫干净是个好习惯。但从宏观来看，合约是不会被真正清理干净的。退一步讲，假设这真会发生，就会出现被用作移除合约的以太币凭空消失的事情。
 
 If you want to deactivate your contracts, it is preferable to **disable** them by changing some
 internal state which causes all functions to throw. This will make it impossible
