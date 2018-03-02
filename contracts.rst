@@ -14,74 +14,52 @@ SOLIDITY的智能合约类似于面向对象语言中的‘类’。包含状态
 
 合约可以通过Ethereum的交易从外部生成，也可以从Solidity内部生成。
 IDEs(集成开发环境)，比如`Remix <https://remix.ethereum.org/>`_，可以让你从图形界面无缝生成一个合约。
-Ethereum里程序化的
-Contracts can be created "from outside" via Ethereum transactions or from within Solidity contracts.
+Ethereum里面的程序化生成合同最好的办法是通过JavaScript API `web3.js <https://github.com/ethereum/web3.js>`_.
+现在有一个方法调用来实现生成合约 `web3.eth.Contract <https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#new-contract>`_
 
-IDEs, such as `Remix <https://remix.ethereum.org/>`_, make the creation process seamless using UI elements.
-
-Creating contracts programatically on Ethereum is best done via using the JavaScript API `web3.js <https://github.com/ethereum/web3.js>`_.
-As of today it has a method called `web3.eth.Contract <https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#new-contract>`_
-to facilitate contract creation.
-
-When a contract is created, its constructor (a function with the same
-name as the contract) is executed once.
-A constructor is optional. Only one constructor is allowed, and this means
-overloading is not supported.
+当一个合约生成时，它的构造函数（一个和合约同名的函数）被执行一次。
+构造函数是可选的。且只允许一个构造函数，这就意味着构造函数是不过以重载的。
 
 .. index:: constructor;arguments
-
-Internally, constructor arguments are passed :ref:`ABI encoded <ABI>` after the code of
-the contract itself, but you do not have to care about this if you use ``web3.js``.
-
-If a contract wants to create another contract, the source code
-(and the binary) of the created contract has to be known to the creator.
-This means that cyclic creation dependencies are impossible.
+.. index:: 构造函数，参数
+从内部机制来说，构造函数的参数是在合约代码自身之后通过:ref:`ABI encoded <ABI>`传递，但如果你用"web3.js"，你不需要关心这个。
+如果一个合约需要生成另一个合约，这个合约需要知道被生成的合约的代码（以及二进制码）。这就意味着循环生成是不可以的。
 
 ::
 
     pragma solidity ^0.4.16;
 
     contract OwnedToken {
-        // TokenCreator is a contract type that is defined below.
-        // It is fine to reference it as long as it is not used
-        // to create a new contract.
-        TokenCreator creator;
+        //TokenCreator是一个合约类型，它的定义在后面
+        //在没有使用它定义一个新的合约之前都可以引用它
+        TokenCreator creator;
         address owner;
         bytes32 name;
 
-        // This is the constructor which registers the
-        // creator and the assigned name.
-        function OwnedToken(bytes32 _name) public {
-            // State variables are accessed via their name
-            // and not via e.g. this.owner. This also applies
-            // to functions and especially in the constructors,
-            // you can only call them like that ("internally"),
-            // because the contract itself does not exist yet.
-            owner = msg.sender;
-            // We do an explicit type conversion from `address`
-            // to `TokenCreator` and assume that the type of
-            // the calling contract is TokenCreator, there is
-            // no real way to check that.
+        // 这是一个构造函数用来登记合约创造者并且赋予一个名字
+        function OwnedToken(bytes32 _name) public {
+            //状态变量可通过它们的名字来访问
+            //而不是用类似于 this.owner.这也适用于函数特别是构造函数，
+            //你只能“内部的”去调用这些构造函数，因为这时候合约本身还不存在。
+            owner = msg.sender;
+            //我们用一个显示的类型转换把address换为TokenCreator,并且假设调用的合约就是TokenCreator
+            //这里并没有一个真正的办法确认这一点
             creator = TokenCreator(msg.sender);
             name = _name;
         }
 
         function changeName(bytes32 newName) public {
-            // Only the creator can alter the name --
-            // the comparison is possible since contracts
-            // are implicitly convertible to addresses.
-            if (msg.sender == address(creator))
+            //只有合约创造者可以修改名字
+            //比较是可行的，因为合约类型可以显示的转为地址类型
+            if (msg.sender == address(creator))
                 name = newName;
         }
 
         function transfer(address newOwner) public {
-            // Only the current owner can transfer the token.
-            if (msg.sender != owner) return;
-            // We also want to ask the creator if the transfer
-            // is fine. Note that this calls a function of the
-            // contract defined below. If the call fails (e.g.
-            // due to out-of-gas), the execution here stops
-            // immediately.
+            //只有当前的拥有者才可以进行代币转帐
+            if (msg.sender != owner) return;
+            //我们还需要问合约创造者转帐是否可行。注意这里调用了一个在后面定义的函数，
+            //如果调用失败（比如gas用完）,程序运行将立即停止。
             if (creator.isTokenTransferOK(owner, newOwner))
                 owner = newOwner;
         }
@@ -91,17 +69,15 @@ This means that cyclic creation dependencies are impossible.
         function createToken(bytes32 name)
            public
            returns (OwnedToken tokenAddress)
-        {
-            // Create a new Token contract and return its address.
-            // From the JavaScript side, the return type is simply
-            // `address`, as this is the closest type available in
-            // the ABI.
+        {            
+            // 生成一个新的代币合约并且返回它的地址.
+            // 从JavaScriptp的角度来看，返回值就是一个简单的地址。  
+            // 这是ABI里最常用的类型。
             return new OwnedToken(name);
         }
 
         function changeName(OwnedToken tokenAddress, bytes32 name)  public {
-            // Again, the external type of `tokenAddress` is
-            // simply `address`.
+            // 这里外部类型又一次是个简单的地址类型。
             tokenAddress.changeName(name);
         }
 
@@ -110,65 +86,49 @@ This means that cyclic creation dependencies are impossible.
             view
             returns (bool ok)
         {
-            // Check some arbitrary condition.
+            // 这里随意增加了一些条件.
             address tokenAddress = msg.sender;
             return (keccak256(newOwner) & 0xff) == (bytes20(tokenAddress) & 0xff);
         }
     }
 
 .. index:: ! visibility, external, public, private, internal
-
-.. _visibility-and-getters:
+.. index:: ! 可见性，外部的，公共的，私人的，内部的
+.. 可见性和Getters
 
 **********************
-Visibility and Getters
+可见性和Getters
 **********************
 
-Since Solidity knows two kinds of function calls (internal
-ones that do not create an actual EVM call (also called
-a "message call") and external
-ones that do), there are four types of visibilities for
-functions and state variables.
+由于Solidity知道两种函数调用：内部函数internal，并不产生一个实际的EVM调用
+（也称之为消息调用）和外部函数external（会产生EVM调用）。所以函数和状态变量
+有总共有四种可见性。
 
-Functions can be specified as being ``external``,
-``public``, ``internal`` or ``private``, where the default is
-``public``. For state variables, ``external`` is not possible
-and the default is ``internal``.
+函数能被指定为‘外部的external’，‘公共的public’，‘内部的internal’或者‘私人的private’，
+这里缺省的是公共的。状态变量是不可以是外部的，缺省的是内部的，
 
-``external``:
-    External functions are part of the contract
-    interface, which means they can be called from other contracts and
-    via transactions. An external function ``f`` cannot be called
-    internally (i.e. ``f()`` does not work, but ``this.f()`` works).
-    External functions are sometimes more efficient when
-    they receive large arrays of data.
 
-``public``:
-    Public functions are part of the contract
-    interface and can be either called internally or via
-    messages. For public state variables, an automatic getter
-    function (see below) is generated.
+``外部的external``:
+    外部函数是合约界面的一部分，也就意味着可以通过交易或者其它合约来调用。
+    一个外部函数``f``不能从内部调用 (比如， ``f()`` 不可以, but ``this.f()`` 可以).
+    外部函数在接受一些大的数据数组时，有时效率会更高。
 
-``internal``:
-    Those functions and state variables can only be
-    accessed internally (i.e. from within the current contract
-    or contracts deriving from it), without using ``this``.
+``公共的public``:
+    公共的也是合约界面的一部分，即可以在内部调用也可以通过消息调用。
+    对于一个公共的状态变量来说，一个用于查询的getter函数会被自动生成（见下面）
 
-``private``:
-    Private functions and state variables are only
-    visible for the contract they are defined in and not in
-    derived contracts.
+``内部的internal``:
+    这些函数和状态变量只能从内部防问（比如从当前合约或者从它派生合约里调用）
+    这种情况不需要使用``this``.
 
-.. note::
-    Everything that is inside a contract is visible to
-    all external observers. Making something ``private``
-    only prevents other contracts from accessing and modifying
-    the information, but it will still be visible to the
-    whole world outside of the blockchain.
+``私人的private``:
+    私人函数和状态变量只能从定义它们的合约内部可，派生合约则不可以防问。
 
-The visibility specifier is given after the type for
-state variables and between parameter list and
-return parameter list for functions.
+.. 注note::
+    合约内的任何东西对一个外部观察者来说都是可见的，把某个东西标成 ``private``
+    只是防止其它的合约来防问和修改。但对区块链以外的世界来说它仍然是可见的（译注：通过察看区块链数据）。
+
+可见性标识符位于状态变量类型之后，以及函数的参数列表和返回参数之间。
 
 ::
 
@@ -180,7 +140,7 @@ return parameter list for functions.
         uint public data;
     }
 
-In the following example, ``D``, can call ``c.getData()`` to retrieve the value of
+在下面这个例子里In the following example, ``D``, can call ``c.getData()`` to retrieve the value of
 ``data`` in state storage, but is not able to call ``f``. Contract ``E`` is derived from
 ``C`` and, thus, can call ``compute``.
 
