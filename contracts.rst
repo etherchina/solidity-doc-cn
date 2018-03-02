@@ -110,7 +110,7 @@ Ethereum里面的程序化生成合同最好的办法是通过JavaScript API `we
 
 ``外部的external``:
     外部函数是合约界面的一部分，也就意味着可以通过交易或者其它合约来调用。
-    一个外部函数``f``不能从内部调用 (比如， ``f()`` 不可以, but ``this.f()`` 可以).
+    一个外部函数 ``f`` 不能从内部调用 (比如， ``f()`` 不可以,  ``this.f()`` 可以).
     外部函数在接受一些大的数据数组时，有时效率会更高。
 
 ``公共的public``:
@@ -119,7 +119,7 @@ Ethereum里面的程序化生成合同最好的办法是通过JavaScript API `we
 
 ``内部的internal``:
     这些函数和状态变量只能从内部防问（比如从当前合约或者从它派生合约里调用）
-    这种情况不需要使用``this``.
+    这种情况不需要使用 ``this``.
 
 ``私人的private``:
     私人函数和状态变量只能从定义它们的合约内部可，派生合约则不可以防问。
@@ -259,7 +259,7 @@ getter函数有外部可见性。一个符号在内部被防问时 (例如：不
 
         // 这个合约只是定义了修饰符但没有用它
         // 它将在派生合约中使用。
-        // 这个函数体在出现修饰符的地方被插入一个`_;` 
+        // 这个函数体在修饰符里出现`_;`的地方被代入 
         // 这意味着如果是所有者(Owner)调用这个函数，函数就会运行，否则就会抛出一个意外（exception）错误
         modifier onlyOwner {
             require(msg.sender == owner);
@@ -290,9 +290,7 @@ getter函数有外部可见性。一个符号在内部被防问时 (例如：不
 
         function Register(uint initialPrice) public { price = initialPrice; }
 
-        // It is important to also provide the
-        // `payable` keyword here, otherwise the function will
-        // automatically reject all Ether sent to it.
+        // 这里使用了`payable` 这个关键词非常重要，否则这个函数将会自动拒绝所有送给它的以太币Ether
         function register() public payable costs(price) {
             registeredAddresses[msg.sender] = true;
         }
@@ -311,39 +309,33 @@ getter函数有外部可见性。一个符号在内部被防问时 (例如：不
             locked = false;
         }
 
-        /// This function is protected by a mutex, which means that
-        /// reentrant calls from within `msg.sender.call` cannot call `f` again.
-        /// The `return 7` statement assigns 7 to the return value but still
-        /// executes the statement `locked = false` in the modifier.
+        /// 这个函数使用互拆功能来进行保护，这就意味着在 `msg.sender.call` 里不能够再次重入调用 `f`
+        /// `return 7` 把 7 赋予返回值，不过也执行了修饰符里的 `locked = false` 语句.
         function f() public noReentrancy returns (uint) {
             require(msg.sender.call());
             return 7;
         }
     }
 
-Multiple modifiers are applied to a function by specifying them in a
-whitespace-separated list and are evaluated in the order presented.
+多个修饰符应用于一个函数时，要用空格隔开的列表方式并且按顺序实施。
 
-.. warning::
-    In an earlier version of Solidity, ``return`` statements in functions
-    having modifiers behaved differently.
+.. 警告::
+    在Solidity早期版本中， 在带有修饰符的函数里，``return`` 语句的执行效果会有不同。
 
-Explicit returns from a modifier or function body only leave the current
-modifier or function body. Return variables are assigned and
-control flow continues after the "_" in the preceding modifier.
+显示的
+在修饰符或者函数体中显示使用 returns 仅仅是离开了当前的修饰符或者函数体。
+返回值变量被赋值，控制流在前一个修饰的 "_"之后继续运行。
 
-Arbitrary expressions are allowed for modifier arguments and in this context,
-all symbols visible from the function are visible in the modifier. Symbols
-introduced in the modifier are not visible in the function (as they might
-change by overriding).
+修饰符的任意表达是允许的，在这种情况下，函数内的所有变量都对修饰符可见。
+但修饰行内定义的符号在函数里是不可见的（因为它们可能被重载）
 
-.. index:: ! constant
+.. index:: ! 常量
 
-************************
-Constant State Variables
-************************
+************
+常量状态变量
+************
 
-State variables can be declared as ``constant``. In this case, they have to be
+状态变量可以被定义为常量（ ``constant``）. In this case, they have to be
 assigned from an expression which is a constant at compile time. Any expression
 that accesses storage, blockchain data (e.g. ``now``, ``this.balance`` or
 ``block.number``) or
