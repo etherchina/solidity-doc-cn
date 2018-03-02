@@ -336,21 +336,14 @@ getter函数有外部可见性。一个符号在内部被防问时 (例如：不
 
 状态变量可以被定义为常量（ ``constant``）.在这种情况下，该变量必须被赋予一个编译时就确定的常量，
 任何表达式用来防问存贮器，区块链数据（比如 ``now``, ``this.balance`` 或者
-``block.number``) 或者运行数据(``msg.gas``) 或者调用外部合约都是不允许的。表达式如果需要一个内存分配的副作用是可以允许的 Expressions
-that might have a side-effect on memory allocation are allowed, but those that
-might have a side-effect on other memory objects are not. The built-in functions
-``keccak256``, ``sha256``, ``ripemd160``, ``ecrecover``, ``addmod`` and ``mulmod``
-are allowed (even though they do call external contracts).
+``block.number``) 或者运行数据(``msg.gas``) 或者调用外部合约都是不允许的。表达式如果有可能用到内存分配是可以允许的，
+但如果对其它内存对象有影响的则不可以，内置函数``keccak256``, ``sha256``, ``ripemd160``,
+``ecrecover``, ``addmod`` and ``mulmod`` 是允许的（虽然他们确实会调用外部合约）。
 
-The reason behind allowing side-effects on the memory allocator is that it
-should be possible to construct complex objects like e.g. lookup-tables.
-This feature is not yet fully usable.
+允许有内存外配的原因是这样就有可能构建复杂的对象比如，查询表lookup-tables，但这个功能目前还没实现。
 
-The compiler does not reserve a storage slot for these variables, and every occurrence is
-replaced by the respective constant expression (which might be computed to a single value by the optimizer).
-
-Not all types for constants are implemented at this time. The only supported types are
-value types and strings.
+编译器并不为这些常量保留存贮区域，这些常量每次都会被一个常数表达式所替代（也可能会被优化器计算出单一数值替代）。
+并非所有类型的常量到目前为止都已实现，现在只支持值类型和字符串。
 
 ::
 
@@ -366,29 +359,29 @@ value types and strings.
 
 .. _functions:
 
-*********
-Functions
-*********
+****
+函数
+****
 
-.. index:: ! view function, function;view
+.. index:: ! view 函数, 函数;view
 
-.. _view-functions:
+.. _view-函数:
 
-View Functions
+View 函数
 ==============
 
-Functions can be declared ``view`` in which case they promise not to modify the state.
+函数可以定义为 ``view`` 这种情况下函数可以确保不会修改状态.
 
-The following statements are considered modifying the state:
+下列语句可以被认为是修改了状态：
 
-#. Writing to state variables.
-#. :ref:`Emitting events <events>`.
-#. :ref:`Creating other contracts <creating-contracts>`.
-#. Using ``selfdestruct``.
-#. Sending Ether via calls.
-#. Calling any function not marked ``view`` or ``pure``.
-#. Using low-level calls.
-#. Using inline assembly that contains certain opcodes.
+#. 写入到状态变量 Writing to state variables.
+#. 发出一个事件 :ref:`Emitting events <events>`.
+#. 生成另一个合约 :ref:`Creating other contracts <creating-contracts>`.
+#. 使用自我销毁 Using ``selfdestruct``.
+#. 通过调用来发送以太币 Sending Ether via calls.
+#. 调用任何没有标为 ``view`` 或 ``pure``的函数 Calling any function not marked ``view`` or ``pure``.
+#. 使用低级调用 Using low-level calls.
+#. 使用包含特定操作码的嵌入式汇编 Using inline assembly that contains certain opcodes.
 
 ::
 
@@ -401,30 +394,29 @@ The following statements are considered modifying the state:
     }
 
 .. note::
-  ``constant`` is an alias to ``view``.
+  ``constant`` 是 ``view`` 的一个别名.
 
 .. note::
-  Getter methods are marked ``view``.
+  Getter 方法被标示为 ``view``.
 
 .. warning::
-  The compiler does not enforce yet that a ``view`` method is not modifying state.
+  编译器目前为止并不强制 ``view`` 方法不要去修改状态。
 
 .. index:: ! pure function, function;pure
 
 .. _pure-functions:
 
-Pure Functions
+纯函数 pure function
 ==============
 
-Functions can be declared ``pure`` in which case they promise not to read from or modify the state.
+函数可以被定义为纯 ``pure`` 的，代表函数不会读也不会修改状态。
 
-In addition to the list of state modifying statements explained above, the following are considered reading from the state:
-
-#. Reading from state variables.
-#. Accessing ``this.balance`` or ``<address>.balance``.
-#. Accessing any of the members of ``block``, ``tx``, ``msg`` (with the exception of ``msg.sig`` and ``msg.data``).
-#. Calling any function not marked ``pure``.
-#. Using inline assembly that contains certain opcodes.
+在上述会修改状态的语句列表之外，下列语句会被认为会读取状态。
+#. 读取状态变量 Reading from state variables.
+#. 访问 ``this.balance`` or ``<address>.balance``.
+#. 访问 ``block``, ``tx``, ``msg`` 的任何成员(除了 ``msg.sig`` and ``msg.data``).
+#. 调用任何没有标示为 ``pure``的函数.
+#. 使用包含特定代码的嵌入式汇编.
 
 ::
 
@@ -437,51 +429,44 @@ In addition to the list of state modifying statements explained above, the follo
     }
 
 .. warning::
-  The compiler does not enforce yet that a ``pure`` method is not reading from the state.
+  编译器到目前为止并不强制 ``pure`` 方法不去读状态。
 
 .. index:: ! fallback function, function;fallback
 
 .. _fallback-function:
 
-Fallback Function
+Fallback 函数
 =================
 
-A contract can have exactly one unnamed function. This function cannot have
-arguments and cannot return anything.
-It is executed on a call to the contract if none of the other
-functions match the given function identifier (or if no data was supplied at
-all).
+一个合约可以有最多一个的无名函数，这个函数不能有任何参数也不能返回任何东西。
+当一个合约被调用时但其函数标识符和它的函数没有一个是匹配的（或者压根就没提供任何数据）。
 
-Furthermore, this function is executed whenever the contract receives plain
-Ether (without data). Additionally, in order to receive Ether, the fallback function
-must be marked ``payable``. If no such function exists, the contract cannot receive
-Ether through regular transactions.
+还有，如果一个合约收到一个纯粹的以太币转账交易（不带数据），为了接收这些以太币，fallback函数必须被标为 ``payable``。
+如果没有这样的函数存在，合约就不能接受常规的以太币转帐交易。
 
-In such a context, there is usually very little gas available to the function call (to be precise, 2300 gas), so it is important to make fallback functions as cheap as possible. Note that the gas required by a transaction (as opposed to an internal call) that invokes the fallback function is much higher, because each transaction charges an additional amount of 21000 gas or more for things like signature checking.
+在这种情况下，通常只有很少的gas可以用于函数调用（准确地说是2300 gas），所以让fallback函数花得尽可能少是非常重要的。要意识到由fallback调用的一个交易（和一个内部调用相比较）所需要的gas要高得多，因为一个交易要被收取21000 gas来用于签名验证等方面。
 
-In particular, the following operations will consume more gas than the stipend provided to a fallback function:
+特别的，下列操作会消耗的gas比给fallback函数配备的gas更多:
 
-- Writing to storage
-- Creating a contract
-- Calling an external function which consumes a large amount of gas
-- Sending Ether
+- 写一个存贮 Writing to storage
+- 生成一个合约 Creating a contract
+- 调用一个消耗大量gas的外部函数 Calling an external function which consumes a large amount of gas
+- 发送以太币 Sending Ether
 
-Please ensure you test your fallback function thoroughly to ensure the execution cost is less than 2300 gas before deploying a contract.
+在部署一个合约前请确认你彻底测试了你的fallback来确保运行成本少于2300 gas.
 
 .. note::
-    Even though the fallback function cannot have arguments, one can still use ``msg.data`` to retrieve
-    any payload supplied with the call.
+    虽然fallback 函数不能有参数，但它还是可以用 ``msg.data`` 来
+  读取这个调用中带的 payload .
 
 .. warning::
-    Contracts that receive Ether directly (without a function call, i.e. using ``send`` or ``transfer``)
-    but do not define a fallback function
-    throw an exception, sending back the Ether (this was different
-    before Solidity v0.4.0). So if you want your contract to receive Ether,
-    you have to implement a fallback function.
+    直接接收以太币的合约(没使用函数调用比如： ``send`` or ``transfer``)，
+    但并没有定义fallback函数的会抛出一个例外错误（exception）,并将以太币送回 (这一点在Solidity v0.4.0之前有所不同).
+    所以如果你想让你的合约接收以太币，你就必须实现一个 fallback 函数.
 
 .. warning::
-    A contract without a payable fallback function can receive Ether as a recipient of a `coinbase transaction` (aka `miner block reward`)
-    or as a destination of a ``selfdestruct``.
+    一个不带有payable fallback函数的合约可以作为 `coinbase transaction` (又叫 `挖矿奖励`)的
+  接受方的方式来接受以太币或者作为一个自我毁灭 ``selfdestruct``的目的方.
 
     A contract cannot react to such Ether transfers and thus also cannot reject them. This is a design choice of the EVM and Solidity cannot work around it.
 
