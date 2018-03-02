@@ -3,7 +3,7 @@
 ##########
 合约
 ##########
-
+SOLIDITY的智能合约类似于面向对象语言中的‘类’。
 Contracts in Solidity are similar to classes in object-oriented languages. They
 contain persistent data in state variables and functions that can modify these
 variables. Calling a function on a different contract (instance) will perform
