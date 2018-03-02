@@ -3,19 +3,18 @@
 ##########
 合约
 ##########
-SOLIDITY的智能合约类似于面向对象语言中的‘类’。
-Contracts in Solidity are similar to classes in object-oriented languages. They
-contain persistent data in state variables and functions that can modify these
-variables. Calling a function on a different contract (instance) will perform
-an EVM function call and thus switch the context such that state variables are
-inaccessible.
+SOLIDITY的智能合约类似于面向对象语言中的‘类’。包含状态变量数据和能够改变它们值的函数。调用一个不同合约的函数（或实例）就会执行一个EVM的函数调用从而切换到这些变量不可以被防问的另外一个上下文环境。
+
 
 .. index:: ! contract;creation, constructor
 
 ******************
-Creating Contracts
+生成合约
 ******************
 
+合约可以通过Ethereum的交易从外部生成，也可以从Solidity内部生成。
+IDEs(集成开发环境)，比如`Remix <https://remix.ethereum.org/>`_，可以让你从图形界面无缝生成一个合约。
+Ethereum里程序化的
 Contracts can be created "from outside" via Ethereum transactions or from within Solidity contracts.
 
 IDEs, such as `Remix <https://remix.ethereum.org/>`_, make the creation process seamless using UI elements.
