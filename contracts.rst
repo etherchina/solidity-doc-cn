@@ -100,7 +100,7 @@ Ethereum里面的程序化生成合同最好的办法是通过JavaScript API `we
 可见性和Getters
 **********************
 
-由于Solidity知道两种函数调用：内部函数internal，并不产生一个实际的EVM调用
+由于Solidity知道两种函数调用：内部函数internal，它并不产生一个实际的EVM调用
 （也称之为消息调用）和外部函数external（会产生EVM调用）。所以函数和状态变量
 有总共有四种可见性。
 
@@ -140,9 +140,8 @@ Ethereum里面的程序化生成合同最好的办法是通过JavaScript API `we
         uint public data;
     }
 
-在下面这个例子里In the following example, ``D``, can call ``c.getData()`` to retrieve the value of
-``data`` in state storage, but is not able to call ``f``. Contract ``E`` is derived from
-``C`` and, thus, can call ``compute``.
+在下面这个例子里, ``D``, 可以调用``c.getData()`` 来读取存在状态存贮区的``data``的值, 但是不能调用``f``。
+合约``E`` is 是由``C`` 派生, 所以可以调用``compute``.
 
 ::
 
@@ -177,17 +176,14 @@ Ethereum里面的程序化生成合同最好的办法是通过JavaScript API `we
     }
 
 .. index:: ! getter;function, ! function;getter
-.. _getter-functions:
+.. _getter函数:
 
-Getter Functions
-================
+Getter 函数
+===========
 
-The compiler automatically creates getter functions for
-all **public** state variables. For the contract given below, the compiler will
-generate a function called ``data`` that does not take any
-arguments and returns a ``uint``, the value of the state
-variable ``data``. The initialization of state variables can
-be done at declaration.
+编译器会为所有的**public**状态变量自动生成一个getter函数。在下面这个合约里,
+编译器会生成一个叫做``data`` 的函数，该函数不带任何参数，只返回一个 ``uint``,
+也就是状态变量 ``data``的值. 状态变量的值可以在类型定义时初始化。
 
 ::
 
@@ -204,10 +200,8 @@ be done at declaration.
         }
     }
 
-The getter functions have external visibility. If the
-symbol is accessed internally (i.e. without ``this.``),
-it is evaluated as a state variable.  If it is accessed externally
-(i.e. with ``this.``), it is evaluated as a function.
+getter函数有外部可见性。一个符号在内部被防问时 (例如：不带 ``this.``),
+它就被当作状态变量， 如果是从外部防问(例如：带有``this.``), 它就被当作函数.
 
 ::
 
@@ -221,8 +215,7 @@ it is evaluated as a state variable.  If it is accessed externally
         }
     }
 
-The next example is a bit more complex:
-
+下一个例子要稍微复杂点
 ::
 
     pragma solidity ^0.4.0;
@@ -236,27 +229,25 @@ The next example is a bit more complex:
         mapping (uint => mapping(bool => Data[])) public data;
     }
 
-It will generate a function of the following form::
+这个将会生成一个如下形式的函数::
 
     function data(uint arg1, bool arg2, uint arg3) public returns (uint a, bytes3 b) {
         a = data[arg1][arg2][arg3].a;
         b = data[arg1][arg2][arg3].b;
-    }
+    }
 
-Note that the mapping in the struct is omitted because there
-is no good way to provide the key for the mapping.
+注意这个结构里mapping被忽略，因为没有一个好的办法去提供一个关键值key去mapping.
 
-.. index:: ! function;modifier
+.. index:: ! 函数修饰符
 
-.. _modifiers:
+.. _修饰符:
 
-******************
-Function Modifiers
-******************
+*********
+函数修饰符
+*********
 
-Modifiers can be used to easily change the behaviour of functions.  For example,
-they can automatically check a condition prior to executing the function. Modifiers are
-inheritable properties of contracts and may be overridden by derived contracts.
+修饰符（Modifiers）能够很容易地改变函数的行为，例如，可以在运行函数之前自动检查一个条件。
+修饰符是合约的可继承属性，因此也可以被派生出的函数重载。
 
 ::
 
@@ -266,13 +257,10 @@ inheritable properties of contracts and may be overridden by derived contracts.
         function owned() public { owner = msg.sender; }
         address owner;
 
-        // This contract only defines a modifier but does not use
-        // it: it will be used in derived contracts.
-        // The function body is inserted where the special symbol
-        // `_;` in the definition of a modifier appears.
-        // This means that if the owner calls this function, the
-        // function is executed and otherwise, an exception is
-        // thrown.
+        // 这个合约只是定义了修饰符但没有用它
+        // 它将在派生合约中使用。
+        // 这个函数体在出现修饰符的地方被插入一个`_;` 
+        // 这意味着如果是所有者(Owner)调用这个函数，函数就会运行，否则就会抛出一个意外（exception）错误
         modifier onlyOwner {
             require(msg.sender == owner);
             _;
@@ -280,17 +268,15 @@ inheritable properties of contracts and may be overridden by derived contracts.
     }
 
     contract mortal is owned {
-        // This contract inherits the `onlyOwner` modifier from
-        // `owned` and applies it to the `close` function, which
-        // causes that calls to `close` only have an effect if
-        // they are made by the stored owner.
-        function close() public onlyOwner {
+        // 这个合约从 `owned` 处继承了`onlyOwner` 修饰符
+        // 并且应用到`close` 函数, 从而达到只有店主可以调用这个函数的效果。
+        function close() public onlyOwner {
             selfdestruct(owner);
         }
     }
 
     contract priced {
-        // Modifiers can receive arguments:
+        // 修饰符也可以接受参数:
         modifier costs(uint price) {
             if (msg.value >= price) {
                 _;
