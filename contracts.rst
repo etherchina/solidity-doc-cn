@@ -322,9 +322,8 @@ getter函数有外部可见性。一个符号在内部被防问时 (例如：不
 .. 警告::
     在Solidity早期版本中， 在带有修饰符的函数里，``return`` 语句的执行效果会有不同。
 
-显示的
-在修饰符或者函数体中显示使用 returns 仅仅是离开了当前的修饰符或者函数体。
-返回值变量被赋值，控制流在前一个修饰的 "_"之后继续运行。
+在修饰符或者函数体中显式使用 returns 仅仅是离开了当前的修饰符或者函数体。
+返回值变量也会被赋值，但控制流在前一个修饰的 "_"之后继续运行。
 
 修饰符的任意表达是允许的，在这种情况下，函数内的所有变量都对修饰符可见。
 但修饰行内定义的符号在函数里是不可见的（因为它们可能被重载）
@@ -335,11 +334,9 @@ getter函数有外部可见性。一个符号在内部被防问时 (例如：不
 常量状态变量
 ************
 
-状态变量可以被定义为常量（ ``constant``）. In this case, they have to be
-assigned from an expression which is a constant at compile time. Any expression
-that accesses storage, blockchain data (e.g. ``now``, ``this.balance`` or
-``block.number``) or
-execution data (``msg.gas``) or make calls to external contracts are disallowed. Expressions
+状态变量可以被定义为常量（ ``constant``）.在这种情况下，该变量必须被赋予一个编译时就确定的常量，
+任何表达式用来防问存贮器，区块链数据（比如 ``now``, ``this.balance`` 或者
+``block.number``) 或者运行数据(``msg.gas``) 或者调用外部合约都是不允许的。表达式如果需要一个内存分配的副作用是可以允许的 Expressions
 that might have a side-effect on memory allocation are allowed, but those that
 might have a side-effect on other memory objects are not. The built-in functions
 ``keccak256``, ``sha256``, ``ripemd160``, ``ecrecover``, ``addmod`` and ``mulmod``
