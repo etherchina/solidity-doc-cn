@@ -48,13 +48,12 @@
 
 如果想让合约不再可用，建议的做法是修改合约内在逻辑来使其 **失效** ，让所有功能调用都变为无效返回。这样就无法使用这份合约了，而且发送过去的以太币也会被自动退回。
 
-现在正式回答这个问题：在构造器中，将creator赋值为``msg.sender``，并保存。然后调用``selfdestruct(creator);``来中止程序并进行退款。
+现在正式回答这个问题：在构造器中，将creator赋值为 ``msg.sender`` ，并保存。然后调用 ``selfdestruct(creator);`` 来中止程序并进行退款。
 
 `例子 <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/05_greeter.sol>`_
 
 需要注意的是，如果你已经在合约顶部做了引用 ``import "mortal"`` 并且申明了 
-``contract SomeContract is mortal { ...`` ，然后再在已存在此合约的编译器中进行编译（包含 `Remix <https://remix.ethereum.org/>`_），那么 ``kill()`` 就会自动执行。当一份合约被申明为"mortal"时，你可以仿照我的例子，使用
- ``contractname.kill.sendTransaction({from:eth.coinbase})`` 来中止它。
+``contract SomeContract is mortal { ...`` ，然后再在已存在此合约的编译器中进行编译（包含 `Remix <https://remix.ethereum.org/>`_），那么 ``kill()`` 就会自动执行。当一份合约被申明为"mortal"时，你可以仿照我的例子，使用 ``contractname.kill.sendTransaction({from:eth.coinbase})`` 来中止它。
 
 
 在合约中存储以太币
