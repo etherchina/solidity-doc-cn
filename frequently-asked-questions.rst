@@ -80,22 +80,14 @@
 
 可以。参考 `array_receiver_and_returner.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/60_array_receiver_and_returner.sol>`_ 。
 
-What is problematic, though, is returning any variably-sized data (e.g. a
-variably-sized array like ``uint[]``) from a fuction **called from within Solidity**.
-This is a limitation of the EVM and will be solved with the next protocol update.
-但是，在 **Solidity内部** 调用一个函数返回非固定长度数据（例如 ``uint[]`` 这种未定义长度的数组）时，往往会出现问题。这是EVM本身带来的限制，我们已经计划在下一次协议升级时解决这个问题。
+但是，在 **Solidity内部** 调用一个函数并返回非固定长度的数据（例如 ``uint[]`` 这种未定义长度的数组）时，往往会出现问题。这是EVM自身的限制，我们已经计划在下一次协议升级时解决这个问题。
 
-Returning variably-sized data as part of an external transaction or call is fine.
 将非固定长度数据作为外部交易或调用的一部分返回是没问题的。
 
-Is it possible to in-line initialize an array like so: ``string[] myarray = ["a", "b"];``
-=========================================================================================
 可以使用嵌套结构给数组进行初始化吗？比如： ``string[] myarray = ["a", "b"];``
 =============================================================================
 
-Yes. However it should be noted that this currently only works with statically sized memory arrays. You can even create an inline memory
-array in the return statement. Pretty cool, huh?
-可以。然而需要注意的是，这方法现在只能用于固定长度的内存数组。你甚至可以在返回语句中新建一个嵌套内存数组。听起来很酷对吧！ 
+可以。然而需要注意的是，这方法现在只能用于固定长度的内存数组。你甚至可以在返回语句中新建一个嵌套内存数组。听起来很酷，对吧！ 
 
 例子::
 
@@ -108,32 +100,20 @@ array in the return statement. Pretty cool, huh?
         }
     }
 
-Can a contract function return a ``struct``?
-============================================
 合约的函数可以返回数据结构（ ``struct`` ）吗？
 ==========================================
 
-Yes, but only in ``internal`` function calls.
 可以，但只适用于内部（ ``internal`` ）函数调用。
 
-If I return an ``enum``, I only get integer values in web3.js. How to get the named values?
-===========================================================================================
 我从一个返回的枚举类型（ ``enum`` ）中，使用web3.js只得到了整数值。我该如何获取具名数值？
 =========================================================================================
 
-Enums are not supported by the ABI, they are just supported by Solidity.
-You have to do the mapping yourself for now, we might provide some help
-later.
 虽然Solidity支持枚举类型，但ABI（应用程序二进制接口）并不支持。当前阶段你需要自己去做映射，将来我们可能会提供一些帮助。
 
-Can state variables be initialized in-line?
-===========================================
 嵌套结构可以用来初始化状态变量吗？
 ==================================
 
-Yes, this is possible for all types (even for structs). However, for arrays it
-should be noted that you must declare them as static memory arrays.
-可以，所有类型都可以（甚至包括数据结构）。然而需要注意的是，在数组使用这个方法的时候需要需要将其定义为静态内存数组。
+可以，所有类型都可以（甚至包括数据结构）。然而需要注意的是，在数组使用这个方法的时候需要将其定义为静态内存数组。
 
 例子::
 
@@ -154,40 +134,27 @@ should be noted that you must declare them as static memory arrays.
         C c = new C();
     }
 
-How do structs work?
-====================
 数据结构（ ``structs`` ）如何使用？
 ===================================
 
 参考 `struct_and_for_loop_tester.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/65_struct_and_for_loop_tester.sol>`_ 。
 
-How do for loops work?
-======================
 循环（ ``for loops`` ）如何使用？
 =================================
 
-Very similar to JavaScript. There is one point to watch out for, though:
 和JavaScript非常相像。但有一点需要注意：
 
 如果你使用 ``for (var i = 0; i < a.length; i ++) { a[i] = i; }`` ，那么 ``i`` 的数据类型将会是 ``uint8`` ，需要从 ``0`` 开始计数。也就是说，如果 ``a`` 有超过 ``255`` 个元素，那么循环就无法中止，因为 ``i`` 最大只能变为 ``255`` 。
 
-Better use ``for (uint i = 0; i < a.length...``
 最好使用 ``for (uint i = 0; i < a.length...``
 
-See `struct_and_for_loop_tester.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/65_struct_and_for_loop_tester.sol>`_.
 参考 `struct_and_for_loop_tester.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/65_struct_and_for_loop_tester.sol>`_ 。
 
-What are some examples of basic string manipulation (``substring``, ``indexOf``, ``charAt``, etc)?
-==================================================================================================
 有没有一些简单的操作字符串的例子（ ``substring`` ， ``indexOf`` ，``charAt`` 等）？
 ===================================================================================
 
-There are some string utility functions at `stringUtils.sol <https://github.com/ethereum/dapp-bin/blob/master/library/stringUtils.sol>`_
-which will be extended in the future. In addition, Arachnid has written `solidity-stringutils <https://github.com/Arachnid/solidity-stringutils>`_.
 这里有一些字符串相关的功能性函数 `stringUtils.sol <https://github.com/ethereum/dapp-bin/blob/master/library/stringUtils.sol>`_ ，并且会在将来作扩展。另外，Arachnid有写过 `solidity-stringutils <https://github.com/Arachnid/solidity-stringutils>`_ 。
 
-For now, if you want to modify a string (even when you only want to know its length),
-you should always convert it to a ``bytes`` first::
 当前，如果你想修改一个字符串（甚至你只是想获取其长度），首先都必须将其转化为一个 ``bytes`` ::
 
     pragma solidity ^0.4.0;
@@ -205,50 +172,31 @@ you should always convert it to a ``bytes`` first::
     }
 
 
-Can I concatenate two strings?
-==============================
 我能拼接两个字符串吗？
 ======================
 
-You have to do it manually for now.
 目前只能通过手工实现。
 
-Why is the low-level function ``.call()`` less favorable than instantiating a contract with a variable (``ContractB b;``) and executing its functions (``b.doSomething();``)?
-=============================================================================================================================================================================
 为什么大家都选择将合约实例化成一个变量（ ``ContractB b;`` ），然后去执行变量的函数（ ``b.doSomething();`` ），而不是直接调用这个低级函数 ``.call()`` ？
 ==========================================================================================================================================================================
 
-If you use actual functions, the compiler will tell you if the types
-or your arguments do not match, if the function does not exist
-or is not visible and it will do the packing of the
-arguments for you.
 如果你真实调用函数，编译器会提示诸如参数类型不匹配的问题，如果函数不存在或者不可见，他也会自动帮你打包参数。
 
 参考 `ping.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/45_ping.sol>`_ and
 `pong.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/45_pong.sol>`_ 。
 
-Is unused gas automatically refunded?
-=====================================
 没被使用的燃料会被自动退回吗？
 ==============================
 
-Yes and it is immediate, i.e. done as part of the transaction.
 是的，马上会退回。例如，作为交易的一部分，在交易完成的同时完成退款。
 
-When returning a value of say ``uint`` type, is it possible to return an ``undefined`` or "null"-like value?
-============================================================================================================
 当返回一个值的时候，比如说 ``uint`` 类型的值, 可以返回一个 ``undefined`` 或者类 "null" 的值吗？
 ===============================================================================================
 
-This is not possible, because all types use up the full value range.
 这不可能，因为所有的数据类型已经覆盖了全部的取值范围。
 
-You have the option to ``throw`` on error, which will also revert the whole
-transaction, which might be a good idea if you ran into an unexpected
-situation.
 替代方案是可以在错误时抛出（ ``throw`` ），这同样能重置整个交易，当你遇到意外情况时不失为一个好的选择。
 
-If you do not want to throw, you can return a pair::
 如果你不想抛出，也可以返回对值::
 
     pragma solidity ^0.4.16;
