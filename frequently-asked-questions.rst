@@ -35,7 +35,7 @@
 存在反编译程序吗？
 ==================
 
-除了`Porosity <https://github.com/comaeio/porosity>`_ 有点接近之外，Solidity没有严格意义上的反编译程序。由于诸如变量名、注释、代码格式等会在编译过程中丢失，所以完全反编译回源代码是没有可能的。
+除了 `Porosity <https://github.com/comaeio/porosity>`_ 有点接近之外，Solidity没有严格意义上的反编译程序。由于诸如变量名、注释、代码格式等会在编译过程中丢失，所以完全反编译回源代码是没有可能的。
 
 很多区块链管理器都能将字节码分解为一系列操作码。
 
@@ -46,63 +46,40 @@
 
 首先，需要提醒一下：中止合约听起来是一个好主意，把垃圾打扫干净是个好习惯，但如上所述，合约是不会被真正清理干净的。更有甚者，被发送至已移除合约的以太币，会从此丢失。
 
-If you want to deactivate your contracts, it is preferable to **disable** them by changing some
-internal state which causes all functions to throw. This will make it impossible
-to use the contract and ether sent to the contract will be returned automatically.
-如果你想让合约不再可用，建议的做法是通过修改内在逻辑来使其**失效**，使用所有功能都变为无效返回。这样的话，这份合约就变得无法使用，并且发送过去的以太币也会被自动退回。
+如果想让合约不再可用，建议的做法是修改合约内在逻辑来使其 **失效** ，让所有功能调用都变为无效返回。这样就无法使用这份合约了，而且发送过去的以太币也会被自动退回。
 
-Now to answering the question: Inside a constructor, ``msg.sender`` is the
-creator. Save it. Then ``selfdestruct(creator);`` to kill and return funds.
-现在来回答这个问题：在构造器中，将creator赋值为``msg.sender``，并保存。然后调用``selfdestruct(creator);``来中止程序并退款。
+现在正式回答这个问题：在构造器中，将creator赋值为``msg.sender``，并保存。然后调用``selfdestruct(creator);``来中止程序并进行退款。
 
-`example <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/05_greeter.sol>`_
 `例子 <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/05_greeter.sol>`_
 
-Note that if you ``import "mortal"`` at the top of your contracts and declare
-``contract SomeContract is mortal { ...`` and compile with a compiler that already
-has it (which includes `Remix <https://remix.ethereum.org/>`_), then
-``kill()`` is taken care of for you. Once a contract is "mortal", then you can
-``contractname.kill.sendTransaction({from:eth.coinbase})``, just the same as my
-examples.
-需要注意的是，如果你已经在合约顶部做了引用``import "mortal"``并且申明了
-``contract SomeContract is mortal { ...``，然后再在已存在此合约的编译器中进行编译（包含 `Remix <https://remix.ethereum.org/>`_），那么``kill()``就会自动执行。当一份合约被申明为"mortal"时，你可以仿照我的例子，使用
-``contractname.kill.sendTransaction({from:eth.coinbase})``来中止它。
+需要注意的是，如果你已经在合约顶部做了引用 ``import "mortal"`` 并且申明了 
+``contract SomeContract is mortal { ...`` ，然后再在已存在此合约的编译器中进行编译（包含 `Remix <https://remix.ethereum.org/>`_），那么 ``kill()`` 就会自动执行。当一份合约被申明为"mortal"时，你可以仿照我的例子，使用
+ ``contractname.kill.sendTransaction({from:eth.coinbase})`` 来中止它。
 
-Store Ether in a contract
-=========================
+
 在合约中存储以太币
 ==================
 
-The trick is to create the contract with ``{from:someaddress, value: web3.toWei(3,"ether")...}``
-诀窍是在合约中使用``{from:someaddress, value: web3.toWei(3,"ether")...}``
+诀窍是在合约中使用 ``{from:someaddress, value: web3.toWei(3,"ether")...}``
 
-参考 `endowment_retriever.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/30_endowment_retriever.sol>`_。
+参考 `endowment_retriever.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/30_endowment_retriever.sol>`_ 。
 
-Use a non-constant function (req ``sendTransaction``) to increment a variable in a contract
-===========================================================================================
-使用非恒定方程（请求``sendTransaction``）来对合约中的变量进行递增
+使用非恒定方程（请求 ``sendTransaction`` ）来对合约中的变量进行递增
 =================================================================
 
-参考 `value_incrementer.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/20_value_incrementer.sol>`_。
+参考 `value_incrementer.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/20_value_incrementer.sol>`_ 。
 
-Get a contract to return its funds to you (not using ``selfdestruct(...)``).
-============================================================================
-让合约把费用返还给你（不使用``selfdestruct(...)``）
+让合约把费用返还给你（不使用 ``selfdestruct(...)`` ）
 ===================================================
 
-This example demonstrates how to send funds from a contract to an address.
 这个例子展示了如何将费用从一份合约发送至一个地址。
 
-See `endowment_retriever <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/30_endowment_retriever.sol>`_.
-参考`endowment_retriever <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/30_endowment_retriever.sol>`_。
+参考 `endowment_retriever <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/30_endowment_retriever.sol>`_ 。
 
-Can you return an array or a ``string`` from a solidity function call?
-======================================================================
 调用Solidity方法可以返回一个数组或字符串（``string``）吗？
 ==========================================================
 
-Yes. See `array_receiver_and_returner.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/60_array_receiver_and_returner.sol>`_.
-可以。参考`array_receiver_and_returner.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/60_array_receiver_and_returner.sol>`_。
+可以。参考 `array_receiver_and_returner.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/60_array_receiver_and_returner.sol>`_ 。
 
 What is problematic, though, is returning any variably-sized data (e.g. a
 variably-sized array like ``uint[]``) from a fuction **called from within Solidity**.
