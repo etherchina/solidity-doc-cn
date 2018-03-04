@@ -31,7 +31,6 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 2. `introduction-to-smart-contracts.rst`: @oldcodeoberyn @ysqi 翻译完成 @hongbinzuo 审校完成 @toyab 审校中 (f58024b9744f557dbc77d5f7bfbc4319bde2e0c7)
 3. `structure-of-a-contract.rst`: @bobjiang 翻译中 (f58024b9744f557dbc77d5f7bfbc4319bde2e0c7)
 4. `frequently-asked-questions.rst`: @ghostrd 翻译中（5770458826bfe72201393f4f02729a970bac926e） 
-5. `abi-spec.rst`: @riversyang 翻译中（5770458826bfe72201393f4f02729a970bac926e）
 
 ## 贡献者列表
 
@@ -42,7 +41,6 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 5. 李捷
 6. 虞是乎ysqi
 7. 周锷
-8. 杨镇
 
 ## 常见问题
 1. fork出的仓库如何同步源的内容：https://www.zhihu.com/question/28676261
