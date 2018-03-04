@@ -9,16 +9,11 @@
 基本设计
 ============
 
-The Application Binary Interface is the standard way to interact with contracts in the Ethereum ecosystem, both
-from outside the blockchain and for contract-to-contract interaction. Data is encoded according to its type,
-as described in this specification.  The encoding is not self describing and thus requires a schema in order to decode.
 在以太坊生态系统中，应用二进制接口（即Application Binary Interface，ABI）是从区块链外部与合约进行交互以及合约与合约间进行交互的一种标准方式。
 数据会按照下文中说明的方法、基于其类型进行编码。这种编码并不是可以自描述的，而是需要一种特定的概要（schema）来进行解码。
 
-We assume the interface functions of a contract are strongly typed, known at compilation time and static. No introspection mechanism will be provided. We assume that all contracts will have the interface definitions of any contracts they call available at compile-time.
 我们假定合约函数的接口都是强类型的，且在编译时是可知的和静态的；不提供自我检查机制。我们假定在编译时，所有合约要调用的其他合约接口定义都是可用的。
 
-This specification does not address contracts whose interface is dynamic or otherwise known only at run-time. Should these cases become important they can be adequately handled as facilities built within the Ethereum ecosystem.
 这份技术手册并不针对那些动态合约接口或者仅在运行时才可获知的合约接口。如果这种场景变得很重要，你可以使用以太坊生态系统中其他更合适的基础设施来处理它们。
 
 .. _abi_function_selector:
@@ -26,105 +21,73 @@ This specification does not address contracts whose interface is dynamic or othe
 函数选择器（Function Selector）
 =================
 
-The first four bytes of the call data for a function call specifies the function to be called. It is the
-first (left, high-order in big-endian) four bytes of the Keccak (SHA-3) hash of the signature of the function. The signature is defined as the canonical expression of the basic prototype, i.e.
-the function name with the parenthesised list of parameter types. Parameter types are split by a single comma - no spaces are used.
 一个函数调用数据的前4字节，指定了要调用的函数。这就是某个函数签名的Keccak（SHA-3）哈希的前4字节（高位在左的大端序）（译注：这里的“高位在左的大端序“，指每字节数据中的8位二进制数据最高位在最左边；且字节流中的最高位字节存储在最低位地址上的一种串行化编码方式）。
-这种签名被定义为基础协议的权威表达法，例如，附加了参数类型列表的函数名称，参数类型由一个逗号分隔开，且没有空格。
+这种签名被定义为基础协议的权威表达法，即附加了参数类型列表的函数名称，参数类型由一个逗号分隔开，且没有空格。
 
 参数编码（Argument Encoding）
 =================
 
-Starting from the fifth byte, the encoded arguments follow. This encoding is also used in other places, e.g. the return values and also event arguments are encoded in the same way, without the four bytes specifying the function.
 从第5字节开始是被编码的参数。这种编码也被用在其他地方，比如，返回值和事件的参数也会被用同样的方式进行编码，去掉用来指定函数的4个字节。
 
 类型
 =====
 
-The following elementary types exist:
 以下是基础类型：
 
-- ``uint<M>``: unsigned integer type of ``M`` bits, ``0 < M <= 256``, ``M % 8 == 0``. e.g. ``uint32``, ``uint8``, ``uint256``.
 - ``uint<M>`` ： ``M`` 位的无符号整数， ``0 < M <= 256`` 、 ``M % 8 == 0`` 。例如： ``uint32`` ， ``uint8`` ， ``uint256`` 。
 
-- ``int<M>``: two's complement signed integer type of ``M`` bits, ``0 < M <= 256``, ``M % 8 == 0``.
 - ``int<M>`` ：以2的补码作为符号的 ``M`` 位整数， ``0 < M <= 256`` 、 ``M % 8 == 0`` 。
 
-- ``address``: equivalent to ``uint160``, except for the assumed interpretation and language typing. For computing the function selector, ``address`` is used.
 - ``address`` ：除了表现上的理解和语言类型的区别以外，等价于 ``uint160`` 。在计算和函数选择器中，通常使用 ``address`` 。
 
-- ``uint``, ``int``: synonyms for ``uint256``, ``int256`` respectively. For computing the function selector, ``uint256`` and ``int256`` have to be used.
 - ``uint`` 、 ``int`` ： ``uint256`` 、 ``int256`` 各自的同义词。在计算和函数选择器中，通常使用 ``uint256`` 和 ``int256`` 。
 
-- ``bool``: equivalent to ``uint8`` restricted to the values 0 and 1. For computing the function selector, ``bool`` is used.
 - ``bool`` ：等价于 ``uint8`` ，取值限定为0或1。在计算和函数选择其中，通常使用 ``bool`` 。
 
-- ``fixed<M>x<N>``: signed fixed-point decimal number of ``M`` bits, ``8 <= M <= 256``, ``M % 8 ==0``, and ``0 < N <= 80``, which denotes the value ``v`` as ``v / (10 ** N)``.
 - ``fixed<M>x<N>`` ： ``M`` 位的有符号的固定小数位数字 ``8 <= M <= 256`` 、 ``M % 8 ==0`` 、且 ``0 < N <= 80`` 。其值 ``v`` 即是 ``v / (10 ** N)`` 。
 
-- ``ufixed<M>x<N>``: unsigned variant of ``fixed<M>x<N>``.
 - ``ufixed<M>x<N>`` ：  ``fixed<M>x<N>`` 的无符号变量。
 
-- ``fixed``, ``ufixed``: synonyms for ``fixed128x19``, ``ufixed128x19`` respectively. For computing the function selector, ``fixed128x19`` and ``ufixed128x19`` have to be used.
 - ``fixed`` 、 ``ufixed`` ： ``fixed128x19`` 、 ``ufixed128x19`` 各自的同义词。在计算和函数选择器中，通常使用 ``fixed128x19`` 和 ``ufixed128x19`` 。
 
-- ``bytes<M>``: binary type of ``M`` bytes, ``0 < M <= 32``.
 - ``bytes<M>`` ： ``M`` 字节的二进制类型， ``0 < M <= 32`` 。
 
-- ``function``: an address (20 bytes) folled by a function selector (4 bytes). Encoded identical to ``bytes24``.
 - ``function`` ：一个地址（20字节）之后紧跟一个函数选择器（4字节）。编码之后等价于 ``bytes24`` 。
 
-The following (fixed-size) array type exists:
 以下是定长数组类型：
 
-- ``<type>[M]``: a fixed-length array of ``M`` elements, ``M > 0``, of the given type.
 - ``<type>[M]`` ：有 ``M`` 个元素的定长数组， ``M > 0`` ，数组元素为给定类型。
 
-The following non-fixed-size types exist:
 以下是非定长类型：
 
-- ``bytes``: dynamic sized byte sequence.
 - ``bytes`` ：动态大小的字节序列。
 
-- ``string``: dynamic sized unicode string assumed to be UTF-8 encoded.
-- ``string`` ：动态大小的unicode字符串，通常假定为UTF-8编码。
+- ``string`` ：动态大小的unicode字符串，通常呈现为UTF-8编码。
 
-- ``<type>[]``: a variable-length array of elements of the given type.
 - ``<type>[]`` ：元素为给定类型的变长数组。
 
-Types can be combined to a tuple by enclosing a finite non-negative number
-of them inside parentheses, separated by commas:
 类型可以通过添加非负下标放到一对括号中，用逗号分隔开，以此来构成一个元组：
 
-- ``(T1,T2,...,Tn)``: tuple consisting of the types ``T1``, ..., ``Tn``, ``n >= 0``
 - ``(T1,T2,...,Tn)`` ：由 ``T1`` ， ...， ``Tn`` ， ``n >= 0`` 构成的元组。
 
-It is possible to form tuples of tuples, arrays of tuples and so on.
 用元组构成元组、用数组构成元组等等也是可能的。
 
 .. note::
-    Solidity supports all the types presented above with the same names with the exception of tuples. The ABI tuple type is utilised for encoding Solidity ``structs``.
-    除了元组（tuple）一台，Solidity支持以上所有类型的名称。ABI元组是利用Solidity的 ``structs`` 编码得到的。
+    除了元组（tuple）以外，Solidity支持以上所有类型的名称。ABI元组是利用Solidity的 ``structs`` 编码得到的。
 
 编码的形式化说明
 ====================================
 
-We will now formally specify the encoding, such that it will have the following
-properties, which are especially useful if some arguments are nested arrays:
 我们现在来正式讲述编码，它具有如下属性，如果参数是嵌套的数组，这些属性非常有用：
 
 属性：
 
-  1. The number of reads necessary to access a value is at most the depth of the value inside the argument array structure, i.e. four reads are needed to retrieve ``a_i[k][l][r]``. In a previous version of the ABI, the number of reads scaled linearly with the total number of dynamic parameters in the worst case.
-  1、读取的次数取决于参数数组结构中的最大深度，例如要取得 ``a_i[k][l][r]`` 需要读取4次。在先前的ABI版本中，在最糟的情况下，读取的次数会随着动态参数的总数而线性地增长。
+  1、读取的次数取决于参数数组结构中的最大深度；也就是说，要取得 ``a_i[k][l][r]`` 需要读取4次。在先前的ABI版本中，在最糟的情况下，读取的次数会随着动态参数的总数而线性地增长。
 
-  2. The data of a variable or array element is not interleaved with other data and it is relocatable, i.e. it only uses relative "addresses"
-  2、一个变量或数组元素的数据，不会被插入其他的数据，并且是不可再定位的，例如，它们只会使用相对的“地址”。
+  2、一个变量或数组元素的数据，不会被插入其他的数据，并且是不可再定位的；也就是说，它们只会使用相对的“地址”。
 
-We distinguish static and dynamic types. Static types are encoded in-place and dynamic types are encoded at a separately allocated location after the current block.
 我们需要区分静态和动态类型。静态类型会在原地（即当前区块，译者注）被编码，动态类型则会在当前区块之后的独立分配的位置被编码（即在实际执行时才会被编码，译者注）。
 
-**Definition:** The following types are called "dynamic":
 **定义：** 以下类型被称为“动态”：
 
 * ``bytes``
@@ -133,73 +96,61 @@ We distinguish static and dynamic types. Static types are encoded in-place and d
 * 任意动态 `T` 的 ``T[k]`` 且任意 ``k > 0``
 * ``(T1,...,Tk)`` ，任意动态 ``1 <= i <= k`` 的 ``Ti``
 
-All other types are called "static".
 所有其他类型都被称为“静态”。
 
-**Definition:** ``len(a)`` is the number of bytes in a binary string ``a``.
-The type of ``len(a)`` is assumed to be ``uint256``.
+**定义：** ``len(a)`` 是一个二进制字符串 ``a`` 的字节长度。 ``len(a)`` 的类型被呈现为 ``uint256`` 。
 
-We define ``enc``, the actual encoding, as a mapping of values of the ABI types to binary strings such
-that ``len(enc(X))`` depends on the value of ``X`` if and only if the type of ``X`` is dynamic.
+我们把实际的编码 ``enc`` 定义为一个由ABI类型到二进制字符串的值的映射；因而，当且仅当 ``X`` 的类型是动态的， ``len(enc(X))`` （即 ``X`` 经编码后的实际长度，译者注）才会依赖于 ``X`` 的值。
 
-**Definition:** For any ABI value ``X``, we recursively define ``enc(X)``, depending
-on the type of ``X`` being
+**定义：** 对任意ABI值 ``X`` ，我们依赖 ``X`` 的实际类型递归地定义 ``enc(X)`` 。
 
-- ``(T1,...,Tk)`` for ``k >= 0`` and any types ``T1``, ..., ``Tk``
+- ``(T1,...,Tk)`` 对于 ``k >= 0`` 且任意类型 ``T1``, ..., ``Tk``
 
   ``enc(X) = head(X(1)) ... head(X(k-1)) tail(X(0)) ... tail(X(k-1))``
 
-  where ``X(i)`` is the ``ith`` component of the value, and
-  ``head`` and ``tail`` are defined for ``Ti`` being a static type as
+  这里， ``X(i)`` 是值的 ``ith`` 组件，并且
+  当 ``Ti`` 为静态类型时， ``head`` 和 ``tail`` 被定义为
 
-    ``head(X(i)) = enc(X(i))`` and ``tail(X(i)) = ""`` (the empty string)
+    ``head(X(i)) = enc(X(i))`` and ``tail(X(i)) = ""`` （空字符串）
 
-  and as
+  否则，比如 ``Ti`` 是动态类型时，它们被定义为
 
     ``head(X(i)) = enc(len(head(X(0)) ... head(X(k-1)) tail(X(0)) ... tail(X(i-1))))``
     ``tail(X(i)) = enc(X(i))``
 
-  otherwise, i.e. if ``Ti`` is a dynamic type.
+  注意，在动态类型的情况下，由于head部分的长度仅取决于类型而非值，所以 ``head(X(i))`` 是定义明确的。它的值是从 ``enc(X)`` 的开头算起的， ``tail(X(i))`` 的起始位在 ``enc(X)`` 中的偏移量。
 
-  Note that in the dynamic case, ``head(X(i))`` is well-defined since the lengths of
-  the head parts only depend on the types and not the values. Its value is the offset
-  of the beginning of ``tail(X(i))`` relative to the start of ``enc(X)``.
-
-- ``T[k]`` for any ``T`` and ``k``:
+- ``T[k]`` 对于任意 ``T`` 和 ``k`` ：
 
   ``enc(X) = enc((X[0], ..., X[k-1]))``
 
-  i.e. it is encoded as if it were a tuple with ``k`` elements
-  of the same type.
+  即是说，它就像是个由相同类型的 ``k`` 个元素组成的元组那样被编码的。
 
-- ``T[]`` where ``X`` has ``k`` elements (``k`` is assumed to be of type ``uint256``):
+- ``T[]`` 当 ``X`` 有 ``k`` 个元素（ ``k`` 被呈现为类型 ``uint256`` ）：
 
   ``enc(X) = enc(k) enc([X[1], ..., X[k]])``
 
-  i.e. it is encoded as if it were an array of static size ``k``, prefixed with
-  the number of elements.
+  即是说，它就像是个由静态大小 ``k`` 的数组那样被编码的，且由元素的个数作为前缀。
 
-- ``bytes``, of length ``k`` (which is assumed to be of type ``uint256``):
+- 具有 ``k`` （呈现为类型 ``uint256`` ）长度的 ``bytes`` ：
 
-  ``enc(X) = enc(k) pad_right(X)``, i.e. the number of bytes is encoded as a
-    ``uint256`` followed by the actual value of ``X`` as a byte sequence, followed by
-    the minimum number of zero-bytes such that ``len(enc(X))`` is a multiple of 32.
+  ``enc(X) = enc(k) pad_right(X)`` ，即是说，字节数被编码为 ``uint256`` ，紧跟着实际的 ``X`` 的字节码序列，再在后边补上可以使 ``len(enc(X))`` 成为32的倍数的最少数量的0值字节数据。
 
-- ``string``:
+- ``string`` ：
 
-  ``enc(X) = enc(enc_utf8(X))``, i.e. ``X`` is utf-8 encoded and this value is interpreted as of ``bytes`` type and encoded further. Note that the length used in this subsequent encoding is the number of bytes of the utf-8 encoded string, not its number of characters.
+  ``enc(X) = enc(enc_utf8(X))`` ，即是说， ``X`` 被utf-8编码，且在后续编码中将这个值解释为 ``bytes`` 类型。注意，在随后的编码中使用的长度是其utf-8编码的字符串的字节数，而不是其字符数。
 
-- ``uint<M>``: ``enc(X)`` is the big-endian encoding of ``X``, padded on the higher-order (left) side with zero-bytes such that the length is a multiple of 32 bytes.
-- ``address``: as in the ``uint160`` case
-- ``int<M>``: ``enc(X)`` is the big-endian two's complement encoding of ``X``, padded on the higher-order (left) side with ``0xff`` for negative ``X`` and with zero bytes for positive ``X`` such that the length is a multiple of 32 bytes.
-- ``bool``: as in the ``uint8`` case, where ``1`` is used for ``true`` and ``0`` for ``false``
-- ``fixed<M>x<N>``: ``enc(X)`` is ``enc(X * 10**N)`` where ``X * 10**N`` is interpreted as a ``int256``.
-- ``fixed``: as in the ``fixed128x19`` case
-- ``ufixed<M>x<N>``: ``enc(X)`` is ``enc(X * 10**N)`` where ``X * 10**N`` is interpreted as a ``uint256``.
-- ``ufixed``: as in the ``ufixed128x19`` case
-- ``bytes<M>``: ``enc(X)`` is the sequence of bytes in ``X`` padded with zero-bytes to a length of 32.
+- ``uint<M>`` ： ``enc(X)`` 是 ``X`` 的大端序（big-endian，即将高位字节存储在低位地址上的一种串行化编码方法，译者注）编码加在为了使其长度成为32的倍数而添加的若干0值字节的高位（左侧）构成的。
+- ``address`` ：与 ``uint160`` 的情况相同。
+- ``int<M>`` ： ``enc(X)`` 是 ``X`` 的大端序的2的补码编码加在为了使其长度成为32的倍数而添加的若干字节数据的高位（左侧）构成的；对于负数，添加值为 ``0xff`` （即8位全为1，译者注）的字节数据，对于正数，添加0值（即8位全为0，译者注）字节数据。
+- ``bool`` ：与 ``uint8`` 的情况相同， ``1`` 用来表示 ``true`` ， ``0`` 表示 ``false`` 。
+- ``fixed<M>x<N>`` ： ``enc(X)`` 就是 ``enc(X * 10**N)`` ，其中 ``X * 10**N`` 可以理解为 ``int256`` 。
+- ``fixed`` ：与 ``fixed128x19`` 的情况相同。
+- ``ufixed<M>x<N>`` ： ``enc(X)`` 就是 ``enc(X * 10**N)`` ，其中 ``X * 10**N`` 可以理解为 ``uint256`` 。
+- ``ufixed`` ：与 ``ufixed128x19`` 的情况相同。
+- ``bytes<M>`` ： ``enc(X)`` 就是 ``X`` 的字节序列加上为使长度称为32的倍数而添加的若干0值字节。
 
-Note that for any ``X``, ``len(enc(X))`` is a multiple of 32.
+注意，对于任意的 ``X`` , ``len(enc(X))`` 都是32的倍数。
 
 函数选择器和参数编码
 =======================================
