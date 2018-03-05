@@ -3,27 +3,27 @@
 ##########
 合约
 ##########
-SOLIDITY的智能合约类似于面向对象语言中的‘类’。包含状态变量数据和能够改变它们值的函数。调用另外一个合约（或实例）的函数就会执行一个EVM的函数调用，从而切换到这些变量不可以被防问的另外一个上下文环境。
+Solidity的智能合约类似于面向对象语言中的“类”。包含状态变量数据和能够改变它们值的函数。调用另外一个合约（或实例）的函数就会执行一个EVM的函数调用，从而切换到这些变量不可以被防问的另外一个上下文环境。
 
 
 .. index:: ! contract;creation, constructor
 
 ******************
-生成合约
+创建合约
 ******************
 
-合约可以通过Ethereum的交易从外部生成，也可以从Solidity内部生成。
-IDEs(集成开发环境)，比如`Remix <https://remix.ethereum.org/>`_，可以让你从图形界面无缝生成一个合约。
-Ethereum里面的程序化生成合同最好的办法是通过JavaScript API `web3.js <https://github.com/ethereum/web3.js>`_.
-现在有一个方法调用来实现生成合约 `web3.eth.Contract <https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#new-contract>`_
+合约可以通过以太币网络的交易从外部创建，也可以从Solidity内部创建。
+集成开发环境，比如`Remix <https://remix.ethereum.org/>`_，可以让你从图形界面无缝创建一个合约。
+以太币网络里面的程序化创建合同最好的办法是通过JavaScript API `web3.js <https://github.com/ethereum/web3.js>`_.
+现在有一个方法调用来实现创建合约 `web3.eth.Contract <https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#new-contract>`_
 
-当一个合约生成时，它的构造函数（一个和合约同名的函数）被执行一次。
-构造函数是可选的。且只允许一个构造函数，这就意味着构造函数是不过以重载的。
+当一个合约创建时，它的构造函数（一个和合约同名的函数）被执行一次。
+构造函数是可选的。且只允许一个构造函数，这就意味着构造函数是不可以重载的。
 
 .. index:: constructor;arguments
 .. index:: 构造函数，参数
 从内部机制来说，构造函数的参数是在合约代码自身之后通过:ref:`ABI encoded <ABI>`传递，但如果你用"web3.js"，你不需要关心这个。
-如果一个合约需要生成另一个合约，这个合约需要知道被生成的合约的代码（以及二进制码）。这就意味着循环生成是不可以的。
+如果一个合约需要创建另一个合约，这个合约需要知道被创建的合约的代码（以及二进制码）。这就意味着循环创建是不可以的。
 
 ::
 
@@ -70,7 +70,7 @@ Ethereum里面的程序化生成合同最好的办法是通过JavaScript API `we
            public
            returns (OwnedToken tokenAddress)
         {            
-            // 生成一个新的代币合约并且返回它的地址.
+            // 创建一个新的代币合约并且返回它的地址.
             // 从JavaScriptp的角度来看，返回值就是一个简单的地址。  
             // 这是ABI里最常用的类型。
             return new OwnedToken(name);
@@ -104,27 +104,27 @@ Ethereum里面的程序化生成合同最好的办法是通过JavaScript API `we
 （也称之为消息调用）和外部函数external（会产生EVM调用）。所以函数和状态变量
 有总共有四种可见性。
 
-函数能被指定为‘外部的external’，‘公共的public’，‘内部的internal’或者‘私人的private’，
+函数能被指定为“external”，“public”，“internal”或者“private”，
 这里缺省的是公共的。状态变量是不可以是外部的，缺省的是内部的，
 
 
-``外部的external``:
+``external``:
     外部函数是合约界面的一部分，也就意味着可以通过交易或者其它合约来调用。
     一个外部函数 ``f`` 不能从内部调用 (比如， ``f()`` 不可以,  ``this.f()`` 可以).
     外部函数在接受一些大的数据数组时，有时效率会更高。
 
-``公共的public``:
+``public``:
     公共的也是合约界面的一部分，即可以在内部调用也可以通过消息调用。
-    对于一个公共的状态变量来说，一个用于查询的getter函数会被自动生成（见下面）
+    对于一个公共的状态变量来说，一个用于查询的getter函数会被自动创建（见下面）
 
-``内部的internal``:
+``internal``:
     这些函数和状态变量只能从内部防问（比如从当前合约或者从它派生合约里调用）
     这种情况不需要使用 ``this``.
 
-``私人的private``:
+``private``:
     私人函数和状态变量只能从定义它们的合约内部可，派生合约则不可以防问。
 
-.. 注note::
+..note::
     合约内的任何东西对一个外部观察者来说都是可见的，把某个东西标成 ``private``
     只是防止其它的合约来防问和修改。但对区块链以外的世界来说它仍然是可见的（译注：通过察看区块链数据）。
 
@@ -181,8 +181,8 @@ Ethereum里面的程序化生成合同最好的办法是通过JavaScript API `we
 Getter 函数
 ===========
 
-编译器会为所有的 **public** 状态变量自动生成一个getter函数。在下面这个合约里,
-编译器会生成一个叫做 ``data`` 的函数，该函数不带任何参数，只返回一个 ``uint``,
+编译器会为所有的 **public** 状态变量自动创建一个getter函数。在下面这个合约里,
+编译器会创建一个叫做 ``data`` 的函数，该函数不带任何参数，只返回一个 ``uint``,
 也就是状态变量 ``data`` 的值. 状态变量的值可以在类型定义时初始化。
 
 ::
@@ -229,7 +229,7 @@ getter函数有外部可见性。一个符号在内部被防问时 (例如：不
         mapping (uint => mapping(bool => Data[])) public data;
     }
 
-这个将会生成一个如下形式的函数::
+这个将会创建一个如下形式的函数::
 
     function data(uint arg1, bool arg2, uint arg3) public returns (uint a, bytes3 b) {
         a = data[arg1][arg2][arg3].a;
@@ -319,8 +319,8 @@ getter函数有外部可见性。一个符号在内部被防问时 (例如：不
 
 多个修饰符应用于一个函数时，要用空格隔开的列表方式并且按顺序实施。
 
-.. 警告::
-    在Solidity早期版本中， 在带有修饰符的函数里，``return`` 语句的执行效果会有不同。
+.. warning::
+    -  在Solidity早期版本中， 在带有修饰符的函数里，``return`` 语句的执行效果会有不同。
 
 在修饰符或者函数体中显式使用 returns 仅仅是离开了当前的修饰符或者函数体。
 返回值变量也会被赋值，但控制流在前一个修饰的 "_"之后继续运行。
@@ -376,7 +376,7 @@ View 函数
 
 #. 写入到状态变量 Writing to state variables.
 #. 发出一个事件 :ref:`Emitting events <events>`.
-#. 生成另一个合约 :ref:`Creating other contracts <creating-contracts>`.
+#. 创建另一个合约 :ref:`Creating other contracts <creating-contracts>`.
 #. 使用自我销毁 Using ``selfdestruct``.
 #. 通过调用来发送以太币 Sending Ether via calls.
 #. 调用任何没有标为 ``view`` 或 ``pure``的函数 Calling any function not marked ``view`` or ``pure``.
@@ -449,7 +449,7 @@ Fallback 函数
 特别的，下列操作会消耗的gas比给fallback函数配备的gas更多:
 
 - 写一个存贮 Writing to storage
-- 生成一个合约 Creating a contract
+- 创建一个合约 Creating a contract
 - 调用一个消耗大量gas的外部函数 Calling an external function which consumes a large amount of gas
 - 发送以太币 Sending Ether
 
@@ -457,65 +457,59 @@ Fallback 函数
 
 .. note::
     虽然fallback 函数不能有参数，但它还是可以用 ``msg.data`` 来
-  读取这个调用中带的 payload .
+  读取这个调用中带的 payload 。
 
 .. warning::
     直接接收以太币的合约(没使用函数调用比如： ``send`` or ``transfer``)，
-    但并没有定义fallback函数的会抛出一个例外错误（exception）,并将以太币送回 (这一点在Solidity v0.4.0之前有所不同).
-    所以如果你想让你的合约接收以太币，你就必须实现一个 fallback 函数.
+    但并没有定义fallback函数的会抛出一个例外错误（exception）,并将以太币送回 (这一点在Solidity v0.4.0之前有所不同)。
+    所以如果你想让你的合约接收以太币，你就必须实现一个 fallback 函数。
 
 .. warning::
     一个不带有payable fallback函数的合约可以作为 `coinbase transaction` (又叫 `挖矿奖励`)的
-  接受方的方式来接受以太币或者作为一个自我毁灭 ``selfdestruct``的目的方.
-
-    A contract cannot react to such Ether transfers and thus also cannot reject them. This is a design choice of the EVM and Solidity cannot work around it.
-
-    It also means that ``this.balance`` can be higher than the sum of some manual accounting implemented in a contract (i.e. having a counter updated in the fallback function).
-
+  接受方的方式来接受以太币或者作为一个自我毁灭 ``selfdestruct``的目的方。
+  
+    对于这种交易，合约即不能和它互动也不能拒绝。这是EVM和Solidity设计的选择使得其不能绕过这个问题。
+    
+    这也意味着这 ``this.balance`` 可能比合约里手动计算出来的余额要高（例如： 在回调函数里有一个计数器来计算余额）。
+    
 ::
 
     pragma solidity ^0.4.0;
 
     contract Test {
-        // This function is called for all messages sent to
-        // this contract (there is no other function).
-        // Sending Ether to this contract will cause an exception,
-        // because the fallback function does not have the `payable`
-        // modifier.
-        function() public { x = 1; }
+        // 这个函数在合约收到任何消息时都会被调用
+        // （这个合约没有其它函数）。
+        // 发送以太币到这个合约会引起例外错误，
+        // 因为这个回调函数没有“payable”修饰符
+        function() public { x = 1; }
         uint x;
     }
 
 
-    // This contract keeps all Ether sent to it with no way
-    // to get it back.
-    contract Sink {
+    // 这个合约接受所有送给它的以太币，并且没有任何办法可以退回去。
+    contract Sink {
         function() public payable { }
     }
 
     contract Caller {
         function callTest(Test test) public {
-            test.call(0xabcdef01); // hash does not exist
-            // results in test.x becoming == 1.
+            test.call(0xabcdef01); // 这个哈希不存在
+            // 结果就是 test.x 变成 == 1。
 
-            // The following will not compile, but even
-            // if someone sends ether to that contract,
-            // the transaction will fail and reject the
-            // Ether.
+            // 下面这句不会编译，但如果有人发送以太币
+            // 到那个合约，交易就会失败，发送的以太币也会被拒收。
             //test.send(2 ether);
         }
     }
 
 .. index:: ! overload
 
-.. _overload-function:
+.. _重载函数 :
 
-Function Overloading
-====================
+函数重载
+========
 
-A Contract can have multiple functions of the same name but with different arguments.
-This also applies to inherited functions. The following example shows overloading of the
-``f`` function in the scope of contract ``A``.
+一个合约可以有多合同名但参数不同的函数，这也适用于继承函数。下面这个例子给出在合约 ``A`` 范围内重载 ``f`` 。
 
 ::
 
@@ -531,13 +525,14 @@ This also applies to inherited functions. The following example shows overloadin
         }
     }
 
+重载函数也表现在外部接口。如果两个外部可见函数有不同的Solidity类型但外部类型相同则会出现一个错误。
 Overloaded functions are also present in the external interface. It is an error if two
 externally visible functions differ by their Solidity types but not by their external types.
 
 ::
 
-    // This will not compile
-    pragma solidity ^0.4.16;
+    // 这个不会被编译
+    pragma solidity ^0.4.16;
 
     contract A {
         function f(B _in) public pure returns (B out) {
@@ -553,19 +548,16 @@ externally visible functions differ by their Solidity types but not by their ext
     }
 
 
-Both ``f`` function overloads above end up accepting the address type for the ABI although
-they are considered different inside Solidity.
+上述两个重载的 ``f`` 函数虽然在Solidity内部被认为是不同的，最终在ABI中都是接受一个地址类型。
 
-Overload resolution and Argument matching
------------------------------------------
+重载解析和参数匹配
+-----------------
 
-Overloaded functions are selected by matching the function declarations in the current scope
-to the arguments supplied in the function call. Functions are selected as overload candidates
-if all arguments can be implicitly converted to the expected types. If there is not exactly one
-candidate, resolution fails.
+重载函数的选择是通过匹配当前范围内的函数定义和函数调用时所使用的参数来进行。函数的参数如果能够隐含匹配，
+则该函数会被选为重载候选函数。如果没有一个重载候选函数，则解析失败。
 
 .. note::
-    Return parameters are not taken into account for overload resolution.
+    返回参数并不参与重载解析。
 
 ::
 
@@ -581,55 +573,37 @@ candidate, resolution fails.
         }
     }
 
-Calling ``f(50)`` would create a type error since ``250`` can be implicitly converted both to ``uint8``
-and ``uint256`` types. On another hand ``f(256)`` would resolve to ``f(uint256)`` overload as ``256`` cannot be implicitly
-converted to ``uint8``.
+调用 ``f(50)`` 会生成一个类型错误因为 ``250`` 能被同时隐含地转换为 ``uint8``和
+``uint256`` 类型. 另一方面 ``f(256)`` 会被认为指定用 ``f(uint256)`` 重载 因为 ``256`` 不能够隐含地转为 ``uint8``。
 
 .. index:: ! event
 
-.. _events:
+.. _事件：
 
-******
-Events
-******
+****
+事件
+****
 
-Events allow the convenient usage of the EVM logging facilities,
-which in turn can be used to "call" JavaScript callbacks in the user interface
-of a dapp, which listen for these events.
+事件允许一种方便的方法来使用 EVM 日志功能，且可以用来“调用”一个dapp用户接口里列出来的JavaScript的回调函数。
 
-Events are
-inheritable members of contracts. When they are called, they cause the
-arguments to be stored in the transaction's log - a special data structure
-in the blockchain. These logs are associated with the address of
-the contract and will be incorporated into the blockchain
-and stay there as long as a block is accessible (forever as of
-Frontier and Homestead, but this might change with Serenity). Log and
-event data is not accessible from within contracts (not even from
-the contract that created them).
+事件是合约里的可继承成员。当调用时，会生成一些参数并且存在交易的日志里 - 区块链里的一个特别的数据结构。
+这些日志是和合约的地址相对应并且被关联进区块链，只要这个区块是可防问的，这些数据就会存在那里。
+（在Frontier 和 Homestead里是一直存在的，但在Serenity里可能会被改掉）。在合约内部是不能防问日志和事件数据的
+（就算是创建这些数据的合约也不能）。
 
-SPV proofs for logs are possible, so if an external entity supplies
-a contract with such a proof, it can check that the log actually
-exists inside the blockchain.  But be aware that block headers have to be supplied because
-the contract can only see the last 256 block hashes.
+SPV 验证日志是可行的，因此一个外部实体提供一个合约加上一个证明，它能检查这个日志确实存在于这个区块链内部。
+但是要注意，一定要有区块头，因为合约只能看到最后256个区块哈希。
 
-Up to three parameters can
-receive the attribute ``indexed`` which will cause the respective arguments
-to be searched for: It is possible to filter for specific values of
-indexed arguments in the user interface.
+最多可以接受三个参数作为 ``indexed`` ，然后用这些对应的参数进行搜索：在用户接口中还可以用索引参数的特定值来过滤搜索。
 
-If arrays (including ``string`` and ``bytes``) are used as indexed arguments, the
-Keccak-256 hash of it is stored as topic instead.
+如果数组（包括 ``string`` 和 ``bytes``) 用于索引参数，会用存贮它们的Keccak-256来替代。
 
-The hash of the signature of the event is one of the topics except if you
-declared the event with ``anonymous`` specifier. This means that it is
-not possible to filter for specific anonymous events by name.
+事件签名的哈希是其中一个标题，除非你用 ``anonymous``修饰符定义这个事件。这就意味着你不能用指定名字过滤一个无名事件。
 
-All non-indexed arguments will be stored in the data part of the log.
+所有非索引参数会被存在日志的数据部分。
 
 .. note::
-    Indexed arguments will not be stored themselves.  You can only
-    search for the values, but it is impossible to retrieve the
-    values themselves.
+    索引参数本身不会被存贮。你只能用参数值来搜索，但不能读取值本身。
 
 ::
 
@@ -643,48 +617,44 @@ All non-indexed arguments will be stored in the data part of the log.
         );
 
         function deposit(bytes32 _id) public payable {
-            // Any call to this function (even deeply nested) can
-            // be detected from the JavaScript API by filtering
-            // for `Deposit` to be called.
+            // 所有调用这个函数（甚至深层嵌套）都
+            // 能被JavaScript 的 API 通过过滤
+            // “Deposit” 的调用而检测到。
             Deposit(msg.sender, _id, msg.value);
         }
     }
 
-The use in the JavaScript API would be as follows:
+下面这个例子给出 JavaScript API 的使用:
 
 ::
 
-    var abi = /* abi as generated by the compiler */;
+    var abi = /* abi 由编译器生成 */;
     var ClientReceipt = web3.eth.contract(abi);
-    var clientReceipt = ClientReceipt.at("0x1234...ab67" /* address */);
+    var clientReceipt = ClientReceipt.at("0x1234...ab67" /* 地址 */);
 
     var event = clientReceipt.Deposit();
 
-    // watch for changes
+    // 观察变化
     event.watch(function(error, result){
-        // result will contain various information
-        // including the argumets given to the `Deposit`
-        // call.
-        if (!error)
+        // 结果会包含各种信息，包括调用 “Deposit" 时的各个参数。
+        if (!error)
             console.log(result);
     });
 
-    // Or pass a callback to start watching immediately
-    var event = clientReceipt.Deposit(function(error, result) {
+    // 或者传递一个回调函数来立即开始观察。
+    var event = clientReceipt.Deposit(function(error, result) {
         if (!error)
             console.log(result);
     });
 
 .. index:: ! log
 
-Low-Level Interface to Logs
-===========================
+日志的低层接口
+=============
 
-It is also possible to access the low-level interface to the logging
-mechanism via the functions ``log0``, ``log1``, ``log2``, ``log3`` and ``log4``.
-``logi`` takes ``i + 1`` parameter of type ``bytes32``, where the first
-argument will be used for the data part of the log and the others
-as topics. The event call above can be performed in the same way as
+可以通过函数 ``log0``, ``log1``, ``log2``, ``log3`` and ``log4`` 来防问日志机制的低层接口。
+``logi`` 用 ``i + 1``个 ``bytes32`` 类型的参数, 这里第一个参数会被用于日志的数据部分，其它参数作为标题。
+上述事件调用可以用下面的方法同样完成。
 
 ::
 
@@ -702,21 +672,20 @@ as topics. The event call above can be performed in the same way as
         }
     }
 
-where the long hexadecimal number is equal to
-``keccak256("Deposit(address,hash256,uint256)")``, the signature of the event.
+这里的长十六进制数等于 ``keccak256("Deposit(address,hash256,uint256)")``, 也就是事件的签名。
 
-Additional Resources for Understanding Events
-==============================================
+理解事件的附加资源
+================
 
-- `Javascript documentation <https://github.com/ethereum/wiki/wiki/JavaScript-API#contract-events>`_
-- `Example usage of events <https://github.com/debris/smart-exchange/blob/master/lib/contracts/SmartExchange.sol>`_
-- `How to access them in js <https://github.com/debris/smart-exchange/blob/master/lib/exchange_transactions.js>`_
+- `Javascript 文档 <https://github.com/ethereum/wiki/wiki/JavaScript-API#contract-events>`_
+- `事件使用例集 <https://github.com/debris/smart-exchange/blob/master/lib/contracts/SmartExchange.sol>`_
+- `怎样在js中防问 <https://github.com/debris/smart-exchange/blob/master/lib/exchange_transactions.js>`_
 
 .. index:: ! inheritance, ! base class, ! contract;base, ! deriving
 
-***********
-Inheritance
-***********
+****
+继承
+****
 
 Solidity supports multiple inheritance by copying code including polymorphism.
 
