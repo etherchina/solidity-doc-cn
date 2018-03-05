@@ -9,17 +9,14 @@
 我们特别需要以下方面的帮助：
 
 * 改善文档
-* 回复 `StackExchange
-    <https://ethereum.stackexchange.com>`_ 和 `Solidity Gitter
-    <https://gitter.im/ethereum/solidity>`_ 上的用户提问
+* 回复 `StackExchange <https://ethereum.stackexchange.com>`_ 和 `Solidity Gitter <https://gitter.im/ethereum/solidity>`_ 上的用户提问
 * 解决并回复 `Solidity's GitHub issues
-  <https://github.com/ethereum/solidity/issues>`_ 上的问题，特别是被标记为
-    `up-for-grabs <https://github.com/ethereum/solidity/issues?q=is%3Aopen+is%3Aissue+label%3Aup-for-grabs>`_ 的问题，他们是针对外部贡献者的入门问题。
+  <https://github.com/ethereum/solidity/issues>`_ 上的问题，特别是被标记为 `up-for-grabs <https://github.com/ethereum/solidity/issues?q=is%3Aopen+is%3Aissue+label%3Aup-for-grabs>`_ 的问题，他们是针对外部贡献者的入门问题。
 
 怎样报告问题
 ====================
 
-请用`GitHub issues tracker <https://github.com/ethereum/solidity/issues>`_ 来报告问题。汇报问题时，请提供下列细节：
+请用 `GitHub issues tracker <https://github.com/ethereum/solidity/issues>`_ 来报告问题。汇报问题时，请提供下列细节：
 
 * 你所使用的 Solidity 版本
 * 源码 (如果可以的话)
@@ -67,7 +64,7 @@ Solidity 有不同类型的测试，他们被包含在应用 ``soltest`` 中。�
 Travis CI 甚至会执行一些额外的测试（包括 ``solc-js`` 和对第三方 Solidity 框架的测试），这些测试需要去编译 Emscripten 目标代码。
 
 Whiskers 模板系统
-========
+==========================
 
 *Whiskers* 是一个模板系统，类似于 `Mustache <https://mustache.github.io>`_。编译器在各种各样的场合使用它来增强可读性，从而提高代码的可维护性和可验证性。
 
