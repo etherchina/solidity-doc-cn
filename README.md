@@ -13,7 +13,7 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 ### 工作流
 
 1. 注册Github帐号
-2. 发信联系zuohongbin@gmail.com加入Solidity翻译团队(需要试译)
+2. 申请成为译者，微信添加小助手（baobaotalk_com），或者发邮件：info@hiblock.net
 3. fork仓库: https://github.com/etherchina/solidity-doc-cn
 4. develop: admin负责README更新，记录需要翻译的章节，请务必加入commit hash值，命令见常见问题。
 5. develop: 译者翻译，完成后提交PR
