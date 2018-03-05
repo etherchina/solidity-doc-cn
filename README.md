@@ -32,6 +32,7 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 3. `structure-of-a-contract.rst`: @bobjiang 翻译中 (f58024b9744f557dbc77d5f7bfbc4319bde2e0c7)
 4. `frequently-asked-questions.rst`: @ghostrd 翻译中（5770458826bfe72201393f4f02729a970bac926e） 
 
+
 ## 贡献者列表
 
 1. 姜信宝 
