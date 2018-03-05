@@ -225,59 +225,47 @@
     }
 
 
-Are comments included with deployed contracts and do they increase deployment gas?
-==================================================================================
+注释会被包含在已部署的合约里吗，而且会增加部署的燃料费吗？
+==========================================================
 
-No, everything that is not needed for execution is removed during compilation.
-This includes, among others, comments, variable names and type names.
+不会，所有执行时非必须的内容都会在编译的时候被移除。
+其中就包括注释、变量名和类型名。
 
-What happens if you send ether along with a function call to a contract?
-========================================================================
+如果在调用合约的函数时一起发送了以太币，将会发生什么？
+======================================================
 
-It gets added to the total balance of the contract, just like when you send ether when creating a contract.
-You can only send ether along to a function that has the ``payable`` modifier,
-otherwise an exception is thrown.
+就像在创建合约时发送以太币一样，会累加到合约的余额总数上。
+你只可以将以太币一起发送至拥有 ``payable`` 修饰符的函数，不然会抛出异常。
 
-Is it possible to get a tx receipt for a transaction executed contract-to-contract?
-===================================================================================
+合约对合约的交易可以获得交易回执吗？
+====================================
 
-No, a function call from one contract to another does not create its own transaction,
-you have to look in the overall transaction. This is also the reason why several
-block explorer do not show Ether sent between contracts correctly.
+不能，合约对合约的函数调用并不会创建前者自己的交易，你必须要去查看全部的交易。这也是为什么很多区块管理器无法正确显示合约对合约发送的以太币。
 
-What is the ``memory`` keyword? What does it do?
-================================================
+关键字 ``memory`` 是什么？是用来做什么的？
+==========================================
 
-The Ethereum Virtual Machine has three areas where it can store items.
+以太坊虚拟机拥有三类存储区域。
 
-The first is "storage", where all the contract state variables reside.
-Every contract has its own storage and it is persistent between function calls
-and quite expensive to use.
+第一类是存储（ "storage" ），贮存了合约申明中所有的变量。
+虚拟机会为每份合约分别划出一片独立的存储（ "storage" ）区域，并在函数相互调用时持久存在，所以其使用开销非常大。
 
-The second is "memory", this is used to hold temporary values. It
-is erased between (external) function calls and is cheaper to use.
+第二类是内存（ "memory" ），用于暂存数据。其中存储的内容会在函数被调用（包括外部函数）时擦除，所以其使用开销相对较小。
 
-The third one is the stack, which is used to hold small local variables.
-It is almost free to use, but can only hold a limited amount of values.
+第三类是栈，用于存放本地小变量。使用几乎是免费的，但容量有限。
 
-For almost all types, you cannot specify where they should be stored, because
-they are copied everytime they are used.
+对绝大部分数据类型来说，由于每次被使用时都会被复制，所以你无法指定将其存储在哪里。
 
-The types where the so-called storage location is important are structs
-and arrays. If you e.g. pass such variables in function calls, their
-data is not copied if it can stay in memory or stay in storage.
-This means that you can modify their content in the called function
-and these modifications will still be visible in the caller.
+在数据类型中，对所谓存储地点比较重视的是结构和数组。 如果你在函数调用中传递了这类参数，假设它们的数据可以被贮存在存储或内存中，那么它们将不会被复制。也就是说，当你在被调用函数中修改了它们的内容，这些修改调用者也是可见的。
 
-There are defaults for the storage location depending on which type
-of variable it concerns:
+不同数据类型的变量会有各自默认的存储地点：
 
-* state variables are always in storage
-* function arguments are in memory by default
-* local variables of struct, array or mapping type reference storage by default
-* local variables of value type (i.e. neither array, nor struct nor mapping) are stored in the stack
+* 状态变量总是会贮存在存储中
+* 函数参数默认存放在内存中
+* 数据结构、数组或映射类型的本地变量，默认会放在存储中
+* 除数据结构、数组及映射类型之外的本地变量，会储存在栈中
 
-Example::
+例子::
 
     pragma solidity ^0.4.0;
 
@@ -298,19 +286,11 @@ Example::
         }
     }
 
-The function ``append`` can work both on ``data1`` and ``data2`` and its modifications will be
-stored permanently. If you remove the ``storage`` keyword, the default
-is to use ``memory`` for function arguments. This has the effect that
-at the point where ``append(data1)`` or ``append(data2)`` is called, an
-independent copy of the state variable is created in memory and
-``append`` operates on this copy (which does not support ``.push`` - but that
-is another issue). The modifications to this independent copy do not
-carry back to ``data1`` or ``data2``.
+函数 ``append`` 能一起作用于 ``data1`` 和 ``data2`` ，并且修改是永久保存的。如果你移除了 ``storage`` 关键字，函数的参数会默认存储于 ``memory`` 。这带来的影响是，在 ``append(data1)`` 或 ``append(data2)`` 被调用的时节，一份全新的状态变量的拷贝会在内存中被创建， ``append`` 操作的会是这份拷贝（也不支持 ``.push`` -但这又是另一个话题了）。针对这份全新的拷贝的修改，不会反过来影响 ``data1`` 或 ``data2`` 。
 
-A common mistake is to declare a local variable and assume that it will
-be created in memory, although it will be created in storage::
+一个常见误区就是申明了一个本地变量，就认为它会创建在内存中，其实它会被创建在存储中::
 
-    /// THIS CONTRACT CONTAINS AN ERROR
+    /// 这份合约含有一个错误
 
     pragma solidity ^0.4.0;
 
@@ -325,18 +305,11 @@ be created in memory, although it will be created in storage::
         }
     }
 
-The type of the local variable ``x`` is ``uint[] storage``, but since
-storage is not dynamically allocated, it has to be assigned from
-a state variable before it can be used. So no space in storage will be
-allocated for ``x``, but instead it functions only as an alias for
-a pre-existing variable in storage.
+本地变量 ``x`` 的数据类型是 ``uint[] storage``，但由于存储不是动态指定的，它需要在使用前通过状态变量赋值。所以 ``x`` 本身不会被分配存储的空间，取而代之的是，它只是作为存储中已有变量的别名。 
 
-What will happen is that the compiler interprets ``x`` as a storage
-pointer and will make it point to the storage slot ``0`` by default.
-This has the effect that ``someVariable`` (which resides at storage
-slot ``0``) is modified by ``x.push(2)``.
+实际上会发生的是，编译器将 ``x`` 解析为一个存储指针，并默认将指针指向存储的 ``0`` 位置。这就造成 ``someVariable`` （贮存在存储的 ``0`` 位置）会被 ``x.push(2)`` 更改。
 
-The correct way to do this is the following::
+正确的方法如下::
 
     pragma solidity ^0.4.0;
 
