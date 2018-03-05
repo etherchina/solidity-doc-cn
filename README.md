@@ -16,7 +16,7 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 2. 申请成为译者，微信添加小助手（baobaotalk_com），或者发邮件：info@hiblock.net
 3. fork仓库: https://github.com/etherchina/solidity-doc-cn
 4. develop: admin负责README更新，记录需要翻译的章节，请务必加入commit hash值，命令见常见问题。
-5. develop: 译者翻译，完成后提交PR
+5. develop: 译者认领PR，翻译，完成后提交PR
 6. develop: 在提交PR或git push的时候注意：一定要先同步主仓库源，见常见问题
 7. develop: 一名Reviewer审核之后, 有问题退回修改，提交后另一名Reviewer再审核
 8. master: 确认质量后由admin合并入master
