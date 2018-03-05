@@ -281,8 +281,6 @@
 JSON
 =======
 
-The JSON format for a contract's interface is given by an array of function and/or event descriptions.
-A function description is a JSON object with the fields:
 合约接口的JSON格式是由一个函数和/或事件描述的数组所给定的。一个函数的描述是一个有如下字段的JSON对象：
 
 - ``type`` ： ``"function"`` 、 ``"constructor"`` 或 ``"fallback"`` （ :ref:`未命名的 "缺省" 函数 <fallback-function>` ）
