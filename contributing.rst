@@ -40,8 +40,7 @@ Pull Request 的工作流
 <https://gitter.im/ethereum/solidity-dev>`_ （不同于上面提到的那个小组，这个小组专注于编译器和编程语言开发，而不是编程语言的使用）进行商量。
 
 最后，请确保你遵守了这个项目的 `coding standards
-<https://raw.githubusercontent.com/ethereum/cpp-ethereum/develop/CodingStandards.txt>`_ 。
-还有，虽然我们采用了持续集成测试，但是在提交 pull request 之前，请测试你的代码并确保它能在本地进行编译。
+<https://raw.githubusercontent.com/ethereum/cpp-ethereum/develop/CodingStandards.txt>`_ 。还有，虽然我们采用了持续集成测试，但是在提交 pull request 之前，请测试你的代码并确保它能在本地进行编译。
 
 感谢你的帮助！
 
