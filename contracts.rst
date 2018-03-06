@@ -8,9 +8,9 @@ Solidity的智能合约类似于面向对象语言中的“类”。包含状态
 
 .. index:: ! contract;creation, constructor
 
-******************
+********
 创建合约
-******************
+********
 
 合约可以通过以太币网络的交易从外部创建，也可以从Solidity内部创建。
 集成开发环境，比如`Remix <https://remix.ethereum.org/>`_，可以让你从图形界面无缝创建一个合约。
@@ -93,8 +93,8 @@ Solidity的智能合约类似于面向对象语言中的“类”。包含状态
     }
 
 .. index:: ! visibility, external, public, private, internal
-.. index:: ! 可见性，外部的，公共的，私人的，内部的
-.. 可见性和Getters
+
+.. _visibility-and-getters:
 
 **********************
 可见性和Getters
@@ -435,7 +435,7 @@ View 函数
 
 .. _fallback-function:
 
-Fallback 函数
+Fallback 回调函数
 =================
 
 一个合约可以有最多一个的无名函数，这个函数不能有任何参数也不能返回任何东西。
@@ -504,7 +504,7 @@ Fallback 函数
 
 .. index:: ! overload
 
-.. _重载函数 :
+.. 重载函数 :
 
 函数重载
 ========
@@ -525,9 +525,7 @@ Fallback 函数
         }
     }
 
-重载函数也表现在外部接口。如果两个外部可见函数有不同的Solidity类型但外部类型相同则会出现一个错误。
-
-::
+重载函数也表现在外部接口。如果两个外部可见函数有不同的Solidity类型但外部类型相同则会出现一个错误。::
 
     // 这个不会被编译
     pragma solidity ^0.4.16;
@@ -941,39 +939,30 @@ Solidity沿用了Python的方法并且用 "`C3 线性化 <https://en.wikipedia.o
 库可以被看作是调用它们的合约的隐含基类合约，它们在继承体系里不是显性可见的。但是调用库函数看起来就像调用一个显性
 的基类函数（ ``L.f()`` 这里 ``L`` 是库名）. 更进一步，库里的 ``internal`` 函数是在合约里可见的。就像库是一个基类合约一样。
 当然，调用一个内部函数是要使用内部函数调用转换的。也就意味着内部类型可以被传递，内存类型是通过引用而不是拷贝来传递的。
-要在EVM中实现这一点，内部库函数以及它们内部调用的函数
-To realize this in the EVM, code of internal library functions
-and all functions called from therein will at compile time be pulled into the calling
-contract, and a regular ``JUMP`` call will be used instead of a ``DELEGATECALL``.
+要在EVM中实现这一点，调用合约在编译时里就要包含内部库函数以及它们库自身调用的函数的代码，并且用 ``JUMP`` 来代替 ``DELEGATECALL``。
 
 .. index:: using for, set
 
-The following example illustrates how to use libraries (but
-be sure to check out :ref:`using for <using-for>` for a
-more advanced example to implement a set).
+下面这个例子演示了如何使用库（请查阅一个更高级的方法去实现一个集合的例子 :ref:`using for <using-for>` ).
 
 ::
 
     pragma solidity ^0.4.16;
 
     library Set {
-      // We define a new struct datatype that will be used to
-      // hold its data in the calling contract.
+      //定义一个新的数据类型用于在调用合约里保存数据。
       struct Data { mapping(uint => bool) flags; }
 
-      // Note that the first parameter is of type "storage
-      // reference" and thus only its storage address and not
-      // its contents is passed as part of the call.  This is a
-      // special feature of library functions.  It is idiomatic
-      // to call the first parameter `self`, if the function can
-      // be seen as a method of that object.
+      // 注意第一个参数是类型是 "storage
+      // 引用" 因此只有存贮的地址而不是内容在调用中被传递过去。这是库函数的一个特别之处。
+      // 把第一个参数称之为 `self`是一种常见的做法，就好象是函数可以被看作是一个对象的方法。
       function insert(Data storage self, uint value)
           public
           returns (bool)
       {
           if (self.flags[value])
-              return false; // already there
-          self.flags[value] = true;
+              return false; // 已经在里面。 
+          self.flags[value] = true;
           return true;
       }
 
@@ -982,8 +971,8 @@ more advanced example to implement a set).
           returns (bool)
       {
           if (!self.flags[value])
-              return false; // not there
-          self.flags[value] = false;
+              return false; // 不在里面。
+          self.flags[value] = false;
           return true;
       }
 
@@ -1000,31 +989,21 @@ more advanced example to implement a set).
         Set.Data knownValues;
 
         function register(uint value) public {
-            // The library functions can be called without a
-            // specific instance of the library, since the
-            // "instance" will be the current contract.
-            require(Set.insert(knownValues, value));
+            // 这个库函数可以在没有实例化的情况下被调用
+            // 因为“实例”其实就是当前的合约。 
+            require(Set.insert(knownValues, value));
         }
-        // In this contract, we can also directly access knownValues.flags, if we want.
-    }
+        // 在这个合约里，如果你愿意，也可以直接防问knownValues.flags。
+    }
 
-Of course, you do not have to follow this way to use
-libraries: they can also be used without defining struct
-data types. Functions also work without any storage
-reference parameters, and they can have multiple storage reference
-parameters and in any position.
+当然，你也不是一定要按这个方法去使用库：没有定义结构数据类型的情况下也可以用。函数也可以在没有任何存贮引用的情况下工作，
+它们也可以在任何位置有多个存贮引用作为参数。
 
-The calls to ``Set.contains``, ``Set.insert`` and ``Set.remove``
-are all compiled as calls (``DELEGATECALL``) to an external
-contract/library. If you use libraries, take care that an
-actual external function call is performed.
-``msg.sender``, ``msg.value`` and ``this`` will retain their values
-in this call, though (prior to Homestead, because of the use of ``CALLCODE``, ``msg.sender`` and
-``msg.value`` changed, though).
+调用 ``Set.contains``, ``Set.insert`` and ``Set.remove``都被编译为调用外部合约/库。使用库时要注意，实际是执行一个外部调用。
+在调用中，``msg.sender``, ``msg.value`` and ``this`` 会保持它们原来的值。虽然 （在Homestead之前, 因为用了 ``CALLCODE``,
+``msg.sender`` 和 ``msg.value`` 会变化）。
 
-The following example shows how to use memory types and
-internal functions in libraries in order to implement
-custom types without the overhead of external function calls:
+下面这个例子示例了在库里如何在避免外部函数调用开销的情况下，使用内存类型和内部调用去实现一个定制类型。
 
 ::
 
@@ -1053,7 +1032,7 @@ custom types without the overhead of external function calls:
                     carry = 0;
             }
             if (carry > 0) {
-                // too bad, we have to add a limb
+                // 不好，我们必须增加一个limb
                 uint[] memory newLimbs = new uint[](r.limbs.length + 1);
                 for (i = 0; i < r.limbs.length; ++i)
                     newLimbs[i] = r.limbs[i];
@@ -1081,24 +1060,23 @@ custom types without the overhead of external function calls:
         }
     }
 
+在编译器不知道库会被部署在什么地方的情况下，它们的地址在最终的二进制码（bytecode)中只能用最终用一个链接的来填充。
 As the compiler cannot know where the library will be
 deployed at, these addresses have to be filled into the
 final bytecode by a linker
-(see :ref:`commandline-compiler` for how to use the
-commandline compiler for linking). If the addresses are not
-given as arguments to the compiler, the compiled hex code
-will contain placeholders of the form ``__Set______`` (where
-``Set`` is the name of the library). The address can be filled
-manually by replacing all those 40 symbols by the hex
-encoding of the address of the library contract.
+（参见 :ref:`commandline-compiler` for how to use the
+commandline compiler for linking）.
+如果地址没有作为参数传给编译器，编译后的十六进制码会包含一个``__Set______``形式的占位符（这里 ``Set`` 是库名）。
+实际地址可以通过用库合约地址的40个十六进制字符替换的方法手动填入。
 
 Restrictions for libraries in comparison to contracts:
+和合约相比库的限制：
 
-- No state variables
-- Cannot inherit nor be inherited
-- Cannot receive Ether
+- 没有状态变量
+- 不能继承或被继承
+- 不能接收以太币
 
-(These might be lifted at a later point.)
+（以有有可能会取消。）
 
 Call Protection For Libraries
 =============================
