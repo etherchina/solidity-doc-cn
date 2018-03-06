@@ -91,7 +91,7 @@ Solidity中合约的含义就是一组代码（它的 *函数*)和数据（它�
 .. index:: mapping
 下一行， ``mapping (address => uint) public balances;`` 也创建一个公共状态变量，但它是一个更复杂的数据类型。
 该类型将address映射为无符号整数。
-Mappings 可以看作是一个 `哈希表 <https://en.wikipedia.org/wiki/Hash_table>`_ 它会被进行虚拟的初始化，以使所有可能存在的键都映射到一个字节表示为全零的值。 但是，这种类比并不太恰当，因为它既不能获得映射的所有键的列表，也不能获得所有值的列表。 因此，要么记住你添加到mapping中的数据（使用列表或更高级的数据类型会更好），要么在不需要键列表或值列表的上下文中使用它，就如本例。 而由``public``关键字创建的getter函数 :ref:`getter function<getter-functions>` 则是更复杂一些的情况， 它大致如下所示：
+Mappings 可以看作是一个 `哈希表 <https://en.wikipedia.org/wiki/Hash_table>`_ 它会执行虚拟初始化，以使所有可能存在的键都映射到一个字节表示为全零的值。 但是，这种类比并不太恰当，因为它既不能获得映射的所有键的列表，也不能获得所有值的列表。 因此，要么记住你添加到mapping中的数据（使用列表或更高级的数据类型会更好），要么在不需要键列表或值列表的上下文中使用它，就如本例。 而由``public``关键字创建的getter函数 :ref:`getter function<getter-functions>` 则是更复杂一些的情况， 它大致如下所示：
 ::
 
     function balances(address _account) public view returns (uint) {
