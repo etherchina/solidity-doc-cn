@@ -3,7 +3,7 @@
 ##########
 合约
 ##########
-Solidity的智能合约类似于面向对象语言中的“类”。包含状态变量数据和能够改变它们值的函数。调用另外一个合约（或实例）的函数就会执行一个EVM的函数调用，从而切换到这些变量不可以被防问的另外一个上下文环境。
+Solidity的智能合约类似于面向对象语言中的“类”。包含持续保存的状态变量数据和能够改变它们值的函数。调用另外一个合约（实例）的函数就会执行一个EVM的函数调用，从而切换到这些变量不可以被防问的另外一个上下文环境。
 
 
 .. index:: ! contract;creation, constructor
@@ -14,7 +14,7 @@ Solidity的智能合约类似于面向对象语言中的“类”。包含状态
 
 合约可以通过以太币网络的交易从外部创建，也可以从Solidity内部创建。
 集成开发环境，比如`Remix <https://remix.ethereum.org/>`_，可以让你从图形界面无缝创建一个合约。
-以太币网络里面的程序化创建合同最好的办法是通过JavaScript API `web3.js <https://github.com/ethereum/web3.js>`_.
+以太币网络里面的程序化创建合约最好的办法是通过JavaScript API `web3.js <https://github.com/ethereum/web3.js>`_.
 现在有一个方法调用来实现创建合约 `web3.eth.Contract <https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#new-contract>`_。
 
 当一个合约创建时，它的构造函数（一个和合约同名的函数）会被执行一次。
@@ -42,7 +42,7 @@ Solidity的智能合约类似于面向对象语言中的“类”。包含状态
             //而不是用类似于 this.owner.这也适用于函数特别是构造函数，
             //你只能“内部的”去调用这些构造函数，因为这时候合约本身还不存在。
             owner = msg.sender;
-            //我们用一个显示的类型转换把address换为TokenCreator,并且假设调用的合约就是TokenCreator
+            //我们用一个显式的类型转换把address换为TokenCreator,并且假设调用的合约就是TokenCreator
             //这里并没有一个真正的办法确认这一点
             creator = TokenCreator(msg.sender);
             name = _name;
@@ -50,7 +50,7 @@ Solidity的智能合约类似于面向对象语言中的“类”。包含状态
 
         function changeName(bytes32 newName) public {
             //只有合约创造者可以修改名字
-            //比较是可以的，因为合约类型可以显示的转为地址类型
+            //比较是可以的，因为合约类型可以显式的转为地址类型
             if (msg.sender == address(creator))
                 name = newName;
         }
@@ -685,7 +685,7 @@ SPV 验证日志是可行的，因此一个外部实体提供一个合约加上�
 
 Solidity 通过包括多态性的代码拷贝来支持多重继承。
 
-所有函数调用都是虚拟的，也主意味着派生函数会被调用，除非显示给定合约名称。
+所有函数调用都是虚拟的，也主意味着派生函数会被调用，除非显式给定合约名称。
 
 当一个合约从多个合约继承时，只有一个合约会在区块链中被创建，所有基类代码都会被拷贝到被创建的合约。
 
