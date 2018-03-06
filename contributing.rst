@@ -70,4 +70,4 @@ Whiskers 模板系统
 任何出现 ``<name>`` 的地方都会被所提供的变量 ``name`` 的字符串值所替换，既不会进行任何转义也不会迭代替换。可以通过 ``<#name>...</name>`` 来限定一个区域。该区域中的内容将进行多次拼接，每次拼接会使用相应变量集中的值替换区域中的 ``<inner>`` 项，模板系统中提供了多少组变量集，就会进行多少次拼接。顶层变量也可以在这样的区域的内部使用。
 
 
-译者注：对于域<#name>...</name>的释义，译者参考自：https://github.com/janl/mustache.js#sections
+译者注：对于区域<#name>...</name>的释义，译者参考自：https://github.com/janl/mustache.js#sections
