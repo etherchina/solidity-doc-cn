@@ -1001,8 +1001,8 @@ Solidity会给出一个继承图线性化错误。
 当然，你也不是一定要按这个方法去使用库：没有定义结构数据类型的情况下也可以用。函数也可以在没有任何存贮引用的情况下工作，
 它们也可以在任何位置有多个存贮引用作为参数。
 
-调用 ``Set.contains``, ``Set.insert`` and ``Set.remove``都被编译为调用外部合约/库。使用库时要注意，实际是执行一个外部调用。
-在调用中，``msg.sender``, ``msg.value`` and ``this`` 会保持它们原来的值。虽然 （在Homestead之前, 因为用了 ``CALLCODE``,
+调用 ``Set.contains``, ``Set.insert`` 和 ``Set.remove`` 都被编译为调用外部合约/库。使用库时要注意，实际是执行一个外部调用。
+在调用中， ``msg.sender``, ``msg.value`` 和 ``this`` 会保持它们原来的值。虽然 （在Homestead之前, 因为用了 ``CALLCODE``,
 ``msg.sender`` 和 ``msg.value`` 会变化）。
 
 下面这个例子示例了在库里如何在避免外部函数调用开销的情况下，使用内存类型和内部调用去实现一个定制类型。
