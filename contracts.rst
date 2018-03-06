@@ -15,15 +15,15 @@ Solidity的智能合约类似于面向对象语言中的“类”。包含状态
 合约可以通过以太币网络的交易从外部创建，也可以从Solidity内部创建。
 集成开发环境，比如`Remix <https://remix.ethereum.org/>`_，可以让你从图形界面无缝创建一个合约。
 以太币网络里面的程序化创建合同最好的办法是通过JavaScript API `web3.js <https://github.com/ethereum/web3.js>`_.
-现在有一个方法调用来实现创建合约 `web3.eth.Contract <https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#new-contract>`_
+现在有一个方法调用来实现创建合约 `web3.eth.Contract <https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#new-contract>`_。
 
-当一个合约创建时，它的构造函数（一个和合约同名的函数）被执行一次。
+当一个合约创建时，它的构造函数（一个和合约同名的函数）会被执行一次。
 构造函数是可选的。且只允许一个构造函数，这就意味着构造函数是不可以重载的。
 
 .. index:: constructor;arguments
-.. index:: 构造函数，参数
+
 从内部机制来说，构造函数的参数是在合约代码自身之后通过:ref:`ABI encoded <ABI>`传递，但如果你用"web3.js"，你不需要关心这个。
-如果一个合约需要创建另一个合约，这个合约需要知道被创建的合约的代码（以及二进制码）。这就意味着循环创建是不可以的。
+如果一个合约需要创建另一个合约，这个合约需要知道被创建的合约的代码（以及二进制码）。这就意味不可以循环创建。
 
 ::
 
@@ -36,7 +36,7 @@ Solidity的智能合约类似于面向对象语言中的“类”。包含状态
         address owner;
         bytes32 name;
 
-        // 这是一个构造函数用来登记合约创造者并且赋予一个名字
+        //这是一个构造函数用来登记合约创造者并且赋予一个名字
         function OwnedToken(bytes32 _name) public {
             //状态变量可通过它们的名字来访问
             //而不是用类似于 this.owner.这也适用于函数特别是构造函数，
@@ -50,7 +50,7 @@ Solidity的智能合约类似于面向对象语言中的“类”。包含状态
 
         function changeName(bytes32 newName) public {
             //只有合约创造者可以修改名字
-            //比较是可行的，因为合约类型可以显示的转为地址类型
+            //比较是可以的，因为合约类型可以显示的转为地址类型
             if (msg.sender == address(creator))
                 name = newName;
         }
@@ -96,16 +96,16 @@ Solidity的智能合约类似于面向对象语言中的“类”。包含状态
 
 .. _visibility-and-getters:
 
-**********************
+***************
 可见性和Getters
-**********************
+***************
 
 由于Solidity知道两种函数调用：内部函数internal，它并不产生一个实际的EVM调用
 （也称之为消息调用）和外部函数external（会产生EVM调用）。所以函数和状态变量
 有总共有四种可见性。
 
 函数能被指定为“external”，“public”，“internal”或者“private”，
-这里缺省的是公共的。状态变量是不可以是外部的，缺省的是内部的，
+这里缺省的是公共的。状态变量是不可以是外部的，缺省的是内部的。
 
 
 ``external``:
@@ -115,17 +115,17 @@ Solidity的智能合约类似于面向对象语言中的“类”。包含状态
 
 ``public``:
     公共的也是合约界面的一部分，即可以在内部调用也可以通过消息调用。
-    对于一个公共的状态变量来说，一个用于查询的getter函数会被自动创建（见下面）
+    对于一个公共的状态变量来说，一个用于查询的getter函数会被自动创建（见下面）。
 
 ``internal``:
-    这些函数和状态变量只能从内部防问（比如从当前合约或者从它派生合约里调用）
-    这种情况不需要使用 ``this``.
+    这些函数和状态变量只能从内部防问（比如从当前合约或者从它派生合约里调用）。
+    这种情况不需要使用 ``this``。
 
 ``private``:
     私人函数和状态变量只能从定义它们的合约内部可，派生合约则不可以防问。
 
 ..note::
-    合约内的任何东西对一个外部观察者来说都是可见的，把某个东西标成 ``private``
+    合约内的任何东西对一个外部观察者来说都是可见的，把某个东西标成 ``private``。
     只是防止其它的合约来防问和修改。但对区块链以外的世界来说它仍然是可见的（译注：通过察看区块链数据）。
 
 可见性标识符位于状态变量类型之后，以及函数的参数列表和返回参数之间。
@@ -141,7 +141,7 @@ Solidity的智能合约类似于面向对象语言中的“类”。包含状态
     }
 
 在下面这个例子里, ``D``, 可以调用 ``c.getData()`` 来读取存在状态存贮区的``data``的值, 但是不能调用``f``。
-合约 ``E`` 是由 ``C`` 派生, 所以可以调用 ``compute``.
+合约 ``E`` 是由 ``C`` 派生, 所以可以调用 ``compute``。
 
 ::
 
@@ -176,7 +176,7 @@ Solidity的智能合约类似于面向对象语言中的“类”。包含状态
     }
 
 .. index:: ! getter;function, ! function;getter
-.. _getter函数:
+.. _getter function:
 
 Getter 函数
 ===========
@@ -236,11 +236,11 @@ getter函数有外部可见性。一个符号在内部被防问时 (例如：不
         b = data[arg1][arg2][arg3].b;
     }
 
-注意这个结构里mapping被忽略，因为没有一个好的办法去提供一个关键值key去mapping.
+注意这个结构里mapping被忽略，因为没有一个好的办法去提供一个关键值key去mapping。
 
-.. index:: ! 函数修饰符
+.. index:: ! function;modifier
 
-.. _修饰符:
+.. _modifiers:
 
 *********
 函数修饰符
@@ -258,7 +258,7 @@ getter函数有外部可见性。一个符号在内部被防问时 (例如：不
         address owner;
 
         // 这个合约只是定义了修饰符但没有用它
-        // 它将在派生合约中使用。
+        // 它将在派生合约中使用
         // 这个函数体在修饰符里出现`_;`的地方被代入 
         // 这意味着如果是所有者(Owner)调用这个函数，函数就会运行，否则就会抛出一个意外（exception）错误
         modifier onlyOwner {
@@ -269,7 +269,7 @@ getter函数有外部可见性。一个符号在内部被防问时 (例如：不
 
     contract mortal is owned {
         // 这个合约从 `owned` 处继承了`onlyOwner` 修饰符
-        // 并且应用到`close` 函数, 从而达到只有店主可以调用这个函数的效果。
+        // 并且应用到`close` 函数, 从而达到只有店主可以调用这个函数的效果
         function close() public onlyOwner {
             selfdestruct(owner);
         }
@@ -310,8 +310,8 @@ getter函数有外部可见性。一个符号在内部被防问时 (例如：不
         }
 
         /// 这个函数使用互拆功能来进行保护，这就意味着在 `msg.sender.call` 里不能够再次重入调用 `f`
-        /// `return 7` 把 7 赋予返回值，不过也执行了修饰符里的 `locked = false` 语句.
-        function f() public noReentrancy returns (uint) {
+        /// `return 7` 把 7 赋予返回值，不过也执行了修饰符里的 `locked = false` 语句。
+        function f() public noReentrancy returns (uint) {
             require(msg.sender.call());
             return 7;
         }
@@ -326,9 +326,9 @@ getter函数有外部可见性。一个符号在内部被防问时 (例如：不
 返回值变量也会被赋值，但控制流在前一个修饰的 "_"之后继续运行。
 
 修饰符的任意表达是允许的，在这种情况下，函数内的所有变量都对修饰符可见。
-但修饰行内定义的符号在函数里是不可见的（因为它们可能被重载）
+但修饰行内定义的符号在函数里是不可见的（因为它们可能被重载）。
 
-.. index:: ! 常量
+.. index:: ! constant
 
 ************
 常量状态变量
@@ -363,25 +363,25 @@ getter函数有外部可见性。一个符号在内部被防问时 (例如：不
 函数
 ****
 
-.. index:: ! view 函数, 函数;view
+.. index:: ! view function, function;view
 
-.. _view-函数:
+.. _view-functions:
 
 View 函数
 ==============
 
-函数可以定义为 ``view`` 这种情况下函数可以确保不会修改状态.
+函数可以定义为 ``view`` 这种情况下函数可以确保不会修改状态。
 
 下列语句可以被认为是修改了状态：
 
-#. 写入到状态变量 Writing to state variables.
-#. 发出一个事件 :ref:`Emitting events <events>`.
-#. 创建另一个合约 :ref:`Creating other contracts <creating-contracts>`.
-#. 使用自我销毁 Using ``selfdestruct``.
-#. 通过调用来发送以太币 Sending Ether via calls.
-#. 调用任何没有标为 ``view`` 或 ``pure``的函数 Calling any function not marked ``view`` or ``pure``.
-#. 使用低级调用 Using low-level calls.
-#. 使用包含特定操作码的嵌入式汇编 Using inline assembly that contains certain opcodes.
+#. 写入到状态变量 。
+#. 发出一个事件 :ref:`Emitting events <events>`。
+#. 创建另一个合约 :ref:`Creating other contracts <creating-contracts>`。
+#. 使用自我销毁 Using ``selfdestruct``。
+#. 通过调用来发送以太币 Sending Ether via calls。
+#. 调用任何没有标为 ``view`` 或 ``pure``的函数 Calling any function not marked ``view`` or ``pure``。
+#. 使用低级调用 Using low-level calls。
+#. 使用包含特定操作码的嵌入式汇编 Using inline assembly that contains certain opcodes。
 
 ::
 
@@ -394,10 +394,10 @@ View 函数
     }
 
 .. note::
-  ``constant`` 是 ``view`` 的一个别名.
+  ``constant`` 是 ``view`` 的一个别名。
 
 .. note::
-  Getter 方法被标示为 ``view``.
+  Getter 方法被标示为 ``view``。
 
 .. warning::
   编译器目前为止并不强制 ``view`` 方法不要去修改状态。
@@ -412,11 +412,11 @@ View 函数
 函数可以被定义为纯 ``pure`` 的，代表函数不会读也不会修改状态。
 
 在上述会修改状态的语句列表之外，下列语句会被认为会读取状态。
-#. 读取状态变量 Reading from state variables.
-#. 访问 ``this.balance`` or ``<address>.balance``.
-#. 访问 ``block``, ``tx``, ``msg`` 的任何成员(除了 ``msg.sig`` and ``msg.data``).
-#. 调用任何没有标示为 ``pure``的函数.
-#. 使用包含特定代码的嵌入式汇编.
+#. 读取状态变量 Reading from state variables。
+#. 访问 ``this.balance`` or ``<address>.balance``。
+#. 访问 ``block``, ``tx``, ``msg`` 的任何成员(除了 ``msg.sig`` and ``msg.data``)。
+#. 调用任何没有标示为 ``pure``的函数。
+#. 使用包含特定代码的嵌入式汇编。
 
 ::
 
@@ -444,7 +444,8 @@ Fallback 回调函数
 还有，如果一个合约收到一个纯粹的以太币转账交易（不带数据），为了接收这些以太币，fallback函数必须被标为 ``payable``。
 如果没有这样的函数存在，合约就不能接受常规的以太币转帐交易。
 
-在这种情况下，通常只有很少的gas可以用于函数调用（准确地说是2300 gas），所以让fallback函数花得尽可能少是非常重要的。要意识到由fallback调用的一个交易（和一个内部调用相比较）所需要的gas要高得多，因为一个交易要被收取21000 gas来用于签名验证等方面。
+在这种情况下，通常只有很少的gas可以用于函数调用（准确地说是2300 gas），所以让fallback函数花得尽可能少是非常重要的。
+要意识到由fallback调用的一个交易（和一个内部调用相比较）所需要的gas要高得多，因为一个交易要被收取21000 gas来用于签名验证等方面。
 
 特别的，下列操作会消耗的gas比给fallback函数配备的gas更多:
 
@@ -453,11 +454,10 @@ Fallback 回调函数
 - 调用一个消耗大量gas的外部函数 Calling an external function which consumes a large amount of gas
 - 发送以太币 Sending Ether
 
-在部署一个合约前请确认你彻底测试了你的fallback来确保运行成本少于2300 gas.
+在部署一个合约前请确认你彻底测试你的fallback，确保运行成本少于2300 gas。
 
 .. note::
-    虽然fallback 函数不能有参数，但它还是可以用 ``msg.data`` 来
-  读取这个调用中带的 payload 。
+    虽然fallback 函数不能有参数，但它还是可以用 ``msg.data`` 来读取这个调用中带的 payload 。
 
 .. warning::
     直接接收以太币的合约(没使用函数调用比如： ``send`` or ``transfer``)，
@@ -466,7 +466,7 @@ Fallback 回调函数
 
 .. warning::
     一个不带有payable fallback函数的合约可以作为 `coinbase transaction` (又叫 `挖矿奖励`)的
-  接受方的方式来接受以太币或者作为一个自我毁灭 ``selfdestruct``的目的方。
+    接受方的方式来接受以太币或者作为一个自我毁灭 ``selfdestruct``的目的方。
   
     对于这种交易，合约即不能和它互动也不能拒绝。这是EVM和Solidity设计的选择使得其不能绕过这个问题。
     
@@ -504,7 +504,7 @@ Fallback 回调函数
 
 .. index:: ! overload
 
-.. 重载函数 :
+.. _overload-function:
 
 函数重载
 ========
@@ -570,11 +570,11 @@ Fallback 回调函数
     }
 
 调用 ``f(50)`` 会生成一个类型错误因为 ``250`` 能被同时隐含地转换为 ``uint8``和
-``uint256`` 类型. 另一方面 ``f(256)`` 会被认为指定用 ``f(uint256)`` 重载 因为 ``256`` 不能够隐含地转为 ``uint8``。
+``uint256`` 类型. 另一方面 ``f(256)`` 会被认为指定用 ``f(uint256)`` 重载，因为 ``256`` 不能够隐含地转为 ``uint8``。
 
 .. index:: ! event
 
-.. _事件：
+.. _events:
 
 ****
 事件
@@ -841,7 +841,9 @@ Solidity 通过包括多态性的代码拷贝来支持多重继承。
 =============
 
 允许多继承的语言必须面对一些严重的问题。  一个是 `钻石问题 <https://en.wikipedia.org/wiki/Multiple_inheritance#The_diamond_problem>`_.
-Solidity沿用了Python的方法并且用 "`C3 线性化 <https://en.wikipedia.org/wiki/C3_linearization>`_"去强制使用一个基类DAG（和向无环图）的特定顺序。这样会有一个一致顺序，但有时会导致一些继承图是不允许的。基类在 ``is`` 指示符后的顺序是尤其重要的。在下面这个例子里，Solidity会给出一个继承图线性化错误。
+Solidity沿用了Python的方法并且用 "`C3 线性化 <https://en.wikipedia.org/wiki/C3_linearization>`_"去强制使用一个基类DAG（和向无环图）
+的特定顺序。这样会有一个一致顺序，但有时会导致一些继承图是不允许的。基类在 ``is`` 指示符后的顺序是尤其重要的。在下面这个例子里，
+Solidity会给出一个继承图线性化错误。
 
 ::
 
@@ -929,7 +931,7 @@ Solidity沿用了Python的方法并且用 "`C3 线性化 <https://en.wikipedia.o
 库
 **
 
-库类似于合约，但它们的目的是库存只会在一个特定地址被部署一次，并且它们的代码通过使用EVM中的 ``DELEGATECALL`` 
+库类似于合约，但它们的目的是库存只会在一个特定地址被部署一次，并且库代码通过使用EVM中的 ``DELEGATECALL`` 
 来实现重用。（Homestead之前用``CALLCODE``）。这就意味着库函数被调用时，它们的代码是在调用它们的合约上下文里
 执行的。比如 ``this`` 指向了调用合约，而且能够防问调用合约的存贮空间。库是一段被隔离的源代码，它只能在被显式
 提供的情况下防问调用合约里的状态变量（否则根本无法命名）。库函数在不修改状态变量的情况下（例如是 ``view`` 
@@ -954,7 +956,7 @@ Solidity沿用了Python的方法并且用 "`C3 线性化 <https://en.wikipedia.o
       struct Data { mapping(uint => bool) flags; }
 
       // 注意第一个参数是类型是 "storage
-      // 引用" 因此只有存贮的地址而不是内容在调用中被传递过去。这是库函数的一个特别之处。
+      // 引用" 因此在调用中被传递的只是存贮的地址而不是内容。这是库函数的一个特别之处。
       // 把第一个参数称之为 `self`是一种常见的做法，就好象是函数可以被看作是一个对象的方法。
       function insert(Data storage self, uint value)
           public
@@ -1079,7 +1081,6 @@ Restrictions for libraries in comparison to contracts:
 
 在介绍部分提到过，除了在调用了一个 ``view`` 或 ``pure`` 函数外，如果一个库的代码是用 ``CALL`` 而不是用 `DELEGATECALL`` 
 或者 ``CALLCODE``来调用的话，结果就会被复原。
-it will revert unless a ``view`` or ``pure`` function is called.
 
 EVM并没有提供一个直接的方法去检测是否用了 ``CALL`` 来调用，但是一个合约能用 ``ADDRESS`` 操作码来确定它当前在什么地方运行。
 生成的代码比较当前（this）的地址和构造时的地址来确定调用的模式。
@@ -1106,11 +1107,6 @@ using for 指令
 
 ``using A for B;`` 指示符只在当前范围内有效，当前只限于一个合约内但以后会提到全局范围，因为通过把一个模块包括进来，
 它的数据类型还有库函数都可以不用增加任何代码而直接可用。
-directive is active for the current
-scope, which is limited to a contract for now but will
-be lifted to the global scope later, so that by including
-a module, its data types including library functions are
-available without having to add further code.
 
 下面我们用这种方式来重写这个例子:ref:`libraries` ::
 
@@ -1196,7 +1192,3 @@ available without having to add further code.
 
 注意所有库的调用实际上是EVM函数调用。这主意味着如果你传递过去一个内存变量或值变量，就算用了``self`` 变量，
 库函数也只会在拷贝上执行。只有在传递变量的存贮引用时，才不会在拷贝上运行。
-Note that all library calls are actual EVM function calls. This means that
-if you pass memory or value types, a copy will be performed, even of the
-``self`` variable. The only situation where no copy will be performed
-is when storage reference variables are used.
