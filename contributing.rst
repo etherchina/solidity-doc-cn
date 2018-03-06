@@ -59,7 +59,7 @@ Solidity 有不同类型的测试，他们被包含在应用 ``soltest`` 中。�
 可以用过滤器来执行一组测试子集：
 ``soltest -t TestSuite/TestName -- --ipcpath /tmp/testeth/geth.ipc``，其中 ``TestName`` 可以是通配符 ``*``。
 
-或者，使用 ``scripts/test.sh`` 里的测试脚本， 它会执行所有测试，并且自动运行 ``cpp-ethereum`` ，如果它在 path 中的话（但不会去下载它）。
+另外，``scripts/test.sh`` 里有一个测试脚本可执行所有测试，并自动运行 ``cpp-ethereum`` ，如果它在 path 中的话（但不会去下载它）。
 
 Travis CI 甚至会执行一些额外的测试（包括 ``solc-js`` 和对第三方 Solidity 框架的测试），这些测试需要去编译 Emscripten 目标代码。
 
