@@ -316,4 +316,3 @@ Example:
 4. the 0.5.0 release is made
 
 This behaviour works well with the  :ref:`version pragma <version_pragma>`.
-
