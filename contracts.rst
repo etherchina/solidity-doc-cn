@@ -377,11 +377,11 @@ View 函数
 #. 写入到状态变量 。
 #. 发出一个事件 :ref:`Emitting events <events>`。
 #. 创建另一个合约 :ref:`Creating other contracts <creating-contracts>`。
-#. 使用自我销毁 Using ``selfdestruct``。
-#. 通过调用来发送以太币 Sending Ether via calls。
-#. 调用任何没有标为 ``view`` 或 ``pure``的函数 Calling any function not marked ``view`` or ``pure``。
-#. 使用低级调用 Using low-level calls。
-#. 使用包含特定操作码的嵌入式汇编 Using inline assembly that contains certain opcodes。
+#. 使用自我销毁 ``selfdestruct``。
+#. 通过调用来发送以太币。
+#. 调用任何没有标为 ``view`` 或 ``pure``的函数。
+#. 使用低级调用。
+#. 使用包含特定操作码的嵌入式汇编。
 
 ::
 
