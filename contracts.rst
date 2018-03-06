@@ -781,10 +781,8 @@ Solidity 通过包括多态性的代码拷贝来支持多重继承。
     contract Final is Base1, Base2 {
     }
 
-A call to ``Final.kill()`` will call ``Base2.kill`` as the most
-derived override, but this function will bypass
-``Base1.kill``, basically because it does not even know about
-``Base1``.  The way around this is to use ``super``::
+对 ``Final.kill()`` 的调用将会调用最近派生父类的 ``Base2.kill`` 的调用，但这个函数会旁路
+``Base1.kill``，主要是因为它根本就不知道 ``Base1``.  解决这个的方法是用 ``super``::
 
     pragma solidity ^0.4.0;
 
@@ -811,24 +809,17 @@ derived override, but this function will bypass
     contract Final is Base1, Base2 {
     }
 
-If ``Base2`` calls a function of ``super``, it does not simply
-call this function on one of its base contracts.  Rather, it
-calls this function on the next base contract in the final
-inheritance graph, so it will call ``Base1.kill()`` (note that
-the final inheritance sequence is -- starting with the most
-derived contract: Final, Base2, Base1, mortal, owned).
-The actual function that is called when using super is
-not known in the context of the class where it is used,
-although its type is known. This is similar for ordinary
-virtual method lookup.
+如果 ``Base2`` 调用一个 ``super`` 函数，它不是简单的调用其中一个基类的对应函数，实际上它调用了
+在继承体系里挨着它的下一个基类的对应函数。因此，这里它会调用 ``Base1.kill()`` （注意实际的继承序列
+--从最近的基类合约开始：Final，Base2，Base1，mortal，owned）。当一个类在使用super调用函数的上下文里，
+它虽然知道函数的类型，但并不清楚实际那个函数被调用。这类似于一般的虚拟方法查找。
 
 .. index:: ! base;constructor
 
-Arguments for Base Constructors
-===============================
+基类构造参数
+===========
 
-Derived contracts need to provide all arguments needed for
-the base constructors. This can be done in two ways::
+派生类需要提供基类构造函数的参数，可以用下列两种方法::
 
     pragma solidity ^0.4.0;
 
@@ -842,34 +833,21 @@ the base constructors. This can be done in two ways::
         }
     }
 
-One way is directly in the inheritance list (``is Base(7)``).  The other is in
-the way a modifier would be invoked as part of the header of
-the derived constructor (``Base(_y * _y)``). The first way to
-do it is more convenient if the constructor argument is a
-constant and defines the behaviour of the contract or
-describes it. The second way has to be used if the
-constructor arguments of the base depend on those of the
-derived contract. If, as in this silly example, both places
-are used, the modifier-style argument takes precedence.
+一个方法是直接放在继承列表里（``is Base(7)``）。另一个方法是将其作为一个构造函数头部的一部分并会被调用的修饰符。
+（``Base(_y * _y)``）。如果构造函数参数是一个常数且用来定义合约的行为或者用来描述合约，则第一种方法更方便一些。
+如果基类构造函数的参数依赖于这些派生类，则只能用第二种方法。如果同时使用两个方法，则使用修饰符传递参数的方法会优先执行。
 
 .. index:: ! inheritance;multiple, ! linearization, ! C3 linearization
 
-Multiple Inheritance and Linearization
-======================================
+多继承和线性化
+=============
 
-Languages that allow multiple inheritance have to deal with
-several problems.  One is the `Diamond Problem <https://en.wikipedia.org/wiki/Multiple_inheritance#The_diamond_problem>`_.
-Solidity follows the path of Python and uses "`C3 Linearization <https://en.wikipedia.org/wiki/C3_linearization>`_"
-to force a specific order in the DAG of base classes. This
-results in the desirable property of monotonicity but
-disallows some inheritance graphs. Especially, the order in
-which the base classes are given in the ``is`` directive is
-important. In the following code, Solidity will give the
-error "Linearization of inheritance graph impossible".
+允许多继承的语言必须面对一些严重的问题。  一个是 `钻石问题 <https://en.wikipedia.org/wiki/Multiple_inheritance#The_diamond_problem>`_.
+Solidity沿用了Python的方法并且用 "`C3 线性化 <https://en.wikipedia.org/wiki/C3_linearization>`_"去强制使用一个基类DAG（和向无环图）的特定顺序。这样会有一个一致顺序，但有时会导致一些继承图是不允许的。基类在 ``is`` 指示符后的顺序是尤其重要的。在下面这个例子里，Solidity会给出一个继承图线性化错误。
 
 ::
 
-    // This will not compile
+    // 这个不能被编译
 
     pragma solidity ^0.4.0;
 
@@ -877,28 +855,23 @@ error "Linearization of inheritance graph impossible".
     contract A is X {}
     contract C is A, X {}
 
-The reason for this is that ``C`` requests ``X`` to override ``A``
-(by specifying ``A, X`` in this order), but ``A`` itself
-requests to override ``X``, which is a contradiction that
-cannot be resolved.
+错误的原因是 ``C`` 要求 ``X`` 去重载 ``A`` （通过指定 ``A， X`` 这样的顺序），但是 ``A`` 自身又要去继承 ``X``，这就会形成一个无法解决的矛盾。
 
-A simple rule to remember is to specify the base classes in
-the order from "most base-like" to "most derived".
+一个简装的规则是记住基类的顺序是从“最远基类”到“最近基类”的顺序。
 
-Inheriting Different Kinds of Members of the Same Name
-======================================================
+继承同名的不同成员
+================
 
-When the inheritance results in a contract with a function and a modifier of the same name, it is considered as an error.
-This error is produced also by an event and a modifier of the same name, and a function and an event of the same name.
-As an exception, a state variable getter can override a public function.
+当继承导致一个合约里有同名的函数和修饰符时，会被当作一个错误。事件和修饰符同名，函数和事件同名都会导致这个错误。
+例外的情况是，一个状态变量的getter可以重载一个public函数。
 
 .. index:: ! contract;abstract, ! abstract contract
 
-******************
-Abstract Contracts
-******************
+*******
+抽象合约
+*******
 
-Contract functions can lack an implementation as in the following example (note that the function declaration header is terminated by ``;``)::
+下面这个例子中，合约函数可以不含具体的实现方法（注意函数定义头是以 ``;``结尾的）::
 
     pragma solidity ^0.4.0;
 
@@ -906,9 +879,7 @@ Contract functions can lack an implementation as in the following example (note 
         function utterance() public returns (bytes32);
     }
 
-Such contracts cannot be compiled (even if they contain
-implemented functions alongside non-implemented functions),
-but they can be used as base contracts::
+这样的合约不能被编译（就算它包含其它有具体实现方法的函数），但是他们可以被用作基类。
 
     pragma solidity ^0.4.0;
 
@@ -920,28 +891,27 @@ but they can be used as base contracts::
         function utterance() public returns (bytes32) { return "miaow"; }
     }
 
-If a contract inherits from an abstract contract and does not implement all non-implemented functions by overriding, it will itself be abstract.
+如果一个合约从抽象合约继承并且没有实际实现上述的空函数，那么它自身也算是抽象合约。
 
 .. index:: ! contract;interface, ! interface contract
 
-**********
-Interfaces
-**********
+****
+接口
+****
 
-Interfaces are similar to abstract contracts, but they cannot have any functions implemented. There are further restrictions:
+接口类似于抽象合约，但是他们不能包含函数的具体实现。还有一些具体限制：
 
-#. Cannot inherit other contracts or interfaces.
-#. Cannot define constructor.
-#. Cannot define variables.
-#. Cannot define structs.
-#. Cannot define enums.
+#. 不能继承其它合约或接口。
+#. 不能定义构造函数。
+#. 不能定义变量。
+#. 不能定义结构。
+#. 不能定义枚举。
 
-Some of these restrictions might be lifted in the future.
+其中的一些限制将来有可能会取消。
 
-Interfaces are basically limited to what the Contract ABI can represent, and the conversion between the ABI and
-an Interface should be possible without any information loss.
+接口基本上限制于一个合约的ABI所能代表的内容，在ABI和接口之间进行转换时应该能够做到不掉失任何信息。
 
-Interfaces are denoted by their own keyword:
+接口有自己的关键词：
 
 ::
 
@@ -951,38 +921,27 @@ Interfaces are denoted by their own keyword:
         function transfer(address recipient, uint amount) public;
     }
 
-Contracts can inherit interfaces as they would inherit other contracts.
+合约可以像继承其它合约一样继承接口。
 
 .. index:: ! library, callcode, delegatecall
 
 .. _libraries:
 
-************
-Libraries
-************
+**
+库
+**
 
-Libraries are similar to contracts, but their purpose is that they are deployed
-only once at a specific address and their code is reused using the ``DELEGATECALL``
-(``CALLCODE`` until Homestead)
-feature of the EVM. This means that if library functions are called, their code
-is executed in the context of the calling contract, i.e. ``this`` points to the
-calling contract, and especially the storage from the calling contract can be
-accessed. As a library is an isolated piece of source code, it can only access
-state variables of the calling contract if they are explicitly supplied (it
-would have no way to name them, otherwise). Library functions can only be
-called directly (i.e. without the use of ``DELEGATECALL``) if they do not modify
-the state (i.e. if they are ``view`` or ``pure`` functions),
-because libraries are assumed to be stateless. In particular, it is
-not possible to destroy a library unless Solidity's type system is circumvented.
+库类似于合约，但它们的目的是库存只会在一个特定地址被部署一次，并且它们的代码通过使用EVM中的 ``DELEGATECALL`` 
+来实现重用。（Homestead之前用``CALLCODE``）。这就意味着库函数被调用时，它们的代码是在调用它们的合约上下文里
+执行的。比如 ``this`` 指向了调用合约，而且能够防问调用合约的存贮空间。库是一段被隔离的源代码，它只能在被显示
+提供的情况下防问调用合约里的状态变量（否则根本无法命名）。库函数在不修改状态变量的情况下（例如是 ``view`` 
+或 ``pure`` 函数）只能被直接调用（例如不能使用``DELEGATECALL``）。因为库是假定没有状态的。除非Solidity
+的类型系统被绕开，否则库是不可以被销毁的。
 
-Libraries can be seen as implicit base contracts of the contracts that use them.
-They will not be explicitly visible in the inheritance hierarchy, but calls
-to library functions look just like calls to functions of explicit base
-contracts (``L.f()`` if ``L`` is the name of the library). Furthermore,
-``internal`` functions of libraries are visible in all contracts, just as
-if the library were a base contract. Of course, calls to internal functions
-use the internal calling convention, which means that all internal types
-can be passed and memory types will be passed by reference and not copied.
+库可以被看作是调用它们的合约的隐含基类合约，它们在继承体系里不是显性可见的。但是调用库函数看起来就像调用一个显性
+的基类函数（ ``L.f()`` 这里 ``L`` 是库名）. 更进一步，库里的 ``internal`` 函数是在合约里可见的。就像库是一个基类合约一样。
+当然，调用一个内部函数是要使用内部函数调用转换的。也就意味着内部类型可以被传递，内存类型是通过引用而不是拷贝来传递的。
+要在EVM中实现这一点，内部库函数以及它们内部调用的函数
 To realize this in the EVM, code of internal library functions
 and all functions called from therein will at compile time be pulled into the calling
 contract, and a regular ``JUMP`` call will be used instead of a ``DELEGATECALL``.
