@@ -526,8 +526,6 @@ Fallback 函数
     }
 
 重载函数也表现在外部接口。如果两个外部可见函数有不同的Solidity类型但外部类型相同则会出现一个错误。
-Overloaded functions are also present in the external interface. It is an error if two
-externally visible functions differ by their Solidity types but not by their external types.
 
 ::
 
@@ -548,7 +546,7 @@ externally visible functions differ by their Solidity types but not by their ext
     }
 
 
-上述两个重载的 ``f`` 函数虽然在Solidity内部被认为是不同的，最终在ABI中都是接受一个地址类型。
+上述两个重载的 ``f`` 函数虽然在Solidity内部被认为是不同的，最终在ABI中都被认为都是用来接受地址作为参数的，属同一个类型。
 
 重载解析和参数匹配
 -----------------
@@ -687,20 +685,15 @@ SPV 验证日志是可行的，因此一个外部实体提供一个合约加上�
 继承
 ****
 
-Solidity supports multiple inheritance by copying code including polymorphism.
+Solidity 通过包括多态性的代码拷贝来支持多重继承。
 
-All function calls are virtual, which means that the most derived function
-is called, except when the contract name is explicitly given.
+所有函数调用都是虚拟的，也主意味着派生函数会被调用，除非显示给定合约名称。
 
-When a contract inherits from multiple contracts, only a single
-contract is created on the blockchain, and the code from all the base contracts
-is copied into the created contract.
+当一个合约从多个合约继承时，只有一个合约会在区块链中被创建，所有基类代码都会被拷贝到被创建的合约。
 
-The general inheritance system is very similar to
-`Python's <https://docs.python.org/3/tutorial/classes.html#inheritance>`_,
-especially concerning multiple inheritance.
-
-Details are given in the following example.
+整体继承体系非常类似于 `Python's <https://docs.python.org/3/tutorial/classes.html#inheritance>`_，
+特别是在涉及到多重继承时。
+下面的例子给出细节。
 
 ::
 
@@ -711,21 +704,17 @@ Details are given in the following example.
         address owner;
     }
 
-    // Use `is` to derive from another contract. Derived
-    // contracts can access all non-private members including
-    // internal functions and state variables. These cannot be
-    // accessed externally via `this`, though.
+    // 使用 `is` 来继承其它合约. 派生合约能够防问不能在外部通过 ‘this'来防问的所有非私用成员以及内部函数和状态变量。
+    
     contract mortal is owned {
         function kill() {
             if (msg.sender == owner) selfdestruct(owner);
         }
     }
 
-    // These abstract contracts are only provided to make the
-    // interface known to the compiler. Note the function
-    // without body. If a contract does not implement all
-    // functions it can only be used as an interface.
-    contract Config {
+    // 这个抽象类只是用于为编译器提供接口。注意这些函数没有函数体。
+    // 如果一个合约在没有实现它的所有函数的情况下只能被用作为一个接口。
+    contract Config {
         function lookup(uint id) public returns (address adr);
     }
 
@@ -734,35 +723,29 @@ Details are given in the following example.
         function unregister() public;
      }
 
-    // Multiple inheritance is possible. Note that `owned` is
-    // also a base class of `mortal`, yet there is only a single
-    // instance of `owned` (as for virtual inheritance in C++).
-    contract named is owned, mortal {
+    // 多继承是可行的。注意 “owned” 是 “mortal” 的一个基类， 但这里还是只有一个 “owned” 的实例
+    // （就像是C++的虚拟继承）。
+    contract named is owned, mortal {
         function named(bytes32 name) {
             Config config = Config(0xD5f9D8D94886E70b06E474c3fB14Fd43E2f23970);
             NameReg(config.lookup(1)).register(name);
         }
 
-        // Functions can be overridden by another function with the same name and
-        // the same number/types of inputs.  If the overriding function has different
-        // types of output parameters, that causes an error.
-        // Both local and message-based function calls take these overrides
-        // into account.
-        function kill() public {
+        // 函数能够被另一个名称及输入参数的数量及类型相同的函数重载。如果重载函数有一个不同的输出参数就会引起一个错误。
+        // 所有本地和基于消息的函数都能够重载。
+        function kill() public {
             if (msg.sender == owner) {
                 Config config = Config(0xD5f9D8D94886E70b06E474c3fB14Fd43E2f23970);
                 NameReg(config.lookup(1)).unregister();
-                // It is still possible to call a specific
-                // overridden function.
-                mortal.kill();
+                // 还是有可能调用一个特定的被重载函数。
+                mortal.kill();
             }
         }
     }
 
-    // If a constructor takes an argument, it needs to be
-    // provided in the header (or modifier-invocation-style at
-    // the constructor of the derived contract (see below)).
-    contract PriceFeed is owned, mortal, named("GoldFeed") {
+    // 如果一个构造函数带有一个参数，那就必须在派生类的的头部（或者在派生类构造函数的修饰符调用中）
+    // 提供这个参数（见下方）。
+    contract PriceFeed is owned, mortal, named("GoldFeed") {
        function updateInfo(uint newInfo) public {
           if (msg.sender == owner) info = newInfo;
        }
@@ -772,9 +755,7 @@ Details are given in the following example.
        uint info;
     }
 
-Note that above, we call ``mortal.kill()`` to "forward" the
-destruction request. The way this is done is problematic, as
-seen in the following example::
+注意在上面这个例子中，我们调用 ``mortal.kill()`` 去传递这个析构请求，这么做是有问题的，请看下面这个例子::
 
     pragma solidity ^0.4.0;
 
