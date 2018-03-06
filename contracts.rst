@@ -931,7 +931,7 @@ Solidity沿用了Python的方法并且用 "`C3 线性化 <https://en.wikipedia.o
 
 库类似于合约，但它们的目的是库存只会在一个特定地址被部署一次，并且它们的代码通过使用EVM中的 ``DELEGATECALL`` 
 来实现重用。（Homestead之前用``CALLCODE``）。这就意味着库函数被调用时，它们的代码是在调用它们的合约上下文里
-执行的。比如 ``this`` 指向了调用合约，而且能够防问调用合约的存贮空间。库是一段被隔离的源代码，它只能在被显示
+执行的。比如 ``this`` 指向了调用合约，而且能够防问调用合约的存贮空间。库是一段被隔离的源代码，它只能在被显式
 提供的情况下防问调用合约里的状态变量（否则根本无法命名）。库函数在不修改状态变量的情况下（例如是 ``view`` 
 或 ``pure`` 函数）只能被直接调用（例如不能使用``DELEGATECALL``）。因为库是假定没有状态的。除非Solidity
 的类型系统被绕开，否则库是不可以被销毁的。
@@ -1060,12 +1060,8 @@ Solidity沿用了Python的方法并且用 "`C3 线性化 <https://en.wikipedia.o
         }
     }
 
-在编译器不知道库会被部署在什么地方的情况下，它们的地址在最终的二进制码（bytecode)中只能用最终用一个链接的来填充。
-As the compiler cannot know where the library will be
-deployed at, these addresses have to be filled into the
-final bytecode by a linker
-（参见 :ref:`commandline-compiler` for how to use the
-commandline compiler for linking）.
+在编译器不知道库会被部署在什么地址的情况下，它们的地址在最终的二进制码（bytecode)中只能用一个链接来填充。
+（参见 :ref:`commandline-compiler` 如何使用命行行编译器来链接）。
 如果地址没有作为参数传给编译器，编译后的十六进制码会包含一个``__Set______``形式的占位符（这里 ``Set`` 是库名）。
 实际地址可以通过用库合约地址的40个十六进制字符替换的方法手动填入。
 
@@ -1078,65 +1074,49 @@ Restrictions for libraries in comparison to contracts:
 
 （以有有可能会取消。）
 
-Call Protection For Libraries
-=============================
+库的调用保护
+===========
 
-As mentioned in the introduction, if a library's code is executed
-using a ``CALL`` instead of a ``DELEGATECALL`` or ``CALLCODE``,
+在介绍部分提到过，除了在调用了一个 ``view`` 或 ``pure`` 函数外，如果一个库的代码是用 ``CALL`` 而不是用 `DELEGATECALL`` 
+或者 ``CALLCODE``来调用的话，结果就会被复原。
 it will revert unless a ``view`` or ``pure`` function is called.
 
-The EVM does not provide a direct way for a contract to detect
-whether it was called using ``CALL`` or not, but a contract
-can use the ``ADDRESS`` opcode to find out "where" it is
-currently running. The generated code compares this address
-to the address used at construction time to determine the mode
-of calling.
+EVM并没有提供一个直接的方法去检测是否用了 ``CALL`` 来调用，但是一个合约能用 ``ADDRESS`` 操作码来确定它当前在什么地方运行。
+生成的代码比较当前（this）的地址和构造时的地址来确定调用的模式。
 
-More specifically, the runtime code of a library always starts
-with a push instruction, which is a zero of 20 bytes at
-compilation time. When the deploy code runs, this constant
-is replaced in memory by the current address and this
-modified code is stored in the contract. At runtime,
-this causes the deploy time address to be the first
-constant to be pushed onto the stack and the dispatcher
-code compares the current address against this constant
-for any non-view and non-pure function.
+更详细的说，库的运行代码在编译时总是以一个为零的20字节push指令开头。当部署代码执行时。这个常数在内存中会被当前的地址所取代，
+然后这段修改过的代码会被存在合约中。而在运行时，这个会导致部署地址是被第一个压进堆栈的常数，并且调度代码会为所有的non-view 
+和 non-pure函数比较当前的地址和这个常数值。
 
 .. index:: ! using for, library
 
 .. _using-for:
 
-*********
-Using For
-*********
+*************
+using for 指令
+*************
 
-The directive ``using A for B;`` can be used to attach library
-functions (from the library ``A``) to any type (``B``).
-These functions will receive the object they are called on
-as their first parameter (like the ``self`` variable in
-Python).
+指示符 ``using A for B;`` 能够把任何库函数（来自库 ``A``）关联至任何类型（``B``）。
+这些函数会通过调用时的的第一个参数来接收对象。（就像Python中的``self``）。
 
-The effect of ``using A for *;`` is that the functions from
-the library ``A`` are attached to any type.
+``using A for *;`` 的效果是来自库A的函数关联到任意类型。
+ 
+在以上两种情况下，所有的函数就算它们的第一个参数并不和一个对象的类型相匹配，也会被关联。类型检查是在函数被调用时才会进行，
+然后执行函数重载方案。
 
-In both situations, all functions, even those where the
-type of the first parameter does not match the type of
-the object, are attached. The type is checked at the
-point the function is called and function overload
-resolution is performed.
-
-The ``using A for B;`` directive is active for the current
+``using A for B;`` 指示符只在当前范围内有效，当前只限于一个合约内但以后会提到全局范围，因为通过把一个模块包括进来，
+它的数据类型还有库函数都可以不用增加任何代码而直接可用。
+directive is active for the current
 scope, which is limited to a contract for now but will
 be lifted to the global scope later, so that by including
 a module, its data types including library functions are
 available without having to add further code.
 
-Let us rewrite the set example from the
-:ref:`libraries` in this way::
+下面我们用这种方式来重写这个例子:ref:`libraries` ::
 
     pragma solidity ^0.4.16;
 
-    // This is the same code as before, just without comments
+    // 和之前的代码一样，只是没有注释
     library Set {
       struct Data { mapping(uint => bool) flags; }
 
@@ -1145,8 +1125,8 @@ Let us rewrite the set example from the
           returns (bool)
       {
           if (self.flags[value])
-            return false; // already there
-          self.flags[value] = true;
+            return false; // 已经在这里
+            self.flags[value] = true;
           return true;
       }
 
@@ -1155,8 +1135,8 @@ Let us rewrite the set example from the
           returns (bool)
       {
           if (!self.flags[value])
-              return false; // not there
-          self.flags[value] = false;
+              return false; // 还没有
+              self.flags[value] = false;
           return true;
       }
 
@@ -1170,19 +1150,17 @@ Let us rewrite the set example from the
     }
 
     contract C {
-        using Set for Set.Data; // this is the crucial change
+        using Set for Set.Data; // 这里是关键的不同
         Set.Data knownValues;
 
         function register(uint value) public {
-            // Here, all variables of type Set.Data have
-            // corresponding member functions.
-            // The following function call is identical to
-            // `Set.insert(knownValues, value)`
+            // 这里，所有Set.Data类型的变量都有对应的成员函数。
+            // 下面这个函数调用等同于 `Set.insert(knownValues, value)`
             require(knownValues.insert(value));
         }
     }
 
-It is also possible to extend elementary types in that way::
+这种方式也可以扩展到基础类型 ::
 
     pragma solidity ^0.4.16;
 
@@ -1207,7 +1185,7 @@ It is also possible to extend elementary types in that way::
         }
 
         function replace(uint _old, uint _new) public {
-            // This performs the library function call
+            // 这里执行库函数的调用
             uint index = data.indexOf(_old);
             if (index == uint(-1))
                 data.push(_new);
@@ -1216,6 +1194,8 @@ It is also possible to extend elementary types in that way::
         }
     }
 
+注意所有库的调用实际上是EVM函数调用。这主意味着如果你传递过去一个内存变量或值变量，就算用了``self`` 变量，
+库函数也只会在拷贝上执行。只有在传递变量的存贮引用时，才不会在拷贝上运行。
 Note that all library calls are actual EVM function calls. This means that
 if you pass memory or value types, a copy will be performed, even of the
 ``self`` variable. The only situation where no copy will be performed
