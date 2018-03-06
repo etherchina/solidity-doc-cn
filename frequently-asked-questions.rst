@@ -63,8 +63,8 @@
 
 参考 `endowment_retriever.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/30_endowment_retriever.sol>`_ 。
 
-使用非常量函数（请求 ``sendTransaction`` ）来对合约中的变量进行递增
-=================================================================
+使用非固定函数（请求 ``sendTransaction`` ）来对合约中的变量进行递增
+===================================================================
 
 参考 `value_incrementer.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/20_value_incrementer.sol>`_ 。
 
@@ -256,13 +256,13 @@
 
 对绝大部分数据类型来说，由于每次被使用时都会被复制，所以你无法指定将其存储在哪里。
 
-在数据类型中，对所谓存储地点比较重视的是结构和数组。 如果你在函数调用中传递了这类参数，假设它们的数据可以被贮存在存储或内存中，那么它们将不会被复制。也就是说，当你在被调用函数中修改了它们的内容，这些修改调用者也是可见的。
+在数据类型中，对所谓存储地点比较重视的是结构和数组。 如果你在函数调用中传递了这类参数，假设它们的数据可以被贮存在存储（storage）或内存（memory）中，那么它们将不会被复制。也就是说，当你在被调用函数中修改了它们的内容，这些修改调用者也是可见的。
 
 不同数据类型的变量会有各自默认的存储地点：
 
-* 状态变量总是会贮存在存储中
-* 函数参数默认存放在内存中
-* 数据结构、数组或映射类型的本地变量，默认会放在存储中
+* 状态变量总是会贮存在存储（storage）中
+* 函数参数默认存放在内存（memory）中
+* 数据结构、数组或映射类型的本地变量，默认会放在存储（storage）中
 * 除数据结构、数组及映射类型之外的本地变量，会储存在栈中
 
 例子::
@@ -286,11 +286,11 @@
         }
     }
 
-函数 ``append`` 能一起作用于 ``data1`` 和 ``data2`` ，并且修改是永久保存的。如果你移除了 ``storage`` 关键字，函数的参数会默认存储于 ``memory`` 。这带来的影响是，在 ``append(data1)`` 或 ``append(data2)`` 被调用的时节，一份全新的状态变量的拷贝会在内存中被创建， ``append`` 操作的会是这份拷贝（也不支持 ``.push`` -但这又是另一个话题了）。针对这份全新的拷贝的修改，不会反过来影响 ``data1`` 或 ``data2`` 。
+函数 ``append`` 能一起作用于 ``data1`` 和 ``data2`` ，并且修改是永久保存的。如果你移除了 ``storage`` 关键字，函数的参数会默认存储于 ``memory`` 。这带来的影响是，在 ``append(data1)`` 或 ``append(data2)`` 被调用的时节，一份全新的状态变量的拷贝会在内存（memory）中被创建， ``append`` 操作的会是这份拷贝（也不支持 ``.push`` -但这又是另一个话题了）。针对这份全新的拷贝的修改，不会反过来影响 ``data1`` 或 ``data2`` 。
 
-一个常见误区就是申明了一个本地变量，就认为它会创建在内存中，其实它会被创建在存储中::
+一个常见误区就是申明了一个本地变量，就认为它会创建在内存（memory）中，其实它会被创建在存储（storage）中::
 
-    /// 这份合约含有一个错误
+    /// 这份合约包含一处错误
 
     pragma solidity ^0.4.0;
 
@@ -305,9 +305,9 @@
         }
     }
 
-本地变量 ``x`` 的数据类型是 ``uint[] storage``，但由于存储不是动态指定的，它需要在使用前通过状态变量赋值。所以 ``x`` 本身不会被分配存储的空间，取而代之的是，它只是作为存储中已有变量的别名。 
+本地变量 ``x`` 的数据类型是 ``uint[] storage``，但由于存储（storage）不是动态指定的，它需要在使用前通过状态变量赋值。所以 ``x`` 本身不会被分配存储（storage）的空间，取而代之的是，它只是作为存储（storage）中已有变量的别名。 
 
-实际上会发生的是，编译器将 ``x`` 解析为一个存储指针，并默认将指针指向存储的 ``0`` 位置。这就造成 ``someVariable`` （贮存在存储的 ``0`` 位置）会被 ``x.push(2)`` 更改。
+实际上会发生的是，编译器将 ``x`` 解析为一个存储指针，并默认将指针指向存储（storage）的 ``0`` 位置。这就造成 ``someVariable`` （贮存在存储（storage）的 ``0`` 位置）会被 ``x.push(2)`` 更改。
 
 正确的方法如下::
 
@@ -329,37 +329,54 @@
 
 How do you get a random number in a contract? (Implement a self-returning gambling contract.)
 =============================================================================================
+怎样才能在合约中获取一个随机数？（落地一份自动回款的博彩合约）
+==============================================================
 
 Getting randomness right is often the crucial part in a crypto project and
 most failures result from bad random number generators.
+做好随机这件事情，往往是一个加密项目最关键的部分，大部分的失败都来自于使用了低劣的随机数发生器。
 
 If you do not want it to be safe, you build something similar to the `coin flipper <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/35_coin_flipper.sol>`_
 but otherwise, rather use a contract that supplies randomness, like the `RANDAO <https://github.com/randao/randao>`_.
+如果你不考虑安全性，可以做一个类似于 `coin flipper <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/35_coin_flipper.sol>`_ 的东西，反之，最好调用一份提供随机性的合约，比如 `RANDAO <https://github.com/randao/randao>`_ 。
 
 Get return value from non-constant function from another contract
 =================================================================
+从另一份合约中的非固定函数获取返回值
+====================================
 
 The key point is that the calling contract needs to know about the function it intends to call.
+关键点是调用者（合约）需要了解将被调用的函数。
 
 See `ping.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/45_ping.sol>`_
 and `pong.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/45_pong.sol>`_.
+参考 `ping.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/45_ping.sol>`_
+和 `pong.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/45_pong.sol>`_ 。
 
 Get contract to do something when it is first mined
 ===================================================
+让合约在第一次被挖矿时就开始做些事情
+====================================
 
 Use the constructor. Anything inside it will be executed when the contract is first mined.
+使用构造函数。在构造函数中写的任何内容都会在第一次被挖矿时执行。
 
 See `replicator.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/50_replicator.sol>`_.
+参考 `replicator.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/50_replicator.sol>`_ 。
 
 How do you create 2-dimensional arrays?
 =======================================
+怎样才能创建二维数组？
+======================
 
 See `2D_array.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/55_2D_array.sol>`_.
+参考 `2D_array.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/55_2D_array.sol>`_ 。
 
 Note that filling a 10x10 square of ``uint8`` + contract creation took more than ``800,000``
 gas at the time of this writing. 17x17 took ``2,000,000`` gas. With the limit at
 3.14 million... well, there’s a pretty low ceiling for what you can create right
 now.
+需要注意的是，用 ``uint8`` 类型的数据填满一个10x10的方阵，再加上合约创建，总共需要花费超过 ``800,000`` 燃料费。如果是17x17需要 ``2,000,000`` 燃料费。然而交易燃料费上限是314万。。。好吧，其实你也玩不了多大的花样。
 
 Note that merely "creating" the array is free, the costs are in filling it.
 
