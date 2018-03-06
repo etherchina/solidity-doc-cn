@@ -19,7 +19,7 @@
 请用 `GitHub issues tracker <https://github.com/ethereum/solidity/issues>`_ 来报告问题。汇报问题时，请提供下列细节：
 
 * 你所使用的 Solidity 版本
-* 源码 (如果可以的话)
+* 源码（如果可以的话）
 * 你在哪个平台上运行代码
 * 如何重现该问题
 * 该问题的结果是什么
