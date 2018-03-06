@@ -7,4 +7,4 @@
  - keypair: 密钥对
  - light client: 轻客户端
  - constructor: 构造函数
-
+ - version pragma: 版本杂注

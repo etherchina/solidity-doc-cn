@@ -2,138 +2,120 @@
 Solidity源代码文件结构
 ********************************
 
-Source files can contain an arbitrary number of contract definitions, include directives
-and pragma directives.
+源文件中可以包含任意多个合约定义、包括嵌入和杂注指令。 
 
 .. index:: ! pragma, version
 
 .. _version_pragma:
 
-Version Pragma
-==============
+版本 Pragma 指令
+============================
 
-Source files can (and should) be annotated with a so-called version pragma to reject
-being compiled with future compiler versions that might introduce incompatible
-changes. We try to keep such changes to an absolute minimum and especially
-introduce changes in a way that changes in semantics will also require changes
-in the syntax, but this is of course not always possible. Because of that, it is always
-a good idea to read through the changelog at least for releases that contain
-breaking changes, those releases will always have versions of the form
-``0.x.0`` or ``x.0.0``.
+为了避免未来高版本的编译器可能带来的兼容性变化，源文件可以（也应该）被所谓的版本杂注所注解。 
+我们尽量保持最小变更，特别是语义变化而引起语法变更的，但有时也很难避免。
+因此，对于有重大变化的新版本，建议通读变更日志。
+大版本的版本号始终是 ``0.x.0`` 或者 ``x.0.0`` 形式。  
 
-The version pragma is used as follows::
+版本杂注使用方式如下::
 
   pragma solidity ^0.4.0;
 
-Such a source file will not compile with a compiler earlier than version 0.4.0
-and it will also not work on a compiler starting from version 0.5.0 (this
-second condition is added by using ``^``). The idea behind this is that
-there will be no breaking changes until version ``0.5.0``, so we can always
-be sure that our code will compile the way we intended it to. We do not fix
-the exact version of the compiler, so that bugfix releases are still possible.
+这样的源文件既不允许被低于版本 0.4.0 的编译器编译，也不允许被高于（含） ``0.5.0`` 版本的编译器编译（被 ``^`` 限制）。 
+这种做法的考虑是，在版本 0.5.0 之前不会有任何重大改变，所以可确保源代码始终按照意愿被编译。
+我们这里不固定编译器的具体版本号，因此编译器的补丁版也可以使用。
 
-It is possible to specify much more complex rules for the compiler version,
-the expression follows those used by `npm <https://docs.npmjs.com/misc/semver>`_.
+可以为编译器指定更复杂的编译规则，指令表达式遵循 `npm <https://docs.npmjs.com/misc/semver>`_ 版本语义。
+
+.. note::
+  Pragma 是 pragmatic information 的简称，微软 Visual C++ 官方文档中中译为杂注。 
+  Solidity 中沿用 C ， C++ 等中的编译指令概念，用于告知编译器**如何**编译。
+  - 译者注
 
 .. index:: source file, ! import
 
 .. _import:
 
-Importing other Source Files
+导入其他源文件
 ============================
 
-Syntax and Semantics
+语法与语义
 --------------------
 
-Solidity supports import statements that are very similar to those available in JavaScript
-(from ES6 on), although Solidity does not know the concept of a "default export".
+虽然 Solidity 中没有 "default export" 语法，
+但是 Solidity 支持非常类似于 JavaScript（从 ES6 起）中可用的导入语句。
 
-At a global level, you can use import statements of the following form:
-
+在全局层面上，可使用如下格式的导入语句：
 ::
 
   import "filename";
 
-This statement imports all global symbols from "filename" (and symbols imported there) into the
-current global scope (different than in ES6 but backwards-compatible for Solidity).
+此语句将从 “filename” 中导入所有的全局符号到当前全局作用域中（不同于 ES6 但 Solidity 向后兼容）。 
 
 ::
 
   import * as symbolName from "filename";
 
-...creates a new global symbol ``symbolName`` whose members are all the global symbols from ``"filename"``.
+...创建一个新的全局符号 ``symbolName``，成员均是来自 ``"filename"`` 中全局符号。
 
 ::
 
   import {symbol1 as alias, symbol2} from "filename";
 
-...creates new global symbols ``alias`` and ``symbol2`` which reference ``symbol1`` and ``symbol2`` from ``"filename"``, respectively.
+...创建新的全局符号 ``alias`` 和 ``symbol2``。``symbol1`` 和 ``symbol2`` 分别从 ``"filename"`` 引入。
 
-Another syntax is not part of ES6, but probably convenient:
+另外一种语法不属于 ES6，但或许更方便一些：
 
 ::
 
   import "filename" as symbolName;
 
-which is equivalent to ``import * as symbolName from "filename";``.
+这条语句等同于 ``import * as symbolName from "filename";``。
 
-Paths
+路径
 -----
 
-In the above, ``filename`` is always treated as a path with ``/`` as directory separator,
-``.`` as the current and ``..`` as the parent directory.  When ``.`` or ``..`` is followed by a character except ``/``,
-it is not considered as the current or the parent directory.
-All path names are treated as absolute paths unless they start with the current ``.`` or the parent directory ``..``.
+上面 ``filename`` 始终被视为以 ``/`` 作为目录分割符的文件路径，如果以 ``.`` 或者 ``..`` 开头，则视为相对路径，否则视为绝对路径。
+其中``.`` 表示当前目录，``..`` 表示父目录，但只有当 ``.`` 或 ``..`` 后面跟随的是 ``/`` 时才视为当前目录或父目录。
 
-To import a file ``x`` from the same directory as the current file, use ``import "./x" as x;``.
-If you use ``import "x" as x;`` instead, a different file could be referenced
-(in a global "include directory").
 
-It depends on the compiler (see below) how to actually resolve the paths.
-In general, the directory hierarchy does not need to strictly map onto your local
-filesystem, it can also map to resources discovered via e.g. ipfs, http or git.
+用 ``import "./x" as x;`` 语句导入当前源文件同目录下的文件 ``x`` 。 
+如果用 ``import "x" as x;``来代替，可引入一个不同的文件（在全局 ``include directory`` 中）。
 
-Use in Actual Compilers
+路径取决于编译器（如下）到底是怎样解析路径的。通常，目录层次不必严格映射到本地文件系统，它也可以映射到通过比如 ipfs，http 或者 git 发现的资源。
+
+在实际的编译器中使用
 -----------------------
 
-When the compiler is invoked, it is not only possible to specify how to
-discover the first element of a path, but it is possible to specify path prefix
-remappings so that e.g. ``github.com/ethereum/dapp-bin/library`` is remapped to
-``/usr/local/dapp-bin/library`` and the compiler will read the files from there.
-If multiple remappings can be applied, the one with the longest key is tried first. This
-allows for a "fallback-remapping" with e.g. ``""`` maps to
-``"/usr/local/include/solidity"``. Furthermore, these remappings can
-depend on the context, which allows you to configure packages to
-import e.g. different versions of a library of the same name.
+当编译器被调用后，它不仅能指定如何发现路径的第一个元素，还可指定路径前缀重映射。
+例如，``github.com/ethereum/dapp-bin/library`` 被重映射到 ``/usr/local/dapp-bin/library`` ，此时编译器从这里读取文件。
+如果多个重映射被指定，优先尝试导入路径最长的一个。
+它还可以将比如``""`` 被重映射到 ``"/usr/local/include/solidity"``来进行“回退映射”。
+同时，这些重映射可取决于上下文，允许你配置要导入的包，比如不同版本的同名库。 
+
 
 **solc**:
 
-For solc (the commandline compiler), these remappings are provided as
-``context:prefix=target`` arguments, where both the ``context:`` and the
-``=target`` parts are optional (where target defaults to prefix in that
-case). All remapping values that are regular files are compiled (including
-their dependencies). This mechanism is completely backwards-compatible (as long
-as no filename contains = or :) and thus not a breaking change. All imports
-in files in or below the directory ``context`` that import a file that
-starts with ``prefix`` are redirected by replacing ``prefix`` by ``target``.
 
-So as an example, if you clone
-``github.com/ethereum/dapp-bin/`` locally to ``/usr/local/dapp-bin``, you can use
-the following in your source file:
+对于 solc（命令行编译器），这些重映射以 ``context:prefix=target`` 参数形式提供。
+其中，``context`` 和 ``=target`` 可选（此时 target 默认为 prefix ）。
+所有重映射值都是常规文件被编译（包括他们的依赖），这个机制完全是向后兼容的（只要没文件名包含 = 或 :），
+因此不是一个突破性变化。在 ``content`` 目录下或之下的所有以 ``prefix`` 开头的导入文件
+都将被用 ``target`` 替换 ``prefix`` 来重定向。
+
+举个例子，如果想克隆 ``github.com/ethereum/dapp-bin/`` 到本地 ``/usr/local/dapp-bin`` ，可在源文件中如下使用：  
 
 ::
 
   import "github.com/ethereum/dapp-bin/library/iterable_mapping.sol" as it_mapping;
 
-and then run the compiler as
+再运行编译器：
 
 .. code-block:: bash
 
   solc github.com/ethereum/dapp-bin/=/usr/local/dapp-bin/ source.sol
 
-As a more complex example, suppose you rely on some module that uses a
-very old version of dapp-bin. That old version of dapp-bin is checked
-out at ``/usr/local/dapp-bin_old``, then you can use
+举个更复杂的例子，假设你想依赖非常旧版本的 dapp-bin 上的一些模块。 
+旧版本 dapp-bin 签出到 ``/usr/local/dapp-bin_old`` ，那么可使用：
 
 .. code-block:: bash
 
@@ -141,35 +123,29 @@ out at ``/usr/local/dapp-bin_old``, then you can use
        module2:github.com/ethereum/dapp-bin/=/usr/local/dapp-bin_old/ \
        source.sol
 
-so that all imports in ``module2`` point to the old version but imports
-in ``module1`` get the new version.
+以便 ``module2`` 下所有导入都指向旧版本，而 ``module1`` 指向新版本。
 
-Note that solc only allows you to include files from certain directories:
-They have to be in the directory (or subdirectory) of one of the explicitly
-specified source files or in the directory (or subdirectory) of a remapping
-target. If you want to allow direct absolute includes, just add the
-remapping ``=/``.
+注意， solc 只允许包含来自特定目录的文件：
 
-If there are multiple remappings that lead to a valid file, the remapping
-with the longest common prefix is chosen.
+它们必须位于显式指定源文件或重映射目标中的一个目录（或子目录）中。
+如果你想直接绝对包括，只需添加重映射 ``= /``。
+
+如果有多个重映射指向一个有效文件，那选择最长公共前缀的重映射。
 
 **Remix**:
 
-`Remix <https://remix.ethereum.org/>`_
-provides an automatic remapping for github and will also automatically retrieve
-the file over the network:
-You can import the iterable mapping by e.g.
-``import "github.com/ethereum/dapp-bin/library/iterable_mapping.sol" as it_mapping;``.
+`Remix <https://remix.ethereum.org/>`_ 提供了一个为 github 的自动重映射，将通过网络自动获取文件。
+如可使用 ``import "github.com/ethereum/dapp-bin/library/iterable_mapping.sol" as it_mapping;`` 导入一个键迭代器。
 
-Other source code providers may be added in the future.
+以后可能支持其他源码平台。
 
 
 .. index:: ! comment, natspec
 
-Comments
+注释
 ========
 
-Single-line comments (``//``) and multi-line comments (``/*...*/``) are possible.
+可以使用单行注释（``//``）和多行注释（``/*...*/``）
 
 ::
 
@@ -181,17 +157,12 @@ Single-line comments (``//``) and multi-line comments (``/*...*/``) are possible
   */
 
 
-Additionally, there is another type of comment called a natspec comment,
-for which the documentation is not yet written. They are written with a
-triple slash (``///``) or a double asterisk block(``/** ... */``) and
-they should be used directly above function declarations or statements.
-You can use `Doxygen <https://en.wikipedia.org/wiki/Doxygen>`_-style tags inside these comments to document
-functions, annotate conditions for formal verification, and provide a
-**confirmation text** which is shown to users when they attempt to invoke a
-function.
+此外，有另一种注释称为 natspec 注释，其文档尚未编写。 
+它们用三个反斜杠（``///``）或双星块（``/** ... */``）编辑，它应直接在函数声明或语句上使用。
+可在注释中使用 `Doxygen <https://en.wikipedia.org/wiki/Doxygen>`_ 样式
+的标签来文档化函数，标注形式校验通过的条件，并提供一个 **确认信息**，可在用户尝试调用一个函数时提示。  
 
-In the following example we document the title of the contract, the explanation
-for the two input parameters and two returned values.
+在下面的例子中，记录合约的标题、两个入参和两个返回值的说明：
 
 ::
 
