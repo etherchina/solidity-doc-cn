@@ -4,7 +4,7 @@
 
 对于大家的帮助，我们一如既往地感激。
 
-你可以试着从 :ref:`building-from-source` 开始， 以熟悉 Solidity 的组件和编译流程。这对精通 Solidity 上智能合约的编写也有帮助。
+你可以试着 :ref:`building-from-source` 开始，以熟悉 Solidity 的组件和编译流程。这对精通 Solidity 上智能合约的编写也有帮助。
 
 我们特别需要以下方面的帮助：
 
@@ -30,7 +30,7 @@
 Pull Request 的工作流
 ==========================
 
-为了进行贡献，请 fork 一个 ``develop`` 分支并在那里进行修改。除了你*做了什么*之外，你还需要在commit信息中说明，你*为什么*做这些修改（除非只是个微小的改动）。
+为了进行贡献，请 fork 一个 ``develop`` 分支并在那里进行修改。除了你 *做了什么* 之外，你还需要在commit信息中说明，你 *为什么* 做这些修改（除非只是个微小的改动）。
 
 在进行了 fork 之后， 如果你还需要从 ``develop`` 分支 pull 任何变更的话（例如，为了解决潜在的合并冲突），请避免使用 ``git merge``，而是 ``git rebase`` 你的分支。
 
@@ -41,7 +41,7 @@ Pull Request 的工作流
 
 最后，请确保你遵守了这个项目的 `coding standards
 <https://raw.githubusercontent.com/ethereum/cpp-ethereum/develop/CodingStandards.txt>`_ 。
-并且，虽然我们采用了持续集成测试，但是在提交 pull request 之前，请测试你的代码并确保它能在本地进行编译。
+还有，虽然我们采用了持续集成测试，但是在提交 pull request 之前，请测试你的代码并确保它能在本地进行编译。
 
 感谢你的帮助！
 
@@ -52,7 +52,7 @@ Solidity 有不同类型的测试，他们被包含在应用 ``soltest`` 中。�
 
 若要禁用 z3 测试，可使用 ``./build/test/soltest -- --no-smt``，若要执行不需要 ``cpp-ethereum`` 的测试子集，则用 ``./build/test/soltest -- --no-ipc``。
 
-对于别的所有测试，你都需要安装 `cpp-ethereum <https://github.com/ethereum/cpp-ethereum/releases/download/solidityTester/eth>`_，并将其运行在测试模式下：``eth --test -d /tmp/testeth``。
+对于别的所有测试，你都需要安装 `cpp-ethereum <https://github.com/ethereum/cpp-ethereum/releases/download/solidityTester/eth>`_ ，并将其运行在测试模式下：``eth --test -d /tmp/testeth``。
 
 之后再执行实际的测试文件：``./build/test/soltest -- --ipcpath /tmp/testeth/geth.ipc``。
 
@@ -66,10 +66,13 @@ Travis CI 甚至会执行一些额外的测试（包括 ``solc-js`` 和对第三
 Whiskers 模板系统
 ==========================
 
-*Whiskers* 是一个模板系统，类似于 `Mustache <https://mustache.github.io>`_。编译器在各种各样的场合使用它来增强可读性，从而提高代码的可维护性和可验证性。
+*Whiskers* 是一个类似于 `Mustache <https://mustache.github.io>`_ 的模板系统。编译器在各种各样的地方使用 Whiskers 来增强可读性，从而提高代码的可维护性和可验证性。
 
-它的语法与 Mustache 有很大差别：模板标记 ``{{`` 和 ``}}`` 被替换成了 ``<`` and ``>``，以便增强语法分析，避免与 :ref:`inline-assembly` 的冲突（符号 ``<`` 和 ``>`` 在内联汇编中是无效的，而 ``{`` 和 ``}`` 则被用来限定块）。另一个局限是，列表只会被解析一层，而不是递归解析。未来可能会改变这一个限制。
+它的语法与 Mustache 有很大差别：模板标记 ``{{`` 和 ``}}`` 被替换成了 ``<`` 和 ``>``，以便增强语法分析，避免与 :ref:`inline-assembly` 的冲突（符号 ``<`` 和 ``>`` 在内联汇编中是无效的，而 ``{`` 和 ``}`` 则被用来限定块）。另一个局限是，列表只会被解析一层，而不是递归解析。未来可能会改变这一个限制。
 
 下面是一个粗略的说明：
 
-任何出现 ``<name>`` 的地方都会被所提供的变量 ``name`` 的字符串值所替换，既不会进行任何转义也不会进行迭代替换。可以通过 ``<#name>...</name>`` 来限定一个区域。该区域中的内容将进行多次串联，每次串联会使用相应变量集中的值，替换区域中的 ``<inner>`` 项，模板系统中提供了多少组变量集，串联就会被执行多少次。（译者注：对于域<#name>...</name>的释义，译者参考自：https://github.com/janl/mustache.js#sections）。顶层变量也可以在这样的域的内部使用。
+任何出现 ``<name>`` 的地方都会被所提供的变量 ``name`` 的字符串值所替换，既不会进行任何转义也不会进行迭代替换。可以通过 ``<#name>...</name>`` 来限定一个区域。该区域中的内容将进行多次拼接，每次拼接会使用相应变量集中的值替换区域中的 ``<inner>`` 项，模板系统中提供了多少组变量集，就会进行多少次拼接。顶层变量也可以在这样的区域的内部使用。
+
+
+译者注：对于域<#name>...</name>的释义，译者参考自：https://github.com/janl/mustache.js#sections
