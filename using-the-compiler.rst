@@ -9,8 +9,7 @@
 使用命令行编译器
 ******************************
 
-.. note::
-This section doesn't apply to :ref:`solcjs <solcjs>`.
+.. note:: This section doesn't apply to :ref:`solcjs <solcjs>`
 
 
 ``solc`` 是Solidity源码库的构建目标之一，它是Solidity的命令行编译器。你可使用 ``solc --help`` 命令来查看它的所有选项的解释。该编译器可以生成各种输出，范围从简单的二进制文件、汇编文件到用于估计“gas”使用情况的抽象语法树（解析树）。如果你只想编译一个文件，你可以运行 ``solc --bin sourceFile.sol`` 来生成二进制文件。在部署合约之前，你还可以通过 ``solc --optimize --bin sourceFile.sol`` 命令，在编译时激活优化器。如果你想通过 ``solc`` 获得一些更高级的输出信息，可以通过 ``solc -o outputDirectory --bin --ast --asm sourceFile.sol`` 命令将所有的输出都保存到一个单独的文件夹中。
@@ -29,7 +28,7 @@ This section doesn't apply to :ref:`solcjs <solcjs>`.
 
 如果您的合约使用 :ref:`libraries <libraries>` ，您会注意到在编译后的十六进制字节码中会包含形如 ``__LibraryName____`` 的字符串。当您将 ``solc`` 作为链接器使用时，它会在下列情况中为你插入库的地址：要么在命令行中添加 ``--libraries "Math:0x12345678901234567890 Heap:0xabcdef0123456"`` 来为每个库提供地址，或者将这些字符串保存到一个文件中（每行一个库），并使用 ``--libraries fileName`` 参数。
 
-如果在调用 ``solc`` 命令时使用了 ``--link`` 选项，则所有的输入文件会被解析为上面提到过的  ``__LibraryName____`` 格式的未链接的二进制数据（十六进制编码），并且就地链接。（如果输入是从stdin读取的，则生成的数据会被写入stdout）。在这种情况下，除了 ``--libraries`` 外的其他选项（包括``-o``）都会被忽略。
+如果在调用 ``solc`` 命令时使用了 ``--link`` 选项，则所有的输入文件会被解析为上面提到过的  ``__LibraryName____`` 格式的未链接的二进制数据（十六进制编码），并且就地链接。（如果输入是从stdin读取的，则生成的数据会被写入stdout）。在这种情况下，除了 ``--libraries`` 外的其他选项（包括 ``-o`` ）都会被忽略。
 
 如果在调用 ``solc`` 命令时使用了 ``--standard-json`` 选项，它将会按JSON格式解析标准输入上的输入，并在标准输出上返回JSON格式的输出。
 
