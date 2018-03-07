@@ -103,7 +103,7 @@ Mappings 可以看作是一个 `哈希表 <https://en.wikipedia.org/wiki/Hash_ta
 
 .. index:: event
 
-``event Sent(address from, address to, uint amount);`` 这行声明了一个所谓的“事件（event）”，它会在 ``send`` 函数的最后一行被发出。 用户界面（当然也包括服务器应用程序）可以监听区块链上正在发送的事件，而不会花费太多成本。一旦它被发出， 所有的listener都将收到该事件。而所有的事件都包含了 ``from`` ， ``to`` 和 ``amount`` 三个参数，方便了追踪事务。 为了监听这个事件，你可以使用如下代码：
+``event Sent(address from, address to, uint amount);`` 这行声明了一个所谓的“事件（event）”，它会在 ``send`` 函数的最后一行被发出。 用户界面（当然也包括服务器应用程序）可以监听区块链上正在发送的事件，而不会花费太多成本。一旦它被发出， 监听该事件的listener都将收到通知。而所有的事件都包含了 ``from`` ， ``to`` 和 ``amount`` 三个参数，可方便追踪事务。 为了监听这个事件，你可以使用如下代码：
  ::
 
     Coin.Sent().watch({}, '', function(error, result) {
