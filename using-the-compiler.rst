@@ -2,7 +2,7 @@
 使用编译器
 ******************
 
-.. index:: ! commandline compiler，compiler;commandline，! solc，! linker
+.. index:: ! commandline compiler, compiler;commandline, ! solc, ! linker
 
 .. _commandline-compiler:
 
@@ -27,12 +27,9 @@ This section doesn't apply to :ref:`solcjs <solcjs>`.
 
 出于安全原因，编译器限制了它可以访问的目录。在命令行中指定的源文件的路径（及其子目录）和通过重定向定义的路径可用于 ``import`` 语句，其他的则会被拒绝。额外路径（及其子目录）可以通过  ``--allow-paths /sample/path,/another/sample/path`` 进行配置。
 
-如果您的合约使用 :ref:`libraries <libraries>` ，您可能会注意到，某些字节码会包含字符串 ``__LibraryName______`` 。当您使用 ``solc`` 作为链接器时，它可帮您链接库的地址。使用方式如下：
+如果您的合约使用 :ref:`libraries <libraries>` ，您会注意到在编译后的十六进制字节码中会包含形如 ``__LibraryName____`` 的字符串。当您将 ``solc`` 作为链接器使用时，它会在下列情况中为你插入库的地址：要么在命令行中添加 ``--libraries "Math:0x12345678901234567890 Heap:0xabcdef0123456"`` 来为每个库提供地址，或者将这些字符串保存到一个文件中（每行一个库），并使用 ``--libraries fileName`` 参数。
 
-- 直接提供库的地址：``--libraries "Math:0x12345678901234567890 Heap:0xabcdef0123456"``
-- 将库的地址存储于文件中，每行一个库：``--libraries fileName``
-
-如果在调用 ``solc`` 命令时使用了 ``--link`` 选项，则所有的输入文件会被解析为上面提到过的  ``__LibraryName____`` 格式的未链接的二进制文件（十六进制编码），并且就地链接。（如果从stdin读取输入，则将其写入stdout）。在这种情况下，除了 ``--libraries`` 外的其他选项都会被忽略。（包括``-o``）
+如果在调用 ``solc`` 命令时使用了 ``--link`` 选项，则所有的输入文件会被解析为上面提到过的  ``__LibraryName____`` 格式的未链接的二进制数据（十六进制编码），并且就地链接。（如果输入是从stdin读取的，则生成的数据会被写入stdout）。在这种情况下，除了 ``--libraries`` 外的其他选项（包括``-o``）都会被忽略。
 
 如果在调用 ``solc`` 命令时使用了 ``--standard-json`` 选项，它将会按JSON格式解析标准输入上的输入，并在标准输出上返回JSON格式的输出。
 
@@ -59,10 +56,10 @@ This section doesn't apply to :ref:`solcjs <solcjs>`.
       // 必选
       sources:
       {
-        // 下面定义的key是该源文件的全局变量，可使用remappings引入其他文件，并加载其全局变量，见下例
+        // 这里的键值是源文件的“全局”名称，可以通过remappings引入其他文件（参考下文）
         "myFile.sol":
         {
-          // 可选: 指明该文件使用keccak256哈希散列，可用于校验通过URL加载的内容。
+          // 可选: 源文件的kaccak256哈希值，可用于校验通过URL加载的内容。
           "keccak256": "0x123...",
           // 必选（除非声明了 "content" 字段）: 指向源文件的URL。
           // URL(s) 会按顺序加载，并且结果会通过keccak256哈希值进行检查（如果有keccak256的话）
@@ -99,8 +96,7 @@ This section doesn't apply to :ref:`solcjs <solcjs>`.
           // 只可使用字面内容，不可用URLs （默认设为 false）
           useLiteralContent: true
         },
-        // 库的地址。如果这里没有把所有需要的库都给出，其结果是生成未链接的对象，
-        // 这些对象的输出数据是不同的。
+        // 库的地址。如果这里没有把所有需要的库都给出，会导致生成输出数据不同的未链接对象
         libraries: {
           // 最外层的 key 是使用这些库的源文件的名字。
           // 如果使用了重定向， 在重定向之后，这些源文件应该能匹配全局路径
@@ -111,7 +107,7 @@ This section doesn't apply to :ref:`solcjs <solcjs>`.
         }
         // 以下内容可以用于选择所需的输出。
         // 如果这个字段被忽略，那么编译器会加载并进行类型检查，但除了错误之外不会产生任何输出。
-        // 第一级的key是文件名，第二级是合约名称，如果合约名为空，则使用文件名作为合约名，
+        // 第一级的key是文件名，第二级是合约名称，如果合约名为空，则针对文件本身（进行输出）。
         // 若使用通配符*，则表示所有合约。
         //
         // 可用的输出类型如下所示：
@@ -134,10 +130,10 @@ This section doesn't apply to :ref:`solcjs <solcjs>`.
         //   ewasm.wast - eWASM S-expressions 格式（不支持atm）
         //   ewasm.wasm - eWASM二进制格式（不支持atm）
         //
-        // 请注意，如果使用 `evm`，`evm.bytecode`，`ewasm` 等选项，会选择其所有的子项作为输出。 另外，`*`可以用作通配符来请求所有内容。
+        // 请注意，如果使用 `evm` ，`evm.bytecode` ，`ewasm` 等选项，会选择其所有的子项作为输出。 另外，`*`可以用作通配符来请求所有内容。
         //
         outputSelection: {
-          // 为每个合约的生成元数据和字节码输出。
+          // 为每个合约生成元数据和字节码输出。
           "*": {
             "*": [ "metadata"，"evm.bytecode" ]
           },
@@ -174,7 +170,7 @@ This section doesn't apply to :ref:`solcjs <solcjs>`.
             end: 100
           ],
           // 强制: 错误类型，例如 “TypeError”， “InternalCompilerError”， “Exception”等.
-          // 可在文末查看完整的错误列表
+          // 可在文末查看完整的错误类型列表
           type: "TypeError",
           // 强制: 发生错误的组件，例如“general”，“ewasm”等
           component: "general",
@@ -186,7 +182,7 @@ This section doesn't apply to :ref:`solcjs <solcjs>`.
           formattedMessage: "sourceFile.sol:100: Invalid keyword"
         }
       ],
-      // 以下配置文件级别的输出。可以通过outputSelection来设置限制/过滤。
+      // 这里包含了文件级别的输出。可以通过outputSelection来设置限制/过滤。
       sources: {
         "sourceFile.sol": {
           // 标识符（用于源码映射）
@@ -197,12 +193,12 @@ This section doesn't apply to :ref:`solcjs <solcjs>`.
           legacyAST: {}
         }
       },
-      // 以下配置合约级别的输出。 可以通过outputSelection来设置限制/过滤。
+      // 这里包含了合约级别的输出。 可以通过outputSelection来设置限制/过滤。
       contracts: {
         "sourceFile.sol": {
           // 如果使用的语言没有合约名称，则该字段应该留空。
           "ContractName": {
-            // 以太坊的ABI合约。 如果为空，则表示为空数组。
+            // 以太坊合约的应用二进制接口（ABI）。如果为空，则表示为空数组。
             // 请参阅 https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI
             abi: [],
             // 请参阅元数据输出文档（序列化的JSON字符串）
@@ -227,7 +223,7 @@ This section doesn't apply to :ref:`solcjs <solcjs>`.
                 opcodes: "",
                 // 源码映射的字符串。 请参阅源码映射的定义
                 sourceMap: "",
-                // 可选：未链接对象
+                // 如果这里给出了信息，则表示这是一个未链接的对象
                 linkReferences: {
                   "libraryFile.sol": {
                     // 字节码中的字节偏移；链接时，从指定的位置替换20个字节
@@ -281,7 +277,7 @@ This section doesn't apply to :ref:`solcjs <solcjs>`.
 4. ``DocstringParsingError``: 注释块中的NatSpec标签无法解析。
 5. ``SyntaxError``: 语法错误，例如 ``continue`` 在 ``for`` 循环外部使用。
 6. ``DeclarationError``: 无效的，无法解析的或冲突的标识符名称 比如 ``Identifier not found``。
-7. ``TypeError``: 类型系统内的错误,，例如无效类型转换，无效赋值等。
+7. ``TypeError``: 类型系统内的错误，例如无效类型转换，无效赋值等。
 8. ``UnimplementedFeatureError``: 编译器当前不支持该功能，但预计将在未来的版本中支持。
 9. ``InternalCompilerError``: 在编译器中触发的内部错误——应将此报告为一个issue。
 10. ``Exception``: 编译期间的未知失败——应将此报告为一个issue。
