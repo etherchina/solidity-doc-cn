@@ -35,7 +35,7 @@ Pull Request 的工作流
 
 此外，如果你在编写一个新功能，请确保你编写了合适的 Boost 测试案例，并将他们放在了 ``test/`` 下。
 
-但是，如果你在进行一个更大的变更，请先与 `Solidity Development Gitter channel <https://gitter.im/ethereum/solidity-dev>`_ （不同于上面提到的那个小组，这个小组专注于编译器和编程语言开发，而不是编程语言的使用）进行商量。
+但是，如果你在进行一个更大的变更，请先与 `Solidity Development Gitter channel <https://gitter.im/ethereum/solidity-dev>`_ 进行商量（该变更不同于上面提到的那个功能，这个变更侧重于编译器和编程语言开发，而不是编程语言的使用）。
 
 最后，请确保你遵守了这个项目的 `coding standards <https://raw.githubusercontent.com/ethereum/cpp-ethereum/develop/CodingStandards.txt>`_ 。还有，虽然我们采用了持续集成测试，但是在提交 pull request 之前，请测试你的代码并确保它能在本地进行编译。
 
