@@ -376,19 +376,24 @@ Note that filling a 10x10 square of ``uint8`` + contract creation took more than
 gas at the time of this writing. 17x17 took ``2,000,000`` gas. With the limit at
 3.14 million... well, there’s a pretty low ceiling for what you can create right
 now.
-需要注意的是，用 ``uint8`` 类型的数据填满一个10x10的方阵，再加上合约创建，总共需要花费超过 ``800,000`` 燃料费。如果是17x17需要 ``2,000,000`` 燃料费。然而交易燃料费上限是314万。。。好吧，其实你也玩不了多大的花样。
+需要注意的是，用 ``uint8`` 类型的数据填满一个10x10的方阵，再加上合约创建，总共需要花费超过 ``800,000`` 燃料费。如果是17x17需要 ``2,000,000`` 燃料费。然而交易燃料费上限是314万。。。好吧，其实你也玩不了太大的花样。
 
 Note that merely "creating" the array is free, the costs are in filling it.
+注意，“创建”数组纯粹是免费的，成本在于填充数组。
 
 Note2: Optimizing storage access can pull the gas costs down considerably, because
 32 ``uint8`` values can be stored in a single slot. The problem is that these optimizations
 currently do not work across loops and also have a problem with bounds checking.
 You might get much better results in the future, though.
+还需注意，存储访问的优化可以大大降低燃料的成本，因为一个位置可以存放下32个 ``uint8`` 类型的值。但这类优化目前也存在一些问题：在跨循环的时候不起作用；以及在边界检查时候会出问题。
 
 What happens to a ``struct``'s mapping when copying over a ``struct``?
 ======================================================================
+当我们复制一个 ``数据结构`` 时， ``数据结构`` 中定义的映射会被怎么处理？
+========================================================================
 
 This is a very interesting question. Suppose that we have a contract field set up like such::
+这是一个非常有意思的问题。假设我们有一份合约，里面的字段设置如下::
 
     struct User {
         mapping(string => string) comments;
@@ -402,15 +407,23 @@ This is a very interesting question. Suppose that we have a contract field set u
 
 In this case, the mapping of the struct being copied over into the userList is ignored as there is no "list of mapped keys".
 Therefore it is not possible to find out which values should be copied over.
+在这种情况下，由于缺失 "被映射的键列表" ，被复制至userList的数据结构中的映射会被忽视。因此，系统无法找出什么值可以被复制过去。
 
 How do I initialize a contract with only a specific amount of wei?
 ==================================================================
+我应该如何创建一份只包含指定数量wei的合约？
+===========================================
 
 Currently the approach is a little ugly, but there is little that can be done to improve it.
 In the case of a ``contract A`` calling a new instance of ``contract B``, parentheses have to be used around
 ``new B`` because ``B.value`` would refer to a member of ``B`` called ``value``.
 You will need to make sure that you have both contracts aware of each other's presence and that ``contract B`` has a ``payable`` constructor.
+目前实现方式不是太优雅，当然暂时也没有更好的方法。
+就拿 ``合约A`` 调用一个 ``合约B`` 的新实例来说，``new B`` 周围必须要加括号，不然 ``B.value`` 就会被认作是一个叫做 ``B`` 的成员在调用 ``value``。
+你必须确保两份合约都知道对方的存在，并且 ``合约B`` 拥有 ``payable`` 构造函数。
+
 In this example::
+就是这个例子::
 
     pragma solidity ^0.4.0;
 
@@ -428,18 +441,26 @@ In this example::
 
 Can a contract function accept a two-dimensional array?
 =======================================================
+合约的函数可以接收二维数组吗？
+==============================
 
 This is not yet implemented for external calls and dynamic arrays -
 you can only use one level of dynamic arrays.
+二维数组还无法使用于外部调用和动态数组 - 你只能使用一维的动态数组。
 
 What is the relationship between ``bytes32`` and ``string``? Why is it that ``bytes32 somevar = "stringliteral";`` works and what does the saved 32-byte hex value mean?
 ========================================================================================================================================================================
+``bytes32`` 和 ``string`` 有什么关系吗？为什么 ``bytes32 somevar = "stringliteral";`` 可以生效，还有存下来的32-字节的16进制数值有什么含义？
+================================================================================================================================================================================
 
 The type ``bytes32`` can hold 32 (raw) bytes. In the assignment ``bytes32 samevar = "stringliteral";``,
 the string literal is interpreted in its raw byte form and if you inspect ``somevar`` and
 see a 32-byte hex value, this is just ``"stringliteral"`` in hex.
+数据类型 ``bytes32`` 可以存放 32个（原始）字节。在给变量分配值的过程中 ``bytes32 samevar = "stringliteral";``，
+字符串已经被逐字翻译成了原始字节。如果你去检查 ``somevar`` ，会发现一个32-字节的16进制数值，这就是用16进制表示的 ``"字符串的文字"`` 。
 
 The type ``bytes`` is similar, only that it can change its length.
+数据类型 ``bytes`` 与此类似，只是它的长度可以改变。
 
 Finally, ``string`` is basically identical to ``bytes`` only that it is assumed
 to hold the UTF-8 encoding of a real string. Since ``string`` stores the
@@ -452,13 +473,16 @@ the low-level byte encoding of the string, you can use
 of bytes in the UTF-8 encoding of the string (not the number of
 characters) and the second byte (not character) of the UTF-8 encoded
 string, respectively.
-
+最终来看，假设 ``bytes`` 储存的是字符串的UTF-8编码，那么它和 ``string`` 基本是等同的。由于 ``string`` 存储是UTF-8编码格式的数据，所以计算字符串中字符的数量的成本是很高的（某些字符的编码甚至大于一个字节）。因此，系统还不支持 ``string s; s.length`` ，甚至不能通过索引访问 ``s[2]`` 。但如果你想访问字符串的低级字节编码，可以使用 ``bytes(s).length`` 和 ``bytes(s)[2]``，它们分别会返回字符串在UTF-8编码下的字节数量（不是字符数量）以及字符串UTF-8编码的第二个字节（不是字符）。
 
 Can a contract pass an array (static size) or string or ``bytes`` (dynamic size) to another contract?
 =====================================================================================================
+一份合约可以传递一个数组（固定长度）或者一个字符串或者一个 ``bytes`` （不定长度）给另一份合约吗？
+=================================================================================================
 
 Sure. Take care that if you cross the memory / storage boundary,
 independent copies will be created::
+当然可以。但如果不小心跨越了内存 / 存储的边界，一份独立的拷贝就会被创建出来::
 
     pragma solidity ^0.4.16;
 
@@ -484,66 +508,85 @@ to create an independent copy of the storage value in memory
 (the default storage location is memory). On the other hand,
 ``h(x)`` successfully modifies ``x`` because only a reference
 and not a copy is passed.
+由于需要在内存中对存储的值创建一份独立的拷贝（默认存储在内存中），所以对 ``g(x)`` 的调用其实并不会对 ``x`` 产生影响。另一方面，由于传递的只是引用而不是一个拷贝， ``h(x)`` 得以成功地修改了 ``x`` 。
 
 Sometimes, when I try to change the length of an array with ex: ``arrayname.length = 7;`` I get a compiler error ``Value must be an lvalue``. Why?
 ==================================================================================================================================================
+有些时候，当我想用类似这样的表达式： ``arrayname.length = 7;`` 来修改数组长度，却会得到一个编译错误 ``Value must be an lvalue`` 。这是为什么？
+====================================================================================================================================================
 
 You can resize a dynamic array in storage (i.e. an array declared at the
 contract level) with ``arrayname.length = <some new length>;``. If you get the
 "lvalue" error, you are probably doing one of two things wrong.
+你可以使用 ``arrayname.length = <some new length>;`` 来调整存储中的动态数组的长度（例如在合约层申明的数组）。如果你得到一个 "lvalue" 错误，那么你有可能做错了以下两件事中的一件或全部。
 
 1. You might be trying to resize an array in "memory", or
+1. 你在尝试修改长度的数组可能是存在 "内存" 中的，或者
 
 2. You might be trying to resize a non-dynamic array.
+2. 你可能在尝试修改一个非动态数组的长度。
 
 ::
 
-    int8[] memory memArr;        // Case 1
-    memArr.length++;             // illegal
-    int8[5] storageArr;          // Case 2
-    somearray.length++;          // legal
-    int8[5] storage storageArr2; // Explicit case 2
-    somearray2.length++;         // legal
+    int8[] memory memArr;        // 第一种情况
+    memArr.length++;             // 非法操作
+    int8[5] storageArr;          // 第二种情况
+    somearray.length++;          // 非法操作
+    int8[5] storage storageArr2; // 第二种情况附加显式定义
+    somearray2.length++;         // 合法操作
 
 **Important note:** In Solidity, array dimensions are declared backwards from the way you
 might be used to declaring them in C or Java, but they are access as in
 C or Java.
+**重要提醒：** 在Solidity中，数组维数的申明方向是和在C或Java中的申明方式相反的，但访问方式相同。
 
 For example, ``int8[][5] somearray;`` are 5 dynamic ``int8`` arrays.
+举个例子， ``int8[][5] somearray;`` 是5个 ``int8`` 格式的动态数组。
 
 The reason for this is that ``T[5]`` is always an array of 5 ``T``'s,
 no matter whether ``T`` itself is an array or not (this is not the
 case in C or Java).
+这么做的原因是 ``T[5]`` 就总是能被识别为5个 ``T`` ，哪怕 ``T`` 本身就是一个数组（而在C或Java是不一样的）。 
 
 Is it possible to return an array of strings (``string[]``) from a Solidity function?
 =====================================================================================
+Solidity的函数可以返回一个字符串数组吗（ ``string[]`` ）？
+==========================================================
 
 Not yet, as this requires two levels of dynamic arrays (``string`` is a dynamic array itself).
+暂时还不可以，因为这要求两个层面的动态数组（ ``string`` 本身就是一种动态数组）
 
 If you issue a call for an array, it is possible to retrieve the whole array? Or must you write a helper function for that?
 ===========================================================================================================================
+如果你发起了一次数组的调用，有可能获得整个数组吗？还是说另外需要写一个帮助函数来实现？
+======================================================================================
 
 The automatic :ref:`getter function<getter-functions>`  for a public state variable of array type only returns
 individual elements. If you want to return the complete array, you have to
 manually write a function to do that.
-
+公有申明的数组类型变量有个自动获取函数 :ref:`getter function<getter-functions>` , 这个函数只会返回单个元素。如果你想获取完整的数组，那么只能再手工写一个函数来实现。
 
 What could have happened if an account has storage value(s) but no code?  Example: http://test.ether.camp/account/5f740b3a43fbb99724ce93a879805f4dc89178b5
 ==========================================================================================================================================================
+如果某个账户只存储了值但没有任何代码，将会发生什么？例子: http://test.ether.camp/account/5f740b3a43fbb99724ce93a879805f4dc89178b5
+=================================================================================================================================
 
 The last thing a constructor does is returning the code of the contract.
 The gas costs for this depend on the length of the code and it might be
 that the supplied gas is not enough. This situation is the only one
 where an "out of gas" exception does not revert changes to the state,
 i.e. in this case the initialisation of the state variables.
+构造函数做的最后一件事情是返回合约的代码。这件事消耗的燃料取决于代码的长度，并且有种可能是提供的燃料不够。那么这就是唯一一种情况下，出现了 "out of gas" 异常然而被改变了的申明却没有被重置，这个改变在这里就是对申明变量的初始化。
 
 https://github.com/ethereum/wiki/wiki/Subtleties
 
 After a successful CREATE operation's sub-execution, if the operation returns x, 5 * len(x) gas is subtracted from the remaining gas before the contract is created. If the remaining gas is less than 5 * len(x), then no gas is subtracted, the code of the created contract becomes the empty string, but this is not treated as an exceptional condition - no reverts happen.
-
+当CREATE操作的某个阶段被成功执行，如果这个操作返回x，那么5 * len(x)的燃料在合约被创建前会从剩余燃料中被扣除。如果剩余的燃料少于5 * len(x)，那么就不扣除，创建的合约代码会变成空字符串，但这时候并不认为是发生了异常 - 不会发生重置。
 
 What does the following strange check do in the Custom Token contract?
 ======================================================================
+在定制代币（Token）的合约中，下面这些奇怪的校验是做什么的？
+===========================================================
 
 ::
 
@@ -554,10 +597,16 @@ For ``uint256``, this is ``0`` up to ``2**256 - 1``. If the result of some opera
 does not fit inside this range, it is truncated. These truncations can have
 `serious consequences <https://en.bitcoin.it/wiki/Value_overflow_incident>`_, so code like the one
 above is necessary to avoid certain attacks.
-
+在Solidity中的整形（以及大多数其他机器相关的编程语言）都会被限定在一定范围内。
+比如 ``uint256`` ，就是从 ``0`` 到 ``2**256 - 1`` 。如果某些对这些数字的操作结果不在这个范围内，那么就会被裁剪。这些裁剪会带来
+`严重的后果 <https://en.bitcoin.it/wiki/Value_overflow_incident>`_ ，所以像上面这样的代码需要考虑避免此类攻击。
 
 More Questions?
 ===============
+更多问题？
+==========
 
 If you have more questions or your question is not answered here, please talk to us on
 `gitter <https://gitter.im/ethereum/solidity>`_ or file an `issue <https://github.com/ethereum/solidity/issues>`_.
+如果你有其他问题，或者你的问题在这里找不到答案，请在此联系我们
+`gitter <https://gitter.im/ethereum/solidity>`_ or file an `issue <https://github.com/ethereum/solidity/issues>`_ 。
