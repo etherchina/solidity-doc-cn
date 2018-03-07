@@ -44,17 +44,17 @@ Pull Request 的工作流
 运行编译器测试
 ==========================
 
-Solidity 有不同类型的测试，他们被包含在应用 ``soltest`` 中。其中一些测试需要 ``cpp-ethereum`` 客户端运行在测试模式下，另一些需要安装 ``libz3`` 。
+Solidity 有不同类型的测试，他们包含在应用 ``soltest`` 中。其中一些需要 ``cpp-ethereum`` 客户端运行在测试模式下，另一些需要安装 ``libz3`` 。
 
 若要禁用 z3 测试，可使用 ``./build/test/soltest -- --no-smt`` ，若要执行不需要 ``cpp-ethereum`` 的测试子集，则用 ``./build/test/soltest -- --no-ipc`` 。
 
-对于别的所有测试，你都需要安装 `cpp-ethereum <https://github.com/ethereum/cpp-ethereum/releases/download/solidityTester/eth>`_ ，并将其运行在测试模式下： ``eth --test -d /tmp/testeth`` 。
+对于其他测试，你都需要安装 `cpp-ethereum <https://github.com/ethereum/cpp-ethereum/releases/download/solidityTester/eth>`_ ，并在测试模式下运行它： ``eth --test -d /tmp/testeth`` 。
 
 之后再执行实际的测试文件： ``./build/test/soltest -- --ipcpath /tmp/testeth/geth.ipc`` 。
 
 可以用过滤器来执行一组测试子集： ``soltest -t TestSuite/TestName -- --ipcpath /tmp/testeth/geth.ipc`` ，其中 ``TestName`` 可以是通配符 ``*`` 。
 
-另外， ``scripts/test.sh`` 里有一个测试脚本可执行所有测试，并自动运行 ``cpp-ethereum`` ，如果它在 path 中的话（但不会去下载它）。
+另外， ``scripts/test.sh`` 里有一个测试脚本可执行所有测试，并自动运行 ``cpp-ethereum`` ，如果它在 scripts 路径中的话（但不会去下载它）。
 
 Travis CI 甚至会执行一些额外的测试（包括 ``solc-js`` 和对第三方 Solidity 框架的测试），这些测试需要去编译 Emscripten 目标代码。
 
