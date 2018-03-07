@@ -12,10 +12,10 @@ Solidity的智能合约类似于面向对象语言中的“类”。包含会持
 创建合约
 ********
 
-合约可以通过以太币网络的交易从外部创建，也可以从Solidity内部创建。
-集成开发环境，比如`Remix <https://remix.ethereum.org/>`_，可以让你从图形界面无缝创建一个合约。
+合约可以通过以太币网络的交易从外部创建，也可以从Solidity合约内部创建。
+集成开发环境，比如 `Remix <https://remix.ethereum.org/>`_，可以让你从图形界面无缝创建一个合约。
 以太币网络里面的程序化创建合约最好的办法是通过JavaScript API `web3.js <https://github.com/ethereum/web3.js>`_.
-现在有一个方法调用来实现创建合约 `web3.eth.Contract <https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#new-contract>`_。
+现在已经有了一种被称为 `web3.eth.Contract <https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#new-contract>`_ 的简便方法来创建合约。
 
 当一个合约创建时，它的构造函数（一个和合约同名的函数）会被执行一次。
 构造函数是可选的。且只允许一个构造函数，这就意味着构造函数是不可以重载的。
@@ -23,7 +23,7 @@ Solidity的智能合约类似于面向对象语言中的“类”。包含会持
 .. index:: constructor;arguments
 
 从内部机制来说，构造函数的参数是附在合约代码本身之后通过:ref:`ABI encoded <ABI>`传递的，但如果你用"web3.js"，则用不着关心这个。
-如果一个合约需要创建另一个合约，这个合约需要知道被创建的合约的代码（以及二进制码）。这也意味不可以循环创建。
+如果一个合约想要创建另一个合约，这个合约需要知道被创建的合约的代码（以及二进制码）。这也意味不可以递归循环创建。
 
 ::
 
