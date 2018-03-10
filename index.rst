@@ -28,7 +28,7 @@ Solidity是静态类型语言，支持继承、库和复杂的用户定义类型
 
 本文档由社区志愿者翻译成多种语言，但是英语版本作为主要参考。
 
-* `简体中文版 <https://solidity-doc-cn.readthedocs.io/>`_
+* `简体中文版 <https://solidity-cn.readthedocs.io/>`_
 * `西班牙语版 <https://solidity-es.readthedocs.io>`_
 * `俄语版 <https://github.com/ethereum/wiki/wiki/%5BRussian%5D-%D0%A0%D1%83%D0%BA%D0%BE%D0%B2%D0%BE%D0%B4%D1%81%D1%82%D0%B2%D0%BE-%D0%BF%D0%BE-Solidity>`_ (已过时)
 
