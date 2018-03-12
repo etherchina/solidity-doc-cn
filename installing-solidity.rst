@@ -9,7 +9,7 @@
 版本
 ==========
 
-Solidity的版本遵循 `语义化版本原则 <https://semver.org>`_ ，除了正式发布的版本外，Solidity还有一个**每夜开发版本**（nightly development builds）可用。这个每晚构建的版本不保证能够正常工作，尽管尽了最大的努力，但仍可能包含无文档的或重大的改动。我们建议使用最新版本。 下面的包安装程序将使用最新版本。
+Solidity的版本遵循 `语义化版本原则 <https://semver.org>`_ ，除了正式发布的版本外，Solidity还有一个**每日开发构建**（nightly development builds）可用。这个每晚构建的版本不保证能够正常工作，尽管尽了最大的努力，但仍可能包含无文档的或重大的改动。我们建议使用最新版本。 下面的包安装程序将使用最新版本。
 
 Remix
 =====
@@ -17,13 +17,14 @@ Remix
   推荐使用 Remix 来开发简单合约和快速学习 Solidity。
 
 `Remix <https://remix.ethereum.org/>`_ 可在线使用，而无需安装任何东西。如果你想离线使用，可按 https://github.com/ethereum/browser-solidity/tree/gh-pages 的页面说明下载 zip 文件来使用。
-该页面有进一步详细说明如何安装 solidity 命令行编译器到你计算机上。如果你刚好要处理大型合约，或者需要更多的编译选项，那么你应该选择使用命令行编译器 solc。
+该页面有进一步详细说明如何安装 Solidity 命令行编译器到你计算机上。如果你刚好要处理大型合约，或者需要更多的编译选项，那么你应该选择使用命令行编译器 solc。
 
+.. _solcjs:
 
 npm / Node.js
 =============
 
-使用 `npm` 可以便捷的安装Solidity编译器solcjs。但该 `solcjs` 程序的功能相对于本页下面的所有其他选项都要少。在 :ref:`commandline-compiler` 一章中，我们假定你使用的是完整功能的编译器。 所以，如果你是从 npm 安装 solcjs ，就此打住，直接跳到 `solc-js  <https://github.com/ethereum/solc-js>`_ 去了解。
+使用 `npm` 可以便捷地安装Solidity编译器solcjs。但该 `solcjs` 程序的功能相对于本页下面的所有其他选项都要少。在 :ref:`commandline-compiler` 一章中，我们假定你使用的是完整功能的编译器。 所以，如果你是从 npm 安装 solcjs ，就此打住，直接跳到 `solc-js  <https://github.com/ethereum/solc-js>`_ 去了解。
 
 
 注意: `solc-js <https://github.com/ethereum/solc-js>`_ 是利用 Emscripten 从 C++ 版的 solc 跨平台编译为 JavaScript 的，因此，可在 JavaScript 项目中使用 solcjs（如同 Remix）。
@@ -56,7 +57,7 @@ Docker
 
 可在`solidity/releases <https://github.com/ethereum/solidity/releases>`_下载 Solidity 的二进制安装包。
 
-对于Unbuntu，我们也提供PPAs。通过以下命令，可获取最新的稳定版本：
+对于Ubuntu，我们也提供PPAs。通过以下命令，可获取最新的稳定版本：
 
 .. code:: bash
 
@@ -190,7 +191,7 @@ Solidity 在 OS X 下构建，必须 `安装 Homebrew <http://brew.sh>`_
 外部依赖
 ---------------------
 
-在 macOS、Windows和其他 Linux 发行版上，有一个一键脚本可安装所需的外部依赖库。本来是需要人工参与的多步操作，现在可一键执行:
+在 macOS、Windows和其他 Linux 发行版上，有一个脚本可以“一键”安装所需的外部依赖库。本来是需要人工参与的多步操作，现在可一键执行:
 
 .. code:: bash
 
@@ -250,22 +251,22 @@ CMake参数
 Solidity 版本名包含四部分：
 
 - 版本号
-- 先行版本号，通常为 ``develop.YYYY.MM.DD`` 或者 ``nightly.YYYY.MM.DD``
+- 预发布版本号，通常为 ``develop.YYYY.MM.DD`` 或者 ``nightly.YYYY.MM.DD``
 - 以 ``commit.GITHASH`` 格式展示的提交号
 - 含平台和编译器的详细信息的多条目内容
 
 如果本地有修改，则 commit 部分有后缀 ``.mod``。
 
-此四部分按照 Semver 要求组成，第2部分等同 Semver 先行版本号，第三和四部分组成 Semver 版本编译信息。
+此四部分按照 Semver 要求组成，第2部分等同 Semver 预发布版本号，第三和四部分组成 Semver 版本编译信息。
 
 发行版样例：``0.4.8+commit.60cc1668.Emscripten.clang``.
 
-先行版样例： ``0.4.9-nightly.2017.1.17+commit.6ecb4aa3.Emscripten.clang``
+预发布版样例： ``0.4.9-nightly.2017.1.17+commit.6ecb4aa3.Emscripten.clang``
 
 版本信息详情
 ======================================
 
-在版本发布之后，补丁版本号会增加，因为我们假定只有修补程序级别发生变化。当变更被合并后，版本应该根据semver和更改的严重程度进行调整。最后，发行版本总是与当前夜间版本的版本的版本号一致，但没有``先行版``说明符。
+在版本发布之后，补丁版本号会增加，因为我们假定只有修补程序级别发生变化。当变更被合并后，版本应该根据semver和更改的严重程度进行调整。最后，发行版本总是与当前夜间版本的版本的版本号一致，但没有``预发布版``说明符。
 
 例如：
 
@@ -275,4 +276,4 @@ Solidity 版本名包含四部分：
 3. 引入破坏性变更 - 版本跳跃到 0.5.0
 4. 0.5.0 版本发布
 
-该方式与 :ref:`version pragma <version_pragma>` 下运行良好。
+该方式与 :ref:`version pragma <version_pragma>` 一起运行良好。
