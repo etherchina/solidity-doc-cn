@@ -32,15 +32,10 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 ------------
 
 * `以太坊官网 <https://ethereum.org>`_
-
 * `变更日志 <https://github.com/ethereum/solidity/blob/develop/Changelog.md>`_
-
 * `故事需求列表 <https://www.pivotaltracker.com/n/projects/1189488>`_
-
 * `源代码 <https://github.com/ethereum/solidity/>`_
-
 * `Ethereum Stackexchange <https://ethereum.stackexchange.com/>`_
-
 * `Gitter 聊天 <https://gitter.im/ethereum/solidity/>`_
 
 可用的 Solidity 集成
