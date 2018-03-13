@@ -13,10 +13,10 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 ### 工作流
 
 1. 注册Github帐号
-2. 加入[Solidity翻译团队](https://github.com/orgs/etherchina/teams/solidity-translation-team/)
+2. 申请成为译者，微信添加小助手（baobaotalk_com），或者发邮件：info@hiblock.net
 3. fork仓库: https://github.com/etherchina/solidity-doc-cn
 4. develop: admin负责README更新，记录需要翻译的章节，请务必加入commit hash值，命令见常见问题。
-5. develop: 译者翻译，完成后提交PR
+5. develop: 译者认领PR，翻译，完成后提交PR
 6. develop: 在提交PR或git push的时候注意：一定要先同步主仓库源，见常见问题
 7. develop: 一名Reviewer审核之后, 有问题退回修改，提交后另一名Reviewer再审核
 8. master: 确认质量后由admin合并入master
@@ -28,22 +28,25 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 示例：<文件名>: [@github-id] [翻译中|翻译完成] [审校人] [未审校|审校中|审校完成] (英文源文件commit hash)  
 
 1. `index.rst`: @hongbinzuo 翻译完成 @toyab 审校中 （01ba8b7e1fbdcb1b26820fd7b8908e43fb367e82）
-2. `introduction-to-smart-contracts.rst`: @oldcodeoberyn @ysqi 翻译完成 @hongbinzuo 审校完成 @toyab 审校中 (f58024b9744f557dbc77d5f7bfbc4319bde2e0c7)
+2. `introduction-to-smart-contracts.rst`: @oldcodeoberyn @ysqi 翻译完成 @hongbinzuo @riversyang @buffalo2004 @ghostrd 审校完成  (f58024b9744f557dbc77d5f7bfbc4319bde2e0c7)
 3. `structure-of-a-contract.rst`: @bobjiang 翻译中 (f58024b9744f557dbc77d5f7bfbc4319bde2e0c7)
 4. `frequently-asked-questions.rst`: @ghostrd 翻译中（5770458826bfe72201393f4f02729a970bac926e） 
 
 
 ## 贡献者列表
+以下排名不分先后。
 
-1. 姜信宝 
-2. 左洪斌
+1. 姜信宝（bobjiang）
+2. 左洪斌（hongbinzuo）
 3. 侯伯薇
 4. toyab
-5. 李捷
-6. 虞是乎ysqi
-7. 周锷
+5. 李捷（oldcodeoberyn）
+6. 虞是乎（ysqi）
+7. 周锷（ghostrd）
+8. 杨镇（riversyang）
 
 ## 常见问题
+0. [中文文案排版指北](https://github.com/mzlogin/chinese-copywriting-guidelines)
 1. fork出的仓库如何同步源的内容：https://www.zhihu.com/question/28676261
 2. 如何检查文件(参考[Solidity英文文档仓库](https://github.com/ethereum/solidity))的提交哈希：`git log filename.rst`
 3. 文档如何构建：https://solidity-cn.rtfd.io 是我们的托管地址，readthedocument这个网站是免费的，可以关联多个仓库，并且可以由git push触发自动构建，以达到文档更新的目的。
