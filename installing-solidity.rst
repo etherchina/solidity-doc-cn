@@ -136,7 +136,7 @@ Gentoo Linux 下也提供了安装包，可使用``emerge``进行安装：
     git clone --recursive https://github.com/ethereum/solidity.git
     cd solidity
 
-如果你想参与 Solidity 的开发, 你可 Fork Solidity 后，用你个人的 Fork 库作为第二远程源：
+如果你想参与 Solidity 的开发, 你可分叉 Solidity 后，用你个人的分叉库作为第二远程源：
 
 .. code:: bash
 
