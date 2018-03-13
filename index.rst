@@ -2,15 +2,15 @@ Solidity
 ========
 
 .. image:: logo.svg
-:width: 120px
+    :width: 120px
     :alt: Solidity logo
-        :align: center
+    :align: center
 
-    Solidity 是一门面向合约的、为实现智能合约而创建的高级编程语言。这门语言受到了 C++，Python 和 Javascript 语言的影响，设计的目的是能在以太坊虚拟机（EVM）上运行。
+Solidity 是一门面向合约的、为实现智能合约而创建的高级编程语言。这门语言受到了 C++，Python 和 Javascript 语言的影响，设计的目的是能在以太坊虚拟机（EVM）上运行。
 
-    Solidity 是静态类型语言，支持继承、库和复杂的用户定义类型等特性。
+Solidity 是静态类型语言，支持继承、库和复杂的用户定义类型等特性。
 
-    下面您将会看到，使用 Solidity 语言，可以为投票、众筹、秘密竞价（盲拍）、多重签名的钱包以及其他应用创建合约。
+下面您将会看到，使用 Solidity 语言，可以为投票、众筹、秘密竞价（盲拍）、多重签名的钱包以及其他应用创建合约。
 
 .. note::
     目前尝试 Solidity 编程的最好的方式是使用 `Remix <https://remix.ethereum.org/>`_ （需要时间加载，请耐心等待）。Remix 是一个基于 Web 的 IDE，它可以让你编写 Solidity 智能合约，然后部署并运行该智能合约。
@@ -64,7 +64,7 @@ Solidity
 
 * `Solium <https://github.com/duaraghav8/Solium/>`_
     一种静态检查器，识别和修复 Solidity 中的风格以及安全问题。
-
+    
 * `Solhint <https://github.com/protofire/solhint>`_
     一种静态检查器，提供安全和风格指南以及智能合约验证的最佳实践规则。
 
@@ -85,7 +85,7 @@ Solidity
 * `Mix IDE <https://github.com/ethereum/mix/>`_
     基于 Qt 的 IDE，可以设计、调试和测试 Solidity 智能合约。
 
-* `Ethereum Studio <https://live.ether.camp/>`_
+* `Ethereum Studio <https://live.ether.camp/>`_		
     专门的网页 IDE，也提供一个完整以太坊环境的脚本访问。
 
 Solidity 工具列表
@@ -132,19 +132,19 @@ Solidity 工具列表
 :ref:`Keyword Index <genindex>`, :ref:`Search Page <search>`
 
 .. toctree::
-:maxdepth: 2
+   :maxdepth: 2
 
-       introduction-to-smart-contracts.rst
-       installing-solidity.rst
-       solidity-by-example.rst
-       solidity-in-depth.rst
-       security-considerations.rst
-       using-the-compiler.rst
-       metadata.rst
-       abi-spec.rst
-       julia.rst
-       style-guide.rst
-       common-patterns.rst
-       bugs.rst
-       contributing.rst
-       frequently-asked-questions.rst
+   introduction-to-smart-contracts.rst
+   installing-solidity.rst
+   solidity-by-example.rst
+   solidity-in-depth.rst
+   security-considerations.rst
+   using-the-compiler.rst
+   metadata.rst
+   abi-spec.rst
+   julia.rst
+   style-guide.rst
+   common-patterns.rst
+   bugs.rst
+   contributing.rst
+   frequently-asked-questions.rst
