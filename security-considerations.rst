@@ -7,10 +7,16 @@
 While it is usually quite easy to build software that works as expected,
 it is much harder to check that nobody can use it in a way that was **not** anticipated.
 
+尽管在通常情况下编写一个按照预期运行的软件很简单，
+但想要确保没有人会使用出乎意料的方式运行它就要难多了。
+
 In Solidity, this is even more important because you can use smart contracts
 to handle tokens or, possibly, even more valuable things. Furthermore, every
 execution of a smart contract happens in public and, in addition to that,
 the source code is often available.
+
+在Solidity中，这一点尤为重要，因为智能合约可以用来处理令牌，甚至有可能是更有价值的东西。
+除此之外，智能合约的每一次执行都是公开的，而且源代码也通常是容易获得的。
 
 Of course you always have to consider how much is at stake:
 You can compare a smart contract with a web service that is open to the
@@ -18,6 +24,12 @@ public (and thus, also to malicious actors) and perhaps even open source.
 If you only store your grocery list on that web service, you might not have
 to take too much care, but if you manage your bank account using that web service,
 you should be more careful.
+
+当然，你总是需要考虑有多大的风险：
+你可以将智能合约与公开的（当然也对恶意用户开放），甚至是开源的网络服务相比较。
+如果你只是在某个网络服务上存储你的购物清单，则可能不必太在意，
+但如果你使用那个网络服务管理您的银行帐户，
+那就需要当心了。
 
 This section will list some pitfalls and general security recommendations but
 can, of course, never be complete. Also, keep in mind that even if your
@@ -28,8 +40,15 @@ can be found in the
 that there is a bug bounty program that covers the code generator of the
 Solidity compiler.
 
+本节将列出一些陷阱和一般性的安全建议，但这绝对不全面。
+另外，请时刻注意的是即使你的智能合约代码没有bug，
+但编译器或者平台本身可能存在bug。
+一个已知的有关编译器的安全相关的bug可以在:ref:`list of known bugs<known_bugs>`找到，这个列表也是机器可读的。
+请注意其中有一个涵盖了Solidity编译器的代码生成器的bug悬赏项目。
+
 As always, with open source documentation, please help us extend this section
 (especially, some examples would not hurt)!
+有了开源的文档，请一如既往地帮助我们扩展这一节的内容（尤其是一些例子并不会造成伤害）！
 
 ********
 陷阱
