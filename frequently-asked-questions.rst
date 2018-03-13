@@ -63,7 +63,7 @@
 
 参考 `endowment_retriever.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/30_endowment_retriever.sol>`_ 。
 
-使用非固定函数（请求 ``sendTransaction`` ）来对合约中的变量进行递增
+使用非恒（non-constant）函数（请求 ``sendTransaction`` ）来对合约中的变量进行递增
 ===================================================================
 
 参考 `value_incrementer.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/20_value_incrementer.sol>`_ 。
@@ -334,7 +334,7 @@
 
 如果你不考虑安全性，可以做一个类似于 `coin flipper <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/35_coin_flipper.sol>`_ 的东西，反之，最好调用一份可以提供随机性的合约，比如 `RANDAO <https://github.com/randao/randao>`_ 。
 
-从另一份合约中的非固定函数获取返回值
+从另一份合约中的非恒定（non-constant）函数获取返回值
 ====================================
 
 关键点是调用者（合约）需要了解将被调用的函数。
