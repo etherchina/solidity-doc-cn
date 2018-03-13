@@ -32,10 +32,10 @@
 
 就是随交易一起发送的字节码“数据”。
 
-存在反编译程序吗？
+存在反编译器吗？
 ==================
 
-除了 `Porosity <https://github.com/comaeio/porosity>`_ 有点接近之外，Solidity没有严格意义上的反编译程序。由于诸如变量名、注释、代码格式等会在编译过程中丢失，所以完全反编译回源代码是没有可能的。
+除了 `Porosity <https://github.com/comaeio/porosity>`_ 有点接近之外，Solidity没有严格意义上的反编译器。由于诸如变量名、注释、代码格式等会在编译过程中丢失，所以完全反编译回源代码是没有可能的。
 
 很多区块链浏览器都能将字节码分解为一系列操作码。
 
@@ -48,7 +48,7 @@
 
 如果想让合约不再可用，建议的做法是修改合约内部状态来使其 **失效** ，让所有函数调用都变为无效返回。这样就无法使用这份合约了，而且发送过去的以太币也会被自动退回。
 
-现在正式回答这个问题：在构造器中，将creator赋值为 ``msg.sender`` ，并保存。然后调用 ``selfdestruct(creator);`` 来中止程序并进行退款。
+现在正式回答这个问题：在构造函数中，将creator赋值为 ``msg.sender`` ，并保存。然后调用 ``selfdestruct(creator);`` 来中止程序并进行退款。
 
 `例子 <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/05_greeter.sol>`_
 
