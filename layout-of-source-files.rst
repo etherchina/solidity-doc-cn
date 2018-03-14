@@ -20,8 +20,8 @@ Solidity 源文件结构
 
   pragma solidity ^0.4.0;
 
-这样，源文件将既不允许被低于 0.4.0 版本的编译器编译，
-也不允许被高于（包含） ``0.5.0`` 版本的编译器编译（第二个条件因使用 ``^`` 被添加）。
+这样，源文件将既不允许低于 0.4.0 版本的编译器编译，
+也不允许高于（包含） ``0.5.0`` 版本的编译器编译（第二个条件因使用 ``^`` 被添加）。
 这种做法的考虑是，编译器在 0.5.0 版本之前不会有重大变更，所以可确保源代码始终按预期被编译。
 上面例子中不固定编译器的具体版本号，因此编译器的补丁版也可以使用。
 
@@ -66,7 +66,7 @@ Solidity 源文件结构
 
   import {symbol1 as alias, symbol2} from "filename";
 
-...创建新的全局符号 ``alias`` 和 ``symbol2``。``symbol1`` 和 ``symbol2`` 分别从 ``"filename"`` 引入。
+...创建新的全局符号 ``alias`` 和 ``symbol2``，分别从 ``"filename"`` 引用 ``symbol1`` 和 ``symbol2`` 。
 
 另一种语法不属于 ES6，但或许更简便：
 
@@ -79,7 +79,7 @@ Solidity 源文件结构
 路径
 -----
 
-上面 ``filename`` 始终被视为以 ``/`` 当做目录分割符、``.`` 当做当前目录和``..`` 当做父目录的路径。
+上面 ``filename`` 总是被当做一个带有 ``/`` 作为目录分割符、``.`` 作为当前目录和 ``..`` 作为父目录的路径。
 路径以当前目录 ``.`` 或父目录 ``..`` 开头时，才能被视为相对路径，否则一律视为绝对路径。
 但只有当``.`` 或 ``..`` 后面跟随的字符是 ``/`` 时，它们才能被当做当前目录或父目录。
 
@@ -98,17 +98,17 @@ Solidity 源文件结构
 例如，``github.com/ethereum/dapp-bin/library`` 被重映射到 ``/usr/local/dapp-bin/library`` ，
 此时编译器将从重映射位置读取文件。如果指定了多个重映射，优先尝试重映射路径最长的一个。
 这允许将比如``""`` 被映射到 ``"/usr/local/include/solidity"``来进行“回退映射”。
-同时，这些重映射可取决于上下文，允许你配置要导入的包，比如不同版本的同名库。
+同时，这些重映射可取决于上下文，允许你配置要导入的包，比如同一个库的不同版本。
 
 **solc**:
 
 对于 solc（命令行编译器），这些重映射以 ``context:prefix=target`` 参数形式提供。
 其中，``context:`` 和 ``=target`` 部分是可选的（此时 target 默认为 prefix ）。
-所有重映射值都是常规文件被编译（包括他们的依赖），这个机制完全是向后兼容的（只要没文件名包含 = 或 : ），
+所有重映射值都是常规文件被编译（包括他们的依赖），这个机制完全是向后兼容的（只要文件名不包含 = 或 : ），
 因此这不是一个破坏性修改。
 在 ``content`` 目录下或之下的所有以 ``prefix`` 开头的导入文件都将被用 ``target`` 替换 ``prefix`` 来重定向。
 
-举个例子，如果你已克隆 ``github.com/ethereum/dapp-bin/`` 到本地 ``/usr/local/dapp-bin`` ，可在源文件中如下使用导入：
+举个例子，如果你已克隆 ``github.com/ethereum/dapp-bin/`` 到本地 ``/usr/local/dapp-bin`` ，可在源文件中使用：
 
 ::
 
@@ -139,7 +139,7 @@ source.sol
 **Remix**:
 
 `Remix <https://remix.ethereum.org/>`_ 提供一个为 github 源代码平台的自动重映射，它将通过网络自动获取文件：
-比如，你可使用 ``import "github.com/ethereum/dapp-bin/library/iterable_mapping.sol" as it_mapping;`` 导入一个 map 迭代器。
+比如，你可以使用 ``import "github.com/ethereum/dapp-bin/library/iterable_mapping.sol" as it_mapping;`` 导入一个 map 迭代器。
 
 未来， Remix 可能支持其他源代码平台。
 
@@ -162,7 +162,7 @@ source.sol
 
 
 此外，有另一种注释称为 natspec 注释，其文档还尚未编写。
-它们用三个反斜杠注释（``///``）或双星号开头的块注释（``/** ... */``），它们应该直接在函数声明或语句上使用。
+它们是用三个反斜杠（``///``）或双星号开头的块（``/** ... */``）书写，它们应该直接在函数声明或语句上使用。
 可在注释中使用 `Doxygen <https://en.wikipedia.org/wiki/Doxygen>`_ 样式的标签来文档化函数、
 标注形式校验通过的条件，和提供一个当用户试图调用一个函数时显示给用户的 **确认文本**。
 
@@ -174,14 +174,14 @@ source.sol
 
   /** @title Shape calculator. */
   contract shapeCalculator {
-    /** @dev Calculates a rectangle's surface and perimeter.
-    * @param w Width of the rectangle.
-    * @param h Height of the rectangle.
-    * @return s The calculated surface.
-    * @return p The calculated perimeter.
-    */
-    function rectangle(uint w, uint h) returns (uint s, uint p) {
-    s = w * h;
-    p = 2 * (w + h);
-    }
+      /** @dev Calculates a rectangle's surface and perimeter.
+      * @param w Width of the rectangle.
+      * @param h Height of the rectangle.
+      * @return s The calculated surface.
+      * @return p The calculated perimeter.
+      */
+      function rectangle(uint w, uint h) returns (uint s, uint p) {
+          s = w * h;
+          p = 2 * (w + h);
+      }
   }
