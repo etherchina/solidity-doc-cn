@@ -43,7 +43,8 @@ Solidity compiler.
 本节将列出一些陷阱和一般性的安全建议，但这绝对不全面。
 另外，请时刻注意的是即使你的智能合约代码没有bug，
 但编译器或者平台本身可能存在bug。
-一个已知的有关编译器的安全相关的bug可以在:ref:`list of known bugs<known_bugs>`找到，这个列表也是机器可读的。
+一个已知的有关编译器的安全相关的bug可以在 :ref:`list of known bugs<known_bugs>`
+找到，这个列表也是机器可读的。
 请注意其中有一个涵盖了Solidity编译器的代码生成器的bug悬赏项目。
 
 As always, with open source documentation, please help us extend this section
@@ -55,15 +56,21 @@ As always, with open source documentation, please help us extend this section
 ********
 
 Private Information and Randomness
+隐私信息和随机性
 ==================================
 
 Everything you use in a smart contract is publicly visible, even
 local variables and state variables marked ``private``.
 
+在智能合约中你所用的一切都是公开可见的，即便是将本地变量和状态变量标记成 ``private``。
+
 Using random numbers in smart contracts is quite tricky if you do not want
 miners to be able to cheat.
 
-Re-Entrancy
+如果你不想让矿工作弊的话，在智能合约中使用随机数是一种很狡猾的手段。
+
+Re-Entranc
+重入
 ===========
 
 Any interaction from a contract (A) with another contract (B) and any transfer
@@ -71,6 +78,10 @@ of Ether hands over control to that contract (B). This makes it possible for B
 to call back into A before this interaction is completed. To give an example,
 the following code contains a bug (it is just a snippet and not a
 complete contract):
+
+一个合约A与另一个合约B的任何交互以及任何以太币交易的控制权都归属于合约B。
+这使得合约B能够在交易结束前回调A中的代码。
+举个例子，下面的代码中有一个bug（这只是一个代码段，不是完整的合约）：
 
 ::
 
@@ -95,6 +106,11 @@ basically retrieve all the Ether in the contract. In particular, the
 following contract will allow an attacker to refund multiple times
 as it uses ``call`` which forwards all remaining gas by default:
 
+这里的问题不是很严重，因为有限的gas也作为 ``send`` 的一部分，但仍然暴露了一个缺陷：
+以太币的传输过程中总是可以包含代码执行，所以接收者可以是一个回调进入 ``withdraw`` 的合约。
+这就会使其多次得到退款，从而将合约中的全部以太币取走。
+特别地，下面的合约将允许一个攻击者多次得到退款，因为它使用了 ``call`` ，默认发送所有剩余的gas。
+
 ::
 
     pragma solidity ^0.4.0;
@@ -112,6 +128,8 @@ as it uses ``call`` which forwards all remaining gas by default:
 
 To avoid re-entrancy, you can use the Checks-Effects-Interactions pattern as
 outlined further below:
+
+为了避免重入，你可以使用下面的 Checks-Effects-Interactions 模式：
 
 ::
 
@@ -132,6 +150,10 @@ Note that re-entrancy is not only an effect of Ether transfer but of any
 function call on another contract. Furthermore, you also have to take
 multi-contract situations into account. A called contract could modify the
 state of another contract you depend on.
+
+请注意重入不仅是以太币传输的其中一个影响，还包括任何对另一个合约的函数调用。
+更进一步说，你也不得不考虑多合约的情况。
+一个被调用的合约可以修改你所依赖的另一个合约的状态。
 
 Gas Limit and Loops
 ===================
