@@ -9,12 +9,12 @@
 版本
 ==========
 
-Solidity的版本遵循 `语义化版本原则 <https://semver.org>`_ ，除了正式发布的版本外，Solidity还有一个**每日开发构建**（nightly development builds）可用。这个每晚构建的版本不保证能够正常工作，尽管尽了最大的努力，但仍可能包含无文档的或重大的改动。我们建议使用最新版本。 下面的包安装程序将使用最新版本。
+Solidity的版本遵循 `语义化版本原则 <https://semver.org>`_，作为发布版本的补充， **每日开发构建** （nightly development builds）也是可用的。这个每日开发构建不保证能正常工作，尽管尽了最大的努力，但仍可能包含未记录的和／或重大的改动。我们推荐使用最新的发布版本。下面的包安装程序将使用最新发布版本。
 
 Remix
 =====
 
-  推荐使用 Remix 来开发简单合约和快速学习 Solidity。
+*我们推荐使用 Remix 来开发简单合约和快速学习 Solidity。*
 
 `Remix <https://remix.ethereum.org/>`_ 可在线使用，而无需安装任何东西。如果你想离线使用，可按 https://github.com/ethereum/browser-solidity/tree/gh-pages 的页面说明下载 zip 文件来使用。
 该页面有进一步详细说明如何安装 Solidity 命令行编译器到你计算机上。如果你刚好要处理大型合约，或者需要更多的编译选项，那么你应该选择使用命令行编译器 solc。
@@ -24,7 +24,7 @@ Remix
 npm / Node.js
 =============
 
-使用 `npm` 可以便捷地安装Solidity编译器solcjs。但该 `solcjs` 程序的功能相对于本页下面的所有其他选项都要少。在 :ref:`commandline-compiler` 一章中，我们假定你使用的是完整功能的编译器。 所以，如果你是从 npm 安装 solcjs ，就此打住，直接跳到 `solc-js  <https://github.com/ethereum/solc-js>`_ 去了解。
+使用 `npm` 可以便捷地安装Solidity编译器solcjs。但该 `solcjs` 程序的功能相对于本页下面的所有其他选项都要少。在 :ref:`commandline-compiler` 一章中，我们假定你使用的是完整功能的编译器。 所以，如果你是从 `npm` 安装 `solcjs` ，就此打住，直接跳到 `solc-js  <https://github.com/ethereum/solc-js>`_ 去了解。
 
 
 注意: `solc-js <https://github.com/ethereum/solc-js>`_ 是利用 Emscripten 从 C++ 版的 solc 跨平台编译为 JavaScript 的，因此，可在 JavaScript 项目中使用 solcjs（如同 Remix）。
@@ -42,14 +42,14 @@ npm / Node.js
 Docker
 ======
 
-我们为solc编译器提供了最新的docker版本。``stable``仓库里的是已发布的版本，``nightly``
+我们为编译器提供了最新的docker构建。 ``stable`` 仓库里的是已发布的版本，``nightly``
 仓库则是在开发分支中的带有不稳定变更的版本。
 
 .. code:: bash
 
     docker run ethereum/solc:stable solc --version
 
-目前，docker 镜像只含有 solc 的可执行程序，因此你需要额外的工作去链接源和输出目录。
+目前，docker 镜像只含有 solc 的可执行程序，因此你需要额外的工作去把源代码和输出目录连接起来。
 
 
 二进制包
@@ -174,13 +174,13 @@ Solidity 在 OS X 下构建，必须 `安装 Homebrew <http://brew.sh>`_
 在Windows下构建Solidity，需下载的依赖软件包：
 
 +------------------------------+-------------------------------------------------------+
-| 软件                           备注                                            |
+| 软件                         | 备注                                                  |
 +==============================+=======================================================+
-| `Git for Windows`_           | 从Github上获取源码的命令行工具  |
+| `Git for Windows`_           | C从Github上获取源码的命令行工具                       |
 +------------------------------+-------------------------------------------------------+
-| `CMake`_                     | 跨平台构建文件生成器                 |
+| `CMake`_                     | 跨平台构建文件生成器                                  |
 +------------------------------+-------------------------------------------------------+
-| `Visual Studio 2015`_        | C++ 编译开发环境                    |
+| `Visual Studio 2015`_        | C++编译开发环境                                       |
 +------------------------------+-------------------------------------------------------+
 
 .. _Git for Windows: https://git-scm.com/download/win
@@ -191,7 +191,7 @@ Solidity 在 OS X 下构建，必须 `安装 Homebrew <http://brew.sh>`_
 外部依赖
 ---------------------
 
-在 macOS、Windows和其他 Linux 发行版上，有一个脚本可以“一键”安装所需的外部依赖库。本来是需要人工参与的多步操作，现在可一键执行:
+在 macOS、Windows和其他 Linux 发行版上，有一个脚本可以“一键”安装所需的外部依赖库。本来是需要人工参与的多步操作，现在只需一行命令:
 
 .. code:: bash
 
@@ -232,7 +232,7 @@ Solidity 使用 CMake 来配置构建。Linux、macOS 和其他 Unix系统上的
     cd build
     cmake -G "Visual Studio 14 2015 Win64" ..
 
-命令的最后一行会在 build 目录下创建一个 **solidity.sln** 文件，双击后，默认会使用 Visual Studio 打开。我们建议在VS上创建 RelWithDebugInfo 配置文件。
+这组指令的最后一句，会在 build 目录下创建一个 **solidity.sln** 文件，双击后，默认会使用 Visual Studio 打开。我们建议在VS上创建 **RelWithDebugInfo** 配置文件。
 
 或者用命令创建：
 
@@ -253,11 +253,11 @@ Solidity 版本名包含四部分：
 - 版本号
 - 预发布版本号，通常为 ``develop.YYYY.MM.DD`` 或者 ``nightly.YYYY.MM.DD``
 - 以 ``commit.GITHASH`` 格式展示的提交号
-- 含平台和编译器的详细信息的多条目内容
+- 由若干条平台、编译器详细信息构成的平台标识
 
 如果本地有修改，则 commit 部分有后缀 ``.mod``。
 
-此四部分按照 Semver 要求组成，第2部分等同 Semver 预发布版本号，第三和四部分组成 Semver 版本编译信息。
+这些部分按照 Semver 的要求来组合， Solidity 预发布版本号等价于 Semver 预发布版本号， Solidity 提交号和平台标识则组成 Semver 的构建元数据。
 
 发行版样例：``0.4.8+commit.60cc1668.Emscripten.clang``.
 
@@ -266,7 +266,7 @@ Solidity 版本名包含四部分：
 版本信息详情
 =====================================
 
-在版本发布之后，补丁版本号会增加，因为我们假定只有修补程序级别发生变化。当变更被合并后，版本应该根据semver和更改的严重程度进行调整。最后，发行版本总是与当前夜间版本的版本的版本号一致，但没有``预发布版``说明符。
+在版本发布之后，补丁版本号会增加，因为我们假定只有补丁级别的变更会在之后发生。当变更被合并后，版本应该根据semver和变更的剧烈程度进行调整。最后，发行版本总是与当前每日构建版本的版本号一致，但没有 ``prerelease`` 指示符。
 
 例如：
 
