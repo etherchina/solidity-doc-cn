@@ -155,7 +155,7 @@ state of another contract you depend on.
 更进一步说，你也不得不考虑多合约的情况。
 一个被调用的合约可以修改你所依赖的另一个合约的状态。
 
-Gas Limit and Loops
+Gas Limit and Loops Gas限制和循环
 ===================
 
 Loops that do not have a fixed number of iterations, for example, loops that depend on storage values, have to be used carefully:
@@ -164,6 +164,14 @@ normal operation, the number of iterations in a loop can grow beyond the block g
 contract to be stalled at a certain point. This may not apply to ``constant`` functions that are only executed
 to read data from the blockchain. Still, such functions may be called by other contracts as part of on-chain operations
 and stall those. Please be explicit about such cases in the documentation of your contracts.
+
+
+必须谨慎使用没有固定迭代次数的循环，例如依赖于存储值的循环：
+由于区块gas有限，交易只能消耗一定数量的gas。
+无论是明确指出的还是正常运行过程中，循环中迭代的次数都有可能超出区块gas的限制，从而导致合约在某个时刻骤然停止。
+这可能不适用于只被用来从区块链中读取数据的 ``常量`` 函数。
+尽管如此，这些函数仍然可能会被其它合约当作链上操作的一部分被调用并将其拖延。
+请在合同文件中明确说明这些情况。
 
 Sending and Receiving Ether
 ===========================
