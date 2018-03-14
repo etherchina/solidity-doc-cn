@@ -57,7 +57,7 @@ Docker
 
 可在`solidity/releases <https://github.com/ethereum/solidity/releases>`_下载 Solidity 的二进制安装包。
 
-对于Ubuntu，我们也提供PPAs。通过以下命令，可获取最新的稳定版本：
+对于 Ubuntu ，我们也提供 PPAs 。通过以下命令，可获取最新的稳定版本：
 
 .. code:: bash
 
@@ -136,7 +136,7 @@ Gentoo Linux 下也提供了安装包，可使用``emerge``进行安装：
     git clone --recursive https://github.com/ethereum/solidity.git
     cd solidity
 
-如果你想参与 Solidity 的开发, 你可分叉 Solidity 后，用你个人的分叉库作为第二远程源：
+如果你想参与 Solidity 的开发, 你可分叉 Solidity 源码库后，用你个人的分叉库作为第二远程源：
 
 .. code:: bash
 
@@ -272,8 +272,8 @@ Solidity 版本名包含四部分：
 
 0. 0.4.0 版本发布
 1. 从现在开始，每晚构建为 0.4.1 版本
-2. 引入非破坏性变更 - 不改变版本号
-3. 引入破坏性变更 - 版本跳跃到 0.5.0
+2. 引入非破坏性变更 —— 不改变版本号
+3. 引入破坏性变更 —— 版本跳跃到 0.5.0
 4. 0.5.0 版本发布
 
 该方式与 :ref:`version pragma <version_pragma>` 一起运行良好。
