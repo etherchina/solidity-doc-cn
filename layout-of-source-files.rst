@@ -108,7 +108,8 @@ Solidity 源文件结构
 因此这不是一个破坏性修改。
 在 ``content`` 目录下或之下的所有以 ``prefix`` 开头的导入文件都将被用 ``target`` 替换 ``prefix`` 来重定向。
 
-举个例子，如果你已克隆 ``github.com/ethereum/dapp-bin/`` 到本地 ``/usr/local/dapp-bin`` ，可在源文件中使用：
+举个例子，如果你已克隆 ``github.com/ethereum/dapp-bin/`` 到本地 ``/usr/local/dapp-bin`` ，
+可在源文件中使用：
 
 ::
 
@@ -166,7 +167,7 @@ source.sol
 可在注释中使用 `Doxygen <https://en.wikipedia.org/wiki/Doxygen>`_ 样式的标签来文档化函数、
 标注形式校验通过的条件，和提供一个当用户试图调用一个函数时显示给用户的 **确认文本**。
 
-在下面的例子中，记录合约的标题、两个入参和两个返回值的说明：
+在下面的例子中，我们记录了合约的标题、两个入参和两个返回值的说明：
 
 ::
 
