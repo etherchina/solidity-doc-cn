@@ -173,7 +173,7 @@ and stall those. Please be explicit about such cases in the documentation of you
 尽管如此，这些函数仍然可能会被其它合约当作链上操作的一部分被调用并将其拖延。
 请在合同文件中明确说明这些情况。
 
-Sending and Receiving Ether
+Sending and Receiving Ether 发送和接收以太币
 ===========================
 
 - Neither contracts nor "external accounts" are currently able to prevent that someone sends them Ether.
@@ -181,12 +181,23 @@ Sending and Receiving Ether
   to move Ether without creating a message call. One way is to simply "mine to"
   the contract address and the second way is using ``selfdestruct(x)``.
 
+- 目前无论是合约还是“外部账户”都不能阻止有人给他们发送以太币。
+  合约可以做出翻译并且拒绝一个常规的交易，但还有些方法可以不通过创建消息来发送以太币。
+  其中一种方法就是单纯地向合约地址“挖矿”，另一种方法就是使用 `selfdestruct(x)`。
+
 - If a contract receives Ether (without a function being called), the fallback function is executed.
   If it does not have a fallback function, the Ether will be rejected (by throwing an exception).
   During the execution of the fallback function, the contract can only rely
   on the "gas stipend" (2300 gas) being available to it at that time. This stipend is not enough to access storage in any way.
   To be sure that your contract can receive Ether in that way, check the gas requirements of the fallback function
   (for example in the "details" section in Remix).
+
+- 如果一个合约收到了以太币（且没有调用函数），就会执行回退函数。
+  如果没有回退函数，那么以太币会被拒收（同时会抛出异常）。
+  在回退函数执行过程中，合约只能依靠此时可用的“gas津贴”（2300gas）来执行。
+  这笔津贴并不足以任何方式访问存储。
+  为了确保你的合约可以通过这种方式收到以太币，请你核对回退函数所需的gas数量
+  （在Remix的“详细”章节会举例说明）。
 
 - There is a way to forward more gas to the receiving contract using
   ``addr.call.value(x)()``. This is essentially the same as ``addr.transfer(x)``,
@@ -196,7 +207,16 @@ Sending and Receiving Ether
   into the sending contract or other state changes you might not have thought of.
   So it allows for great flexibility for honest users but also for malicious actors.
 
+- 有一种方法可以通过使用 ``addr.call.value(x)()`` 向接收合约发送更多的gas。
+  这在根本上跟 ``addr.transfer(x)`` 是一样的，
+  只不过前者发送所有剩余的gas，并且使得接收者有能力执行更加昂贵的步骤
+  （它只会放回一个错误代码，而且也不会自动传播这个错误）。
+  这可能包括回调发送合约或者你能想到的其它状态改变的情况。
+  因此这种方法无论是给良好的用户还是恶意的行为都提供了极大的灵活性。
+
 - If you want to send Ether using ``address.transfer``, there are certain details to be aware of:
+
+- 如果你想要使用 ``address.transfer`` 发送以太币，你需要注意以下几个细节：
 
   1. If the recipient is a contract, it causes its fallback function to be executed which can, in turn, call back the sending contract.
   2. Sending Ether can fail due to the call depth going above 1024. Since the caller is in total control of the call
@@ -209,6 +229,15 @@ Sending and Receiving Ether
      If you use ``transfer`` or ``send`` with a return value check, this might provide a
      means for the recipient to block progress in the sending contract. Again, the best practice here is to use
      a :ref:`"withdraw" pattern instead of a "send" pattern <withdrawal_pattern>`.
+
+  1. 如果接收者是一个合约，它会执行自己的回退函数，从而可以回调发送以太币的合约。
+  2. 如果调用的深度超过1024，发送以太币也会失败。因此调用者对调用深度有完全的控制权，他们可以强制使这次发送失效；
+     请考虑这种可能性，或者使用 ``send`` 并且确保每次都核对它的返回值。
+     更好的方法是使用一种接收者可以取回以太币的方式编写你的合约。
+  3. 发送以太币也可能因为接收方合约的执行所需的gas多余给分配的gas而失败
+     （可以显式地使用 ``require`` ， ``assert``， ``revert`` ， ``throw`` 或者因为这个操作过于昂贵） - “gas不够用了”。
+     如果你使用 ``transfer`` 或者 ``send`` 的同时带有返回值检查，这就为接收者提供了在发送合约中阻断进程的方法。
+     再次说明，最佳做法是使用 :ref:`"withdraw" pattern instead of a "send" pattern <withdrawal_pattern>`。
 
 Callstack Depth
 ===============
