@@ -239,7 +239,7 @@ Sending and Receiving Ether 发送和接收以太币
      如果你使用 ``transfer`` 或者 ``send`` 的同时带有返回值检查，这就为接收者提供了在发送合约中阻断进程的方法。
      再次说明，最佳做法是使用 :ref:`"withdraw" pattern instead of a "send" pattern <withdrawal_pattern>`。
 
-Callstack Depth
+Callstack Depth 调用栈深度
 ===============
 
 External function calls can fail any time because they exceed the maximum
@@ -247,14 +247,23 @@ call stack of 1024. In such situations, Solidity throws an exception.
 Malicious actors might be able to force the call stack to a high value
 before they interact with your contract.
 
+外部函数调用可能随时会失败，因为他们可能超过最大调用栈的值1024.
+在这种情况下，Solidity会抛出一个异常。
+恶意的行为也许能够在与你的合约交互之前强制将调用栈设置成一个比较高的值。
+
 Note that ``.send()`` does **not** throw an exception if the call stack is
 depleted but rather returns ``false`` in that case. The low-level functions
 ``.call()``, ``.callcode()`` and ``.delegatecall()`` behave in the same way.
+
+请注意，使用 ``.send()`` 时如果超出调用栈并不会抛出异常，而是会返回 ``false`` 。
+低级的函数比如 ``.call()`` ， ``.callcode()`` 和 ``.delegatecall()`` 也都是这样的。
 
 tx.origin
 =========
 
 Never use tx.origin for authorization. Let's say you have a wallet contract like this:
+
+永远不要使用 tx.origin 做授权。假设你有一个如下的钱包合约：
 
 ::
 
@@ -275,6 +284,7 @@ Never use tx.origin for authorization. Let's say you have a wallet contract like
     }
 
 Now someone tricks you into sending ether to the address of this attack wallet:
+现在有人欺骗你向下面这个攻击钱包的地址发送以太币：
 
 ::
 
@@ -297,6 +307,10 @@ Now someone tricks you into sending ether to the address of this attack wallet:
     }
 
 If your wallet had checked ``msg.sender`` for authorization, it would get the address of the attack wallet, instead of the owner address. But by checking ``tx.origin``, it gets the original address that kicked off the transaction, which is still the owner address. The attack wallet instantly drains all your funds.
+
+如果你的钱包通过核查 ``msg.sender`` 验证了发送方的身份，你就会得到攻击者钱包的地址，而不是所有者的地址。
+但是如果通过核查 ``tx.origin`` 得到的是启动交易的原始地址，该地址仍然是所有者的地址。
+攻击者钱包会立即将你的资金抽出。
 
 
 Minor Details
