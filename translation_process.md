@@ -45,7 +45,7 @@ EtherChina 翻译流程
 2. 进行试译流程，就是翻译一个段落，以 1000 字为限，时间限制为 1 天。
 3. 如果通过就进入 solidity 翻译小组，进入翻译流程。
 
-没有Github操作经验的同学，请参考[Github操作入门]（https://github.com/etherchina/solidity-doc-cn/wiki）
+没有Github操作经验的同学，请参考[Github操作入门](https://github.com/etherchina/solidity-doc-cn/wiki)
 
 ### 项目进度状态页
 
