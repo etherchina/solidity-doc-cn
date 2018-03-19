@@ -339,14 +339,18 @@ Minor Details 细枝末节
 推荐做法
 ***************
 
-Restrict the Amount of Ether
+Restrict the Amount of Ether 限定以太币的数量
 ============================
 
 Restrict the amount of Ether (or other tokens) that can be stored in a smart
 contract. If your source code, the compiler or the platform has a bug, these
 funds may be lost. If you want to limit your loss, limit the amount of Ether.
 
-Keep it Small and Modular
+限定存储在一个智能合约中以太币（或者其它通证）的数量。
+如果你的源代码或者平台出现了bug，可能会导致这些资产丢失。
+如果你想控制你的损失，就要限定以太币的数量。
+
+Keep it Small and Modular 保持合约简练且模块化
 =========================
 
 Keep your contracts small and easily understandable. Single out unrelated
@@ -355,30 +359,49 @@ about source code quality of course apply: Limit the amount of local variables,
 the length of functions and so on. Document your functions so that others
 can see what your intention was and whether it is different than what the code does.
 
-Use the Checks-Effects-Interactions Pattern
+保持你的合约短小精炼且易于理解。
+在其他合同或库中找出无关的功能。
+有关源码质量可以采用的一般建议：
+限制局部变量的数量以及函数的长度等等。
+将实现的功能文档化，这样别人看到代码的时候就可以理解你的意图，并判断代码是否按照正确的意图实现。
+
+Use the Checks-Effects-Interactions Pattern 使用 Checks-Effects-Interactions 模式
 ===========================================
 
 Most functions will first perform some checks (who called the function,
 are the arguments in range, did they send enough Ether, does the person
 have tokens, etc.). These checks should be done first.
 
+大多数功能会首先做一些检查工作（例如函数从哪里被调用，参数是否在取值范围之内，它们是否发送了足够的以太币，用户是否具有通证等等）。
+这些检查工作应该首先被完成。
+
 As the second step, if all checks passed, effects to the state variables
 of the current contract should be made. Interaction with other contracts
 should be the very last step in any function.
+
+第二步，如果所有检查都通过了，则应该对当前合同的状态变量产生影响。
+与其它合同的交互应该是任何功能的最后一步。
 
 Early contracts delayed some effects and waited for external function
 calls to return in a non-error state. This is often a serious mistake
 because of the re-entrancy problem explained above.
 
+早期合同延迟了一些效果的产生，并等待外部函数调用的结果以非错误状态返回。
+由于上文所述的重入问题，这通常会导致严重的后果。
+
 Note that, also, calls to known contracts might in turn cause calls to
 unknown contracts, so it is probably better to just always apply this pattern.
 
-Include a Fail-Safe Mode
+请注意，对已知合同的调用也可能导致对未知合同的调用，所以最好是一直保持使用这个模式编写代码。
+
+Include a Fail-Safe Mode 保留故障-安全模式
 ========================
 
 While making your system fully decentralised will remove any intermediary,
 it might be a good idea, especially for new code, to include some kind
 of fail-safe mechanism:
+
+尽管将系统完全去中心化可以省去许多中间环节，但保留某种故障-安全模式仍然是好的做法：
 
 You can add a function in your smart contract that performs some
 self-checks like "Has any Ether leaked?",
@@ -386,11 +409,17 @@ self-checks like "Has any Ether leaked?",
 Keep in mind that you cannot use too much gas for that, so help through off-chain
 computations might be needed there.
 
+你可以在你的智能合约中增加一个函数实现某种程度上的自检查，比如“以太币是否会泄露？”，
+“通证的总和是否与合约的余额相等？”等等。
+请记住，你不能使用太多的gas，所以可能需要通过脱链计算来辅助。
+
 If the self-check fails, the contract automatically switches into some kind
 of "failsafe" mode, which, for example, disables most of the features, hands over
 control to a fixed and trusted third party or just converts the contract into
 a simple "give me back my money" contract.
 
+如果自检查没有通过，合约就会自动切换到某种“故障安全”模式，
+例如，关闭所有的功能，将控制权交给某个固定的可信第三方，或者将合约转换成一个简单的“退回我的钱”合约。
 
 *******************
 形式化验证
@@ -401,7 +430,13 @@ proof that your source code fulfills a certain formal specification.
 The specification is still formal (just as the source code), but usually much
 simpler.
 
+使用形式化验证可以执行自动化的数学证明，保证源代码符合特定的正式规范。
+规范仍然是正式的（就像源代码一样），但通常要简单得多。
+
 Note that formal verification itself can only help you understand the
 difference between what you did (the specification) and how you did it
 (the actual implementation). You still need to check whether the specification
 is what you wanted and that you did not miss any unintended effects of it.
+
+请注意形式化证明本身只能帮助你理解你做的（规范）和你怎么做（实际的实现）的之间的差别。
+你仍然需要检查这个规范是否是您想要的，而且没有漏掉由它产生的任何不在意料范围之内的效果。
