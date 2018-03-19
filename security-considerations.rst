@@ -313,7 +313,7 @@ If your wallet had checked ``msg.sender`` for authorization, it would get the ad
 攻击者钱包会立即将你的资金抽出。
 
 
-Minor Details
+Minor Details 细枝末节
 =============
 
 - In ``for (var i = 0; i < arrayName.length; i++) { ... }``, the type of ``i`` will be ``uint8``, because this is the smallest type that is required to hold the value ``0``. If the array has more than 255 elements, the loop will not terminate.
@@ -326,6 +326,14 @@ Minor Details
   of ``0xff000001`` and with ``0x00000001``. Both are fed to the contract and both will
   look like the number ``1`` as far as ``x`` is concerned, but ``msg.data`` will
   be different, so if you use ``keccak256(msg.data)`` for anything, you will get different results.
+
+- 在 ``for (var i = 0; i < arrayName.length; i++) { ... }`` 中， ``i`` 的类型会变为 ``uint8`` ，
+因为这是保存 ``0`` 值所需的最小类型。如果数组有超过255个元素，则循环不会终止。
+- 编译器现在不执行函数的 ``constant`` 关键字。此外，EVM也不执行，因此如果一个合约中“声称”是常量的函数可能仍然会导致状态发生变化。
+- 不占用完整32字节的类型可能包含“脏高位”。这在当你访问 ``msg.data`` 的时候尤为重要 —— 它带来了延展性风险：
+  你可以使用带有原始字节参数 ``0xff000001`` 和``0x00000001`` 的函数 ``f(uint8 x)`` 来构造交易。
+  这两个参数都会被提供给合约，并且当 ``x`` 被调用时，两者都会看起来像数字 ``1``，
+  但 ``msg.data`` 会不一样，所以如果你无论怎么使用 ``keccak256(msg.data)`` ，你都后悔得到不同的结果。
 
 ***************
 推荐做法
