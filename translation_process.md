@@ -2,6 +2,7 @@ EtherChina 翻译流程
 ==================
 
 当前 EtherChina 正在进行的翻译项目为 [Solidity 官方文档](https://github.com/ethereum/solidity/blob/develop/docs/index.rst)。
+英文版官方文档获取地址是 [Solidity 官方文档版本快照](https://github.com/etherchina/solidity/tree/develop/docs)，请使用此版本快照翻译。
 
 本项目进行的翻译遵循以下原则：
 
