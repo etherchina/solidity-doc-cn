@@ -13,10 +13,10 @@
 
 许多项目会实施他们自己的编码风格指南。在和本指南约定冲突的情况下，应优先使用具体项目的风格指南。
 
-本风格指南中的结构和许多建议是取自python的`pep8 style guide <https://www.python.org/dev/peps/pep-0008/>`_.
+本风格指南中的结构和许多建议是取自python的 `pep8 style guide <https://www.python.org/dev/peps/pep-0008/>`_。
 
 本指南并不是以指导正确或最佳的solidity编码方式为目的。本指南的目的是保持代码的一致性。
-来自python的引用文档`pep8 <https://www.python.org/dev/peps/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds>`_
+来自python的引用文档`pep8 <https://www.python.org/dev/peps/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds>`_。
 很好的阐述了这个概念。
 
     风格指南是关于一致性的。与此风格指南的一致性非常重要。项目中的一致性更重要。一个模块或功能内的一致性是最重要的。
@@ -148,7 +148,7 @@ Imports规范
 函数顺序
 ==================
 
-排序有助于读者识别他们可以调用哪些函数，并更容易地找到构造函数和回退函数定义。
+排序有助于读者识别他们可以调用哪些函数，并更容易地找到构造函数和回退函数的定义。
 
 功能应根据其可见性和顺序进行分组：
 
@@ -560,7 +560,7 @@ Imports规范
 
 允许：：
 
-  函数 shortFunction() public { doSomething(); }
+  function shortFunction() public { doSomething(); }
 
 这些函数声明的准则旨在提高可读性。
 因为本指南不会涵盖所有内容，作者应该自行判断函数声明的可能排列方式。
@@ -654,11 +654,11 @@ Imports规范
 * ``UPPERCASE`` （大写）
 * ``UPPER_CASE_WITH_UNDERSCORES`` （大写和下划线）
 * ``CapitalizedWords`` (骆驼命名法，首字母大写）
-* ``mixedCase`` (混合命名法，区分于首字母大写的初始字母小写!)
+* ``mixedCase`` (混合命名法，区别于首字母大写的初始字母小写!)
 * ``Capitalized_Words_With_Underscores`` (首字母大写和下划线)
 
 ..注意:: 当使用骆驼命名法进行首字母缩写时，大写缩写中的所有字母。 因此HTTPServerError比HttpServerError好。
- 当使用混合名称命名时，除了保留第一个小写字母（如果它是名称的开头），大写缩写中的所有字母。
+ 当使用混合名称命名时，除了保留第一个缩写小写（如果它是名称的开头），大写缩写中的所有字母。
  因此xmlHTTPRequest比XMLHTTPRequest更好。
 
 
