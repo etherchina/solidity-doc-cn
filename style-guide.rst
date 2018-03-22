@@ -9,14 +9,14 @@
 ************
 
 本指南旨在约定solidity代码的编码规范。本指南是不断变化演进的，旧的、过时的编码规范会被淘汰，
-而新的有用的规范会被添加进来。
+而新的、有用的规范会被添加进来。
 
-许多项目会实施他们自己的编码风格指南。在和本指南约定冲突的情况下，应优先使用具体项目的风格指南。
+许多项目会实施他们自己的编码风格指南。如遇冲突，应优先使用具体项目的风格指南。
 
 本风格指南中的结构和许多建议是取自python的 `pep8 style guide <https://www.python.org/dev/peps/pep-0008/>`_。
 
-本指南并不是以指导正确或最佳的solidity编码方式为目的。本指南的目的是保持代码的一致性。
-来自python的引用文档`pep8 <https://www.python.org/dev/peps/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds>`_。
+本指南并*不是*以指导正确或最佳的solidity编码方式为目的。本指南的目的是保持代码的*一致性*。
+来自python的参考文档`pep8 <https://www.python.org/dev/peps/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds>`_。
 很好的阐述了这个概念。
 
     风格指南是关于一致性的。与此风格指南的一致性非常重要。项目中的一致性更重要。一个模块或功能内的一致性是最重要的。
@@ -159,7 +159,7 @@ Imports规范
 - 内部函数和变量
 - 私有函数和变量
 
-在一个分组中，最后放置“常量”函数。
+在一个分组中，最后放置``常量``函数。
 
 正确写法::
 
@@ -232,7 +232,7 @@ Imports规范
 
     function singleLine() public { spam(); }
 
-逗号，分号之前的立即数：
+紧接在逗号，分号之前：
 
 正确写法::
 
@@ -277,9 +277,9 @@ Imports规范
 用大括号表示一个合约，库、函数和结构
 应该：
 
-*开括号与声明应在同一行
-*闭括号在与之前函数声明对应的开括号保持同一缩进级别上另起一行.
-*开括号前应该有一个空格。
+* 开括号与声明应在同一行
+* 闭括号在与之前函数声明对应的开括号保持同一缩进级别上另起一行.
+* 开括号前应该有一个空格。
 
 正确写法::
 
@@ -300,9 +300,9 @@ Imports规范
         }
     }
 
-对于控制结构“if”，“else”，“while”，"for"的实施建议与以上相同。
+对于控制结构 ``if``， ``else``， ``while``， ``for``的实施建议与以上相同。
 
-另外，诸如“if”，“else”，“while”，"for"这类的控制结构和条件表达式的块之间应该有一个单独的空格，
+另外，诸如 ``if``， ``else``， ``while``， ``for``这类的控制结构和条件表达式的块之间应该有一个单独的空格，
 同样的，条件表达式的块和开括号之间也应该有一个空格。
 
 正确写法::
@@ -343,7 +343,7 @@ Imports规范
             value: 42
         }));
 
-对于具有“else”或“else if”子句的“if”块，“else”应该是与“if”的闭大括号放在同一行上。 这一规则区别于
+对于具有 ``else``或 ``else if``子句的 ``if``块， ``else``应该是与 ``if``的闭大括号放在同一行上。 这一规则区别于
 其他块状结构。
 
 正确写法::
@@ -517,6 +517,49 @@ Imports规范
         doSomething();
     }
 
+多路输出参数和返回语句应遵循推荐统一风格，可参考 :ref:`Maximum Line Length <maximum_line_length>` 章节。
+正确写法::
+
+    function thisFunctionNameIsReallyLong(
+        address a,
+        address b,
+        address c
+    )
+        public
+        returns (
+            address someAddressName,
+            uint256 LongArgument,
+            uint256 Argument
+        )
+    {
+        doSomething()
+
+        return (
+            veryLongReturnArg1,
+            veryLongReturnArg2,
+            veryLongReturnArg3
+        );
+    }
+
+错误写法::
+
+    function thisFunctionNameIsReallyLong(
+        address a,
+        address b,
+        address c
+    )
+        public
+        returns (address someAddressName,
+                 uint256 LongArgument,
+                 uint256 Argument)
+    {
+        doSomething()
+
+        return (veryLongReturnArg1,
+                veryLongReturnArg1,
+                veryLongReturnArg1);
+    }
+
 对于继承合约中需要参数构造函数，如果函数声明很长或难以阅读，则建议将基构造函数和修饰符下沉放在
 新的一行上。
 
@@ -587,7 +630,7 @@ Imports规范
 其他建议
 =====================
 
-*字符串应该用双引号而不是单引号。
+* 字符串应该用双引号而不是单引号。
 
 正确写法::
 
@@ -599,7 +642,7 @@ Imports规范
       str = 'bar';
       str = '"Be yourself; everyone else is already taken." -Oscar Wilde';
 
-*操作符两边应该各有一个空格。
+* 操作符两边应该各有一个空格。
 
 正确写法::
 
@@ -615,7 +658,7 @@ Imports规范
     x += 3+4;
     x |= y&&z;
 
-*为了表示优先级，高优先级操作符两边可以省略空格。这样可以提高复杂语句的可读性。 你应该在操作符两边
+* 为了表示优先级，高优先级操作符两边可以省略空格。这样可以提高复杂语句的可读性。 你应该在操作符两边
 总是使用相同的空白量：
 
 正确写法::
@@ -653,11 +696,11 @@ Imports规范
 * ``lower_case_with_underscores`` （小写和下划线）
 * ``UPPERCASE`` （大写）
 * ``UPPER_CASE_WITH_UNDERSCORES`` （大写和下划线）
-* ``CapitalizedWords`` (骆驼命名法，首字母大写）
+* ``CapitalizedWords`` (驼峰式，首字母大写）
 * ``mixedCase`` (混合命名法，区别于首字母大写的初始字母小写!)
 * ``Capitalized_Words_With_Underscores`` (首字母大写和下划线)
 
-..注意:: 当使用骆驼命名法进行首字母缩写时，大写缩写中的所有字母。 因此HTTPServerError比HttpServerError好。
+..注意:: 当使用驼峰式进行首字母缩写时，大写缩写中的所有字母。 因此HTTPServerError比HttpServerError好。
  当使用混合名称命名时，除了保留第一个缩写小写（如果它是名称的开头），大写缩写中的所有字母。
  因此xmlHTTPRequest比XMLHTTPRequest更好。
 
@@ -674,17 +717,17 @@ Imports规范
 合约和库名称
 ==========================
 
-合约和库名称应该使用骆驼命名法风格。比如：``SimpleToken``, ``SmartBank``, ``CertificateHashRepository``, ``Player``.
+合约和库名称应该使用驼峰式风格。比如：``SimpleToken``, ``SmartBank``, ``CertificateHashRepository``, ``Player``.
 
-机构名称
+结构体名称
 ==========================
 
-结构名称应该使用骆驼命名法风格。比如：``MyCoin``, ``Position``, ``PositionXY``.
+结构体名称应该使用驼峰式风格。比如：``MyCoin``, ``Position``, ``PositionXY``.
 
 事件名称
 ===========
 
-事件名称应该使用骆驼命名法风格。比如：``Deposit``, ``Transfer``, ``Approval``, ``BeforeTransfer``, ``AfterTransfer``.
+事件名称应该使用驼峰式风格。比如：``Deposit``, ``Transfer``, ``Approval``, ``BeforeTransfer``, ``AfterTransfer``.
 
 函数名称
 ==============
@@ -714,17 +757,17 @@ Imports规范
 枚举变量命名
 =====
 
-枚举，在简单类型声明时，应该使用骆驼命名法风格。比如：``TokenGroup``, ``Frame``, ``HashStyle``, ``CharacterLocation``.
+枚举，在简单类型声明时，应该使用驼峰式风格。比如：``TokenGroup``, ``Frame``, ``HashStyle``, ``CharacterLocation``.
 
 避免命名冲突
 ==========================
 
-*``single_trailing_underscore_``
+* ``single_trailing_underscore_``
 
 当所起名称与内建或保留关键字相冲突时，建议使用此惯例内置或其他保留名称。
 
 
-一般建议
+常规建议
 =======================
 
 待定
