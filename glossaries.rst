@@ -43,3 +43,10 @@
 
   <ruby>元组<rp>（</rp><rt>tuple</rt><rp>）</rp></ruby>
 
+.. |off_chain| raw:: html
+
+  <ruby>链外<rp>（</rp><rt>off-chain</rt><rp>）</rp></ruby>
+
+.. |pragma| raw:: html
+
+  <ruby>杂注<rp>（</rp><rt>pragma</rt><rp>）</rp></ruby>
