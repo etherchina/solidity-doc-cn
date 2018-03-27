@@ -47,6 +47,10 @@
 
   <ruby>元组<rp>（</rp><rt>tuple</rt><rp>）</rp></ruby>
 
+.. |on_chain| raw:: html
+
+  <ruby>链上<rp>（</rp><rt>on-chain</rt><rp>）</rp></ruby>
+
 .. |off_chain| raw:: html
 
   <ruby>链外<rp>（</rp><rt>off-chain</rt><rp>）</rp></ruby>
@@ -54,3 +58,11 @@
 .. |pragma| raw:: html
 
   <ruby>杂注<rp>（</rp><rt>pragma</rt><rp>）</rp></ruby>
+
+.. |storage| raw:: html
+
+  <ruby>存储<rp>（</rp><rt>storage</rt><rp>）</rp></ruby>
+
+.. |memory| raw:: html
+
+  <ruby>内存<rp>（</rp><rt>memory</rt><rp>）</rp></ruby>
