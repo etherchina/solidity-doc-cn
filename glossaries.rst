@@ -11,6 +11,10 @@
 
   <ruby>以太币<rp>（</rp><rt>Ether</rt><rp>）</rp></ruby>
 
+.. |evm| raw:: html
+
+  <ruby>以太坊虚拟机<rp>（</rp><rt>Ethereum Virtual Machine(EVM)</rt><rp>）</rp></ruby>
+
 .. |code_point| raw:: html
 
   <ruby>码点<rp>（</rp><rt>code point</rt><rp>）</rp></ruby>
