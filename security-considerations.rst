@@ -1,5 +1,5 @@
-.. _security_considerations:
 .. include :: glossary.rst
+.. _security_considerations:
 
 #######################
 安全考量
