@@ -7,7 +7,7 @@
 ***********************
 
 
-在 Solidity 中合约类似于面向对象编程语言中的类。
+在 Solidity 中，合约类似于面向对象编程语言中的类。
 每个合约中可以包含 :ref:`structure-state-variables`、 :ref:`structure-functions`、
 :ref:`structure-function-modifiers`、:ref:`structure-events`、 :ref:`structure-struct-types`、
 和 :ref:`structure-enum-types` 的声明，且合约可以从其他合约继承。
