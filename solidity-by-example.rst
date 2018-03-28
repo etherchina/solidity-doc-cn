@@ -33,7 +33,7 @@
         struct Voter {
             uint weight; // 计票的权重
             bool voted;  // 若为真，代表该人已投票
-            address delegate; // 被委托人的地址
+            address delegate; // 被委托人
             uint vote;   // 投票提案的索引
         }
 
@@ -58,7 +58,7 @@
             //对于提供的每个提案名称，
             //创建一个新的 Proposal 对象并添加它到数组的末尾。
             for (uint i = 0; i < proposalNames.length; i++) {
-                // `Proposal({...})` 创建一个 Proposal 对象，
+                // `Proposal({...})` 创建一个临时 Proposal 对象，
                 // `proposals.push(...)` 将其添加到 `proposals` 的末尾
                 proposals.push(Proposal({
                     name: proposalNames[i],
@@ -92,7 +92,7 @@
 
             // 委托是可以传递的，只要被委托者 `to` 也设置了委托。
             // 一般来说，这种循环委托是危险的。因为，如果传递的链条太长，
-            // 则可能需消耗的gas要多于区块中剩余的，
+            // 则可能需消耗的gas要多于区块中剩余的（大于区块设置的gasLimit），
             // 这种情况下，委托不会被执行。
             // 而在另一些情况下，如果形成闭环，则会让合约完全卡住。
             while (voters[to].delegate != address(0)) {
@@ -107,10 +107,10 @@
             sender.delegate = to;
             Voter storage delegate_ = voters[to];
             if (delegate_.voted) {
-                // 若被委托者已经投过票了，直接把这票的权重也加上去
+                // 若被委托者已经投过票了，直接增加得票数
                 proposals[delegate_.vote].voteCount += sender.weight;
             } else {
-                // 若被委托者还没投票，把这票的权重加到委托者的权重上
+                // 若被委托者还没投票，增加委托者的权重
                 delegate_.weight += sender.weight;
             }
         }
@@ -200,7 +200,7 @@
         event AuctionEnded(address winner, uint amount);
 
         // 以下是所谓的natspec注释，可以通过三个斜杠来识别。
-        // 当用户被要求确认交易时将显示。
+        // 当用户被要求确认事务时将显示。
 
         /// 以受益者地址 `_beneficiary` 的名义，
         /// 创建一个简单的拍卖，拍卖时间为 `_biddingTime` 秒。
@@ -226,7 +226,7 @@
 
             if (highestBid != 0) {
                 // 返还出价时，简单地直接调用 highestBidder.send(highestBid) 函数，
-                // 将会打来安全风险。因为，它有可能执行一个非信任合约。
+                // 会冒着安全风险的，因为它有可能执行一个非信任合约。
                 // 更为安全的做法是让接收方自己提取金钱。
                 pendingReturns[highestBidder] += highestBid;
             }
@@ -256,12 +256,12 @@
         /// 结束拍卖，并把最高的出价发送给受益人
         function auctionEnd() public {
             // 对于可与其他合约交互的函数（意味着它会调用其他函数或发送以太币），
-            // 一个好的指导方针是将其结构分为三个层次：
+            // 一个好的指导方针是将其结构分为三个阶段：
             // 1. 检查条件
             // 2. 执行动作 (可能会改变条件)
             // 3. 与其他合约交互
             // 如果这些阶段互相交叉，其他的合约可能会回调当前合约并修改状态，
-            // 或者多次调用产生影响的（比如支付以太币）操作。
+            // 或者多次执行生影响的（比如支付以太币）操作。
             // 如果合约内调用的函数包含了与外部合约的交互，
             // 则必须要考虑与外部合约的交互。
 
@@ -291,7 +291,7 @@
 
 另一个挑战是如何使拍卖同时做到 **绑定和秘密** :
 唯一能阻止投标者在她赢得拍卖后不付款的方式是，让她将钱连同出价一起发出。
-但由于价值转移在Ethereum中不能被隐藏，因此任何人都可以看到它的价值。
+但由于资金转移在Ethereum中不能被隐藏，因此任何人都可以看到它的资金。
 
 下面的合约通过接受任何大于最高出价的值来解决这个问题。
 当然，因为这只能在披露阶段进行检查，有些出价可能是 **无效** 的，
@@ -485,7 +485,7 @@
         event PurchaseConfirmed();
         event ItemReceived();
 
-        ///中止购买并回收以太。
+        ///中止购买并回收以太币。
         ///只能在合约被锁定之前由卖家调用。
         function abort()
             public
@@ -498,7 +498,7 @@
         }
 
         /// 买家确认购买。
-        /// 交易必须包含`2 * value`个以太币。
+        /// 事务必须包含`2 * value`个以太币。
         /// 以太币会被锁定，直到 confirmReceived 被调用。
         function confirmPurchase()
             public
