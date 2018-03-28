@@ -1,7 +1,7 @@
 # Solidity文档翻译进度
 
 ## 首页
-	- `index.rst`
+	- index.rst
 	- 状态：终审
 	- 行数：174行
 	- 译者：左洪斌（hongbinzuo）
@@ -13,7 +13,7 @@
   - 相关PR：#45
 
 ## 智能合约概述
-	- `introduction-to-smart-contracts.rst`
+	- introduction-to-smart-contracts.rst
 	- 状态：终审
 	- 行数：484行
 	- 译者：李捷（oldcodeoberyn），虞双齐（ysqi）
@@ -25,7 +25,7 @@
   - 相关PR：#8，#42，#41，#46，#53
 
 ## ABI 说明
-	- `abi-spec.rst`
+	- abi-spec.rst
 	- 状态：终审
 	- 行数：474行
 	- 译者：杨镇（riversyang）
@@ -37,7 +37,7 @@
   - 相关PR：#35
 
 ## 贡献方式
-	- `contributing.rst`
+	- contributing.rst
 	- 状态：终审
 	- 行数：104行
 	- 译者：卓跃萍（JocelynZhuo）
