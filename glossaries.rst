@@ -66,3 +66,11 @@
 .. |memory| raw:: html
 
   <ruby>内存<rp>（</rp><rt>memory</rt><rp>）</rp></ruby>
+
+.. |natspec| raw:: html
+
+  <ruby>以太坊标准说明格式<rp>（</rp><rt>Ethereum Nature Specification Format(natspec)</rt><rp>）</rp></ruby>
+
+.. |modifier| raw:: html
+
+  <ruby>修饰器<rp>（</rp><rt>modifier</rt><rp>）</rp></ruby>
