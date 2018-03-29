@@ -37,7 +37,6 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 以下排名不分先后。
 
 <<<<<<< HEAD
-<<<<<<< HEAD
 1. 姜信宝（bobjiang）
 2. 左洪斌（hongbinzuo）
 3. 侯伯薇
@@ -46,9 +45,6 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 6. 虞是乎（ysqi）
 7. 周锷（ghostrd）
 8. 杨镇（riversyang）
-=======
-toyab, 侯伯薇, 姜信宝（bobjiang）, 左洪斌（hongbinzuo）, 李捷（oldcodeoberyn）, 虞是乎（ysqi）, 周锷（ghostrd）, 杨镇（riversyang）, 毛明旺（dennisWind）, 王兴宇（wxy）, 孔庆丰（buffalo2004）, 卓跃萍（JocelynZhuo）
->>>>>>> etherchina/develop
 =======
 toyab, 侯伯薇, 姜信宝（bobjiang）, 左洪斌（hongbinzuo）, 李捷（oldcodeoberyn）, 虞是乎（ysqi）, 周锷（ghostrd）, 杨镇（riversyang）, 毛明旺（dennisWind）, 王兴宇（wxy）, 孔庆丰（buffalo2004）, 卓跃萍（JocelynZhuo）
 >>>>>>> etherchina/develop

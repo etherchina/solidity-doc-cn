@@ -72,12 +72,8 @@ output directories.
 ===============
 
 <<<<<<< HEAD
-<<<<<<< HEAD
 Binary packages of Solidity are available at
 `solidity/releases <https://github.com/ethereum/solidity/releases>`_.
-=======
-可在 `solidity/releases <https://github.com/ethereum/solidity/releases>`_ 下载 Solidity 的二进制安装包。
->>>>>>> etherchina/develop
 =======
 可在 `solidity/releases <https://github.com/ethereum/solidity/releases>`_ 下载 Solidity 的二进制安装包。
 >>>>>>> etherchina/develop
@@ -104,9 +100,6 @@ We are also releasing a `snap package <https://snapcraft.io/>`_, which is instal
 =======
 
 同时，也提供可安装 `所有支持的Linux版本 <https://snapcraft.io/docs/core/install>`_ 下的 `snap package <https://snapcraft.io/>`_ 。通过以下命令，可获取最新的稳定版本：
-<<<<<<< HEAD
->>>>>>> etherchina/develop
-=======
 >>>>>>> etherchina/develop
 
 .. code:: bash
@@ -152,9 +145,6 @@ specific commit of ``solidity.rb``.
 你可查阅
 `solidity.rb commits on Github <https://github.com/ethereum/homebrew-ethereum/commits/master/solidity.rb>`_
 的提交记录，去寻找包含 ``solidity.rb`` 文件改动的特殊提交。然后使用 ``brew`` 进行安装：
-<<<<<<< HEAD
->>>>>>> etherchina/develop
-=======
 >>>>>>> etherchina/develop
 
 Install it using ``brew``:
