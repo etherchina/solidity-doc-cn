@@ -71,8 +71,12 @@ output directories.
 二进制包
 ===============
 
+<<<<<<< HEAD
 Binary packages of Solidity are available at
 `solidity/releases <https://github.com/ethereum/solidity/releases>`_.
+=======
+可在 `solidity/releases <https://github.com/ethereum/solidity/releases>`_ 下载 Solidity 的二进制安装包。
+>>>>>>> etherchina/develop
 
 We also have PPAs for Ubuntu.  For the latest stable version.
 
@@ -90,8 +94,13 @@ If you want to use the cutting edge developer version:
     sudo add-apt-repository ppa:ethereum/ethereum-dev
     sudo apt-get update
     sudo apt-get install solc
+<<<<<<< HEAD
     
 We are also releasing a `snap package <https://snapcraft.io/>`_, which is installable in all the `supported Linux distros <https://snapcraft.io/docs/core/install>`_. To install the latest stable version of solc:
+=======
+
+同时，也提供可安装 `所有支持的Linux版本 <https://snapcraft.io/docs/core/install>`_ 下的 `snap package <https://snapcraft.io/>`_ 。通过以下命令，可获取最新的稳定版本：
+>>>>>>> etherchina/develop
 
 .. code:: bash
 
@@ -128,8 +137,15 @@ Homebrew formula directly from Github.
 View 
 `solidity.rb commits on Github <https://github.com/ethereum/homebrew-ethereum/commits/master/solidity.rb>`_.
 
+<<<<<<< HEAD
 Follow the history links until you have a raw file link of a 
 specific commit of ``solidity.rb``.
+=======
+如果你需要特定版本的 Solidity ，你需要从 Github 上安装一个 Homebrew formula。
+你可查阅
+`solidity.rb commits on Github <https://github.com/ethereum/homebrew-ethereum/commits/master/solidity.rb>`_
+的提交记录，去寻找包含 ``solidity.rb`` 文件改动的特殊提交。然后使用 ``brew`` 进行安装：
+>>>>>>> etherchina/develop
 
 Install it using ``brew``:
 

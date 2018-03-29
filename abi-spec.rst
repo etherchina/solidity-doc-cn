@@ -1,33 +1,53 @@
+.. include:: glossaries.rst
 .. index:: abi, application binary interface
 
 .. _ABI:
 
 ******************************************
-应用二进制接口说明
+|ABI| 说明
 ******************************************
 
 基本设计
 ============
 
+<<<<<<< HEAD
 The Application Binary Interface is the standard way to interact with contracts in the Ethereum ecosystem, both
 from outside the blockchain and for contract-to-contract interaction. Data is encoded according to its type,
 as described in this specification.  The encoding is not self describing and thus requires a schema in order to decode.
+=======
+在 |ethereum| 生态系统中， |ABI| 是从区块链外部与合约进行交互以及合约与合约间进行交互的一种标准方式。
+数据会根据其类型按照这份手册中说明的方法进行编码。这种编码并不是可以自描述的，而是需要一种特定的概要（schema）来进行解码。
+>>>>>>> etherchina/develop
 
 We assume the interface functions of a contract are strongly typed, known at compilation time and static. No introspection mechanism will be provided. We assume that all contracts will have the interface definitions of any contracts they call available at compile-time.
 
+<<<<<<< HEAD
 This specification does not address contracts whose interface is dynamic or otherwise known only at run-time. Should these cases become important they can be adequately handled as facilities built within the Ethereum ecosystem.
 
 .. _abi_function_selector:
 
 函数选择器（Function Selector）
 =================
+=======
+这份手册并不针对那些动态合约接口或者仅在运行时才可获知的合约接口。如果这种场景变得很重要，你可以使用 |ethereum| 生态系统中其他更合适的基础设施来处理它们。
+
+.. _abi_function_selector:
+
+|function_selector|
+=================================
+>>>>>>> etherchina/develop
 
 The first four bytes of the call data for a function call specifies the function to be called. It is the
 first (left, high-order in big-endian) four bytes of the Keccak (SHA-3) hash of the signature of the function. The signature is defined as the canonical expression of the basic prototype, i.e.
 the function name with the parenthesised list of parameter types. Parameter types are split by a single comma - no spaces are used.
 
+<<<<<<< HEAD
 参数编码（Encoding）
 =================
+=======
+参数编码
+=================================
+>>>>>>> etherchina/develop
 
 Starting from the fifth byte, the encoded arguments follow. This encoding is also used in other places, e.g. the return values and also event arguments are encoded in the same way, without the four bytes specifying the function.
 
@@ -40,21 +60,37 @@ The following elementary types exist:
 
 - ``int<M>``: two's complement signed integer type of ``M`` bits, ``0 < M <= 256``, ``M % 8 == 0``.
 
+<<<<<<< HEAD
 - ``address``: equivalent to ``uint160``, except for the assumed interpretation and language typing. For computing the function selector, ``address`` is used.
 
 - ``uint``, ``int``: synonyms for ``uint256``, ``int256`` respectively. For computing the function selector, ``uint256`` and ``int256`` have to be used.
 
 - ``bool``: equivalent to ``uint8`` restricted to the values 0 and 1. For computing the function selector, ``bool`` is used.
+=======
+- ``address`` ：除了字面上的意思和语言类型的区别以外，等价于 ``uint160`` 。在计算和 |function_selector| 中，通常使用 ``address`` 。
+
+- ``uint`` 、 ``int`` ： ``uint256`` 、 ``int256`` 各自的同义词。在计算和 |function_selector| 中，通常使用 ``uint256`` 和 ``int256`` 。
+
+- ``bool`` ：等价于 ``uint8`` ，取值限定为0或1。在计算和 |function_selector| 中，通常使用 ``bool`` 。
+>>>>>>> etherchina/develop
 
 - ``fixed<M>x<N>``: signed fixed-point decimal number of ``M`` bits, ``8 <= M <= 256``, ``M % 8 ==0``, and ``0 < N <= 80``, which denotes the value ``v`` as ``v / (10 ** N)``.
 
 - ``ufixed<M>x<N>``: unsigned variant of ``fixed<M>x<N>``.
 
+<<<<<<< HEAD
 - ``fixed``, ``ufixed``: synonyms for ``fixed128x19``, ``ufixed128x19`` respectively. For computing the function selector, ``fixed128x19`` and ``ufixed128x19`` have to be used.
+=======
+- ``fixed`` 、 ``ufixed`` ： ``fixed128x19`` 、 ``ufixed128x19`` 各自的同义词。在计算和 |function_selector| 中，通常使用 ``fixed128x19`` 和 ``ufixed128x19`` 。
+>>>>>>> etherchina/develop
 
 - ``bytes<M>``: binary type of ``M`` bytes, ``0 < M <= 32``.
 
+<<<<<<< HEAD
 - ``function``: an address (20 bytes) folled by a function selector (4 bytes). Encoded identical to ``bytes24``.
+=======
+- ``function`` ：一个地址（20字节）之后紧跟一个 |function_selector| （4字节）。编码之后等价于 ``bytes24`` 。
+>>>>>>> etherchina/develop
 
 The following (fixed-size) array type exists:
 
@@ -68,6 +104,7 @@ The following non-fixed-size types exist:
 
 - ``<type>[]``: a variable-length array of elements of the given type.
 
+<<<<<<< HEAD
 Types can be combined to a tuple by enclosing a finite non-negative number
 of them inside parentheses, separated by commas:
 
@@ -77,6 +114,16 @@ It is possible to form tuples of tuples, arrays of tuples and so on.
 
 .. note::
     Solidity supports all the types presented above with the same names with the exception of tuples. The ABI tuple type is utilised for encoding Solidity ``structs``.
+=======
+可以将有限的若干类型放到一对括号中，用逗号分隔开，以此来构成一个 |tuple| ：
+
+- ``(T1,T2,...,Tn)`` ：由 ``T1`` ， ...， ``Tn`` ， ``n >= 0`` 构成的 |tuple| 。
+
+用 |tuple| 构成 |tuple| 、用 |tuple| 构成数组等等也是可能的。
+
+.. note::
+    除了 |tuple| 以外，Solidity支持以上所有类型的名称。ABI |tuple| 是利用Solidity的 ``structs`` 编码得到的。
+>>>>>>> etherchina/develop
 
 编码的形式化说明
 ====================================
@@ -96,9 +143,15 @@ We distinguish static and dynamic types. Static types are encoded in-place and d
 
 * ``bytes``
 * ``string``
+<<<<<<< HEAD
 * ``T[]`` for any ``T``
 * ``T[k]`` for any dynamic ``T`` and any ``k > 0``
 * ``(T1,...,Tk)`` if any ``Ti`` is dynamic for ``1 <= i <= k``
+=======
+* 任意类型 `T` 的变长数组 ``T[]``
+* 任意动态类型 `T` 的定长数组 ``T[k]`` （ ``k > 0`` ）
+* ``Ti`` （ ``1 <= i <= k`` ）为任意动态类型的 |tuple|  ``(T1,...,Tk)``
+>>>>>>> etherchina/develop
 
 All other types are called "static".
 
@@ -115,8 +168,13 @@ on the type of ``X`` being
 
   ``enc(X) = head(X(1)) ... head(X(k-1)) tail(X(0)) ... tail(X(k-1))``
 
+<<<<<<< HEAD
   where ``X(i)`` is the ``ith`` component of the value, and
   ``head`` and ``tail`` are defined for ``Ti`` being a static type as
+=======
+  这里， ``X(i)`` 是 |tuple| 的第 ``i`` 个要素，并且
+  当 ``Ti`` 为静态类型时， ``head`` 和 ``tail`` 被定义为
+>>>>>>> etherchina/develop
 
     ``head(X(i)) = enc(X(i))`` and ``tail(X(i)) = ""`` (the empty string)
 
@@ -135,8 +193,12 @@ on the type of ``X`` being
 
   ``enc(X) = enc((X[0], ..., X[k-1]))``
 
+<<<<<<< HEAD
   i.e. it is encoded as if it were a tuple with ``k`` elements
   of the same type.
+=======
+  即是说，它就像是个由相同类型的 ``k`` 个元素组成的 |tuple| 那样被编码的。
+>>>>>>> etherchina/develop
 
 - ``T[]`` where ``X`` has ``k`` elements (``k`` is assumed to be of type ``uint256``):
 
@@ -167,7 +229,7 @@ on the type of ``X`` being
 
 Note that for any ``X``, ``len(enc(X))`` is a multiple of 32.
 
-函数选择器和参数编码
+|function_selector| 和参数编码
 =======================================
 
 All in all, a call to the function ``f`` with parameters ``a_1, ..., a_n`` is encoded as
@@ -178,7 +240,11 @@ and the return values ``v_1, ..., v_k`` of ``f`` are encoded as
 
   ``enc((v_1, ..., v_k))``
 
+<<<<<<< HEAD
 i.e. the values are combined into a tuple and encoded.
+=======
+也就是说，返回值会被组合为一个 |tuple| 进行编码。
+>>>>>>> etherchina/develop
 
 例子
 ========
@@ -259,7 +325,11 @@ Finally, we encode the data part of the second dynamic argument, ``"Hello, world
  - ``0x000000000000000000000000000000000000000000000000000000000000000d`` (number of elements (bytes in this case): 13)
  - ``0x48656c6c6f2c20776f726c642100000000000000000000000000000000000000`` (``"Hello, world!"`` padded to 32 bytes on the right)
 
+<<<<<<< HEAD
 All together, the encoding is (newline after function selector and each 32-bytes for clarity):
+=======
+最后，合并到一起的编码就是（为了清晰，在 |function_selector| 和每32字节之后加了换行）：
+>>>>>>> etherchina/develop
 
 ::
 
@@ -277,16 +347,27 @@ All together, the encoding is (newline after function selector and each 32-bytes
 事件
 ======
 
+<<<<<<< HEAD
 Events are an abstraction of the Ethereum logging/event-watching protocol. Log entries provide the contract's address, a series of up to four topics and some arbitrary length binary data. Events leverage the existing function ABI in order to interpret this (together with an interface spec) as a properly typed structure.
+=======
+事件，是 |ethereum| 的日志/事件监视协议的一个抽象。日志项提供了合约的地址、一系列的主题（最高4项）和一些任意长度的二进制数据。为了使用合适的类型数据结构来演绎这些功能（与接口定义一起），事件沿用了既存的ABI函数。
+>>>>>>> etherchina/develop
 
 Given an event name and series of event parameters, we split them into two sub-series: those which are indexed and those which are not. Those which are indexed, which may number up to 3, are used alongside the Keccak hash of the event signature to form the topics of the log entry. Those which are not indexed form the byte array of the event.
 
 In effect, a log entry using this ABI is described as:
 
+<<<<<<< HEAD
 - ``address``: the address of the contract (intrinsically provided by Ethereum);
 - ``topics[0]``: ``keccak(EVENT_NAME+"("+EVENT_ARGS.map(canonical_type_of).join(",")+")")`` (``canonical_type_of`` is a function that simply returns the canonical type of a given argument, e.g. for ``uint indexed foo``, it would return ``uint256``). If the event is declared as ``anonymous`` the ``topics[0]`` is not generated;
 - ``topics[n]``: ``EVENT_INDEXED_ARGS[n - 1]`` (``EVENT_INDEXED_ARGS`` is the series of ``EVENT_ARGS`` that are indexed);
 - ``data``: ``abi_serialise(EVENT_NON_INDEXED_ARGS)`` (``EVENT_NON_INDEXED_ARGS`` is the series of ``EVENT_ARGS`` that are not indexed, ``abi_serialise`` is the ABI serialisation function used for returning a series of typed values from a function, as described above).
+=======
+- ``address`` ：合约地址（由 |ethereum| 真正提供）；
+- ``topics[0]`` ： ``keccak(EVENT_NAME+"("+EVENT_ARGS.map(canonical_type_of).join(",")+")")`` （ ``canonical_type_of`` 是一个可以返回给定参数的权威类型的函数，例如，对 ``uint indexed foo`` 它会返回 ``uint256`` ）。如果事件被声明为 ``anonymous`` ，那么 ``topics[0]`` 不会被生成；
+- ``topics[n]`` ： ``EVENT_INDEXED_ARGS[n - 1]`` （ ``EVENT_INDEXED_ARGS`` 是已索引的 ``EVENT_ARGS`` ）；
+- ``data`` ： ``abi_serialise(EVENT_NON_INDEXED_ARGS)`` （ ``EVENT_NON_INDEXED_ARGS`` 是未索引的 ``EVENT_ARGS`` ， ``abi_serialise`` 是一个用来从某个函数返回一系列类型值的ABI序列化函数，就像上文所讲的那样）。
+>>>>>>> etherchina/develop
 
 For all fixed-length Solidity types, the ``EVENT_INDEXED_ARGS`` array contains the 32-byte encoded value directly. However, for *types of dynamic length*, which include ``string``, ``bytes``, and arrays, ``EVENT_INDEXED_ARGS`` will contain the *Keccak hash* of the encoded value, rather than the encoded value directly. This allows applications to efficiently query for values of dynamic-length types (by setting the hash of the encoded value as the topic), but leaves applications unable to decode indexed values they have not queried for. For dynamic-length types, application developers face a trade-off between fast search for predetermined values (if the argument is indexed) and legibility of arbitrary values (which requires that the arguments not be indexed). Developers may overcome this tradeoff and achieve both efficient search and arbitrary legibility by defining events with two arguments — one indexed, one not — intended to hold the same value.
 
@@ -300,6 +381,7 @@ A function description is a JSON object with the fields:
 - ``name``: the name of the function;
 - ``inputs``: an array of objects, each of which contains:
 
+<<<<<<< HEAD
   * ``name``: the name of the parameter;
   * ``type``: the canonical type of the parameter (more below).
   * ``components``: used for tuple types (more below).
@@ -308,12 +390,26 @@ A function description is a JSON object with the fields:
 - ``payable``: ``true`` if function accepts ether, defaults to ``false``;
 - ``stateMutability``: a string with one of the following values: ``pure`` (:ref:`specified to not read blockchain state <pure-functions>`), ``view`` (:ref:`specified to not modify the blockchain state <view-functions>`), ``nonpayable`` and ``payable`` (same as ``payable`` above).
 - ``constant``: ``true`` if function is either ``pure`` or ``view``
+=======
+  * ``name`` ：参数名称；
+  * ``type`` ：参数的权威类型（详见下文）
+  * ``components`` ：供 |tuple| 类型使用（详见下文）
+
+- ``outputs`` ：一个类似于 ``inputs`` 的对象数组，如果函数无返回值时可以被省略；
+- ``payable`` ：如果函数接受 |ether| ，为 ``true`` ；缺省为 ``false`` ；
+- ``stateMutability`` ：为下列值之一： ``pure`` （ :ref:`指定为不读取区块链状态 <pure-functions>` ）， ``view`` （ :ref:`指定为不修改区块链状态 <view-functions>` ）， ``nonpayable`` 和 ``payable`` （与上文 ``payable`` 一样）。
+- ``constant`` ：如果函数被指定为 ``pure`` 或 ``view`` 则为 ``true`` 。
+>>>>>>> etherchina/develop
 
 ``type`` can be omitted, defaulting to ``"function"``.
 
 Constructor and fallback function never have ``name`` or ``outputs``. Fallback function doesn't have ``inputs`` either.
 
+<<<<<<< HEAD
 Sending non-zero ether to non-payable function will throw. Don't do it.
+=======
+向non-payable（即不接受 |ether| ）的函数发送非零值的 |ether| 会导致其丢失。不要这么做。
+>>>>>>> etherchina/develop
 
 An event description is a JSON object with fairly similar fields:
 
@@ -321,10 +417,17 @@ An event description is a JSON object with fairly similar fields:
 - ``name``: the name of the event;
 - ``inputs``: an array of objects, each of which contains:
 
+<<<<<<< HEAD
   * ``name``: the name of the parameter;
   * ``type``: the canonical type of the parameter (more below).
   * ``components``: used for tuple types (more below).
   * ``indexed``: ``true`` if the field is part of the log's topics, ``false`` if it one of the log's data segment.
+=======
+  * ``name`` ：参数名称；
+  * ``type`` ：参数的权威类型（相见下文）；
+  * ``components`` ：供 |tuple| 类型使用（详见下文）；
+  * ``indexed`` ：如果此字段是日志的一个主题，则为 ``true`` ；否则为 ``false`` 。
+>>>>>>> etherchina/develop
 
 - ``anonymous``: ``true`` if the event was declared as ``anonymous``.
 
@@ -361,12 +464,17 @@ would result in the JSON:
   "outputs": []
   }]
 
+<<<<<<< HEAD
 Handling tuple types
+=======
+处理 |tuple| 类型
+>>>>>>> etherchina/develop
 --------------------
 
 Despite that names are intentionally not part of the ABI encoding they do make a lot of sense to be included
 in the JSON to enable displaying it to the end user. The structure is nested in the following way:
 
+<<<<<<< HEAD
 An object with members ``name``, ``type`` and potentially ``components`` describes a typed variable.
 The canonical type is determined until a tuple type is reached and the string description up
 to that point is stored in ``type`` prefix with the word ``tuple``, i.e. it will be ``tuple`` followed by
@@ -374,6 +482,11 @@ a sequence of ``[]`` and ``[k]`` with
 integers ``k``. The components of the tuple are then stored in the member ``components``,
 which is of array type and has the same structure as the top-level object except that
 ``indexed`` is not allowed there.
+=======
+一个拥有 ``name`` 、 ``type`` 和潜在的 ``components`` 成员的对象描述了某种类型的变量。
+直至到达一个 |tuple| 类型且到那点的存储在 ``type`` 属性中的字符串以 ``tuple`` 为前缀，也就是说，在 ``tuple`` 之后紧跟一个 ``[]`` 或有整数 ``k`` 的 ``[k]`` ，才能确定一个 |tuple| 。
+|tuple| 的组件元素会被存储在成员 ``components`` 中，它是一个数组类型，且与顶级对象具有同样的结构，只是在这里不允许已索引的（ ``indexed`` ）数组元素。
+>>>>>>> etherchina/develop
 
 As an example, the code
 
@@ -456,9 +569,15 @@ would result in the JSON:
 
 Solidity supports a non-standard packed mode where:
 
+<<<<<<< HEAD
 - no :ref:`function selector <abi_function_selector>` is encoded,
 - types shorter than 32 bytes are neither zero padded nor sign extended and
 - dynamic types are encoded in-place and without the length.
+=======
+- :ref:`函数选择器<abi_function_selector>` 不进行编码，
+- 长度低于32字节的类型，既不会进行补0操作，也不会进行符号扩展，以及
+- 动态类型会直接进行编码，并且不包含长度信息。
+>>>>>>> etherchina/develop
 
 As an example encoding ``int1, bytes1, uint16, string`` with values ``-1, 0x42, 0x2424, "Hello, world!"`` results in ::
 
