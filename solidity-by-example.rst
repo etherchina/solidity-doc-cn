@@ -318,7 +318,7 @@
         address public highestBidder;
         uint public highestBid;
 
-        // 可以退回的之前的出价
+        // 可以取回的之前的出价
         mapping(address => uint) pendingReturns;
 
         event AuctionEnded(address winner, uint highestBid);
