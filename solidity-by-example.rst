@@ -325,7 +325,7 @@
 
         /// 使用 modifier 可以更便捷的校验函数的入参。
         /// `onlyBefore` 会被用于后面的 `bid` 函数：
-        /// 新的函数体由是 modifier 本身的函数体，并用原函数体替换 `_;` 语句来组成的。
+        /// 新的函数体是由 modifier 本身的函数体，并用原函数体替换 `_;` 语句来组成的。
         modifier onlyBefore(uint _time) { require(now < _time); _; }
         modifier onlyAfter(uint _time) { require(now > _time); _; }
 
