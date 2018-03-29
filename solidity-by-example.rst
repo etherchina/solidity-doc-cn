@@ -199,7 +199,7 @@
         event HighestBidIncreased(address bidder, uint amount);
         event AuctionEnded(address winner, uint amount);
 
-        // 以下是所谓的natspec注释，可以通过三个斜杠来识别。
+        // 以下是所谓的 |natspec| 注释，可以通过三个斜杠来识别。
         // 当用户被要求确认交易时将显示。
 
         /// 以受益者地址 `_beneficiary` 的名义，
@@ -323,9 +323,9 @@
 
         event AuctionEnded(address winner, uint highestBid);
 
-        /// 使用 modifier 可以更便捷的校验函数的入参。
+        /// 使用 |modifier| 可以更便捷的校验函数的入参。
         /// `onlyBefore` 会被用于后面的 `bid` 函数：
-        /// 新的函数体是由 modifier 本身的函数体，并用原函数体替换 `_;` 语句来组成的。
+        /// 新的函数体是由 |modifier| 本身的函数体，并用原函数体替换 `_;` 语句来组成的。
         modifier onlyBefore(uint _time) { require(now < _time); _; }
         modifier onlyAfter(uint _time) { require(now > _time); _; }
 
