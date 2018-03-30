@@ -60,5 +60,5 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 参见references.md
 
 ## 感谢  
-支持 [HiBlock区块链社区](hiblock.net)  
-赞助 [OlympusLabs](olympuslabs.io)
+支持 [HiBlock区块链社区](http://hiblock.net/)  
+赞助 [OlympusLabs](https://olympuslabs.io/)
