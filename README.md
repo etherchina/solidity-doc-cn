@@ -39,5 +39,5 @@ toyab, 侯伯薇, 姜信宝（bobjiang）, 左洪斌（hongbinzuo）, 李捷（o
 参见references.md
 
 ## 感谢  
-支持 [HiBlock区块链社区](hiblock.net)  
-赞助 [OlympusLabs](olympuslabs.io)
+支持 [HiBlock区块链社区](http://hiblock.net/)  
+赞助 [OlympusLabs](https://olympuslabs.io/)
