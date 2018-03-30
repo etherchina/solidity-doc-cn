@@ -2,10 +2,11 @@
 合约的元数据
 #################
 
+.. include:: glossaries.rst
 .. index:: metadata, contract verification
 
 Solidity编译器自动生成JSON文件，即合约的元数据，其中包含了当前合约的相关信息。
-它可以用于查询编译器版本，所使用的源代码，|ABI| 和 |NatSpec| 文档，以便更安全地与合约进行交互并验证其源代码。
+它可以用于查询编译器版本，所使用的源代码，|ABI| 和 |natspec| 文档，以便更安全地与合约进行交互并验证其源代码。
 
 编译器会将元数据文件的 Swarm 哈希值附加到每个合约的字节码末尾（详情请参阅下文），
 以便你可以以认证的方式获取该文件，而不必求助于中心化的数据提供者。
@@ -100,7 +101,7 @@ Solidity编译器自动生成JSON文件，即合约的元数据，其中包含�
 
 因此，为了获取数据，可以检查部署的字节码的末尾以匹配该模式，并使用 Swarm 哈希来获取元数据文件。
 
-自动化接口生成和 |NatSpec| 的使用方法
+自动化接口生成和 |natspec| 的使用方法
 ====================================================
 
 元数据以下列方式被使用：想要与合约交互的组件（例如，Mist）读取合约的字节码，
@@ -110,7 +111,7 @@ Solidity编译器自动生成JSON文件，即合约的元数据，其中包含�
 
 此外，Mist可以使用 userdoc 在用户与合约进行交互时向用户显示确认消息。
 
-有关 |NatSpec| 的其他信息可以在 `这里 <https://github.com/ethereum/wiki/wiki/Ethereum-Natural-Specification-Format>`_ 找到。
+有关 |natspec| 的其他信息可以在 `这里 <https://github.com/ethereum/wiki/wiki/Ethereum-Natural-Specification-Format>`_ 找到。
 
 源代码验证的使用方法
 ==================================
