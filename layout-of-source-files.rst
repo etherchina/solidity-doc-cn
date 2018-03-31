@@ -175,13 +175,13 @@ source.sol
 
   pragma solidity ^0.4.0;
 
-  /** @title Shape calculator. */
+  /** @title 形状计算器。 */
   contract shapeCalculator {
-      /** @dev Calculates a rectangle's surface and perimeter.
-      * @param w Width of the rectangle.
-      * @param h Height of the rectangle.
-      * @return s The calculated surface.
-      * @return p The calculated perimeter.
+      /** @dev 求矩形表明面积与周长。
+      * @param w 矩形宽度。
+      * @param h 矩形高度。
+      * @return s 求得表面积。
+      * @return p 求得周长。
       */
       function rectangle(uint w, uint h) returns (uint s, uint p) {
           s = w * h;
