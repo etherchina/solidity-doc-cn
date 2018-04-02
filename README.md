@@ -62,15 +62,7 @@ toyab, 侯伯薇, 姜信宝（bobjiang）, 左洪斌（hongbinzuo）, 李捷（o
 5. rst文档中中文斜体无法展示，此问题尚待解决
 
 ## 术语表
-参见`glossaries.md`和`glossaries.rst`
+参见glossaries.md
 
 ## 参考资料
-参见`references.md`
-
-## 感谢  
-支持 [HiBlock区块链社区](http://hiblock.net/)  
-赞助 [OlympusLabs](https://olympuslabs.io/)
-
-## 捐助
-欢迎使用以太捐助我们的翻译工作，以太坊地址：
-`0xa36c3EFC7dd21db612490B5B1BF8734c8EDBCd00`
+参见references.md

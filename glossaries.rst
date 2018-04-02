@@ -74,7 +74,3 @@
 .. |modifier| raw:: html
 
   <ruby>修饰器<rp>（</rp><rt>modifier</rt><rp>）</rp></ruby>
-
-.. |remapping| raw:: html
-
-  <ruby>重映射<rp>（</rp><rt>remapping</rt><rp>）</rp></ruby>
