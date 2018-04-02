@@ -3,62 +3,58 @@
 .. _contract_structure:
 
 ***********************
-合约的结构
+合约结构
 ***********************
 
-Contracts in Solidity are similar to classes in object-oriented languages.
-Each contract can contain declarations of :ref:`structure-state-variables`, :ref:`structure-functions`,
-:ref:`structure-function-modifiers`, :ref:`structure-events`, :ref:`structure-struct-types` and :ref:`structure-enum-types`.
-Furthermore, contracts can inherit from other contracts.
+
+在 Solidity 中，合约类似于面向对象编程语言中的类。
+每个合约中可以包含 :ref:`structure-state-variables`、 :ref:`structure-functions`、
+:ref:`structure-function-modifiers`、:ref:`structure-events`、 :ref:`structure-struct-types`、
+和 :ref:`structure-enum-types` 的声明，且合约可以从其他合约继承。
 
 .. _structure-state-variables:
 
-State Variables
+状态变量
 ===============
 
-State variables are values which are permanently stored in contract storage.
+状态变量是永久地存储在合约存储中的值。
 
 ::
 
     pragma solidity ^0.4.0;
 
     contract SimpleStorage {
-        uint storedData; // State variable
+        uint storedData; // 状态变量
         // ...
     }
 
-See the :ref:`types` section for valid state variable types and
-:ref:`visibility-and-getters` for possible choices for
-visibility.
+有效的状态变量类型参阅 :ref:`types` 章节，
+对状态变量可见性有可能的选择参阅 :ref:`visibility-and-getters` 。
 
 .. _structure-functions:
 
-Functions
+函数
 =========
 
-Functions are the executable units of code within a contract.
-
+函数是合约中代码的可执行单元。
 ::
 
     pragma solidity ^0.4.0;
 
     contract SimpleAuction {
-        function bid() public payable { // Function
+        function bid() public payable { // 函数
             // ...
         }
     }
 
-:ref:`function-calls` can happen internally or externally
-and have different levels of visibility (:ref:`visibility-and-getters`)
-towards other contracts.
+:ref:`function-calls` 可发生在合约内部或外部，且函数对其他合约有不同程度的可见性（ :ref:`visibility-and-getters`）。 
 
 .. _structure-function-modifiers:
 
-Function Modifiers
+函数修饰器
 ==================
 
-Function modifiers can be used to amend the semantics of functions in a declarative way
-(see :ref:`modifiers` in contracts section).
+函数修饰器可以用来以声明的方式改良函数语义（参阅合约章节中 :ref:`modifiers`）。 
 
 ::
 
@@ -67,11 +63,11 @@ Function modifiers can be used to amend the semantics of functions in a declarat
     contract Purchase {
         address public seller;
 
-        modifier onlySeller() { // Modifier
+        modifier onlySeller() { // 修饰器
             require(msg.sender == seller);
             _;
         }
-
+        
         function abort() public onlySeller { // Modifier usage
             // ...
         }
@@ -79,41 +75,36 @@ Function modifiers can be used to amend the semantics of functions in a declarat
 
 .. _structure-events:
 
-Events
+事件
 ======
 
-Events are convenience interfaces with the EVM logging facilities.
-
+事件是与以太坊虚拟机日志工具的方便接口。
 ::
 
     pragma solidity ^0.4.0;
-
     contract SimpleAuction {
-        event HighestBidIncreased(address bidder, uint amount); // Event
+        event HighestBidIncreased(address bidder, uint amount); // 事件
 
         function bid() public payable {
             // ...
-            HighestBidIncreased(msg.sender, msg.value); // Triggering event
+            HighestBidIncreased(msg.sender, msg.value); // 触发事件
         }
     }
 
-See :ref:`events` in contracts section for information on how events are declared
-and can be used from within a dapp.
+有关如何声明事件和如何在 dapp 中使用事件的信息，参阅合约章节中的 :ref:`events`。
 
 .. _structure-struct-types:
 
-Struct Types
+结构类型
 =============
 
-Structs are custom defined types that can group several variables (see
-:ref:`structs` in types section).
-
+结构是可以将几个变量分组的自定义类型（参阅类型章节中的 :ref:`structs`）。
 ::
 
     pragma solidity ^0.4.0;
 
     contract Ballot {
-        struct Voter { // Struct
+        struct Voter { // 结构
             uint weight;
             bool voted;
             address delegate;
@@ -123,16 +114,15 @@ Structs are custom defined types that can group several variables (see
 
 .. _structure-enum-types:
 
-Enum Types
+枚举类型
 ==========
 
-Enums can be used to create custom types with a finite set of values (see
-:ref:`enums` in types section).
+枚举可用来创建有一定数量的值的自定义类型（参阅类型章节中的 :ref:`enums`）。 
 
 ::
 
     pragma solidity ^0.4.0;
 
     contract Purchase {
-        enum State { Created, Locked, Inactive } // Enum
+        enum State { Created, Locked, Inactive } // 枚举
     }
