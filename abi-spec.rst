@@ -10,23 +10,74 @@
 基本设计
 ============
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+The Application Binary Interface is the standard way to interact with contracts in the Ethereum ecosystem, both
+from outside the blockchain and for contract-to-contract interaction. Data is encoded according to its type,
+as described in this specification.  The encoding is not self describing and thus requires a schema in order to decode.
+=======
+=======
+>>>>>>> etherchina/develop
 在 |ethereum| 生态系统中， |ABI| 是从区块链外部与合约进行交互以及合约与合约间进行交互的一种标准方式。
 数据会根据其类型按照这份手册中说明的方法进行编码。这种编码并不是可以自描述的，而是需要一种特定的概要（schema）来进行解码。
+>>>>>>> etherchina/develop
+=======
+在以太坊生态系统中，应用二进制接口（即Application Binary Interface，ABI）是从区块链外部与合约进行交互以及合约与合约间进行交互的一种标准方式。
+数据会根据其类型按照这份手册中说明的方法进行编码。这种编码并不是可以自描述的，而是需要一种特定的概要（schema）来进行解码。
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 我们假定合约函数的接口都是强类型的，且在编译时是可知的和静态的；不提供自我检查机制。我们假定在编译时，所有合约要调用的其他合约接口定义都是可用的。
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+This specification does not address contracts whose interface is dynamic or otherwise known only at run-time. Should these cases become important they can be adequately handled as facilities built within the Ethereum ecosystem.
+=======
+这份手册并不针对那些动态合约接口或者仅在运行时才可获知的合约接口。如果这种场景变得很重要，你可以使用以太坊生态系统中其他更合适的基础设施来处理它们。
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
+
+.. _abi_function_selector:
+
+函数选择器（Function Selector）
+<<<<<<< HEAD
+=================
+=======
 这份手册并不针对那些动态合约接口或者仅在运行时才可获知的合约接口。如果这种场景变得很重要，你可以使用 |ethereum| 生态系统中其他更合适的基础设施来处理它们。
 
 .. _abi_function_selector:
 
+=======
+这份手册并不针对那些动态合约接口或者仅在运行时才可获知的合约接口。如果这种场景变得很重要，你可以使用 |ethereum| 生态系统中其他更合适的基础设施来处理它们。
+
+.. _abi_function_selector:
+
+>>>>>>> etherchina/develop
 |function_selector|
 =================================
+>>>>>>> etherchina/develop
+=======
+=================================
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 一个函数调用数据的前4字节，指定了要调用的函数。这就是某个函数签名的Keccak（SHA-3）哈希的前4字节（高位在左的大端序）（译注：这里的“高位在左的大端序“，指最高位字节存储在最低位地址上的一种串行化编码方式，即高位字节在左）。
 这种签名被定义为基础原型的规范表达，基础原型即是函数名称加上由括号括起来的参数类型列表，参数类型间由一个逗号分隔开，且没有空格。
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+参数编码（Encoding）
+=================
+=======
+=======
+>>>>>>> etherchina/develop
 参数编码
 =================================
+>>>>>>> etherchina/develop
+=======
+参数编码（Argument Encoding）
+=================================
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 从第5字节开始是被编码的参数。这种编码也被用在其他地方，比如，返回值和事件的参数也会被用同样的方式进行编码，而用来指定函数的4个字节则不需要再进行编码。
 
@@ -39,21 +90,71 @@
 
 - ``int<M>`` ：以2的补码作为符号的 ``M`` 位整数， ``0 < M <= 256`` 、 ``M % 8 == 0`` 。
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+- ``address``: equivalent to ``uint160``, except for the assumed interpretation and language typing. For computing the function selector, ``address`` is used.
+=======
+- ``address`` ：除了字面上的意思和语言类型的区别以外，等价于 ``uint160`` 。在计算和函数选择器中，通常使用 ``address`` 。
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
+
+- ``uint`` 、 ``int`` ： ``uint256`` 、 ``int256`` 各自的同义词。在计算和函数选择器中，通常使用 ``uint256`` 和 ``int256`` 。
+
+<<<<<<< HEAD
+- ``bool``: equivalent to ``uint8`` restricted to the values 0 and 1. For computing the function selector, ``bool`` is used.
+=======
+- ``address`` ：除了字面上的意思和语言类型的区别以外，等价于 ``uint160`` 。在计算和 |function_selector| 中，通常使用 ``address`` 。
+=======
 - ``address`` ：除了字面上的意思和语言类型的区别以外，等价于 ``uint160`` 。在计算和 |function_selector| 中，通常使用 ``address`` 。
 
 - ``uint`` 、 ``int`` ： ``uint256`` 、 ``int256`` 各自的同义词。在计算和 |function_selector| 中，通常使用 ``uint256`` 和 ``int256`` 。
 
 - ``bool`` ：等价于 ``uint8`` ，取值限定为0或1。在计算和 |function_selector| 中，通常使用 ``bool`` 。
+>>>>>>> etherchina/develop
+
+- ``uint`` 、 ``int`` ： ``uint256`` 、 ``int256`` 各自的同义词。在计算和 |function_selector| 中，通常使用 ``uint256`` 和 ``int256`` 。
+
+- ``bool`` ：等价于 ``uint8`` ，取值限定为0或1。在计算和 |function_selector| 中，通常使用 ``bool`` 。
+>>>>>>> etherchina/develop
+
+<<<<<<< HEAD
+- ``fixed<M>x<N>``: signed fixed-point decimal number of ``M`` bits, ``8 <= M <= 256``, ``M % 8 ==0``, and ``0 < N <= 80``, which denotes the value ``v`` as ``v / (10 ** N)``.
+=======
+- ``fixed`` 、 ``ufixed`` ： ``fixed128x19`` 、 ``ufixed128x19`` 各自的同义词。在计算和 |function_selector| 中，通常使用 ``fixed128x19`` 和 ``ufixed128x19`` 。
+>>>>>>> etherchina/develop
+=======
+- ``bool`` ：等价于 ``uint8`` ，取值限定为0或1。在计算和函数选择器中，通常使用 ``bool`` 。
 
 - ``fixed<M>x<N>`` ： ``M`` 位的有符号的固定小数位的十进制数字 ``8 <= M <= 256`` 、 ``M % 8 ==0`` 、且 ``0 < N <= 80`` 。其值 ``v`` 即是 ``v / (10 ** N)`` 。（也就是说，这种类型是由M位的二进制数据所保存的，有N位小数的十进制数值。译者注。）
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 - ``ufixed<M>x<N>`` ：无符号的 ``fixed<M>x<N>`` 。
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+- ``fixed``, ``ufixed``: synonyms for ``fixed128x19``, ``ufixed128x19`` respectively. For computing the function selector, ``fixed128x19`` and ``ufixed128x19`` have to be used.
+=======
 - ``fixed`` 、 ``ufixed`` ： ``fixed128x19`` 、 ``ufixed128x19`` 各自的同义词。在计算和 |function_selector| 中，通常使用 ``fixed128x19`` 和 ``ufixed128x19`` 。
+>>>>>>> etherchina/develop
+=======
+- ``function`` ：一个地址（20字节）之后紧跟一个 |function_selector| （4字节）。编码之后等价于 ``bytes24`` 。
+>>>>>>> etherchina/develop
+=======
+- ``fixed`` 、 ``ufixed`` ： ``fixed128x19`` 、 ``ufixed128x19`` 各自的同义词。在计算和函数选择器中，通常使用 ``fixed128x19`` 和 ``ufixed128x19`` 。
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 - ``bytes<M>`` ： ``M`` 字节的二进制类型， ``0 < M <= 32`` 。
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+- ``function``: an address (20 bytes) folled by a function selector (4 bytes). Encoded identical to ``bytes24``.
+=======
 - ``function`` ：一个地址（20字节）之后紧跟一个 |function_selector| （4字节）。编码之后等价于 ``bytes24`` 。
+>>>>>>> etherchina/develop
+=======
+- ``function`` ：一个地址（20字节）之后紧跟一个函数选择器（4字节）。编码之后等价于 ``bytes24`` 。
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 以下是定长数组类型：
 
@@ -63,18 +164,52 @@
 
 - ``bytes`` ：动态大小的字节序列。
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+- ``string``: dynamic sized unicode string assumed to be UTF-8 encoded.
+=======
 - ``string`` ：动态大小的unicode字符串，通常呈现为UTF-8编码。
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 - ``<type>[]`` ：元素为给定类型的变长数组。
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+Types can be combined to a tuple by enclosing a finite non-negative number
+of them inside parentheses, separated by commas:
+=======
+可以将有限的若干类型放到一对括号中，用逗号分隔开，以此来构成一个元组：
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
+
+- ``(T1,T2,...,Tn)`` ：由 ``T1`` ， ...， ``Tn`` ， ``n >= 0`` 构成的元组。
+
+用元组构成元组、用元组构成数组等等也是可能的。
+
+.. note::
+<<<<<<< HEAD
+    Solidity supports all the types presented above with the same names with the exception of tuples. The ABI tuple type is utilised for encoding Solidity ``structs``.
+=======
 可以将有限的若干类型放到一对括号中，用逗号分隔开，以此来构成一个 |tuple| ：
 
 - ``(T1,T2,...,Tn)`` ：由 ``T1`` ， ...， ``Tn`` ， ``n >= 0`` 构成的 |tuple| 。
 
+=======
+可以将有限的若干类型放到一对括号中，用逗号分隔开，以此来构成一个 |tuple| ：
+
+- ``(T1,T2,...,Tn)`` ：由 ``T1`` ， ...， ``Tn`` ， ``n >= 0`` 构成的 |tuple| 。
+
+>>>>>>> etherchina/develop
 用 |tuple| 构成 |tuple| 、用 |tuple| 构成数组等等也是可能的。
 
 .. note::
     除了 |tuple| 以外，Solidity支持以上所有类型的名称。ABI |tuple| 是利用Solidity的 ``structs`` 编码得到的。
+<<<<<<< HEAD
+>>>>>>> etherchina/develop
+=======
+>>>>>>> etherchina/develop
+=======
+    除了元组（tuple）以外，Solidity支持以上所有类型的名称。ABI元组是利用Solidity的 ``structs`` 编码得到的。
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 编码的形式化说明
 ====================================
@@ -93,9 +228,24 @@
 
 * ``bytes``
 * ``string``
+<<<<<<< HEAD
+<<<<<<< HEAD
+* ``T[]`` for any ``T``
+* ``T[k]`` for any dynamic ``T`` and any ``k > 0``
+* ``(T1,...,Tk)`` if any ``Ti`` is dynamic for ``1 <= i <= k``
+=======
 * 任意类型 `T` 的变长数组 ``T[]``
 * 任意动态类型 `T` 的定长数组 ``T[k]`` （ ``k > 0`` ）
 * ``Ti`` （ ``1 <= i <= k`` ）为任意动态类型的 |tuple|  ``(T1,...,Tk)``
+<<<<<<< HEAD
+>>>>>>> etherchina/develop
+=======
+>>>>>>> etherchina/develop
+=======
+* 任意类型 `T` 的变长数组 ``T[]``
+* 任意动态类型 `T` 的定长数组 ``T[k]`` （ ``k > 0`` ）
+* ``Ti`` （ ``1 <= i <= k`` ）为任意动态类型的元组 ``(T1,...,Tk)``
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 所有其他类型都被称为“静态”。
 
@@ -109,8 +259,21 @@
 
   ``enc(X) = head(X(1)) ... head(X(k-1)) tail(X(0)) ... tail(X(k-1))``
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+  where ``X(i)`` is the ``ith`` component of the value, and
+  ``head`` and ``tail`` are defined for ``Ti`` being a static type as
+=======
+=======
+>>>>>>> etherchina/develop
   这里， ``X(i)`` 是 |tuple| 的第 ``i`` 个要素，并且
   当 ``Ti`` 为静态类型时， ``head`` 和 ``tail`` 被定义为
+>>>>>>> etherchina/develop
+=======
+  这里， ``X(i)`` 是元组的第 ``i`` 个要素，并且
+  当 ``Ti`` 为静态类型时， ``head`` 和 ``tail`` 被定义为
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
     ``head(X(i)) = enc(X(i))`` and ``tail(X(i)) = ""`` （空字符串）
 
@@ -125,7 +288,20 @@
 
   ``enc(X) = enc((X[0], ..., X[k-1]))``
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+  i.e. it is encoded as if it were a tuple with ``k`` elements
+  of the same type.
+=======
   即是说，它就像是个由相同类型的 ``k`` 个元素组成的 |tuple| 那样被编码的。
+>>>>>>> etherchina/develop
+=======
+  即是说，它就像是个由相同类型的 ``k`` 个元素组成的 |tuple| 那样被编码的。
+>>>>>>> etherchina/develop
+=======
+  即是说，它就像是个由相同类型的 ``k`` 个元素组成的元组那样被编码的。
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 - ``T[]`` 当 ``X`` 有 ``k`` 个元素（ ``k`` 被呈现为类型 ``uint256`` ）：
 
@@ -164,7 +340,19 @@
 
   ``enc((v_1, ..., v_k))``
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+i.e. the values are combined into a tuple and encoded.
+=======
 也就是说，返回值会被组合为一个 |tuple| 进行编码。
+>>>>>>> etherchina/develop
+=======
+也就是说，返回值会被组合为一个 |tuple| 进行编码。
+>>>>>>> etherchina/develop
+=======
+也就是说，返回值会被组合为一个元组进行编码。
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 例子
 ========
@@ -245,7 +433,19 @@
  - ``0x000000000000000000000000000000000000000000000000000000000000000d`` （元素个数，在这里是字节数：13）
  - ``0x48656c6c6f2c20776f726c642100000000000000000000000000000000000000`` （ ``"Hello, world!"`` 从右边补充到32字节）
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+All together, the encoding is (newline after function selector and each 32-bytes for clarity):
+=======
 最后，合并到一起的编码就是（为了清晰，在 |function_selector| 和每32字节之后加了换行）：
+>>>>>>> etherchina/develop
+=======
+最后，合并到一起的编码就是（为了清晰，在 |function_selector| 和每32字节之后加了换行）：
+>>>>>>> etherchina/develop
+=======
+最后，合并到一起的编码就是（为了清晰，在函数选择器和每32字节之后加了换行）：
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 ::
 
@@ -263,16 +463,45 @@
 事件
 ======
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+Events are an abstraction of the Ethereum logging/event-watching protocol. Log entries provide the contract's address, a series of up to four topics and some arbitrary length binary data. Events leverage the existing function ABI in order to interpret this (together with an interface spec) as a properly typed structure.
+=======
 事件，是 |ethereum| 的日志/事件监视协议的一个抽象。日志项提供了合约的地址、一系列的主题（最高4项）和一些任意长度的二进制数据。为了使用合适的类型数据结构来演绎这些功能（与接口定义一起），事件沿用了既存的ABI函数。
+>>>>>>> etherchina/develop
+=======
+事件，是 |ethereum| 的日志/事件监视协议的一个抽象。日志项提供了合约的地址、一系列的主题（最高4项）和一些任意长度的二进制数据。为了使用合适的类型数据结构来演绎这些功能（与接口定义一起），事件沿用了既存的ABI函数。
+>>>>>>> etherchina/develop
+=======
+事件，是以太坊的日志/事件监视协议的一个抽象。日志项提供了合约的地址、一系列的主题（最高4项）和一些任意长度的二进制数据。为了使用合适的类型数据结构来演绎这些功能（与接口定义一起），事件沿用了既存的ABI函数。
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 给定了事件名称和事件参数之后，我们将其分解为两个子集：已索引的和未索引的。已索引的部分，最多有3个，被用来与事件签名的Keccak哈希一起组成日志项的主题。未索引的部分就组成了事件的字节数组。
 
 这样，一个使用ABI的日志项就可以描述为：
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+- ``address``: the address of the contract (intrinsically provided by Ethereum);
+- ``topics[0]``: ``keccak(EVENT_NAME+"("+EVENT_ARGS.map(canonical_type_of).join(",")+")")`` (``canonical_type_of`` is a function that simply returns the canonical type of a given argument, e.g. for ``uint indexed foo``, it would return ``uint256``). If the event is declared as ``anonymous`` the ``topics[0]`` is not generated;
+- ``topics[n]``: ``EVENT_INDEXED_ARGS[n - 1]`` (``EVENT_INDEXED_ARGS`` is the series of ``EVENT_ARGS`` that are indexed);
+- ``data``: ``abi_serialise(EVENT_NON_INDEXED_ARGS)`` (``EVENT_NON_INDEXED_ARGS`` is the series of ``EVENT_ARGS`` that are not indexed, ``abi_serialise`` is the ABI serialisation function used for returning a series of typed values from a function, as described above).
+=======
+=======
+>>>>>>> etherchina/develop
 - ``address`` ：合约地址（由 |ethereum| 真正提供）；
 - ``topics[0]`` ： ``keccak(EVENT_NAME+"("+EVENT_ARGS.map(canonical_type_of).join(",")+")")`` （ ``canonical_type_of`` 是一个可以返回给定参数的权威类型的函数，例如，对 ``uint indexed foo`` 它会返回 ``uint256`` ）。如果事件被声明为 ``anonymous`` ，那么 ``topics[0]`` 不会被生成；
 - ``topics[n]`` ： ``EVENT_INDEXED_ARGS[n - 1]`` （ ``EVENT_INDEXED_ARGS`` 是已索引的 ``EVENT_ARGS`` ）；
 - ``data`` ： ``abi_serialise(EVENT_NON_INDEXED_ARGS)`` （ ``EVENT_NON_INDEXED_ARGS`` 是未索引的 ``EVENT_ARGS`` ， ``abi_serialise`` 是一个用来从某个函数返回一系列类型值的ABI序列化函数，就像上文所讲的那样）。
+>>>>>>> etherchina/develop
+=======
+- ``address`` ：合约地址（由以太坊真正提供）；
+- ``topics[0]`` ： ``keccak(EVENT_NAME+"("+EVENT_ARGS.map(canonical_type_of).join(",")+")")`` （ ``canonical_type_of`` 是一个可以返回给定参数的权威类型的函数，例如，对 ``uint indexed foo`` 它会返回 ``uint256`` ）。如果事件被声明为 ``anonymous`` ，那么 ``topics[0]`` 不会被生成；
+- ``topics[n]`` ： ``EVENT_INDEXED_ARGS[n - 1]`` （ ``EVENT_INDEXED_ARGS`` 是已索引的 ``EVENT_ARGS`` ）；
+- ``data`` ： ``abi_serialise(EVENT_NON_INDEXED_ARGS)`` （ ``EVENT_NON_INDEXED_ARGS`` 是未索引的 ``EVENT_ARGS`` ， ``abi_serialise`` 是一个用来从某个函数返回一系列类型值的ABI序列化函数，就像上文所讲的那样）。
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 对于所有定长的Solidity类型，  ``EVENT_INDEXED_ARGS`` 数组会直接包含32字节的编码值。然而，对于 *动态长度的类型* ，包含 ``string`` 、 ``bytes`` 和数组，
 ``EVENT_INDEXED_ARGS`` 会包含编码值的 *Keccak哈希* 而不是直接包含编码值。这样就允许应用程序更有效地查询动态长度类型的值（通过把编码值的哈希设定为主题），
@@ -288,6 +517,17 @@ JSON
 - ``name`` ：函数名称；
 - ``inputs`` ：对象数组，每个数组对象会包含：
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+  * ``name``: the name of the parameter;
+  * ``type``: the canonical type of the parameter (more below).
+  * ``components``: used for tuple types (more below).
+
+- ``outputs``: an array of objects similar to ``inputs``, can be omitted if function doesn't return anything;
+- ``payable``: ``true`` if function accepts ether, defaults to ``false``;
+- ``stateMutability``: a string with one of the following values: ``pure`` (:ref:`specified to not read blockchain state <pure-functions>`), ``view`` (:ref:`specified to not modify the blockchain state <view-functions>`), ``nonpayable`` and ``payable`` (same as ``payable`` above).
+- ``constant``: ``true`` if function is either ``pure`` or ``view``
+=======
   * ``name`` ：参数名称；
   * ``type`` ：参数的权威类型（详见下文）
   * ``components`` ：供 |tuple| 类型使用（详见下文）
@@ -296,12 +536,35 @@ JSON
 - ``payable`` ：如果函数接受 |ether| ，为 ``true`` ；缺省为 ``false`` ；
 - ``stateMutability`` ：为下列值之一： ``pure`` （ :ref:`指定为不读取区块链状态 <pure-functions>` ）， ``view`` （ :ref:`指定为不修改区块链状态 <view-functions>` ）， ``nonpayable`` 和 ``payable`` （与上文 ``payable`` 一样）。
 - ``constant`` ：如果函数被指定为 ``pure`` 或 ``view`` 则为 ``true`` 。
+>>>>>>> etherchina/develop
+=======
+  * ``name`` ：参数名称；
+  * ``type`` ：参数的权威类型（详见下文）
+  * ``components`` ：供元组类型使用（详见下文）
+
+- ``outputs`` ：一个类似于 ``inputs`` 的对象数组，如果函数无返回值时可以被省略；
+- ``payable`` ：如果函数接受以太币，为 ``true`` ；缺省为 ``false`` ；
+- ``stateMutability`` ：为下列值之一： ``pure`` （ :ref:`指定为不读取区块链状态 <pure-functions>` ）， ``view`` （ :ref:`指定为不修改区块链状态 <view-functions>` ）， ``nonpayable`` 和 ``payable`` （与上文 ``payable`` 一样）。
+- ``constant`` ：如果函数被指定为 ``pure`` 或 ``view`` 则为 ``true`` 。
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 ``type`` 可以被省略，缺省为 ``"function"`` 。
 
 Constructor和fallback函数没有 ``name`` 或 ``outputs`` 。Fallback函数也没有 ``inputs`` 。
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+Sending non-zero ether to non-payable function will throw. Don't do it.
+=======
 向non-payable（即不接受 |ether| ）的函数发送非零值的 |ether| 会导致其丢失。不要这么做。
+>>>>>>> etherchina/develop
+=======
+向non-payable（即不接受 |ether| ）的函数发送非零值的 |ether| 会导致其丢失。不要这么做。
+>>>>>>> etherchina/develop
+=======
+向non-payable（即不接受以太币）的函数发送非零值的以太币会导致其丢失。不要这么做。
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 一个事件描述是一个有极其相似字段的JSON对象：
 
@@ -309,10 +572,24 @@ Constructor和fallback函数没有 ``name`` 或 ``outputs`` 。Fallback函数也
 - ``name`` ：事件名称；
 - ``inputs`` ：对象数组，每个数组对象会包含：
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+  * ``name``: the name of the parameter;
+  * ``type``: the canonical type of the parameter (more below).
+  * ``components``: used for tuple types (more below).
+  * ``indexed``: ``true`` if the field is part of the log's topics, ``false`` if it one of the log's data segment.
+=======
   * ``name`` ：参数名称；
   * ``type`` ：参数的权威类型（相见下文）；
   * ``components`` ：供 |tuple| 类型使用（详见下文）；
   * ``indexed`` ：如果此字段是日志的一个主题，则为 ``true`` ；否则为 ``false`` 。
+>>>>>>> etherchina/develop
+=======
+  * ``name`` ：参数名称；
+  * ``type`` ：参数的权威类型（相见下文）；
+  * ``components`` ：供元组类型使用（详见下文）；
+  * ``indexed`` ：如果此字段是日志的一个主题，则为 ``true`` ；否则为 ``false`` 。
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 - ``anonymous`` ：如果事件被声明为 ``anonymous`` ，则为 ``true`` 。
 
@@ -349,14 +626,45 @@ Constructor和fallback函数没有 ``name`` 或 ``outputs`` 。Fallback函数也
   "outputs": []
   }]
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+Handling tuple types
+=======
 处理 |tuple| 类型
+>>>>>>> etherchina/develop
+=======
+处理 |tuple| 类型
+>>>>>>> etherchina/develop
+=======
+处理元组类型
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 --------------------
 
 尽管名称被有意地不作为ABI编码的一部分，但将它们包含进JSON来显示给最终用户是非常合理的。其结构会按下列方式进行嵌套：
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+An object with members ``name``, ``type`` and potentially ``components`` describes a typed variable.
+The canonical type is determined until a tuple type is reached and the string description up
+to that point is stored in ``type`` prefix with the word ``tuple``, i.e. it will be ``tuple`` followed by
+a sequence of ``[]`` and ``[k]`` with
+integers ``k``. The components of the tuple are then stored in the member ``components``,
+which is of array type and has the same structure as the top-level object except that
+``indexed`` is not allowed there.
+=======
 一个拥有 ``name`` 、 ``type`` 和潜在的 ``components`` 成员的对象描述了某种类型的变量。
 直至到达一个 |tuple| 类型且到那点的存储在 ``type`` 属性中的字符串以 ``tuple`` 为前缀，也就是说，在 ``tuple`` 之后紧跟一个 ``[]`` 或有整数 ``k`` 的 ``[k]`` ，才能确定一个 |tuple| 。
 |tuple| 的组件元素会被存储在成员 ``components`` 中，它是一个数组类型，且与顶级对象具有同样的结构，只是在这里不允许已索引的（ ``indexed`` ）数组元素。
+<<<<<<< HEAD
+>>>>>>> etherchina/develop
+=======
+>>>>>>> etherchina/develop
+=======
+一个拥有 ``name`` 、 ``type`` 和潜在的 ``components`` 成员的对象描述了某种类型的变量。
+直至到达一个元组类型且到那点的存储在 ``type`` 属性中的字符串以 ``tuple`` 为前缀，也就是说，在 ``tuple`` 之后紧跟一个 ``[]`` 或有整数 ``k`` 的 ``[k]`` ，才能确定一个元组。
+元组的组件元素会被存储在成员 ``components`` 中，它是一个数组类型，且与顶级对象具有同样的结构，只是在这里不允许已索引的（ ``indexed`` ）数组元素。
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 作为例子，代码
 
@@ -439,9 +747,24 @@ Constructor和fallback函数没有 ``name`` 或 ``outputs`` 。Fallback函数也
 
 Solidity支持一种非标准打包模式：
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+- no :ref:`function selector <abi_function_selector>` is encoded,
+- types shorter than 32 bytes are neither zero padded nor sign extended and
+- dynamic types are encoded in-place and without the length.
+=======
+=======
+>>>>>>> etherchina/develop
 - :ref:`函数选择器<abi_function_selector>` 不进行编码，
 - 长度低于32字节的类型，既不会进行补0操作，也不会进行符号扩展，以及
 - 动态类型会直接进行编码，并且不包含长度信息。
+>>>>>>> etherchina/develop
+=======
+- :ref:`函数选择器 <abi_function_selector>` 不进行编码，
+- 长度低于32字节的类型，既不会进行补0操作，也不会进行符号扩展，以及
+- 动态类型会直接进行编码，并且不包含长度信息。
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 例如，对 ``int1, bytes1, uint16, string`` 用数值 ``-1, 0x42, 0x2424, "Hello, world!"`` 进行编码将生成如下结果 ::
 

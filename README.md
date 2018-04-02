@@ -22,7 +22,26 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 
 以下排名不分先后。
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+1. 姜信宝（bobjiang）
+2. 左洪斌（hongbinzuo）
+3. 侯伯薇
+4. toyab
+5. 李捷（oldcodeoberyn）
+6. 虞是乎（ysqi）
+7. 周锷（ghostrd）
+8. 杨镇（riversyang）
+=======
 toyab, 侯伯薇, 姜信宝（bobjiang）, 左洪斌（hongbinzuo）, 李捷（oldcodeoberyn）, 虞是乎（ysqi）, 周锷（ghostrd）, 杨镇（riversyang）, 毛明旺（dennisWind）, 王兴宇（wxy）, 孔庆丰（buffalo2004）, 卓跃萍（JocelynZhuo）
+>>>>>>> etherchina/develop
+=======
+toyab, 侯伯薇, 姜信宝（bobjiang）, 左洪斌（hongbinzuo）, 李捷（oldcodeoberyn）, 虞是乎（ysqi）, 周锷（ghostrd）, 杨镇（riversyang）, 毛明旺（dennisWind）, 王兴宇（wxy）, 孔庆丰（buffalo2004）, 卓跃萍（JocelynZhuo）
+>>>>>>> etherchina/develop
+=======
+toyab, 侯伯薇, 姜信宝（bobjiang）, 左洪斌（hongbinzuo）, 李捷（oldcodeoberyn）, 虞是乎（ysqi）, 周锷（ghostrd）, 杨镇（riversyang）, 毛阴旺（dennisWind）, 王兴宇（wxy）, 孔庆丰（buffalo2004）, 卓跃萍（JocelynZhuo）
+>>>>>>> parent of a49b1d9... Revert "Merge remote-tracking branch 'etherchina/develop' into develop"
 
 ## 常见问题
 0. [中文文案排版指北](https://github.com/mzlogin/chinese-copywriting-guidelines)
@@ -33,15 +52,7 @@ toyab, 侯伯薇, 姜信宝（bobjiang）, 左洪斌（hongbinzuo）, 李捷（o
 
 
 ## 术语表
-参见`glossaries.md`和`glossaries.rst`
+参见glossaries.md
 
 ## 参考资料
-参见`references.md`
-
-## 感谢  
-支持 [HiBlock区块链社区](http://hiblock.net/)  
-赞助 [OlympusLabs](https://olympuslabs.io/)
-
-## 捐助
-欢迎使用以太捐助我们的翻译工作，以太坊地址：
-`0xa36c3EFC7dd21db612490B5B1BF8734c8EDBCd00`
+参见references.md
