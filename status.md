@@ -1,5 +1,7 @@
 # Solidity文档翻译进度
 
+注：某些commit hash和272262e不一样，下次更新同步时请注意检查是hash值错误还是真的是正确的hash。
+
 ## 首页
  - index.rst
  - 状态：终审
@@ -47,3 +49,51 @@
  - 提交日期：3月4日
  - 最后更新日期：3月9日
  - 相关PR：#36
+
+## 使用编译器
+ - using-the-compiler.rst
+ - 状态：终审
+ - 行数：607行
+ - 译者：李捷（oldcodeoberyn）
+ - 审校：杨镇（riversyang），孔庆丰（buffalo2004）
+ - commit: 5815bfd
+ - 认领日期：3月5日
+ - 提交日期：3月6日
+ - 最后更新日期：3月14日
+ - 相关PR：#38
+
+## 常见问题
+ - frequently-asked-questions.rst
+ - 状态：终审
+ - 行数：607行
+ - 译者：周锷（ghostrd）
+ - 审校：杨镇（riversyang），孔庆丰（buffalo2004），毛明旺（dennisWind）
+ - commit: bac926e
+ - 认领日期：3月6日
+ - 提交日期：3月7日
+ - 最后更新日期：3月17日
+ - 相关PR：#39
+
+## 根据例子学习Solidity
+ - solidity-by-example.rst
+ - 状态：终审
+ - 行数：622行
+ - 译者：李捷（oldcodeoberyn）
+ - 审校：杨镇（riversyang），孔庆丰（buffalo2004）
+ - commit: 1d49558c
+ - 认领日期：3月12日
+ - 提交日期：3月17日
+ - 最后更新日期：3月29日
+ - 相关PR：#50
+
+## 合约的元数据
+ - metadata.rst
+ - 状态：终审
+ - 行数：146行
+ - 译者：李捷（oldcodeoberyn）
+ - 审校：杨镇（riversyang），左洪斌（hongbinzuo）
+ - commit: 272262e
+ - 认领日期：3月16日
+ - 提交日期：3月27日
+ - 最后更新日期：3月29日
+ - 相关PR：#57
