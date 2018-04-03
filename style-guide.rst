@@ -517,49 +517,6 @@ Imports规范
         doSomething();
     }
 
-多路输出参数和返回语句应遵循推荐统一风格，可参考 :ref:`Maximum Line Length <maximum_line_length>` 章节。
-正确写法::
-
-    function thisFunctionNameIsReallyLong(
-        address a,
-        address b,
-        address c
-    )
-        public
-        returns (
-            address someAddressName,
-            uint256 LongArgument,
-            uint256 Argument
-        )
-    {
-        doSomething()
-
-        return (
-            veryLongReturnArg1,
-            veryLongReturnArg2,
-            veryLongReturnArg3
-        );
-    }
-
-错误写法::
-
-    function thisFunctionNameIsReallyLong(
-        address a,
-        address b,
-        address c
-    )
-        public
-        returns (address someAddressName,
-                 uint256 LongArgument,
-                 uint256 Argument)
-    {
-        doSomething()
-
-        return (veryLongReturnArg1,
-                veryLongReturnArg1,
-                veryLongReturnArg1);
-    }
-
 对于继承合约中需要参数的构造函数，如果函数声明很长或难以阅读，则建议将构造函数和修饰符下沉放在
 新的一行上。
 
