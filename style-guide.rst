@@ -8,44 +8,49 @@
 概述
 ************
 
-本指南旨在约定solidity代码的编码规范。本指南是不断变化演进的，旧的、过时的编码规范会被淘汰，
-而新的、有用的规范会被添加进来。
+This guide is intended to provide coding conventions for writing solidity code.
+This guide should be thought of as an evolving document that will change over
+time as useful conventions are found and old conventions are rendered obsolete.
 
-许多项目会实施他们自己的编码风格指南。如遇冲突，应优先使用具体项目的风格指南。
+Many projects will implement their own style guides.  In the event of
+conflicts, project specific style guides take precedence.
 
-本风格指南中的结构和许多建议是取自python的 `pep8 style guide <https://www.python.org/dev/peps/pep-0008/>`_。
+The structure and many of the recommendations within this style guide were
+taken from python's
+`pep8 style guide <https://www.python.org/dev/peps/pep-0008/>`_.
 
-本指南并 *不是* 以指导正确或最佳的solidity编码方式为目的。本指南的目的是保持代码的 *一致性* 。
-来自python的参考文档`pep8 <https://www.python.org/dev/peps/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds>`_。
-很好的阐述了这个概念。
+The goal of this guide is *not* to be the right way or the best way to write
+solidity code.  The goal of this guide is *consistency*.  A quote from python's
+`pep8 <https://www.python.org/dev/peps/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds>`_
+captures this concept well.
 
-    风格指南是关于一致性的。与此风格指南的一致性非常重要。项目中的一致性更重要。一个模块或功能内的一致性是最重要的。
-    但最重要的是：知道什么时候不一致 ——有时风格指南不适用。如有疑问，请自行判断。看看其他例子，并决定什么看起来最好。并应毫不犹豫的询问他人！
+    A style guide is about consistency. Consistency with this style guide is important. Consistency within a project is more important. Consistency within one module or function is most important.
+    But most importantly: know when to be inconsistent -- sometimes the style guide just doesn't apply. When in doubt, use your best judgement. Look at other examples and decide what looks best. And don't hesitate to ask!
+
 
 ***********
 代码结构
 ***********
 
 
-缩进
+Indentation
 ===========
 
-每个缩进级别使用4个空格。
+Use 4 spaces per indentation level.
 
-制表符或空格
+Tabs or Spaces
 ==============
 
-空格是首选的缩进方法。
+Spaces are the preferred indentation method.
 
-应该避免混合使用制表符和空格。
+Mixing tabs and spaces should be avoided.
 
-空行
+Blank Lines
 ===========
 
-在solidity源码中合约声明之间留出两个空行。
+Surround top level declarations in solidity source with two blank lines.
 
-
-正确写法::
+Yes::
 
     contract A {
         ...
@@ -61,7 +66,7 @@
         ...
     }
 
-错误写法::
+No::
 
     contract A {
         ...
@@ -74,11 +79,11 @@
         ...
     }
 
-在一个合约中的函数声明之间留有一个空行。
+Within a contract surround function declarations with a single blank line.
 
-在同一合约中的一组函数声明之间可以省略空行（例如抽象合约的存根函数）
+Blank lines may be omitted between groups of related one-liners (such as stub functions for an abstract contract)
 
-正确写法::
+Yes::
 
     contract A {
         function spam() public;
@@ -96,7 +101,7 @@
         }
     }
 
-错误写法::
+No::
 
     contract A {
         function spam() public {
@@ -107,17 +112,17 @@
         }
     }
 
-源文件编码格式
+Source File Encoding
 ====================
 
-首选UTF-8或ASCII编码。
+UTF-8 or ASCII encoding is preferred.
 
-Imports规范
+Imports
 =======
 
-导入语句应始终放在文件的顶部。
+Import statements should always be placed at the top of the file.
 
-正确写法::
+Yes::
 
     import "owned";
 
@@ -131,7 +136,7 @@ Imports规范
         ...
     }
 
-错误写法::
+No::
 
     contract A {
         ...
@@ -145,23 +150,23 @@ Imports规范
         ...
     }
 
-函数顺序
+Order of Functions
 ==================
 
-排序有助于读者识别他们可以调用哪些函数，并更容易地找到构造函数和回退函数的定义。
+Ordering helps readers identify which functions they can call and to find the constructor and fallback definitions easier.
 
-功能应根据其可见性和顺序进行分组：
+Functions should be grouped according to their visibility and ordered:
 
-- 构造函数
-- 回退函数定义（如果存在）
-- 外部函数
-- 公共函数
-- 内部函数和变量
-- 私有函数和变量
+- constructor
+- fallback function (if exists)
+- external
+- public
+- internal
+- private
 
-在一个分组中，最后放置``常量``函数。
+Within a grouping, place the ``constant`` functions last.
 
-正确写法::
+Yes::
 
     contract A {
         function A() public {
@@ -188,7 +193,7 @@ Imports规范
         // ...
     }
 
-错误写法::
+No::
 
     contract A {
 
@@ -213,75 +218,76 @@ Imports规范
         // ...
     }
 
-表达式中的空格
+Whitespace in Expressions
 =========================
 
-在以下情况下避免无关的空格：
+Avoid extraneous whitespace in the following  situations:
 
-除单行函数声明外，中括号或者大括号中的立即数应该避免空格。
+Immediately inside parenthesis, brackets or braces, with the exception of single line function declarations.
 
-正确写法::
+Yes::
 
     spam(ham[1], Coin({name: "ham"}));
 
-错误写法::
+No::
 
     spam( ham[ 1 ], Coin( { name: "ham" } ) );
 
-除外::
+Exception::
 
     function singleLine() public { spam(); }
 
-紧接在逗号，分号之前：
+Immediately before a comma, semicolon:
 
-正确写法::
+Yes::
 
     function spam(uint i, Coin coin) public;
 
-错误写法::
+No::
 
     function spam(uint i , Coin coin) public ;
 
-赋值或者其他操作符两边用于对齐的多个空格：
+More than one space around an assignment or other operator to align with
+  another:
 
-正确写法::
+Yes::
 
     x = 1;
     y = 2;
     long_variable = 3;
 
-错误写法::
+No::
 
     x             = 1;
     y             = 2;
     long_variable = 3;
 
-回退函数中不要包含空格：
+Don't include a whitespace in the fallback function:
 
-正确写法::
+Yes::
 
     function() public {
         ...
     }
 
-错误写法::
+No::
 
     function () public {
         ...
     }
 
-控制结构
-
+Control Structures
 ==================
 
-用大括号表示一个合约，库、函数和结构
-应该：
+The braces denoting the body of a contract, library, functions and structs
+should:
 
-* 开括号与声明应在同一行
-* 闭括号在与之前函数声明对应的开括号保持同一缩进级别上另起一行.
-* 开括号前应该有一个空格。
+* open on the same line as the declaration
+* close on their own line at the same indentation level as the beginning of the
+  declaration.
+* The opening brace should be proceeded by a single space.
 
-正确写法::
+Yes::
 
     contract Coin {
         struct Bank {
@@ -290,7 +296,7 @@ Imports规范
         }
     }
 
-错误写法::
+No::
 
     contract Coin
     {
@@ -300,12 +306,15 @@ Imports规范
         }
     }
 
-对于控制结构 ``if``， ``else``， ``while``， ``for`` 的实施建议与以上相同。
+The same recommendations apply to the control structures ``if``, ``else``, ``while``,
+and ``for``.
 
-另外，诸如 ``if``， ``else``， ``while``， ``for`` 这类的控制结构和条件表达式的块之间应该有一个单独的空格，
-同样的，条件表达式的块和开括号之间也应该有一个空格。
+Additionally there should be a single space between the control structures
+``if``, ``while``, and ``for`` and the parenthetic block representing the
+conditional, as well as a single space between the conditional parenthetic
+block and the opening brace.
 
-正确写法::
+Yes::
 
     if (...) {
         ...
@@ -315,7 +324,7 @@ Imports规范
         ...
     }
 
-错误写法::
+No::
 
     if (...)
     {
@@ -328,14 +337,15 @@ Imports规范
     for (...) {
         ...;}
 
-对于控制结构，如果其主体内容只包含一行，则可以省略括号。
+For control structures whose body contains a single statement, omitting the
+braces is ok *if* the statement is contained on a single line.
 
-正确写法::
+Yes::
 
     if (x < 10)
         x += 1;
 
-错误写法::
+No::
 
     if (x < 10)
         someArray.push(Coin({
@@ -343,10 +353,11 @@ Imports规范
             value: 42
         }));
 
-对于具有 ``else`` 或 ``else if`` 子句的 ``if`` 块， ``else`` 应该是与 ``if`` 的闭大括号放在同一行上。 这一规则区别于
-其他块状结构。
+For ``if`` blocks which have an ``else`` or ``else if`` clause, the ``else`` should be
+placed on the same line as the ``if``'s closing brace. This is an exception compared
+to the rules of other block-like structures.
 
-正确写法::
+Yes::
 
     if (x < 3) {
         x += 1;
@@ -362,7 +373,7 @@ Imports规范
     else
         x -= 1;
 
-错误写法::
+No::
 
     if (x < 3) {
         x += 1;
@@ -371,16 +382,18 @@ Imports规范
         x -= 1;
     }
 
-函数声明
+Function Declaration
 ====================
 
-对于简短的函数声明，建议函数体与函数声明保持在同一行。
+For short function declarations, it is recommended for the opening brace of the
+function body to be kept on the same line as the function declaration.
 
-闭大括号应该与函数声明的缩进级别相同。
+The closing brace should be at the same indentation level as the function
+declaration.
 
-开大括号之前应该有一个空格。
+The opening brace should be preceeded by a single space.
 
-正确写法::
+Yes::
 
     function increment(uint x) public pure returns (uint) {
         return x + 1;
@@ -390,7 +403,7 @@ Imports规范
         return x + 1;
     }
 
-错误写法::
+No::
 
     function increment(uint x) public pure returns (uint)
     {
@@ -408,24 +421,27 @@ Imports规范
     function increment(uint x) public pure returns (uint) {
         return x + 1;}
 
-函数的可见性修饰符应该出现在任何自定义修饰符之前。
+The visibility modifiers for a function should come before any custom
+modifiers.
 
-正确写法::
+Yes::
 
     function kill() public onlyowner {
         selfdestruct(owner);
     }
 
-错误写法::
+No::
 
     function kill() onlyowner public {
         selfdestruct(owner);
     }
 
-对于长函数声明，建议将每个参数独立一行并与函数体保持相同的缩进级别。闭括号和开括号也应该
-独立一行并保持与函数声明相同的缩进级别。
+For long function declarations, it is recommended to drop each argument onto
+it's own line at the same indentation level as the function body.  The closing
+parenthesis and opening bracket should be placed on their own line as well at
+the same indentation level as the function declaration.
 
-正确写法::
+Yes::
 
     function thisFunctionHasLotsOfArguments(
         address a,
@@ -440,7 +456,7 @@ Imports规范
         doSomething();
     }
 
-错误写法::
+No::
 
     function thisFunctionHasLotsOfArguments(address a, address b, address c,
         address d, address e, address f) public {
@@ -466,10 +482,10 @@ Imports规范
         doSomething();
     }
 
+If a long function declaration has modifiers, then each modifier should be
+dropped to its own line.
 
-如果一个长函数声明有修饰符，那么每个修饰符应该下沉到独立的一行。
-
-正确写法::
+Yes::
 
     function thisFunctionNameIsReallyLong(address x, address y, address z)
         public
@@ -493,7 +509,7 @@ Imports规范
         doSomething();
     }
 
-错误写法::
+No::
 
     function thisFunctionNameIsReallyLong(address x, address y, address z)
                                           public
@@ -517,53 +533,11 @@ Imports规范
         doSomething();
     }
 
-多路输出参数和返回语句应遵循推荐统一风格，可参考 :ref:`Maximum Line Length <maximum_line_length>` 章节。
-正确写法::
+For constructor functions on inherited contracts whose bases require arguments,
+it is recommended to drop the base constructors onto new lines in the same
+manner as modifiers if the function declaration is long or hard to read.
 
-    function thisFunctionNameIsReallyLong(
-        address a,
-        address b,
-        address c
-    )
-        public
-        returns (
-            address someAddressName,
-            uint256 LongArgument,
-            uint256 Argument
-        )
-    {
-        doSomething()
-
-        return (
-            veryLongReturnArg1,
-            veryLongReturnArg2,
-            veryLongReturnArg3
-        );
-    }
-
-错误写法::
-
-    function thisFunctionNameIsReallyLong(
-        address a,
-        address b,
-        address c
-    )
-        public
-        returns (address someAddressName,
-                 uint256 LongArgument,
-                 uint256 Argument)
-    {
-        doSomething()
-
-        return (veryLongReturnArg1,
-                veryLongReturnArg1,
-                veryLongReturnArg1);
-    }
-
-对于继承合约中需要参数构造函数，如果函数声明很长或难以阅读，则建议将基构造函数和修饰符下沉放在
-新的一行上。
-
-正确写法::
+Yes::
 
     contract A is B, C, D {
         function A(uint param1, uint param2, uint param3, uint param4, uint param5)
@@ -576,7 +550,7 @@ Imports规范
         }
     }
 
-错误写法::
+No::
 
     contract A is B, C, D {
         function A(uint param1, uint param2, uint param3, uint param4, uint param5)
@@ -599,75 +573,79 @@ Imports规范
         }
     }
 
-当用单个语句声明简短函数时，允许在一行中完成。
+When declaring short functions with a single statement, it is permissible to do it on a single line.
 
-允许：：
+Permissible::
 
-  function shortFunction() public { doSomething(); }
+    function shortFunction() public { doSomething(); }
 
-这些函数声明的准则旨在提高可读性。
-因为本指南不会涵盖所有内容，作者应该自行判断函数声明的可能排列方式。
+These guidelines for function declarations are intended to improve readability.
+Authors should use their best judgement as this guide does not try to cover all
+possible permutations for function declarations.
 
-映射
+Mappings
 ========
 
-待定
+TODO
 
-变量声明
+Variable Declarations
 =====================
 
-数组变量的声明在变量类型和括号之间不应该有空格。
+Declarations of array variables should not have a space between the type and
+the brackets.
 
-正确写法::
+Yes::
 
     uint[] x;
 
-错误写法::
+No::
 
     uint [] x;
 
 
-其他建议
+Other Recommendations
 =====================
 
-* 字符串应该用双引号而不是单引号。
+* Strings should be quoted with double-quotes instead of single-quotes.
 
-正确写法::
+Yes::
 
-      str = "foo";
-      str = "Hamlet says, 'To be or not to be...'";
+    str = "foo";
+    str = "Hamlet says, 'To be or not to be...'";
 
-错误写法::
+No::
 
-      str = 'bar';
-      str = '"Be yourself; everyone else is already taken." -Oscar Wilde';
+    str = 'bar';
+    str = '"Be yourself; everyone else is already taken." -Oscar Wilde';
 
-* 操作符两边应该各有一个空格。
+* Surround operators with a single space on either side.
 
-正确写法::
+Yes::
 
     x = 3;
     x = 100 / 10;
     x += 3 + 4;
     x |= y && z;
 
-错误写法::
+No::
 
     x=3;
     x = 100/10;
     x += 3+4;
     x |= y&&z;
 
-* 为了表示优先级，高优先级操作符两边可以省略空格。这样可以提高复杂语句的可读性。 你应该在操作符两边
-总是使用相同的空白量：
+* Operators with a higher priority than others can exclude surrounding
+  whitespace in order to denote precedence.  This is meant to allow for
+  improved readability for complex statement. You should always use the same
+  amount of whitespace on either side of an operator:
 
-正确写法::
+Yes::
 
     x = 2**3 + 5;
     x = 2*y + 3*z;
     x = (a+b) * (a-b);
 
-错误写法::
+No::
 
     x = 2** 3 + 5;
     x = y+z;
@@ -678,96 +656,120 @@ Imports规范
 命名规范
 ******************
 
-当完全采纳和使用命名规范时会产生强大的作用。 当使用不同的规范时，则不会立即获取代码中传达的重要 *元* 信息。
+Naming conventions are powerful when adopted and used broadly.  The use of
+different conventions can convey significant *meta* information that would
+otherwise not be immediately available.
 
-这里给出的命名建议旨在提高可读性，因此它们不是规则，而是透过名称来尝试和帮助传达最大的信息量。
+The naming recommendations given here are intended to improve the readability,
+and thus they are not rules, but rather guidelines to try and help convey the
+most information through the names of things.
 
+<<<<<<< HEAD
 最后，基于代码库中的一致性，本文档中的任何规范总是可以被（代码库中的规范）取代。 
+=======
+Lastly, consistency within a codebase should always supercede any conventions
+outlined in this document.
+>>>>>>> etherchina/develop
 
 
-命名方式
+Naming Styles
 =============
 
-为了避免混淆，下面的名字用来指不同的命名方式。
+To avoid confusion, the following names will be used to refer to different
+naming styles.
 
-* ``b`` (单个小写字母)
-* ``B`` (单个大写字母)
-* ``lowercase`` （小写）
-* ``lower_case_with_underscores`` （小写和下划线）
-* ``UPPERCASE`` （大写）
-* ``UPPER_CASE_WITH_UNDERSCORES`` （大写和下划线）
-* ``CapitalizedWords`` (驼峰式，首字母大写）
-* ``mixedCase`` (混合命名法，区别于首字母大写的初始字母小写!)
-* ``Capitalized_Words_With_Underscores`` (首字母大写和下划线)
+* ``b`` (single lowercase letter)
+* ``B`` (single uppercase letter)
+* ``lowercase``
+* ``lower_case_with_underscores``
+* ``UPPERCASE``
+* ``UPPER_CASE_WITH_UNDERSCORES``
+* ``CapitalizedWords`` (or CapWords)
+* ``mixedCase`` (differs from CapitalizedWords by initial lowercase character!)
+* ``Capitalized_Words_With_Underscores``
 
-..注意:: 当使用驼峰式进行首字母缩写时，大写缩写中的所有字母。 因此HTTPServerError比HttpServerError好。
- 当使用混合名称命名时，除了保留第一个缩写小写（如果它是名称的开头），大写缩写中的所有字母。
- 因此xmlHTTPRequest比XMLHTTPRequest更好。
+.. note:: When using initialisms in CapWords, capitalize all the letters of the initialisms. Thus HTTPServerError is better than HttpServerError. When using initialisms is mixedCase, capitalize all the letters of the initialisms, except keep the first one lower case if it is the beginning of the name. Thus xmlHTTPRequest is better than XMLHTTPRequest.
 
 
-应避免的名称
+Names to Avoid
 ==============
 
-* ``l`` - el的小写方式
-* ``O`` - oh的大写方式
-* ``I`` - eye的大写方式
+* ``l`` - Lowercase letter el
+* ``O`` - Uppercase letter oh
+* ``I`` - Uppercase letter eye
 
-切勿将任何这些用于单个字母的变量名称。 他们经常与数字1和零不可区分。
+Never use any of these for single letter variable names.  They are often
+indistinguishable from the numerals one and zero.
 
-合约和库名称
+
+Contract and Library Names
 ==========================
 
-合约和库名称应该使用驼峰式风格。比如：``SimpleToken``, ``SmartBank``, ``CertificateHashRepository``, ``Player``.
+Contracts and libraries should be named using the CapWords style. Examples: ``SimpleToken``, ``SmartBank``, ``CertificateHashRepository``, ``Player``.
 
-结构体名称
+
+Struct Names
 ==========================
 
-结构体名称应该使用驼峰式风格。比如：``MyCoin``, ``Position``, ``PositionXY``.
+Structs should be named using the CapWords style. Examples: ``MyCoin``, ``Position``, ``PositionXY``.
 
-事件名称
+
+Event Names
 ===========
 
-事件名称应该使用驼峰式风格。比如：``Deposit``, ``Transfer``, ``Approval``, ``BeforeTransfer``, ``AfterTransfer``.
+Events should be named using the CapWords style. Examples: ``Deposit``, ``Transfer``, ``Approval``, ``BeforeTransfer``, ``AfterTransfer``.
 
-函数名称
+
+Function Names
 ==============
-函数名称不同于结构，应该使用混合命名法风格。比如：``getBalance``, ``transfer``, ``verifyOwner``, ``addMember``, ``changeOwner``.
 
-函数参数命名
+Functions other than constructors should use mixedCase. Examples: ``getBalance``, ``transfer``, ``verifyOwner``, ``addMember``, ``changeOwner``.
+
+
+Function Argument Names
 =======================
 
-函数参数命名应该使用混合命名法风格。比如：``initialSupply``, ``account``, ``recipientAddress``, ``senderAddress``, ``newOwner``.
-在编写操作自定义结构的库函数时，第一个参数应该是结构体，并且应该始终命名为“self”。
+Function arguments should use mixedCase. Examples: ``initialSupply``, ``account``, ``recipientAddress``, ``senderAddress``, ``newOwner``.
 
-本地变量和状态变量名称
+When writing library functions that operate on a custom struct, the struct
+should be the first argument and should always be named ``self``.
+
+
+Local and State Variable Names
 ==============================
 
-使用混合命名法风格。比如：``totalSupply``, ``remainingSupply``, ``balancesOf``, ``creatorAddress``, ``isPreSale``, ``tokenExchangeRate``.
+Use mixedCase. Examples: ``totalSupply``, ``remainingSupply``, ``balancesOf``, ``creatorAddress``, ``isPreSale``, ``tokenExchangeRate``.
 
-常量命名
+
+Constants
 =========
 
-常量应该全都使用大写字母书写，并用下划线分割单词。比如：``MAX_BLOCKS``, `TOKEN_NAME`, ``TOKEN_TICKER``, ``CONTRACT_VERSION``.
+Constants should be named with all capital letters with underscores separating
+words. Examples: ``MAX_BLOCKS``, `TOKEN_NAME`, ``TOKEN_TICKER``, ``CONTRACT_VERSION``.
 
-修饰符命名
+
+Modifier Names
 ==============
 
-使用混合命名法风格。比如：``onlyBy``, ``onlyAfter``, ``onlyDuringThePreSale``.
+Use mixedCase. Examples: ``onlyBy``, ``onlyAfter``, ``onlyDuringThePreSale``.
 
-枚举变量命名
+
+Enums
 =====
 
-枚举，在简单类型声明时，应该使用驼峰式风格。比如：``TokenGroup``, ``Frame``, ``HashStyle``, ``CharacterLocation``.
+Enums, in the style of simple type declarations, should be named using the CapWords style. Examples: ``TokenGroup``, ``Frame``, ``HashStyle``, ``CharacterLocation``.
 
-避免命名冲突
+
+Avoiding Naming Collisions
 ==========================
 
 * ``single_trailing_underscore_``
 
-当所起名称与内建或保留关键字相冲突时，建议使用此惯例内置或其他保留名称。
+This convention is suggested when the desired name collides with that of a
+built-in or otherwise reserved name.
 
 
-常规建议
+General Recommendations
 =======================
 
-待定
+TODO
