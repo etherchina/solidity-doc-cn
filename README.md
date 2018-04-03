@@ -1,4 +1,4 @@
-# Solidity中文官方文档 
+# Solidity中文文档 
 
 ## 工作指南
 
