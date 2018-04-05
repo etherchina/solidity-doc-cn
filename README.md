@@ -40,7 +40,7 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 
 以下排名不分先后。
 
-[Toya](https://github.com/toyab), 侯伯薇, [李捷](https://github.com/oldcodeoberyn), [虞是乎](https://github.com/ysqi), [周锷](https://github.com/ghostrd), [毛明旺](https://github.com/dennisWind), [孔庆丰](https://github.com/buffalo2004), [卓跃萍](https://github.com/JocelynZhuo), [左洪斌](https://github.com/hongbinzuo),[杨镇](https://github.com/riversyang),[王兴宇](https://github.com/wxy),[姜信宝](https://github.com/bobjiang), [盖盖](https://github.com/gitferry), [Kerwin](https://github.com/KerwinChung2018)    
+[Toya](https://github.com/toyab), [侯伯薇](https://github.com/houbowei), [李捷](https://github.com/oldcodeoberyn), [虞是乎](https://github.com/ysqi), [周锷](https://github.com/ghostrd), [毛明旺](https://github.com/dennisWind), [孔庆丰](https://github.com/buffalo2004), [卓跃萍](https://github.com/JocelynZhuo), [左洪斌](https://github.com/hongbinzuo),[杨镇](https://github.com/riversyang),[王兴宇](https://github.com/wxy),[姜信宝](https://github.com/bobjiang), [盖盖](https://github.com/gitferry), [Kerwin](https://github.com/KerwinChung2018), [蔡晓静](https://github.com/caixiaoqing627) , [Justin](https://github.com/justinquan)   
 
 ### 支持与赞助  
 支持 [HiBlock区块链社区](http://hiblock.net/)  
