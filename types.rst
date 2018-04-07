@@ -114,7 +114,7 @@ sign extends. Shifting by a negative amount throws a runtime exception.
     are going to be rounded towards zero (truncated). In other programming languages the shift right of negative values
     works like division with rounding down (towards negative infinity).
 
-·· 警告::
+·· warning::
    由有符号整数类型负值右移所产生的结果跟其它语言中所产生的结果是不同的。
    在 Solidity 中，右移和除是等价的，因此右移位一个负数向下取整时会为零（被截断）。
    而在其它语言中， 右移负数位的结果就像除以了负无穷。
@@ -128,7 +128,7 @@ Fixed Point Numbers 定长浮点型
     Fixed point numbers are not fully supported by Solidity yet. They can be declared, but
     cannot be assigned to or from.
 
-.. 注意::
+.. warning::
     Solidity 还没有完全支持定长浮点型。可以声明定长浮点型的变量，但不能给它们赋值。
 
 ``fixed`` / ``ufixed``: Signed and unsigned fixed point number of various sizes. Keywords ``ufixedMxN`` and ``fixedMxN``, where ``M`` represents the number of bits taken by
@@ -157,7 +157,7 @@ Operators:
     defined in the latter. Generally, in floating point almost the entire space is used to represent the number, while only a small number of bits define
     where the decimal point is.
 
-.. 注意::
+.. note::
     浮点型（在许多语言中的 ``float`` 和 ``double`` 类型，更准确地说是 IEEE 754 类型）和定长浮点型之间最大的不同点是，
     在前者中整数部分和分数部分（小数点后的部分）需要的位数是灵活可变的，而后者中这两部分的长度受到严格的规定。
     一般来说，在浮点型中，几乎整个空间都用来表示数字，但只有少数的位来表示小数点的位置。
@@ -166,29 +166,47 @@ Operators:
 
 .. _address:
 
-Address
+Address 地址型
 -------
 
 ``address``: Holds a 20 byte value (size of an Ethereum address). Address types also have members and serve as a base for all contracts.
 
+``address``：地址型存储一个 20 字节的值（以太坊地址的大小）。
+地址型也有成员，并作为所有合约的基础。
+
 Operators:
 
+运算符：
+
 * ``<=``, ``<``, ``==``, ``!=``, ``>=`` and ``>``
+
+* ``<=``， ``<``， ``==``， ``!=``， ``>=`` 和 ``>``
 
 .. note::
     Starting with version 0.5.0 contracts do not derive from the address type, but can still be explicitly converted to address.
 
+.. note::
+    从0.5.0版本开始，合约不会从地址型派生，但仍然可以明确地转换成地址型。
+
 .. _members-of-addresses:
 
-Members of Addresses
+Members of Addresses 地址成员
 ^^^^^^^^^^^^^^^^^^^^
 
 * ``balance`` and ``transfer``
 
+* ``balance`` 和 ``transfer``
+
 For a quick reference, see :ref:`address_related`.
+
+快速参考，请见 :ref:`address_related`。
+
 
 It is possible to query the balance of an address using the property ``balance``
 and to send Ether (in units of wei) to an address using the ``transfer`` function:
+
+可以使用 ``balance`` 属性来查询一个地址的余额，
+也可以使用 ``transfer`` 函数向一个地址发送 |ether| （以 wei 为单位）：
 
 ::
 
@@ -197,11 +215,18 @@ and to send Ether (in units of wei) to an address using the ``transfer`` functio
     if (x.balance < 10 && myAddress.balance >= 10) x.transfer(10);
 
 .. note::
-    If ``x`` is a contract address, its code (more specifically: its fallback function, if present) will be executed together with the ``transfer`` call (this is a feature of the EVM and cannot be prevented). If that execution runs out of gas or fails in any way, the Ether transfer will be reverted and the current contract will stop with an exception.
+    If ``x`` is a contract address, its code (more specifically: its fallback function, if present) will be executed together with the ``transfer`` call (this is a feature of the EVM and cannot be prevented).
+    If that execution runs out of gas or fails in any way, the Ether transfer will be reverted and the current contract will stop with an exception.
+
+.. note::
+    如果 ``x`` 是一个合约地址，它的代码（具体来说是它的 fallback 函数，如果有的话）会跟 ``transfer`` 函数调用一起执行（这是 EVM 的一个特性，无法改变）。
+    如果在执行过程中用光了 gas 或者因为任何原因执行失败，|ether| 交易会被打回，当前的合约也会在终止的同时抛出异常。
 
 * ``send``
 
 Send is the low-level counterpart of ``transfer``. If the execution fails, the current contract will not stop with an exception, but ``send`` will return ``false``.
+
+``send`` 是比 ``transfer`` 低级一点的函数。如果执行失败，当前的合约在终止时不会抛出异常，但 ``send`` 会返回 ``false``。
 
 .. warning::
     There are some dangers in using ``send``: The transfer fails if the call stack depth is at 1024
@@ -209,10 +234,23 @@ Send is the low-level counterpart of ``transfer``. If the execution fails, the c
     to make safe Ether transfers, always check the return value of ``send``, use ``transfer`` or even better:
     use a pattern where the recipient withdraws the money.
 
+.. warning::
+    在使用 ``send`` 的时候会有些风险：如果调用栈深度是 1024 会导致发送失败（这总是可以被调用者强制），如果接收者用光了 gas 也会导致发送失败。
+    所以为了保证 |ether| 发送的安全，一定要检查 ``send`` 的返回值，使用 ``transfer`` 或者更好地办法：
+    使用一种接收者可以取回资金的模式。
+
 * ``call``, ``callcode`` and ``delegatecall``
 
+* ``call``， ``callcode`` 和 ``delegatecall``
+
 Furthermore, to interface with contracts that do not adhere to the ABI,
-the function ``call`` is provided which takes an arbitrary number of arguments of any type. These arguments are padded to 32 bytes and concatenated. One exception is the case where the first argument is encoded to exactly four bytes. In this case, it is not padded to allow the use of function signatures here.
+the function ``call`` is provided which takes an arbitrary number of arguments of any type. These arguments are padded to 32 bytes and concatenated.
+One exception is the case where the first argument is encoded to exactly four bytes. In this case, it is not padded to allow the use of function signatures here.
+
+此外，为了与不符合 |ABI| 的合约交互，于是就有了可以接受任意类型任意数量参数的 ``call`` 函数。
+这些参数连接在一起填充在 32 字节的空间里。
+其中一个例外是当第一个参数被编码成正好 4 个字节的情况。
+在这种情况下，它被填充后不能使用函数签名。
 
 ::
 
@@ -220,7 +258,11 @@ the function ``call`` is provided which takes an arbitrary number of arguments o
     nameReg.call("register", "MyName");
     nameReg.call(bytes4(keccak256("fun(uint256)")), a);
 
-``call`` returns a boolean indicating whether the invoked function terminated (``true``) or caused an EVM exception (``false``). It is not possible to access the actual data returned (for this we would need to know the encoding and size in advance).
+``call`` returns a boolean indicating whether the invoked function terminated (``true``) or caused an EVM exception (``false``).
+It is not possible to access the actual data returned (for this we would need to know the encoding and size in advance).
+
+``call`` 返回的布尔值表明了被调用的函数已经执行完毕（``true``）或者引发了一个 EVM 异常（``false``）规则。
+无法访问返回的真实数据（为此我们需要事先知道编码和大小）。
 
 It is possible to adjust the supplied gas with the ``.gas()`` modifier::
 
@@ -234,24 +276,58 @@ Lastly, these modifiers can be combined. Their order does not matter::
 
     nameReg.call.gas(1000000).value(1 ether)("register", "MyName");
 
+可以使用 ``.gas()`` 修饰器调整提供的 gas 数量 ::
+
+    namReg.call.gas(1000000)("register", "MyName");
+
+类似地，也能控制提供的 |ether| 的值 ::
+
+   nameReg.call.value(1 ether)("register", "MyName"); 
+
+最后一点，这些修饰器可以联合使用。每个修改器出现的顺序不重要 ::
+
+   nameReg.call.gas(1000000).value(1 ether)("register", "MyName"); 
+
 .. note::
     It is not yet possible to use the gas or value modifiers on overloaded functions.
 
     A workaround is to introduce a special case for gas and value and just re-check
     whether they are present at the point of overload resolution.
 
-In a similar way, the function ``delegatecall`` can be used: the difference is that only the code of the given address is used, all other aspects (storage, balance, ...) are taken from the current contract. The purpose of ``delegatecall`` is to use library code which is stored in another contract. The user has to ensure that the layout of storage in both contracts is suitable for delegatecall to be used. Prior to homestead, only a limited variant called ``callcode`` was available that did not provide access to the original ``msg.sender`` and ``msg.value`` values.
+.. note::
+    目前还不能在重载函数中使用 gas 或者值修改器。
+
+    一种解决方案是给 gas 和值引入一个特例，并重新检查它们是否在重载的地方出现。
+
+In a similar way, the function ``delegatecall`` can be used:
+the difference is that only the code of the given address is used, all other aspects (storage, balance, ...) are taken from the current contract.
+The purpose of ``delegatecall`` is to use library code which is stored in another contract.
+The user has to ensure that the layout of storage in both contracts is suitable for delegatecall to be used.
+Prior to homestead, only a limited variant called ``callcode`` was available that did not provide access to the original ``msg.sender`` and ``msg.value`` values.
+
+类似地，也可以使用 ``delegatecall``：
+区别在于只使用给定地址的代码，其它属性（存储，余额，……）都取自当前合约。
+``delegatecall`` 的目的是使用存储在另外一个合约中的库代码。
+用户必须确保两个合约中存储的分布适合使用 delegatecall。
+在 homestead 版本之前，只有一个功能类似但有限的叫作 ``callcode ``的函数可用，但使用它并不能访问 ``msg.sender`` 和 ``msg.value`` 的原始值。
 
 All three functions ``call``, ``delegatecall`` and ``callcode`` are very low-level functions and should only be used as a *last resort* as they break the type-safety of Solidity.
 
+这三个函数 ``call``， ``delegatecall`` 和 ``callcode`` 都是非常低级的函数，应该只把它们当作 *最后一招* 来使用，因为它们破坏了 Solitity 的类型安全性。
+
 The ``.gas()`` option is available on all three methods, while the ``.value()`` option is not supported for ``delegatecall``.
+
+尽管 ``.value()`` 选项不支持 ``delegatecall``，但三种方法都有 ``.gas()`` 选项。
 
 .. note::
     All contracts inherit the members of address, so it is possible to query the balance of the
     current contract using ``this.balance``.
+    所有合约都集成地址类型的所有成员，因此可以使用 ``this.balance`` 访问当前合约的余额。
 
 .. note::
     The use of ``callcode`` is discouraged and will be removed in the future.
+    不鼓励使用 ``callcode``，在未来也会将其移除。
+
 
 .. warning::
     All these functions are low-level functions and should be used with care.
@@ -259,6 +335,10 @@ The ``.gas()`` option is available on all three methods, while the ``.value()`` 
     hand over control to that contract which could in turn call back into
     your contract, so be prepared for changes to your state variables
     when the call returns.
+    这三个函数都属于低级函数，需要谨慎使用。
+    具体来说，任何未知的合约都可能是恶意的。
+    你在调用一个合约的同时就将控制权交给了它，它可以反过来调用你的合约，
+    因此，当调用返回时准备好改变你的状态变量。
 
 .. index:: byte array, bytes32
 
