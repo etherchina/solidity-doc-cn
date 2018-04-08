@@ -172,7 +172,7 @@ Address 地址型
 ``address``: Holds a 20 byte value (size of an Ethereum address). Address types also have members and serve as a base for all contracts.
 
 ``address``：地址型存储一个 20 字节的值（以太坊地址的大小）。
-地址型也有成员，并作为所有合约的基础。
+地址型也有成员变量，并作为所有合约的基础。
 
 Operators:
 
@@ -190,7 +190,7 @@ Operators:
 
 .. _members-of-addresses:
 
-Members of Addresses 地址成员
+Members of Addresses 地址成员变量
 ^^^^^^^^^^^^^^^^^^^^
 
 * ``balance`` and ``transfer``
@@ -322,7 +322,7 @@ The ``.gas()`` option is available on all three methods, while the ``.value()`` 
 .. note::
     All contracts inherit the members of address, so it is possible to query the balance of the
     current contract using ``this.balance``.
-    所有合约都集成地址类型的所有成员，因此可以使用 ``this.balance`` 访问当前合约的余额。
+    所有合约都集成地址类型的所有成员变量，因此可以使用 ``this.balance`` 访问当前合约的余额。
 
 .. note::
     The use of ``callcode`` is discouraged and will be removed in the future.
@@ -342,41 +342,62 @@ The ``.gas()`` option is available on all three methods, while the ``.value()`` 
 
 .. index:: byte array, bytes32
 
-
-Fixed-size byte arrays
+Fixed-size byte arrays 定长字节数组
 ----------------------
 
 ``bytes1``, ``bytes2``, ``bytes3``, ..., ``bytes32``. ``byte`` is an alias for ``bytes1``.
 
+关键词有：``bytes1``， ``bytes2``， ``bytes3``， ...， ``bytes32``。``byte`` 是 ``bytes1`` 的别名。
+
 Operators:
+
+运算符：
 
 * Comparisons: ``<=``, ``<``, ``==``, ``!=``, ``>=``, ``>`` (evaluate to ``bool``)
 * Bit operators: ``&``, ``|``, ``^`` (bitwise exclusive or), ``~`` (bitwise negation), ``<<`` (left shift), ``>>`` (right shift)
 * Index access: If ``x`` is of type ``bytesI``, then ``x[k]`` for ``0 <= k < I`` returns the ``k`` th byte (read-only).
 
+* 比较运算符：``<=``， ``<``， ``==``， ``!=``， ``>=``， ``>`` （返回布尔型）
+* 位运算符： ``&``， ``|``， ``^`` （按位异或）， ``~`` （按位取反）， ``<<`` （左移位）， ``>>`` （右移位）
+* 索引访问：如果 ``x`` 是 ``bytesI`` 类型，那么 ``x[k]`` 且 ``0 <= k < I`` 返回第 ``k`` 个字节（只读）。
+
 The shifting operator works with any integer type as right operand (but will
 return the type of the left operand), which denotes the number of bits to shift by.
 Shifting by a negative amount will cause a runtime exception.
 
+该类型可以和作为右操作数的任何整数类型进行移位运算（但返回结果的类型和左操作数类型相同），右操作数表示需要移动的位数。
+进行负数位移运算会引发运行时异常。
+
 Members:
 
+成员变量：
+
 * ``.length`` yields the fixed length of the byte array (read-only).
+
+* ``.length`` 表示这个字节数组的长度（只读）.
 
 .. note::
     It is possible to use an array of bytes as ``byte[]``, but it is wasting a lot of space, 31 bytes every element,
     to be exact, when passing in calls. It is better to use ``bytes``.
+    可以将 ``byte[]`` 当作字节数组使用，但这种方式非常浪费存储空间，准确来说，是在传入调用时，每个元素占 31 字节。
+    更好地做法是使用 ``bytes``。
 
-Dynamically-sized byte array
+Dynamically-sized byte array 变长字节数组
 ----------------------------
 
 ``bytes``:
     Dynamically-sized byte array, see :ref:`arrays`. Not a value-type!
+    变长字节数组，参见 :ref:`arrays`，并不是值类型。
 ``string``:
     Dynamically-sized UTF-8-encoded string, see :ref:`arrays`. Not a value-type!
+    变长 UTF-8 编码字符串类型，参见 :ref:`arrays`，并不是值类型。
 
 As a rule of thumb, use ``bytes`` for arbitrary-length raw byte data and ``string``
 for arbitrary-length string (UTF-8) data. If you can limit the length to a certain
 number of bytes, always use one of ``bytes1`` to ``bytes32`` because they are much cheaper.
+
+根据经验，最好使用 ``bytes`` 存储任意长度的原始字节数据，使用 ``string`` 存储任意长度的字符串（UTF-8编码）数据。
+如果长度可以确定，尽量使用 ``bytes1`` 到 ``bytes32`` 中的一个，因为它们的开销小得多。
 
 .. index:: address, literal;address
 
