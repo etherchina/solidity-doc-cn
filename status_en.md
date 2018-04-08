@@ -2,7 +2,7 @@
 
 __Note__: the commit hash of some files are not identical to `272262e`, please pay close attention to the difference when sync with latest version of English doc. We have `status.md` and `status_en.md` separately for Chinese and English versions, and finally we only maintain the English version.
 
-_Last update_: Apr. 9th by hongbinzuo
+_Last updated_: Apr. 9th by hongbinzuo
 
 ## Index
  - File name: index.rst
