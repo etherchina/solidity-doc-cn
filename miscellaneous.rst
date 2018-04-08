@@ -1,3 +1,5 @@
+.. include:: glossaries.rst
+
 #############
 杂项
 #############
@@ -5,37 +7,52 @@
 .. index:: storage, state variable, mapping
 
 ************************************
-Layout of State Variables in Storage
+|storage| 中的状态变量储存结构
 ************************************
 
 Statically-sized variables (everything except mapping and dynamically-sized array types) are laid out contiguously in storage starting from position ``0``. Multiple items that need less than 32 bytes are packed into a single storage slot if possible, according to the following rules:
+静态大小的变量（除 |mapping| 和动态数组之外的所有类型）都从位置 ``0`` 开始连续放置在 |storage| 中。如果可能的话，存储需求少于 32 字节的多个变量会被打包到一个 |storage_slot| 中，规则如下：
 
 - The first item in a storage slot is stored lower-order aligned.
 - Elementary types use only that many bytes that are necessary to store them.
 - If an elementary type does not fit the remaining part of a storage slot, it is moved to the next storage slot.
 - Structs and array data always start a new slot and occupy whole slots (but items inside a struct or array are packed tightly according to these rules).
+- |storage_slot| 的第一项会以低位对齐（即右对齐）的方式储存。
+- 基本类型仅使用它们所需的那么多字节。
+- 如果 |storage_slot| 中的剩余空间不足以储存一个基本类型，那么它会被移入下一个 |storage_slot| 。
+- 结构（struct）和数组数据总是会占用一整个新插槽（但结构或数组中的各项，都会以这些规则进行打包）。
 
 .. warning::
     When using elements that are smaller than 32 bytes, your contract's gas usage may be higher.
     This is because the EVM operates on 32 bytes at a time. Therefore, if the element is smaller
     than that, the EVM must use more operations in order to reduce the size of the element from 32
     bytes to the desired size.
+    使用小于 32 字节的元素时，你的合约的 gas 使用量可能高于使用 32 字节的元素时。这是因为 |evm| 每次会操作32个字节，
+    所以如果元素比 32 字节小，|evm| 必须使用更多的操作才能将其大小缩减到到所需的大小。
 
     It is only beneficial to use reduced-size arguments if you are dealing with storage values
     because the compiler will pack multiple elements into one storage slot, and thus, combine
     multiple reads or writes into a single operation. When dealing with function arguments or memory
     values, there is no inherent benefit because the compiler does not pack these values.
+    仅当你处理 |storage_slot| 中的值时候，使用缩减大小的参数才是有益的。因为编译器会将多个元素打包到一个 |storage_slot| 中，
+    从而将多个读或写合并到一次对存储的操作中。而在处理函数参数或 |memory| 中的值时，因为编译器不会打包这些值，所以没有什么益处。
 
     Finally, in order to allow the EVM to optimize for this, ensure that you try to order your
     storage variables and ``struct`` members such that they can be packed tightly. For example,
     declaring your storage variables in the order of ``uint128, uint128, uint256`` instead of
     ``uint128, uint256, uint128``, as the former will only take up two slots of storage whereas the
     latter will take up three.
+    最后，为了允许 |evm| 对此进行优化，请确保你对 |storage| 中的变量和 ``struct`` 成员的书写顺序允许它们被紧密地打包。
+    例如，按照 ``uint128，uint128，uint256`` 的顺序声明你的存储变量，而不是 ``uint128，uint256，uint128``，
+    因为前者只占用两个 |storage_slot|，而后者将占用三个。
 
 The elements of structs and arrays are stored after each other, just as if they were given explicitly.
+结构和数组中的元素都是顺序存储的，就像它们被明确给定的那样。
 
 Due to their unpredictable size, mapping and dynamically-sized array types use a Keccak-256 hash
 computation to find the starting position of the value or the array data. These starting positions are always full stack slots.
+由于 |mapping| 和动态数组的大小是不可预知的，所以我们使用Keccak-256哈希计算来找到具体数值或数组数据的起始位置。
+这些起始位置本身的数值总是会占满堆栈插槽。
 
 The mapping or the dynamic array itself
 occupies an (unfilled) slot in storage at some position ``p`` according to the above rule (or by
@@ -43,10 +60,17 @@ recursively applying this rule for mappings to mappings or arrays of arrays). Fo
 Array data is located at ``keccak256(p)`` and the value corresponding to a mapping key
 ``k`` is located at ``keccak256(k . p)`` where ``.`` is concatenation. If the value is again a
 non-elementary type, the positions are found by adding an offset of ``keccak256(k . p)``.
+|mapping| 或动态数组本身会根据上述规则来在某个位置 ``p`` 处占用一个（未填充的）存储中的插槽（或递归地将该规则应用到 |mapping| 的 |mapping| 或数组的数组）。
+对于动态数组，此插槽中会存储数组中元素的数量（字节数组和字符串在这里是一个例外，见下文）。对于 |mapping| ，该插槽未被使用（但它仍是需要的，
+以使两个相同的 |mapping| 在彼此之后会使用不同的散列分布）。数组的数据会位于 ``keccak256(p)``； |mapping| 中的键 ``k`` 所对应的值会位于 ``keccak256(k . p)``，
+其中 ``.`` 是连接符。如果该值又是一个非基本类型，则通过添加 ``keccak256(k . p)`` 作为偏移量来找到位置。
 
 ``bytes`` and ``string`` store their data in the same slot where also the length is stored if they are short. In particular: If the data is at most ``31`` bytes long, it is stored in the higher-order bytes (left aligned) and the lowest-order byte stores ``length * 2``. If it is longer, the main slot stores ``length * 2 + 1`` and the data is stored as usual in ``keccak256(slot)``.
+如果 ``bytes`` 和 ``string`` 的数据很短，那么它们的长度也会和数据一起存储到同一个插槽。具体地说：如果数据长度小于等于 31 字节，
+则它存储在高位字节（左对齐），最低位字节存储 ``length * 2``。如果数据长度超出 31 字节，则在主插槽存储 ``length * 2 + 1``，
+数据照常存储在 ``keccak256(slot)`` 中。
 
-So for the following contract snippet::
+所以对于以下合约片段::
 
     pragma solidity ^0.4.0;
 
@@ -57,6 +81,7 @@ So for the following contract snippet::
     }
 
 The position of ``data[4][9].b`` is at ``keccak256(uint256(9) . keccak256(uint256(4) . uint256(1))) + 1``.
+``data[4][9].b`` 的位置将是 ``keccak256(uint256(9) . keccak256(uint256(4) . uint256(1))) + 1``。
 
 .. index: memory layout
 

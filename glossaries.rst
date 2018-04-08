@@ -78,3 +78,11 @@
 .. |remapping| raw:: html
 
   <ruby>重映射<rp>（</rp><rt>remapping</rt><rp>）</rp></ruby>
+
+.. |mapping| raw:: html
+
+  <ruby>映射<rp>（</rp><rt>mapping</rt><rp>）</rp></ruby>
+
+.. |storage_slot| raw:: html
+
+  <ruby>存储插槽<rp>（</rp><rt>storage slot</rt><rp>）</rp></ruby>
