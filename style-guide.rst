@@ -8,19 +8,19 @@
 概述
 ************
 
-本指南旨在约定solidity代码的编码规范。本指南是不断变化演进的，旧的、过时的编码规范会被淘汰，
+本指南旨在约定 solidity 代码的编码规范。本指南是不断变化演进的，旧的、过时的编码规范会被淘汰，
 而新的、有用的规范会被添加进来。
 
 许多项目会实施他们自己的编码风格指南。如遇冲突，应优先使用具体项目的风格指南。
 
-本风格指南中的结构和许多建议是取自python的 `pep8 style guide <https://www.python.org/dev/peps/pep-0008/>`_。
+本风格指南中的结构和许多建议是取自 python 的 `pep8 style guide <https://www.python.org/dev/peps/pep-0008/>`_ 。
 
-本指南并 *不是* 以指导正确或最佳的solidity编码方式为目的。本指南的目的是保持代码的 *一致性* 。
-来自python的参考文档`pep8 <https://www.python.org/dev/peps/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds>`_。
+本指南并 *不是* 以指导正确或最佳的 solidity 编码方式为目的。本指南的目的是保持代码的 *一致性* 。
+来自 python 的参考文档 `pep8 <https://www.python.org/dev/peps/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds>`_ 。
 很好的阐述了这个概念。
 
     风格指南是关于一致性的。与此风格指南的一致性非常重要。项目中的一致性更重要。一个模块或功能内的一致性是最重要的。
-    但最重要的是：知道什么时候不一致 ——有时风格指南不适用。如有疑问，请自行判断。看看其他例子，并决定什么看起来最好。并应毫不犹豫的询问他人！
+    但最重要的是：知道什么时候不一致 ——有时风格指南不适用。如有疑问，请自行判断。看看其他例子，并决定什么看起来最好。并应毫不犹豫的询问他人！
 
 ***********
 代码结构
@@ -42,7 +42,7 @@
 空行
 ===========
 
-在solidity源码中合约声明之间留出两个空行。
+在 solidity 源码中合约声明之间留出两个空行。
 
 
 正确写法::
@@ -76,7 +76,7 @@
 
 在一个合约中的函数声明之间留有一个空行。
 
-在同一合约中的一组函数声明之间可以省略空行（例如抽象合约的存根函数）
+在同一合约中的一组函数声明之间可以省略空行（例如抽象合约的存根函数）。
 
 正确写法::
 
@@ -110,9 +110,9 @@
 源文件编码格式
 ====================
 
-首选UTF-8或ASCII编码。
+首选 UTF-8 或 ASCII 编码。
 
-Imports规范
+Imports 规范
 =======
 
 导入语句应始终放在文件的顶部。
@@ -153,13 +153,13 @@ Imports规范
 功能应根据其可见性和顺序进行分组：
 
 - 构造函数
-- 回退函数定义（如果存在）
+- 回退函数（如果存在）
 - 外部函数
 - 公共函数
 - 内部函数和变量
 - 私有函数和变量
 
-在一个分组中，最后放置``常量``函数。
+在一个分组中，最后放置 ``常量`` 函数。
 
 正确写法::
 
@@ -218,7 +218,7 @@ Imports规范
 
 在以下情况下避免无关的空格：
 
-除单行函数声明外，中括号或者大括号中的立即数应该避免空格。
+除单行函数声明外，紧接着小括号，中括号或者大括号的内容应该避免使用空格。
 
 正确写法::
 
@@ -274,11 +274,11 @@ Imports规范
 
 ==================
 
-用大括号表示一个合约，库、函数和结构
+用大括号表示一个合约，库、函数和结构。
 应该：
 
-* 开括号与声明应在同一行
-* 闭括号在与之前函数声明对应的开括号保持同一缩进级别上另起一行.
+* 开括号与声明应在同一行。
+* 闭括号在与之前函数声明对应的开括号保持同一缩进级别上另起一行。
 * 开括号前应该有一个空格。
 
 正确写法::
@@ -558,7 +558,7 @@ Imports规范
 
 当用单个语句声明简短函数时，允许在一行中完成。
 
-允许：：
+允许::
 
   function shortFunction() public { doSomething(); }
 
@@ -657,9 +657,9 @@ Imports规范
 * ``mixedCase`` (混合命名法，区别于首字母大写的初始字母小写!)
 * ``Capitalized_Words_With_Underscores`` (首字母大写和下划线)
 
-..注意:: 当使用驼峰式进行首字母缩写时，大写缩写中的所有字母。 因此HTTPServerError比HttpServerError好。
+..注意:: 当使用驼峰式进行首字母缩写时，大写缩写中的所有字母。 因此 HTTPServerError 比 HttpServerError 好。
  当使用混合名称命名时，除了保留第一个缩写小写（如果它是名称的开头），大写缩写中的所有字母。
- 因此xmlHTTPRequest比XMLHTTPRequest更好。
+ 因此 xmlHTTPRequest 比 XMLHTTPRequest 更好。
 
 
 应避免的名称
@@ -674,47 +674,47 @@ Imports规范
 合约和库名称
 ==========================
 
-合约和库名称应该使用驼峰式风格。比如：``SimpleToken``, ``SmartBank``, ``CertificateHashRepository``, ``Player``.
+合约和库名称应该使用驼峰式风格。比如：``SimpleToken``, ``SmartBank``, ``CertificateHashRepository``, ``Player`` 。
 
 结构体名称
 ==========================
 
-结构体名称应该使用驼峰式风格。比如：``MyCoin``, ``Position``, ``PositionXY``.
+结构体名称应该使用驼峰式风格。比如：``MyCoin``, ``Position``, ``PositionXY`` 。
 
 事件名称
 ===========
 
-事件名称应该使用驼峰式风格。比如：``Deposit``, ``Transfer``, ``Approval``, ``BeforeTransfer``, ``AfterTransfer``.
+事件名称应该使用驼峰式风格。比如：``Deposit``, ``Transfer``, ``Approval``, ``BeforeTransfer``, ``AfterTransfer`` 。
 
 函数名称
 ==============
-函数名称不同于结构，应该使用混合命名法风格。比如：``getBalance``, ``transfer``, ``verifyOwner``, ``addMember``, ``changeOwner``.
+函数名称不同于结构，应该使用混合命名法风格。比如：``getBalance``, ``transfer``, ``verifyOwner``, ``addMember``, ``changeOwner`` 。
 
 函数参数命名
 =======================
 
-函数参数命名应该使用混合命名法风格。比如：``initialSupply``, ``account``, ``recipientAddress``, ``senderAddress``, ``newOwner``.
+函数参数命名应该使用混合命名法风格。比如：``initialSupply``, ``account``, ``recipientAddress``, ``senderAddress``, ``newOwner`` 。
 在编写操作自定义结构的库函数时，第一个参数应该是结构体，并且应该始终命名 ``self`` 。
 
 本地变量和状态变量名称
 ==============================
 
-使用混合命名法风格。比如：``totalSupply``, ``remainingSupply``, ``balancesOf``, ``creatorAddress``, ``isPreSale``, ``tokenExchangeRate``.
+使用混合命名法风格。比如：``totalSupply``, ``remainingSupply``, ``balancesOf``, ``creatorAddress``, ``isPreSale``, ``tokenExchangeRate`` 。
 
 常量命名
 =========
 
-常量应该全都使用大写字母书写，并用下划线分割单词。比如：``MAX_BLOCKS``, `TOKEN_NAME`, ``TOKEN_TICKER``, ``CONTRACT_VERSION``.
+常量应该全都使用大写字母书写，并用下划线分割单词。比如：``MAX_BLOCKS``, `TOKEN_NAME`, ``TOKEN_TICKER``, ``CONTRACT_VERSION`` 。
 
 修饰符命名
 ==============
 
-使用混合命名法风格。比如：``onlyBy``, ``onlyAfter``, ``onlyDuringThePreSale``.
+使用混合命名法风格。比如：``onlyBy``, ``onlyAfter``, ``onlyDuringThePreSale`` 。
 
 枚举变量命名
 =====
 
-枚举，在简单类型声明时，应该使用驼峰式风格。比如：``TokenGroup``, ``Frame``, ``HashStyle``, ``CharacterLocation``.
+枚举，在简单类型声明时，应该使用驼峰式风格。比如：``TokenGroup``, ``Frame``, ``HashStyle``, ``CharacterLocation`` 。
 
 避免命名冲突
 ==========================
