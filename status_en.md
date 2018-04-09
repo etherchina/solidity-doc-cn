@@ -49,8 +49,8 @@ _Last updated_: Apr. 9th by hongbinzuo
  - Commit: 272262e
  - Claim Date: Mar. 4
  - Submit Date: Mar. 4
- - Last updated: Mar. 19
- - Relevant PR：35
+ - Last updated: Apr. 9
+ - Relevant PR：35, 65
 
 ## Contributing
  - File name: contributing.rst
