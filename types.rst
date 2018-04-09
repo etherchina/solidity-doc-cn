@@ -121,46 +121,27 @@ sign extends. Shifting by a negative amount throws a runtime exception.
 
 .. index:: ! ufixed, ! fixed, ! fixed point number
 
-Fixed Point Numbers 定长浮点型
+Fixed Point Numbers
 -------------------
 
 .. warning::
     Fixed point numbers are not fully supported by Solidity yet. They can be declared, but
     cannot be assigned to or from.
 
-.. 注意::
-    Solidity 还没有完全支持定长浮点型。可以声明定长浮点型的变量，但不能给它们赋值。
-
 ``fixed`` / ``ufixed``: Signed and unsigned fixed point number of various sizes. Keywords ``ufixedMxN`` and ``fixedMxN``, where ``M`` represents the number of bits taken by
 the type and ``N`` represents how many decimal points are available. ``M`` must be divisible by 8 and goes from 8 to 256 bits. ``N`` must be between 0 and 80, inclusive.
 ``ufixed`` and ``fixed`` are aliases for ``ufixed128x19`` and ``fixed128x19``, respectively.
 
-``fixed`` / ``ufixed``：表示各种大小的有符号和无符号的定长浮点型。
-在关键词 ``ufixedMxN`` 和 ``fixedMxN`` 中，``M`` 表示该类型占用的位数，``N``表示可用的十进制长度。
-``M`` 必须能整除 8，表示范围从 8 到 256 的位数。
-``N`` 则可以是从 0 到 80 之间的任意数。
-``ufixed`` 和 ``fixed`` 分别是 ``ufixed128x19`` 和 ``fixed128x19`` 的别名。
-
 Operators:
-
-运算符：
 
 * Comparisons: ``<=``, ``<``, ``==``, ``!=``, ``>=``, ``>`` (evaluate to ``bool``)
 * Arithmetic operators: ``+``, ``-``, unary ``-``, unary ``+``, ``*``, ``/``, ``%`` (remainder)
-
-* 比较运算符：``<=``， ``<``， ``==``， ``!=``， ``>=``， ``>`` （返回值是布尔型）
-* 算术运算符：``+``， ``-``， 一元运算 ``-``， 一元运算 ``+``， ``*``， ``/``， ``%`` （取余数）
 
 .. note::
     The main difference between floating point (``float`` and ``double`` in many languages, more precisely IEEE 754 numbers) and fixed point numbers is
     that the number of bits used for the integer and the fractional part (the part after the decimal dot) is flexible in the former, while it is strictly
     defined in the latter. Generally, in floating point almost the entire space is used to represent the number, while only a small number of bits define
     where the decimal point is.
-
-.. 注意::
-    浮点型（在许多语言中的 ``float`` 和 ``double`` 类型，更准确地说是 IEEE 754 类型）和定长浮点型之间最大的不同点是，
-    在前者中整数部分和分数部分（小数点后的部分）需要的位数是灵活可变的，而后者中这两部分的长度受到严格的规定。
-    一般来说，在浮点型中，几乎整个空间都用来表示数字，但只有少数的位来表示小数点的位置。
 
 .. index:: address, balance, send, call, callcode, delegatecall, transfer
 
