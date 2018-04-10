@@ -427,14 +427,14 @@ a warning and are treated as regular rational number literals.
 
 .. _rational_literals:
 
-Rational and Integer Literals 有理数和整型常量
+Rational and Integer Literals 有理数和整数常量
 -----------------------------
 
 Integer literals are formed from a sequence of numbers in the range 0-9.
 They are interpreted as decimals. For example, ``69`` means sixty nine.
 Octal literals do not exist in Solidity and leading zeros are invalid.
 
-整型常量由范围在 0-9 的一串数字组成，表现成十进制。
+整数常量由范围在 0-9 的一串数字组成，表现成十进制。
 例如，`69` 表示数字六十九。
 Solidity 中是没有八进制的，因此前置 0 是无效的。
 
@@ -505,32 +505,53 @@ a non-rational number).
 
 .. index:: literal, literal;string, string
 
-String Literals
+String Literals 字符串常量
 ---------------
 
-String literals are written with either double or single-quotes (``"foo"`` or ``'bar'``).  They do not imply trailing zeroes as in C; ``"foo"`` represents three bytes not four.  As with integer literals, their type can vary, but they are implicitly convertible to ``bytes1``, ..., ``bytes32``, if they fit, to ``bytes`` and to ``string``.
+String literals are written with either double or single-quotes (``"foo"`` or ``'bar'``).
+They do not imply trailing zeroes as in C; ``"foo"`` represents three bytes not four.
+As with integer literals, their type can vary, but they are implicitly convertible to ``bytes1``, ..., ``bytes32``, if they fit, to ``bytes`` and to ``string``.
 
-String literals support escape characters, such as ``\n``, ``\xNN`` and ``\uNNNN``. ``\xNN`` takes a hex value and inserts the appropriate byte, while ``\uNNNN`` takes a Unicode codepoint and inserts an UTF-8 sequence.
+字符串常量是指由双引号或单引号引起来的字符串（``"foo"`` 或者 ``'bar'``）。
+不像在 C 语言中那样带有结束符；``"foo"`` 表示 3 个字节而不是 4 个。
+
+String literals support escape characters, such as ``\n``, ``\xNN`` and ``\uNNNN``.
+``\xNN`` takes a hex value and inserts the appropriate byte,
+while ``\uNNNN`` takes a Unicode codepoint and inserts an UTF-8 sequence.
+
+字符串常量支持转义字符，例如 ``\n``，``\xNN`` 和 ``\uNNNN``。``\xNN`` 表示一个 16 进制值，最终转换成合适的字节，
+而 ``\uNNNN`` 表示 Unicode 编码值，最终会转换为 UTF-8 的序列。
 
 .. index:: literal, bytes
 
-Hexadecimal Literals
+Hexadecimal Literals 十六进制常量
 --------------------
 
-Hexademical Literals are prefixed with the keyword ``hex`` and are enclosed in double or single-quotes (``hex"001122FF"``). Their content must be a hexadecimal string and their value will be the binary representation of those values.
+Hexademical Literals are prefixed with the keyword ``hex`` and are enclosed in double or single-quotes (``hex"001122FF"``).
+Their content must be a hexadecimal string and their value will be the binary representation of those values.
+
+十六进制常量以关键字 ``hex`` 打头，后面紧跟着用单引号或双引号引起来的字符串（例如，``hex"001122FF"``）。
+字符串的内容必须是一个十六进制的字符串，它的值将使用二进制表示。
 
 Hexademical Literals behave like String Literals and have the same convertibility restrictions.
+
+十六进制常量跟字符串常量很类似，具有相同的转换规则。
 
 .. index:: enum
 
 .. _enums:
 
-Enums
+Enums 枚举类型
 -----
 
 Enums are one way to create a user-defined type in Solidity. They are explicitly convertible
 to and from all integer types but implicit conversion is not allowed.  The explicit conversions
 check the value ranges at runtime and a failure causes an exception.  Enums needs at least one member.
+
+在 Solidity 中，枚举类型可以用来创建自定义类型。
+它可以显式地与整数类型进行转换，但不能隐式转换。
+显式的转换会在运行时检查数值的范围，如果转换失败则会引发一个异常。
+枚举类型至少需要一名成员。下面是枚举类型的一个例子：
 
 ::
 
@@ -563,13 +584,16 @@ check the value ranges at runtime and a failure causes an exception.  Enums need
 
 .. _function_types:
 
-Function Types
+Function Types 函数类型
 --------------
 
 Function types are the types of functions. Variables of function type
 can be assigned from functions and function parameters of function type
 can be used to pass functions to and return functions from function calls.
 Function types come in two flavours - *internal* and *external* functions:
+
+函数类型是一种表示函数的类型。可以将一个函数赋值给另一个函数类型的变量，也可以将一个函数作为参数进行传递，还能在函数调用中返回函数类型变量。
+函数类型有两类：- *内部（internal）* 函数和 *外部（external）* 函数：
 
 Internal functions can only be called inside the current contract (more specifically,
 inside the current code unit, which also includes internal library functions
@@ -578,10 +602,17 @@ context of the current contract. Calling an internal function is realized
 by jumping to its entry label, just like when calling a function of the current
 contract internally.
 
+内部函数只能在当前合约内被调用（更具体来说，在当前代码块内，包括内部库函数和继承的函数中），因为它们不能在当前合约上下文的外部被执行。
+调用一个内部函数是通过跳转到它的入口标签来实现的，就像在当前合约的内部调用一个函数。
+
 External functions consist of an address and a function signature and they can
 be passed via and returned from external function calls.
 
+外部函数由一个地址和一个函数签名组成，可以通过外部函数调用传递或者返回。
+
 Function types are notated as follows::
+
+函数类型表示成如下的形式 ::
 
     function (<parameter types>) {internal|external} [pure|constant|view|payable] [returns (<return types>)]
 
@@ -589,28 +620,47 @@ In contrast to the parameter types, the return types cannot be empty - if the
 function type should not return anything, the whole ``returns (<return types>)``
 part has to be omitted.
 
+与参数类型相比，返回类型不能为空 —— 如果函数类型不需要返回，则需要删除整个 ``returns (<return types>)`` 部分。
+
 By default, function types are internal, so the ``internal`` keyword can be
 omitted. In contrast, contract functions themselves are public by default,
 only when used as the name of a type, the default is internal.
+
+函数类型默认是内部函数，因此不需要声明 ``internal`` 关键词。
+与此相反的是，合约中的函数本身默认是 public 的，只有当它被当做类型名称时，默认才是内部函数。
 
 There are two ways to access a function in the current contract: Either directly
 by its name, ``f``, or using ``this.f``. The former will result in an internal
 function, the latter in an external function.
 
+有两种方法可以访问当前合约中的函数：其中一种方法是直接使用它的名字，``f``，另一种方法是使用 ``this.f``。
+前者适用于内部函数，后者适用于外部函数。
+
 If a function type variable is not initialized, calling it will result
 in an exception. The same happens if you call a function after using ``delete``
 on it.
+
+如果当函数类型的变量还没有初始化时就调用它的话会引发一个异常。
+如果在一个函数被 ``delete`` 之后调用它也会发生相同的情况。
 
 If external function types are used outside of the context of Solidity,
 they are treated as the ``function`` type, which encodes the address
 followed by the function identifier together in a single ``bytes24`` type.
 
+如果外部函数类型在 Solidity 的上下文环境意外的地方使用，它们会被视为 ``function`` 类型。
+该类型将函数所在地址及其函数标识一起编码为一个 ``bytes24`` 类型。
+
 Note that public functions of the current contract can be used both as an
 internal and as an external function. To use ``f`` as an internal function,
 just use ``f``, if you want to use its external form, use ``this.f``.
 
+请注意，当前合约的 public 函数既可以被当作内部函数也可以被当作外部函数使用。
+如果想将一个函数当作内部函数使用，就用 ``f``调用，如果想将其当作外部函数，使用 ``this.f``。
+
 Additionally, public (or external) functions also have a special member called ``selector``,
 which returns the :ref:`ABI function selector <abi_function_selector>`::
+
+除此之外，public（或外部）函数也有一个特殊的成员变量称作 ``selector``，可以返回 :ref:`ABI 函数选择器 <abi_function_selector>`::
 
     pragma solidity ^0.4.16;
 
@@ -621,6 +671,8 @@ which returns the :ref:`ABI function selector <abi_function_selector>`::
     }
 
 Example that shows how to use internal function types::
+
+如果使用内部函数类型的例子::
 
     pragma solidity ^0.4.16;
 
@@ -673,6 +725,8 @@ Example that shows how to use internal function types::
 
 Another example that uses external function types::
 
+另外一个使用外部函数类型的例子::
+
     pragma solidity ^0.4.11;
 
     contract Oracle {
@@ -705,6 +759,7 @@ Another example that uses external function types::
 
 .. note::
     Lambda or inline functions are planned but not yet supported.
+    Lambda 表达式或者内联函数的引入在计划内，但目前还没支持。
 
 .. index:: ! type;reference, ! reference type, storage, memory, location, array, struct
 
