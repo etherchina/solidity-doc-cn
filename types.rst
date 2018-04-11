@@ -763,7 +763,7 @@ Another example that uses external function types::
 
 .. index:: ! type;reference, ! reference type, storage, memory, location, array, struct
 
-Reference Types
+Reference Types 引用类型
 ==================
 
 Complex types, i.e. types which do not always fit into 256 bits have to be handled
@@ -772,7 +772,11 @@ them can be quite expensive, we have to think about whether we want them to be
 stored in **memory** (which is not persisting) or **storage** (where the state
 variables are held).
 
-Data location
+在处理复杂的类型（例如这些类型占用的空间超过 256 位）时，需要比处理之前我们讨论过的值类型更加谨慎。
+由于拷贝这些类型变量的开销相当大，我们不得不考虑它的存储位置，是将它们保存在 **memory** （并不是永久存储）中，
+还是 **storage** （保存状态变量的地方）中。
+
+Data location 数据位置
 -------------
 
 Every complex type, i.e. *arrays* and *structs*, has an additional
@@ -781,10 +785,18 @@ context, there is always a default, but it can be overridden by appending
 either ``storage`` or ``memory`` to the type. The default for function parameters (including return parameters) is ``memory``, the default for local variables is ``storage`` and the location is forced
 to ``storage`` for state variables (obviously).
 
+所有的复杂类型，如 *数组* 和 *结构* 类型，都有一个额外属性，“数据位置”，说明数据是保存在 memory 中还是 storage 中。
+根据上下文不同，大多数时候数据有默认的位置，但也可以通过在类型名后增加关键字 ``storage`` 或 ``memory`` 进行修改。
+函数参数（包括返回的参数）的数据位置默认是 ``memory``，
+局部变量的数据位置默认是 ``storage``，状态变量的数据位置强制是 ``storage`` （这是显而易见的）。
+
 There is also a third data location, ``calldata``, which is a non-modifiable,
 non-persistent area where function arguments are stored. Function parameters
 (not return parameters) of external functions are forced to ``calldata`` and
 behave mostly like ``memory``.
+
+也存在第三种数据位置， ``calldata`` ，这是一块只读的，且不会永久存储的位置，用来存储函数参数。
+外部函数的参数（非返回参数）的数据位置被强制指定为 ``calldata`` ，效果跟 ``memory`` 差不多。
 
 Data locations are important because they change how assignments behave:
 assignments between storage and memory and also to a state variable (even from other state variables)
@@ -794,6 +806,11 @@ this reference always points to the state variable even if the latter is changed
 in the meantime.
 On the other hand, assignments from a memory stored reference type to another
 memory-stored reference type do not create a copy.
+
+数据位置的指定非常重要，因为它们影响着赋值行为：
+在 storage 和 memory 之间两两赋值，或者 storage 向状态变量（甚至是从其它状态变量）赋值都会创建一份独立的拷贝。
+然而状态变量向局部变量赋值时仅仅传递一个引用，而且这个引用总是指向状态变量，因此后者改变的同时前者也会发生改变。
+另一方面，从一个 memory 存储的引用类型向另一个 memory 存储的引用类型赋值并不会创建拷贝。
 
 ::
 
@@ -823,16 +840,24 @@ memory-stored reference type do not create a copy.
         function h(uint[] memoryArray) public {}
     }
 
-Summary
+Summary 总结
 ^^^^^^^
 
 Forced data location:
  - parameters (not return) of external functions: calldata
  - state variables: storage
 
+强制数据位置：
+ - 外部函数的参数（不包括返回参数）： calldata
+ - 状态变量： storage
+
 Default data location:
  - parameters (also return) of functions: memory
  - all other local variables: storage
+
+默认数据位置：
+ - 函数参数（包括返回参数）： memory
+ - 所有其它局部变量： storage
 
 .. index:: ! array
 
