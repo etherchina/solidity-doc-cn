@@ -55,7 +55,7 @@ Docker
 二进制包
 ===============
 
-可在`solidity/releases <https://github.com/ethereum/solidity/releases>`_下载 Solidity 的二进制安装包。
+可在 `solidity/releases <https://github.com/ethereum/solidity/releases>`_ 下载 Solidity 的二进制安装包。
 
 对于 Ubuntu ，我们也提供 PPAs 。通过以下命令，可获取最新的稳定版本：
 
@@ -74,7 +74,7 @@ Docker
     sudo apt-get update
     sudo apt-get install solc
 
-同时，也提供可安装`所有支持的Linux版本 <https://snapcraft.io/docs/core/install>`_下的`snap package <https://snapcraft.io/>`_。通过以下命令，可获取最新的稳定版本：
+同时，也提供可安装 `所有支持的Linux版本 <https://snapcraft.io/docs/core/install>`_ 下的 `snap package <https://snapcraft.io/>`_ 。通过以下命令，可获取最新的稳定版本：
 
 .. code:: bash
 
@@ -106,7 +106,7 @@ Docker
 如果你需要特定版本的 Solidity ，你需要从 Github 上安装一个 Homebrew formula。
 你可查阅
 `solidity.rb commits on Github <https://github.com/ethereum/homebrew-ethereum/commits/master/solidity.rb>`_
-的提交记录，去寻找包含``solidity.rb``文件改动的特殊提交。然后使用``brew``进行安装：
+的提交记录，去寻找包含 ``solidity.rb`` 文件改动的特殊提交。然后使用 ``brew`` 进行安装：
 
 
 .. code:: bash
@@ -115,7 +115,7 @@ Docker
     # Install 0.4.8
     brew install https://raw.githubusercontent.com/ethereum/homebrew-ethereum/77cce03da9f289e5a3ffe579840d3c5dc0a62717/solidity.rb
 
-Gentoo Linux 下也提供了安装包，可使用``emerge``进行安装：
+Gentoo Linux 下也提供了安装包，可使用 ``emerge`` 进行安装：
 
 .. code:: bash
 
