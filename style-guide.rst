@@ -1,4 +1,4 @@
-.. index:: style, coding style
+.. index:: style，coding style
 
 #############
 风格指南
@@ -76,7 +76,7 @@
 
 在一个合约中的函数声明之间留有一个空行。
 
-在同一合约中的一组函数声明之间可以省略空行（例如抽象合约的存根函数）。
+在相关联的各组单行语句之间可以省略空行（例如抽象合约的stub函数）。
 
 正确写法::
 
@@ -115,7 +115,7 @@
 Imports 规范
 =======
 
-导入语句应始终放在文件的顶部。
+Import 语句应始终放在文件的顶部。
 
 正确写法::
 
@@ -148,12 +148,12 @@ Imports 规范
 函数顺序
 ==================
 
-排序有助于读者识别他们可以调用哪些函数，并更容易地找到构造函数和回退函数的定义。
+排序有助于读者识别他们可以调用哪些函数，并更容易地找到构造函数和fallback函数的定义。
 
-功能应根据其可见性和顺序进行分组：
+函数应根据其可见性和顺序进行分组：
 
 - 构造函数
-- 回退函数（如果存在）
+- fallback 函数（如果存在）
 - 外部函数
 - 公共函数
 - 内部函数和变量
@@ -222,11 +222,11 @@ Imports 规范
 
 正确写法::
 
-    spam(ham[1], Coin({name: "ham"}));
+    spam(ham[1]，Coin({name: "ham"}));
 
 错误写法::
 
-    spam( ham[ 1 ], Coin( { name: "ham" } ) );
+    spam( ham[ 1 ]，Coin( { name: "ham" } ) );
 
 除外::
 
@@ -236,11 +236,11 @@ Imports 规范
 
 正确写法::
 
-    function spam(uint i, Coin coin) public;
+    function spam(uint i，Coin coin) public;
 
 错误写法::
 
-    function spam(uint i , Coin coin) public ;
+    function spam(uint i ，Coin coin) public ;
 
 赋值或者其他操作符两边用于对齐的多个空格：
 
@@ -442,8 +442,8 @@ Imports 规范
 
 错误写法::
 
-    function thisFunctionHasLotsOfArguments(address a, address b, address c,
-        address d, address e, address f) public {
+    function thisFunctionHasLotsOfArguments(address a，address b，address c,
+        address d，address e，address f) public {
         doSomething();
     }
 
@@ -471,7 +471,7 @@ Imports 规范
 
 正确写法::
 
-    function thisFunctionNameIsReallyLong(address x, address y, address z)
+    function thisFunctionNameIsReallyLong(address x，address y，address z)
         public
         onlyowner
         priced
@@ -495,7 +495,7 @@ Imports 规范
 
 错误写法::
 
-    function thisFunctionNameIsReallyLong(address x, address y, address z)
+    function thisFunctionNameIsReallyLong(address x，address y，address z)
                                           public
                                           onlyowner
                                           priced
@@ -503,13 +503,13 @@ Imports 规范
         doSomething();
     }
 
-    function thisFunctionNameIsReallyLong(address x, address y, address z)
+    function thisFunctionNameIsReallyLong(address x，address y，address z)
         public onlyowner priced returns (address)
     {
         doSomething();
     }
 
-    function thisFunctionNameIsReallyLong(address x, address y, address z)
+    function thisFunctionNameIsReallyLong(address x，address y，address z)
         public
         onlyowner
         priced
@@ -522,10 +522,10 @@ Imports 规范
 
 正确写法::
 
-    contract A is B, C, D {
-        function A(uint param1, uint param2, uint param3, uint param4, uint param5)
+    contract A is B，C，D {
+        function A(uint param1，uint param2，uint param3，uint param4，uint param5)
             B(param1)
-            C(param2, param3)
+            C(param2，param3)
             D(param4)
             public
         {
@@ -535,10 +535,10 @@ Imports 规范
 
 错误写法::
 
-    contract A is B, C, D {
-        function A(uint param1, uint param2, uint param3, uint param4, uint param5)
+    contract A is B，C，D {
+        function A(uint param1，uint param2，uint param3，uint param4，uint param5)
         B(param1)
-        C(param2, param3)
+        C(param2，param3)
         D(param4)
         public
         {
@@ -546,10 +546,10 @@ Imports 规范
         }
     }
 
-    contract A is B, C, D {
-        function A(uint param1, uint param2, uint param3, uint param4, uint param5)
+    contract A is B，C，D {
+        function A(uint param1，uint param2，uint param3，uint param4，uint param5)
             B(param1)
-            C(param2, param3)
+            C(param2，param3)
             D(param4)
             public {
             // do something with param5
@@ -592,7 +592,7 @@ Imports 规范
 正确写法::
 
       str = "foo";
-      str = "Hamlet says, 'To be or not to be...'";
+      str = "Hamlet says，'To be or not to be...'";
 
 错误写法::
 
@@ -674,57 +674,57 @@ Imports 规范
 合约和库名称
 ==========================
 
-合约和库名称应该使用驼峰式风格。比如：``SimpleToken``, ``SmartBank``, ``CertificateHashRepository``, ``Player`` 。
+合约和库名称应该使用驼峰式风格。比如：``SimpleToken``，``SmartBank``，``CertificateHashRepository``，``Player`` 。
 
 结构体名称
 ==========================
 
-结构体名称应该使用驼峰式风格。比如：``MyCoin``, ``Position``, ``PositionXY`` 。
+结构体名称应该使用驼峰式风格。比如：``MyCoin``，``Position``，``PositionXY`` 。
 
 事件名称
 ===========
 
-事件名称应该使用驼峰式风格。比如：``Deposit``, ``Transfer``, ``Approval``, ``BeforeTransfer``, ``AfterTransfer`` 。
+事件名称应该使用驼峰式风格。比如：``Deposit``，``Transfer``，``Approval``，``BeforeTransfer``，``AfterTransfer`` 。
 
 函数名称
 ==============
-函数名称不同于结构，应该使用混合命名法风格。比如：``getBalance``, ``transfer``, ``verifyOwner``, ``addMember``, ``changeOwner`` 。
+函数名称不同于结构，应该使用混合命名法风格。比如：``getBalance``，``transfer``，``verifyOwner``，``addMember``，``changeOwner`` 。
 
 函数参数命名
 =======================
 
-函数参数命名应该使用混合命名法风格。比如：``initialSupply``, ``account``, ``recipientAddress``, ``senderAddress``, ``newOwner`` 。
+函数参数命名应该使用混合命名法风格。比如：``initialSupply``，``account``，``recipientAddress``，``senderAddress``，``newOwner`` 。
 在编写操作自定义结构的库函数时，第一个参数应该是结构体，并且应该始终命名 ``self`` 。
 
 本地变量和状态变量名称
 ==============================
 
-使用混合命名法风格。比如：``totalSupply``, ``remainingSupply``, ``balancesOf``, ``creatorAddress``, ``isPreSale``, ``tokenExchangeRate`` 。
+使用混合命名法风格。比如：``totalSupply``，``remainingSupply``，``balancesOf``，``creatorAddress``，``isPreSale``，``tokenExchangeRate`` 。
 
 常量命名
 =========
 
-常量应该全都使用大写字母书写，并用下划线分割单词。比如：``MAX_BLOCKS``, `TOKEN_NAME`, ``TOKEN_TICKER``, ``CONTRACT_VERSION`` 。
+常量应该全都使用大写字母书写，并用下划线分割单词。比如：``MAX_BLOCKS``，`TOKEN_NAME`，``TOKEN_TICKER``，``CONTRACT_VERSION`` 。
 
 修饰符命名
 ==============
 
-使用混合命名法风格。比如：``onlyBy``, ``onlyAfter``, ``onlyDuringThePreSale`` 。
+使用混合式命名风格。比如：``onlyBy``，``onlyAfter``，``onlyDuringThePreSale`` 。
 
 枚举变量命名
 =====
 
-枚举，在简单类型声明时，应该使用驼峰式风格。比如：``TokenGroup``, ``Frame``, ``HashStyle``, ``CharacterLocation`` 。
+在声明简单类型时，枚举应该使用驼峰式风格。比如：``TokenGroup``，``Frame``，``HashStyle``，``CharacterLocation`` 。
 
 避免命名冲突
 ==========================
 
 * ``single_trailing_underscore_``
 
-当所起名称与内建或保留关键字相冲突时，建议使用此惯例内置或其他保留名称。
+当所起名称与内建或保留关键字相冲突时，建议照此惯例在名称后边添加下划线。
 
 
-常规建议
+一般建议
 =======================
 
 待定
