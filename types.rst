@@ -863,13 +863,17 @@ Default data location:
 
 .. _arrays:
 
-Arrays
+Arrays 数组
 ------
 
 Arrays can have a compile-time fixed size or they can be dynamic.
 For storage arrays, the element type can be arbitrary (i.e. also other
 arrays, mappings or structs). For memory arrays, it cannot be a mapping and
 has to be an ABI type if it is an argument of a publicly-visible function.
+
+数组可以在声明时指定长度，也可以动态调整大小。
+对于 storage 的数组来说，元素类型可以是任意的（例如，元素也可以是数组类型，映射类型或者结构体）。
+对于 memory 的数组来说，元素类型不能使映射类型，如果作为 public 函数的参数，它只能是 ABI 类型。
 
 An array of fixed size ``k`` and element type ``T`` is written as ``T[k]``,
 an array of dynamic size as ``T[]``. As an example, an array of 5 dynamic
@@ -879,20 +883,35 @@ third dynamic array, you use ``x[2][1]`` (indices are zero-based and
 access works in the opposite way of the declaration, i.e. ``x[2]``
 shaves off one level in the type from the right).
 
+一个元素类型为 ``T``，固定长度为 ``k`` 的数组可以声明为 ``T[k]``，而动态数组声明为 ``T[]``。
+举个例子，一个包含有 5 个元素类型为 ``uint`` 的动态数组的数组声明为 ``uint[][5]``（注意这里跟其它语言比，数组长度的声明位置是反的）。
+使用 ``x[2][]`` 访问第三个动态数组的第二个元素（数组的序号从 0 开始，序号顺序与声明时的相反，例如，``x[2]``就是从右边削去了类型中的一级）。
+
 Variables of type ``bytes`` and ``string`` are special arrays. A ``bytes`` is similar to ``byte[]``,
 but it is packed tightly in calldata. ``string`` is equal to ``bytes`` but does not allow
 length or index access (for now).
 
+``bytes`` 和 ``string`` 类型的变量是特殊的数组。
+``bytes`` 类似于 ``byte[]``，但它在 calldata 中会被压缩打包。
+``string`` 与 ``bytes`` 在这点一样，但目前并不提供长度或序号的索引方式。
+
 So ``bytes`` should always be preferred over ``byte[]`` because it is cheaper.
+
+因此出于开销考虑，使用 ``bytes`` 比 ``byte[]`` 更好。
 
 .. note::
     If you want to access the byte-representation of a string ``s``, use
     ``bytes(s).length`` / ``bytes(s)[7] = 'x';``. Keep in mind
     that you are accessing the low-level bytes of the UTF-8 representation,
     and not the individual characters!
+    如果想要访问以字节型表示的字符串 ``s``，请使用 ``bytes(s).length`` / ``bytes(s)[7] = 'x';``。
+    注意这时你访问的是 UTF-8 形式的低级 bytes 类型，而不是单个的字符。
 
 It is possible to mark arrays ``public`` and have Solidity create a :ref:`getter <visibility-and-getters>`.
 The numeric index will become a required parameter for the getter.
+
+可以将数组标识为 ``public``，从而让 Solidity 创建一个 :ref:`getter <visibility-and-getters>`。
+之后必须使用数字下标来访问 getter。
 
 .. index:: ! array;allocating, new
 
