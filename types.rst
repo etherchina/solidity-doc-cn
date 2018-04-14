@@ -915,12 +915,15 @@ The numeric index will become a required parameter for the getter.
 
 .. index:: ! array;allocating, new
 
-Allocating Memory Arrays
+Allocating Memory Arrays 创建内存数组
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 Creating arrays with variable length in memory can be done using the ``new`` keyword.
 As opposed to storage arrays, it is **not** possible to resize memory arrays by assigning to
 the ``.length`` member.
+
+可使用 ``new`` 关键词在内存中创建具有可变长度的数组。
+与 storage 数组不同的是，你*不能*通过修改成员变量 ``.length`` 改变 memory 数组的大小。
 
 ::
 
@@ -937,11 +940,13 @@ the ``.length`` member.
 
 .. index:: ! array;literals, !inline;arrays
 
-Array Literals / Inline Arrays
+Array Literals / Inline Arrays 数组常量 / 内联数组
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Array literals are arrays that are written as an expression and are not
 assigned to a variable right away.
+
+数组常量是写作表达式形式的数组，并且不会立即赋值给变量。
 
 ::
 
@@ -964,6 +969,11 @@ above to ``uint``. Note that currently, fixed size memory arrays cannot
 be assigned to dynamically-sized memory arrays, i.e. the following is not
 possible:
 
+数组常量是一种定长的 memory 数组类型，它的基础类型由其中元素共同的类型决定。
+例如，``[1, 2, 3]`` 的类型是 ``uint8[3] memory``，因为其中的每个常量的类型都是 ``uint8``。
+正因为如此，有必要将上面这个例子中的第一个元素转换成 ``uint`` 类型。
+目前需要注意的是，定长的 memory 数组并不能赋值给变长的 memory 数组，下面是个反例：
+
 ::
 
     // This will not compile.
@@ -981,29 +991,42 @@ possible:
 It is planned to remove this restriction in the future but currently creates
 some complications because of how arrays are passed in the ABI.
 
+已经计划在未来一处这样的限制，但目前数组在 ABI 中传递的问题造成了一些麻烦。
+
 .. index:: ! array;length, length, push, !array;push
 
-Members
+Members 成员
 ^^^^^^^
 
 **length**:
     Arrays have a ``length`` member to hold their number of elements.
     Dynamic arrays can be resized in storage (not in memory) by changing the
-    ``.length`` member. This does not happen automatically when attempting to access elements outside the current length. The size of memory arrays is fixed (but dynamic, i.e. it can depend on runtime parameters) once they are created.
+    ``.length`` member. This does not happen automatically when attempting to access elements outside the current length.
+    The size of memory arrays is fixed (but dynamic, i.e. it can depend on runtime parameters) once they are created.
+    数组有 ``length`` 成员变量表示当前数组的长度。
+    动态数组可以在 storage （而不是 memory）中通过改变成员变量 ``.length`` 改变数组大小。
+    并不能通过访问超出当前数组长度的方式实现自动扩展数组的长度。
+    memory 数组的大小一旦创建就是是固定的（但也是动态的，例如，可以通过运行时的参数改变数组大小）。
+
 **push**:
-     Dynamic storage arrays and ``bytes`` (not ``string``) have a member function called ``push`` that can be used to append an element at the end of the array. The function returns the new length.
+    Dynamic storage arrays and ``bytes`` (not ``string``) have a member function called ``push`` that can be used to append an element at the end of the array.
+    The function returns the new length.
+    变长的 storage 数组以及 ``bytes`` 类型（而不是 ``string`` 类型）都有一个叫做 ``push`` 的成员函数，它用来附加新的元素到数组末尾。
 
 .. warning::
     It is not yet possible to use arrays of arrays in external functions.
+    在外部函数中目前还不能使用多维数组。
 
 .. warning::
     Due to limitations of the EVM, it is not possible to return
     dynamic content from external function calls. The function ``f`` in
     ``contract C { function f() returns (uint[]) { ... } }`` will return
     something if called from web3.js, but not if called from Solidity.
+    由于 |evm| 的限制，不能通过外部函数调用返回动态的内容。
+    例如，如果通过 web3.js 调用 ``contract C { function f() returns (uint[]) { ... } }`` 中的 ``f`` 函数，它会返回一些内容，但通过 Solidity 不可以。
 
     The only workaround for now is to use large statically-sized arrays.
-
+    目前唯一的变通方法是使用大型的静态数组。
 
 ::
 
