@@ -60,7 +60,7 @@
 - ``tx.origin`` (``address``): 交易发起者（完全的调用链）。
 
 .. note::
-    对于每一个外部函数调用，包括 ``msg.sender`` 和 ``msg.value`` 在内所有 ``msg`` 成员的值都会变化。这里包括对库函数的调用。
+    对于每一个**外部函数**调用，包括 ``msg.sender`` 和 ``msg.value`` 在内所有 ``msg`` 成员的值都会变化。这里包括对库函数的调用。
 
 .. note::
     不要依赖 ``block.timestamp``、 ``now`` 和 ``block.blockhash`` 产生随机数，除非你知道自己在做什么。
