@@ -1124,11 +1124,13 @@ Members 成员
 
 .. _structs:
 
-Structs
+Structs 结构体
 -------
 
 Solidity provides a way to define new types in the form of structs, which is
 shown in the following example:
+
+Solidity 支持通过构造结构体的形式定义新的类型，以下是一个结构体使用的示例：
 
 ::
 
@@ -1136,6 +1138,7 @@ shown in the following example:
 
     contract CrowdFunding {
         // Defines a new type with two fields.
+        // 定义的新类型包含两个属性。
         struct Funder {
             address addr;
             uint amount;
@@ -1153,8 +1156,9 @@ shown in the following example:
         mapping (uint => Campaign) campaigns;
 
         function newCampaign(address beneficiary, uint goal) public returns (uint campaignID) {
-            campaignID = numCampaigns++; // campaignID is return variable
+            campaignID = numCampaigns++; // campaignID 作为一个变量返回
             // Creates new struct and saves in storage. We leave out the mapping type.
+            // 创建新的结构体示例，存储在 storage 中。我们先不关注映射类型。
             campaigns[campaignID] = Campaign(beneficiary, goal, 0, 0);
         }
 
@@ -1163,6 +1167,9 @@ shown in the following example:
             // Creates a new temporary memory struct, initialised with the given values
             // and copies it over to storage.
             // Note that you can also use Funder(msg.sender, msg.value) to initialise.
+            // 以给定的值初始化，创建一个新的临时 memory 结构体，
+            // 并将其拷贝到 storage 中。
+            // 注意你也可以使用 Funder(msg.sender, msg.value) 来初始化。
             c.funders[c.numFunders++] = Funder({addr: msg.sender, amount: msg.value});
             c.amount += msg.value;
         }
@@ -1183,18 +1190,30 @@ contract, but it contains the basic concepts necessary to understand structs.
 Struct types can be used inside mappings and arrays and they can itself
 contain mappings and arrays.
 
+上面的合约只是一个简化版的众筹合约，但它已经足以让我们理解结构体的基础概念。
+结构体类型可以作为元素用在映射和数组中，其自身也可以包含映射和数组作为成员变量。
+
 It is not possible for a struct to contain a member of its own type,
 although the struct itself can be the value type of a mapping member.
 This restriction is necessary, as the size of the struct has to be finite.
+
+尽管结构体本身可以作为映射的值类型成员，但它并不能包含自身。
+这个限制是有必要的，因为结构体的大小必须是有限的。
 
 Note how in all the functions, a struct type is assigned to a local variable
 (of the default storage data location).
 This does not copy the struct but only stores a reference so that assignments to
 members of the local variable actually write to the state.
 
+注意在函数中使用结构体时，一个结构体是如何赋值给一个局部变量（默认存储位置是 storage ）的。
+在这个过程中并没有拷贝这个结构体，而是保存一个引用，因此对局部变量的赋值的同时实际上改变了原变量。
+
 Of course, you can also directly access the members of the struct without
 assigning it to a local variable, as in
 ``campaigns[campaignID].amount = 0``.
+
+当然，你也可以直接访问结构体的属性而不用将其赋值给一个局部变量，例如，
+``campaigns[campaignID].amount = 0``。
 
 .. index:: !mapping
 
