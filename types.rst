@@ -571,6 +571,11 @@ check the value ranges at runtime and a failure causes an exception.  Enums need
         // for all matters external to Solidity. The integer type used is just
         // large enough to hold all enum values, i.e. if you have more values,
         // `uint16` will be used and so on.
+
+        // 由于枚举类型不属于 |ABI| 的一部分，因此对于所有来自 Solidity 外部的调用，
+        // "getCoice" 的签名会自动被改成 "getChoice() returns (uint8)"。
+        // 整数类型的大小已经足够存储所有枚举类型的值，随着值的个数增加，
+        // 可以逐渐使用 `uint16` 或更大的整数类型。
         function getChoice() public view returns (ActionChoices) {
             return choice;
         }
@@ -679,6 +684,8 @@ Example that shows how to use internal function types::
     library ArrayUtils {
       // internal functions can be used in internal library functions because
       // they will be part of the same code context
+      // 内部函数可以在内部库函数中使用，
+      // 因为它们会成为同一代码上下文的一部分
       function map(uint[] memory self, function (uint) pure returns (uint) f)
         internal
         pure
@@ -742,18 +749,20 @@ Another example that uses external function types::
       }
       function reply(uint requestID, bytes response) public {
         // Here goes the check that the reply comes from a trusted source
+        // 这里要验证 reply 来自可信的源
         requests[requestID].callback(response);
       }
     }
 
     contract OracleUser {
-      Oracle constant oracle = Oracle(0x1234567); // known contract
+      Oracle constant oracle = Oracle(0x1234567); // known contract 已知的合约
       function buySomething() {
         oracle.query("USD", this.oracleResponse);
       }
       function oracleResponse(bytes response) public {
         require(msg.sender == address(oracle));
         // Use the data
+        // 使用数据
       }
     }
 
@@ -817,23 +826,29 @@ memory-stored reference type do not create a copy.
     pragma solidity ^0.4.0;
 
     contract C {
-        uint[] x; // the data location of x is storage
+        uint[] x; // x 的数据存储位置是 storage
 
         // the data location of memoryArray is memory
+        // memoryArray 的数据存储位置是 memory
         function f(uint[] memoryArray) public {
-            x = memoryArray; // works, copies the whole array to storage
-            var y = x; // works, assigns a pointer, data location of y is storage
-            y[7]; // fine, returns the 8th element
-            y.length = 2; // fine, modifies x through y
-            delete x; // fine, clears the array, also modifies y
+            x = memoryArray; // works, copies the whole array to storage // 将整个数组拷贝到 storage 中，可行
+            var y = x; // works, assigns a pointer, data location of y is storage // 分配一个指针（其中 y 的数据存储位置是 storage），可行
+            y[7]; // fine, returns the 8th element // 返回第 8 个元素，可行
+            y.length = 2; // fine, modifies x through y // 通过 y 修改 x，可行
+            delete x; // fine, clears the array, also modifies y // 清除数组，同时修改 y，可行
             // The following does not work; it would need to create a new temporary /
             // unnamed array in storage, but storage is "statically" allocated:
+            // 下面的就不可行了；需要在 storage 中创建新的未命名的临时数组， /
+            // 但 storage 是“静态”分配的：
             // y = memoryArray;
             // This does not work either, since it would "reset" the pointer, but there
             // is no sensible location it could point to.
+            // 下面这一行也不可行，因为这会“重置”指针，
+            // 但并没有可以让它指向的合适的存储位置。
             // delete y;
-            g(x); // calls g, handing over a reference to x
-            h(x); // calls h and creates an independent, temporary copy in memory
+            
+            g(x); // calls g, handing over a reference to x 调用 g 函数，同时移交对 x 的引用
+            h(x); // calls h and creates an independent, temporary copy in memory 调用 h 函数，同时在 memory 中创建一个独立的临时拷贝
         }
 
         function g(uint[] storage storageArray) internal {}
@@ -934,6 +949,7 @@ the ``.length`` member.
             uint[] memory a = new uint[](7);
             bytes memory b = new bytes(len);
             // Here we have a.length == 7 and b.length == len
+            // 这里我们有 a.length == 7 以及 b.length == len
             a[6] = 8;
         }
     }
@@ -984,6 +1000,8 @@ possible:
         function f() public {
             // The next line creates a type error because uint[3] memory
             // cannot be converted to uint[] memory.
+            // 这一行引发了一个类型错误，因为 unint[3] memory
+            // 不能转换成 uint[] memory。
             uint[] x = [uint(1), 3, 4];
         }
     }
@@ -1036,30 +1054,38 @@ Members 成员
         uint[2**20] m_aLotOfIntegers;
         // Note that the following is not a pair of dynamic arrays but a
         // dynamic array of pairs (i.e. of fixed size arrays of length two).
+        // 注意下面的代码并不是一对动态数组，
+        // 而是一个元素为一对变量的数组（例如，一个元素为长度为二的定长数组的变长数组）。
         bool[2][] m_pairsOfFlags;
         // newPairs is stored in memory - the default for function arguments
+        // newPairs 存储在 memory 中 —— 函数参数默认的存储位置
 
         function setAllFlagPairs(bool[2][] newPairs) public {
             // assignment to a storage array replaces the complete array
+            // 向一个 storage 的数组赋值会替代整个数组
             m_pairsOfFlags = newPairs;
         }
 
         function setFlagPair(uint index, bool flagA, bool flagB) public {
             // access to a non-existing index will throw an exception
+            // 访问一个不存在的数组下标会引发一个异常
             m_pairsOfFlags[index][0] = flagA;
             m_pairsOfFlags[index][1] = flagB;
         }
 
         function changeFlagArraySize(uint newSize) public {
             // if the new size is smaller, removed array elements will be cleared
+            // 如果 newSize 更小，那么超出的元素会被清除
             m_pairsOfFlags.length = newSize;
         }
 
         function clear() public {
-            // these clear the arrays completely
+            // these clear the arrays completely 
+            // 这些代码会将数组全部清空
             delete m_pairsOfFlags;
             delete m_aLotOfIntegers;
             // identical effect here
+            // 这里也是实现同样地功能
             m_pairsOfFlags.length = 0;
         }
 
@@ -1068,6 +1094,8 @@ Members 成员
         function byteArrays(bytes data) public {
             // byte arrays ("bytes") are different as they are stored without padding,
             // but can be treated identical to "uint8[]"
+            // byte arrays ("bytes") 不一样，因为它们不是填充式存储的，
+            // 但可以当作和 "uint8[]" 一样对待
             m_byteData = data;
             m_byteData.length += 7;
             m_byteData[3] = byte(8);
@@ -1080,8 +1108,10 @@ Members 成员
 
         function createMemoryArray(uint size) public pure returns (bytes) {
             // Dynamic memory arrays are created using `new`:
+            // 使用 `new` 创建动态 memory 数组：
             uint[2][] memory arrayOfPairs = new uint[2][](size);
             // Create a dynamic byte array:
+            // 创建一个动态字节数组：
             bytes memory b = new bytes(200);
             for (uint i = 0; i < b.length; i++)
                 b[i] = byte(i);
