@@ -1217,29 +1217,46 @@ assigning it to a local variable, as in
 
 .. index:: !mapping
 
-Mappings
+Mappings 映射
 ========
 
 Mapping types are declared as ``mapping(_KeyType => _ValueType)``.
 Here ``_KeyType`` can be almost any type except for a mapping, a dynamically sized array, a contract, an enum and a struct.
 ``_ValueType`` can actually be any type, including mappings.
 
+映射类型在声明时的形式为 ``mapping(_KeyType => _ValueType)``。
+其中 ``_KeyType`` 可以是可以是除了映射、变长数组、合约、枚举以及结构体以外的几乎所有类型。
+``_ValueType`` 可以是包括映射类型在内的任何类型。
+
 Mappings can be seen as `hash tables <https://en.wikipedia.org/wiki/Hash_table>`_ which are virtually initialized such that
 every possible key exists and is mapped to a value whose byte-representation is
 all zeros: a type's :ref:`default value <default-value>`. The similarity ends here, though: The key data is not actually stored
 in a mapping, only its ``keccak256`` hash used to look up the value.
 
+映射可以视作 `哈希表 <https://en.wikipedia.org/wiki/Hash_table>`，它们在实际的初始化过程中创建每个可能的 key，
+并将其映射到字节形式全是零的值：一个类型的 :ref:`默认值 <default-value>`。然而下面是映射与哈希表不同的地方：
+在映射中，实际上并不存储 key，而是存储它的 ``keccak256`` 哈希值，从而便于查询实际的值。
+
 Because of this, mappings do not have a length or a concept of a key or value being "set".
+
+正因为如此，映射是没有长度的，也没有 key 或 value 的概念。
 
 Mappings are only allowed for state variables (or as storage reference types
 in internal functions).
+
+映射只用来表示状态变量（或者在内部函数中作为存储位置为 storage 的引用类型）。
 
 It is possible to mark mappings ``public`` and have Solidity create a :ref:`getter <visibility-and-getters>`.
 The ``_KeyType`` will become a required parameter for the getter and it will
 return ``_ValueType``.
 
+可以将映射声明为 ``public``，然后使用 Solidity 创建一个 :ref:`getter <visibility-and-getters>`。
+``_KeyType`` 是 getter 的参数，返回 ``_ValueType``。
+
 The ``_ValueType`` can be a mapping too. The getter will have one parameter
 for each ``_KeyType``, recursively.
+
+``_ValueType`` 也可以是一个映射。这时在使用 getter 时将递归地传入每个 ``_KeyType`` 参数。
 
 ::
 
@@ -1265,6 +1282,8 @@ for each ``_KeyType``, recursively.
 .. note::
   Mappings are not iterable, but it is possible to implement a data structure on top of them.
   For an example, see `iterable mapping <https://github.com/ethereum/dapp-bin/blob/master/library/iterable_mapping.sol>`_.
+  递归不支持迭代，但可以在此之上实现一个这样的数据结构。
+  例子可以参考 `可迭代的映射 <https://github.com/ethereum/dapp-bin/blob/master/library/iterable_mapping.sol>`_。
 
 .. index:: assignment, ! delete, lvalue
 
