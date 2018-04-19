@@ -6,53 +6,45 @@
 类型
 *****
 
-Solidity is a statically typed language, which means that the type of each
-variable (state and local) needs to be specified (or at least known -
-see :ref:`type-deduction` below) at
-compile-time. Solidity provides several elementary types which can be combined
-to form complex types.
+Solidity是一种静态类型语言，这意味着每个变量（全局变量和局部变量）的类型需要在编译时指定（或者至少已知 - 请参阅：ref：`type-deduction`）。 Solidity提供了几种可以组合形成复杂类型的基本类型。另外，类型可以在包含运算符的表达式中相互交互。 有关各种运算符的快速参考，请参阅：ref：`order`。
 
-In addition, types can interact with each other in expressions containing
-operators. For a quick reference of the various operators, see :ref:`order`.
+Solidity是一种静态类型语言，这意味着每个变量（全局变量和局部变量）的类型需要在编译时指定（或者至少已知 - 请参阅：ref：`type-deduction`）。 Solidity提供了几种可以组合形成复杂类型的基本类型。另外，类型可以在包含运算符的表达式中相互交互。 有关各种运算符的快速参考，请参阅：ref：`order`。
 
 .. index:: ! value type, ! type;value
 
-Value Types
+Value 类型
 ===========
 
-The following types are also called value types because variables of these
-types will always be passed by value, i.e. they are always copied when they
-are used as function arguments or in assignments.
-
+以下类型也称为Value类型，因为这些类型的变量类型总是按值传递，即它们总是被复制被用作函数参数或赋值。
 .. index:: ! bool, ! true, ! false
 
-Booleans
+布尔型(Booleans)
 --------
 
-``bool``: The possible values are constants ``true`` and ``false``.
+ bool 的值是：true和false。
 
-Operators:
+操作符(Operators):
 
-*  ``!`` (logical negation)
-*  ``&&`` (logical conjunction, "and")
-*  ``||`` (logical disjunction, "or")
-*  ``==`` (equality)
-*  ``!=`` (inequality)
+*``！``（逻辑否定）
+*``&&``（逻辑连词，“和”）
+*``||``（逻辑和“或”）
+*``==``（平等）
+*``！=``（不等式）
 
-The operators ``||`` and ``&&`` apply the common short-circuiting rules. This means that in the expression ``f(x) || g(y)``, if ``f(x)`` evaluates to ``true``, ``g(y)`` will not be evaluated even if it may have side-effects.
+运算符"||"和'&&"应用常见的短路规则。 在表达式"f（x）|| g（y）"中，如果'f（x）'计算结果为'true'，'g（y）'不会被计算。
 
 .. index:: ! uint, ! int, ! integer
 
-Integers
+整型(Integers)
 --------
 
-``int`` / ``uint``: Signed and unsigned integers of various sizes. Keywords ``uint8`` to ``uint256`` in steps of ``8`` (unsigned of 8 up to 256 bits) and ``int8`` to ``int256``. ``uint`` and ``int`` are aliases for ``uint256`` and ``int256``, respectively.
+‘int’ /‘uint’：符号和无符号整数。 ‘uint8’到‘uint256’（无符号8到256位） 和 “int8”到“int256” 步进为“8”。 ``uint``和``int``分别是``uint256``和``int256``的别名。
 
-Operators:
+操作符Operators:
 
-* Comparisons: ``<=``, ``<``, ``==``, ``!=``, ``>=``, ``>`` (evaluate to ``bool``)
-* Bit operators: ``&``, ``|``, ``^`` (bitwise exclusive or), ``~`` (bitwise negation)
-* Arithmetic operators: ``+``, ``-``, unary ``-``, unary ``+``, ``*``, ``/``, ``%`` (remainder), ``**`` (exponentiation), ``<<`` (left shift), ``>>`` (right shift)
+*比较运算符：'<=', '<', '==', '!=', '>=', '>' （值为‘bool’型）
+*位运算符：'＆'，'|'，'^'（按位异或），'〜'（按位取反）
+*算术运算符：'+', '-', 一元运算符 '-', 一元运算符'+', '*', '/', '%' (求余),'**'（幂运算），'<<'（左移），'>>'（右移）
 
 Division always truncates (it is just compiled to the ``DIV`` opcode of the EVM), but it does not truncate if both
 operators are :ref:`literals<rational_literals>` (or literal expressions).
