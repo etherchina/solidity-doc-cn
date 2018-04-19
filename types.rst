@@ -1287,21 +1287,42 @@ for each ``_KeyType``, recursively.
 
 .. index:: assignment, ! delete, lvalue
 
-Operators Involving LValues
+Operators Involving LValues 涉及 LValues 的运算符
 ===========================
 
 If ``a`` is an LValue (i.e. a variable or something that can be assigned to), the following operators are available as shorthands:
 
-``a += e`` is equivalent to ``a = a + e``. The operators ``-=``, ``*=``, ``/=``, ``%=``, ``|=``, ``&=`` and ``^=`` are defined accordingly. ``a++`` and ``a--`` are equivalent to ``a += 1`` / ``a -= 1`` but the expression itself still has the previous value of ``a``. In contrast, ``--a`` and ``++a`` have the same effect on ``a`` but return the value after the change.
+如果 ``a`` 是一个 LValue（例如，一个可以被赋值的变量之类的），一下运算符都可以使用简写：
 
-delete
+``a += e`` is equivalent to ``a = a + e``. The operators ``-=``, ``*=``, ``/=``, ``%=``, ``|=``, ``&=`` and ``^=`` are defined accordingly.
+``a++`` and ``a--`` are equivalent to ``a += 1`` / ``a -= 1`` but the expression itself still has the previous value of ``a``.
+In contrast, ``--a`` and ``++a`` have the same effect on ``a`` but return the value after the change.
+
+``a += e`` 等同于 ``a = a + e``。 其它运算符 ``-=``， ``*=``， ``/=``， ``%=``， ``|=``， ``&=`` 以及 ``^=`` 都是如此定义的。
+``a++`` 和 ``a--`` 分别等同于 ``a += 1`` 和 ``a -= 1``，但表达式本身的值等于 ``a`` 在计算之前的值。
+与之相反，``--a`` 和 ``++a`` 虽然最终 ``a`` 的结果与之前的表达式相同，但表达式的返回值是计算之后的值。
+
+delete 删除
 ------
 
-``delete a`` assigns the initial value for the type to ``a``. I.e. for integers it is equivalent to ``a = 0``, but it can also be used on arrays, where it assigns a dynamic array of length zero or a static array of the same length with all elements reset. For structs, it assigns a struct with all members reset.
+``delete a`` assigns the initial value for the type to ``a``. I.e. for integers it is equivalent to ``a = 0``,
+but it can also be used on arrays, where it assigns a dynamic array of length zero or a static array of the same length with all elements reset.
+For structs, it assigns a struct with all members reset.
 
-``delete`` has no effect on whole mappings (as the keys of mappings may be arbitrary and are generally unknown). So if you delete a struct, it will reset all members that are not mappings and also recurse into the members unless they are mappings. However, individual keys and what they map to can be deleted.
+``delete a`` 的结果是将 ``a`` 的类型在初始化时的值赋值给 ``a``。例如，对于整型变量来说，相当于 ``a = 0``，
+但 delete 也适用于数组，对于动态数组来说，是将数组的长度设为 0，而对于静态数组来说，是将数组中的所有元素重置。
+如果对象是结构体，则将结构体中的所有属性重置。
+
+``delete`` has no effect on whole mappings (as the keys of mappings may be arbitrary and are generally unknown).
+So if you delete a struct, it will reset all members that are not mappings and also recurse into the members unless they are mappings.
+However, individual keys and what they map to can be deleted.
+
+``delete`` 对整个映射是无效的（因为映射的键可以是任意的，通常也是未知的）。
+因此在你删除一个结构体时，结果将重置所有的非映射属性，这个过程是递归进行的，除非它们是映射。
+然而，单个的键及其映射的值是可以被删除的。
 
 It is important to note that ``delete a`` really behaves like an assignment to ``a``, i.e. it stores a new object in ``a``.
+理解 ``delete a`` 的效果就像是给 ``a``赋值很重要，例如，这相当于在 ``a`` 中存储了一个新的对象。
 
 ::
 
@@ -1314,21 +1335,28 @@ It is important to note that ``delete a`` really behaves like an assignment to `
         function f() public {
             uint x = data;
             delete x; // sets x to 0, does not affect data
+            delete x; // 将 x 设为 0，并不影响数据
             delete data; // sets data to 0, does not affect x which still holds a copy
+            delete data; // 将 data 设为 0，并不影响 x，因为它仍然有个副本
             uint[] storage y = dataArray;
             delete dataArray; // this sets dataArray.length to zero, but as uint[] is a complex object, also
             // y is affected which is an alias to the storage object
             // On the other hand: "delete y" is not valid, as assignments to local variables
             // referencing storage objects can only be made from existing storage objects.
+            // 将 dataArray.length 设为 0，但由于 uint[] 是一个复杂的对象，y 也将受到影响，
+            // 因为它是一个存储位置是 storage 的对象的别名
+            // 另一方面："delete y" 是非法的，引用了 storage 对象的局部变量只能由已有的 storage 对象赋值。
         }
     }
 
 .. index:: ! type;conversion, ! cast
 
-Conversions between Elementary Types
+Conversions between Elementary Type
+基本类型之间的转换
 ====================================
 
 Implicit Conversions
+隐式转换
 --------------------
 
 If an operator is applied to different types, the compiler tries to
@@ -1342,7 +1370,15 @@ Furthermore, unsigned integers can be converted to bytes of the same or larger
 size, but not vice-versa. Any type that can be converted to ``uint160`` can also
 be converted to ``address``.
 
+如果一个运算符用在两个不同类型的变量之间，那么编译器将隐式地将其中一个类型转换为另一个类型（不同类型之间的赋值也是一样）。
+总是，只要值类型之间的转换在语义上行得通，而且转换的过程中没有信息丢失，那么隐式转换基本都是可以实现的：
+``uint8`` 可以转换成 ``uint16``，``int128`` 转换成 ``int256``，但 ``int8`` 不能转换成 ``uint256``
+（因为 ``uint256`` 不能涵盖某些值，例如，``-1``）。
+更进一步来说，无符号整型可以转换成跟它大小相等或更大的字节类型，但反之不能。
+任何可以转换成 ``uint160`` 的类型都可以转换成 ``address`` 类型。
+
 Explicit Conversions
+显式转换
 --------------------
 
 If the compiler does not allow implicit conversion but you know what you are
@@ -1350,6 +1386,10 @@ doing, an explicit type conversion is sometimes possible. Note that this may
 give you some unexpected behaviour so be sure to test to ensure that the
 result is what you want! Take the following example where you are converting
 a negative ``int8`` to a ``uint``:
+
+如果某些情况下编译器不支持隐式转换，但是你很清楚你要做什么，这种情况可以考虑显式转换。
+注意这可能会发生一些无法预料的后果，因此一定要进行测试，确保结果是你想要的！
+下面的示例是将一个 ``int8`` 类型的负数转换成 ``uint``：
 
 ::
 
@@ -1359,22 +1399,29 @@ a negative ``int8`` to a ``uint``:
 At the end of this code snippet, ``x`` will have the value ``0xfffff..fd`` (64 hex
 characters), which is -3 in the two's complement representation of 256 bits.
 
+这段代码的最后，``x`` 的值将是 ``0xfffff..fd``（64 个 16 禁止字符），因为这是 -3 的 256 位补码形式。
+
 If a type is explicitly converted to a smaller type, higher-order bits are
 cut off::
 
+如果一个类型显式转换成与其相似的类型，排序更高的位将被舍弃 ::
+
     uint32 a = 0x12345678;
-    uint16 b = uint16(a); // b will be 0x5678 now
+    uint16 b = uint16(a); // b will be 0x5678 now 此时 b 的值是 0x5678
 
 .. index:: ! type;deduction, ! var
 
 .. _type-deduction:
 
 Type Deduction
+类型推断
 ==============
 
 For convenience, it is not always necessary to explicitly specify the type of a
 variable, the compiler automatically infers it from the type of the first
 expression that is assigned to the variable::
+
+为了方便起见，没有必要每次都精确指定一个变量的类型，编译器会根据分配该变量的第一个表达式的类型自动推断该变量的类型 ::
 
     uint24 x = 0x123;
     var y = x;
@@ -1382,9 +1429,13 @@ expression that is assigned to the variable::
 Here, the type of ``y`` will be ``uint24``. Using ``var`` is not possible for function
 parameters or return parameters.
 
+这里 ``y`` 的类型将是 ``uint24``。不能对函数参数或者返回参数使用 ``var``。
+
 .. warning::
     The type is only deduced from the first assignment, so
     the loop in the following snippet is infinite, as ``i`` will have the type
     ``uint8`` and the highest value of this type is smaller than ``2000``.
     ``for (var i = 0; i < 2000; i++) { ... }``
-
+    类型只能从第一次赋值中推断出来，因此以下代码中的循环是无限的，
+    原因是``i`` 的类型是 ``uint8``，而这个类型变量的最大值比 ``2000`` 小。
+    ``for (var i = 0; i < 2000; i++) { ... }``
