@@ -7,51 +7,28 @@
 类型
 *****
 
-Solidity is a statically typed language, which means that the type of each
-variable (state and local) needs to be specified (or at least known -
-see :ref:`type-deduction` below) at
-compile-time. Solidity provides several elementary types which can be combined
-to form complex types.
-
-Solidity 是一种静态类型语言，这意味着每个变量（状态变量和局部变量）都需要在编译时指定变量的类型（或至少可以推导出——参考下面的 :ref:`type-deduction` ）。
+Solidity 是一种静态类型语言，这意味着每个变量（状态变量和局部变量）都需要在编译时指定变量的类型（或至少可以推导出变量类型——参考下文的 :ref:`type-deduction` ）。
 Solidity 提供了几种基本类型，可以用来组合出复杂类型。
-
-In addition, types can interact with each other in expressions containing
-operators. For a quick reference of the various operators, see :ref:`order`.
 
 除此之外，类型之间可以在包含运算符号的表达式中进行交互。
 关于各种运算符号，可以参考 :ref:`order` 。
 
 .. index:: ! value type, ! type;value
 
-Value Types 值类型
+值类型
 ===========
 
-The following types are also called value types because variables of these
-types will always be passed by value, i.e. they are always copied when they
-are used as function arguments or in assignments.
-
-一下类型也称为值类型，因为这些类型的变量将始终按值来传递。
-也就是说，当这些变量被用作函数参数或者被赋值时，总是进行值拷贝。
+以下类型也称为值类型，因为这些类型的变量将始终按值来传递。
+也就是说，当这些变量被用作函数参数或者被赋值时，总会进行值拷贝。
 
 .. index:: ! bool, ! true, ! false
 
-Booleans 布尔类型
+布尔类型
 --------
-
-``bool``: The possible values are constants ``true`` and ``false``.
 
 ``bool`` ：可能的取值为常量值 ``true`` 和 ``false`` 。
 
-Operators:
-
 运算符：
-
-*  ``!`` (logical negation)
-*  ``&&`` (logical conjunction, "and")
-*  ``||`` (logical disjunction, "or")
-*  ``==`` (equality)
-*  ``!=`` (inequality)
 
 *  ``!`` （逻辑非）
 *  ``&&`` （逻辑与， "and" ）
@@ -59,41 +36,25 @@ Operators:
 *  ``==`` （等于）
 *  ``!=`` （不等于）
 
-The operators ``||`` and ``&&`` apply the common short-circuiting rules. This means that in the expression ``f(x) || g(y)``, if ``f(x)`` evaluates to ``true``, ``g(y)`` will not be evaluated even if it may have side-effects.
-
-运算符 ``||`` 和 ``&&`` 都遵循短路（ short-circuiting ）规则。例如在表达式 ``f(x) || g(y)`` 中，
-如果 ``f(x)`` 的值为 ``true`` ，那么 ``g(x)`` 就不会被执行，即使会出现一些副作用。
+运算符 ``||`` 和 ``&&`` 都遵循同样的短路（ short-circuiting ）规则。就是说在表达式 ``f(x) || g(y)`` 中，
+如果 ``f(x)`` 的值为 ``true`` ，那么 ``g(y)`` 就不会被执行，即使会出现一些副作用。
 
 .. index:: ! uint, ! int, ! integer
 
-Integers 整型
---------
+整型
+---
 
-``int`` / ``uint``: Signed and unsigned integers of various sizes. Keywords ``uint8`` to ``uint256`` in steps of ``8`` (unsigned of 8 up to 256 bits) and ``int8`` to ``int256``.
-``uint`` and ``int`` are aliases for ``uint256`` and ``int256``, respectively.
-
-``int`` / ``uint`` ：表示有符号和无符号不同位数整数。支持关键字 ``uint8`` 到 ``uint256`` （8位递增，从8位到256位）以及 ``int8`` 到 ``int256``。
-``uint`` 和 ``int`` 分别是 ``uint256`` 和 ``int256`` 的别名。
-
-Operators:
+``int`` / ``uint`` ：本别表示有符号和无符号的不同位数的整型变量。支持关键字 ``uint8`` 到 ``uint256`` （8位递增，从8位到256位）以及 ``int8`` 到 ``int256``。
+``uint`` 和 ``int`` 分别代表 ``uint256`` 和 ``int256``。
 
 运算符：
-
-* Comparisons: ``<=``, ``<``, ``==``, ``!=``, ``>=``, ``>`` (evaluate to ``bool``)
-* Bit operators: ``&``, ``|``, ``^`` (bitwise exclusive or), ``~`` (bitwise negation)
-* Arithmetic operators: ``+``, ``-``, unary ``-``, unary ``+``, ``*``, ``/``, ``%`` (remainder), ``**`` (exponentiation), ``<<`` (left shift), ``>>`` (right shift)
 
 * 比较运算符： ``<=`` ， ``<`` ， ``==`` ， ``!=`` ， ``>=`` ， ``>`` （返回布尔值）
 * 位运算符： ``&`` ， ``|`` ， ``^`` （异或）， ``~`` （位取反）
 * 算数运算符： ``+`` ， ``-`` ， 一元运算 ``-`` ， 一元运算 ``+`` ， ``*`` ， ``/`` ， ``%`` （取余） ， ``**`` （幂）， ``<<`` （左移位） ， ``>>`` （右移位）
 
-Division always truncates (it is just compiled to the ``DIV`` opcode of the EVM), but it does not truncate if both
-operators are :ref:`literals<rational_literals>` (or literal expressions).
-
 除法总是会截断的（仅仅编译到 EVM 中的 ``DIV`` 操作码），
-但如果运算符都是 :ref:`字面量（literals）<rational_literals>` （或者字面表达式），则不会截断。
-
-Division by zero and modulus with zero throws a runtime exception.
+但如果操作数都是 :ref:`常量（literals）<rational_literals>` （或者常量表达式），则不会截断。
 
 除以零或者模零运算都会引发运行时异常。
 
@@ -105,7 +66,7 @@ sign extends. Shifting by a negative amount throws a runtime exception.
 移位运算的结果取决于运算符左边的类型。
 表达式 ``x << y`` 与 ``x * 2**y`` 是等价的，
 ``x >> y`` 与 ``x / 2**y``是等价的。这意味着将负数符号转移。
-按负数移动会引发运行时异常。
+按负数位移动会引发运行时异常。
 
 
 .. warning::
