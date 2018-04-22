@@ -44,20 +44,20 @@
 区块和交易属性
 --------------------------------
 
-- ``block.blockhash(uint blockNumber) returns (bytes32)``: 给定区块的哈希—仅对最近的 256 个区块有效，不包括当前区块。
-- ``block.coinbase`` (``address``): 挖出当前区块的矿工地址。
-- ``block.difficulty`` (``uint``): 当前区块难度。
-- ``block.gaslimit`` (``uint``): 当前区块 gas 限额。
-- ``block.number`` (``uint``): 当前区块号。
-- ``block.timestamp`` (``uint``): 自 unix epoch 起始当前区块以秒计的时间戳。
-- ``msg.data`` (``bytes``): 完整的 calldata。
-- ``msg.gas`` (``uint``): 剩余 gas。
-- ``msg.sender`` (``address``): 消息发送者（当前调用）。
-- ``msg.sig`` (``bytes4``): calldata 的前 4 字节（也就是函数标识符）。
-- ``msg.value`` (``uint``): 随消息发送的 wei 的数量。
-- ``now`` (``uint``): 目前区块时间戳（``block.timestamp``）。
-- ``tx.gasprice`` (``uint``): 交易的 gas 价格。
-- ``tx.origin`` (``address``): 交易发起者（完全的调用链）。
+- ``block.blockhash(uint blockNumber) returns (bytes32)``: 给定区块的哈希—仅对最近的 256 个区块有效而不包括当前区块
+- ``block.coinbase`` (``address``): 挖出当前区块的矿工地址
+- ``block.difficulty`` (``uint``): 当前区块难度
+- ``block.gaslimit`` (``uint``): 当前区块 gas 限额
+- ``block.number`` (``uint``): 当前区块号
+- ``block.timestamp`` (``uint``): 自 unix epoch 起始当前区块以秒计的时间戳
+- ``msg.data`` (``bytes``): 完整的 calldata
+- ``msg.gas`` (``uint``): 剩余 gas
+- ``msg.sender`` (``address``): 消息发送者（当前调用）
+- ``msg.sig`` (``bytes4``): calldata 的前 4 字节（也就是函数标识符）
+- ``msg.value`` (``uint``): 随消息发送的 wei 的数量
+- ``now`` (``uint``): 目前区块时间戳（``block.timestamp``）
+- ``tx.gasprice`` (``uint``): 交易的 gas 价格
+- ``tx.origin`` (``address``): 交易发起者（完全的调用链）
 
 .. note::
     对于每一个**外部函数**调用，包括 ``msg.sender`` 和 ``msg.value`` 在内所有 ``msg`` 成员的值都会变化。这里包括对库函数的调用。
