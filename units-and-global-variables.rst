@@ -44,7 +44,7 @@
 区块和交易属性
 --------------------------------
 
-- ``block.blockhash(uint blockNumber) returns (bytes32)``: 给定区块的哈希-仅对最近的 256 个区块有效，不包括当前区块。
+- ``block.blockhash(uint blockNumber) returns (bytes32)``: 给定区块的哈希—仅对最近的 256 个区块有效，不包括当前区块。
 - ``block.coinbase`` (``address``): 挖出当前区块的矿工地址。
 - ``block.difficulty`` (``uint``): 当前区块难度。
 - ``block.gaslimit`` (``uint``): 当前区块 gas 限额。
@@ -65,7 +65,7 @@
 .. note::
     不要依赖 ``block.timestamp``、 ``now`` 和 ``block.blockhash`` 产生随机数，除非你知道自己在做什么。
 
-    时间戳和区块哈希在一定程度上都可能受到挖矿矿工影响。例如说，挖矿社区中的恶意矿工可以用某个给定的哈希来运行赌场合约的 payout 函数，而如果他们没收到钱，还可以用一个不同的哈希重新尝试。
+    时间戳和区块哈希在一定程度上都可能受到挖矿矿工影响。例如，挖矿社区中的恶意矿工可以用某个给定的哈希来运行赌场合约的 payout 函数，而如果他们没收到钱，还可以用一个不同的哈希重新尝试。
 
     当前区块的时间戳必须严格大于最后一个区块的时间戳，但这里唯一能确保的只是它会是在权威链上的两个连续区块的时间戳之间的数值。
     
@@ -78,9 +78,9 @@
 --------------
 
 ``assert(bool condition)``:
-    如果条件不满足就抛出 - 用于内部错误。
+    如果条件不满足就抛出—用于内部错误。
 ``require(bool condition)``:
-    如果条件不满足就抛掉 - 用于输入或者外部组件引起的错误。 
+    如果条件不满足就抛掉—用于输入或者外部组件引起的错误。 
 ``revert()``:
     终止运行并恢复状态变动。
 
@@ -92,7 +92,7 @@
 ``addmod(uint x, uint y, uint k) returns (uint)``:
     计算 ``(x + y) % k``，加法会在任意精度下执行，并且加法的结果即使超过 ``2**256`` 也不会被截取。从 0.5.0 版本的编译器开始会加入对 ``k != 0`` 的校验（assert）。
 ``mulmod(uint x, uint y, uint k) returns (uint)``:
-    计算 ``(x * y) % k``，乘法会在任意精度下执行，并且加法的结果即使超过 ``2**256`` 也不会被截取。从 0.5.0 版本的编译器开始会加入对 ``k != 0`` 的校验（assert）。
+    计算 ``(x * y) % k``，乘法会在任意精度下执行，并且乘法的结果即使超过 ``2**256`` 也不会被截取。从 0.5.0 版本的编译器开始会加入对 ``k != 0`` 的校验（assert）。
 ``keccak256(...) returns (bytes32)``:
     计算 :ref:`(tightly packed) arguments <abi_packed_mode>` 的 Ethereum-SHA-3 （Keccak-256）哈希。
 ``sha256(...) returns (bytes32)``:
@@ -117,7 +117,7 @@
 
 请注意，常量值会使用存储它们所需要的最少字节数进行打包。例如：``keccak256(0) == keccak256(uint8(0))``，``keccak256(0x12345678) == keccak256(uint32(0x12345678))``。
 
-在一个私链上，你很有可能碰到由于 ``sha256``、``ripemd160`` 或者 ``ecrecover`` 引起的 Out-of-Gas。尽管它们的合约代码是硬编码的，然后这个括号整个应该放在这句的最后。发送到不存在的合约的消息非常昂贵，所以实际的执行会导致 Out-of-Gas 错误。在你的合约中实际使用它们之前，给每个合约发送一点儿以太币，比如 1 wei。这在官方网络或测试网络上不是问题。
+在一个私链上，你很有可能碰到由于 ``sha256``、``ripemd160`` 或者 ``ecrecover`` 引起的 Out-of-Gas。这个原因就是他们被当做所谓的预编译合约而执行，并且在第一次收到消息后这些合约才真正存在（尽管合约代码是硬代码）。发送到不存在的合约的消息非常昂贵，所以实际的执行会导致 Out-of-Gas 错误。在你的合约中实际使用它们之前，给每个合约发送一点儿以太币，比如 1 Wei。这在官方网络或测试网络上不是问题。
 
 .. index:: balance, send, transfer, call, callcode, delegatecall
 .. _address_related:
@@ -132,11 +132,11 @@
 ``<address>.send(uint256 amount) returns (bool)``:
     向 :ref:`address` 发送数量为 amount 的 Wei，失败时返回 ``false``，发送 2300 gas 的矿工费用，不可调节。
 ``<address>.call(...) returns (bool)``:
-    发出低级 ``CALL``，失败时返回 ``false``，发送所有可用 gas，不可调节。
+    发出底层 ``CALL``，失败时返回 ``false``，发送所有可用 gas，不可调节。
 ``<address>.callcode(...) returns (bool)``：
-    发出低级 ``CALLCODE``，失败时返回 ``false``，发送所有可用 gas，不可调节。
+    发出底层 ``CALLCODE``，失败时返回 ``false``，发送所有可用 gas，不可调节。
 ``<address>.delegatecall(...) returns (bool)``:
-    发出低级 ``DELEGATECALL``，失败时返回 ``false``，发送所有可用 gas，不可调节。
+    发出底层 ``DELEGATECALL``，失败时返回 ``false``，发送所有可用 gas，不可调节。
 
 更多信息，参考 :ref:`address` 部分：
 
