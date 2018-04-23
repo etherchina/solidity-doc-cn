@@ -52,11 +52,11 @@
 
     pragma solidity ^0.4.0;
 
-    // THIS CONTRACT CONTAINS A BUG - DO NOT USE
+    // 不要使用这个合约，其中包含一个 bug。
     contract Fund {
-        /// Mapping of ether shares of the contract.
+        /// 合约中 |ether| 分成的映射。
         mapping(address => uint) shares;
-        /// Withdraw your share.
+        /// 提取你的分成。
         function withdraw() public {
             if (msg.sender.send(shares[msg.sender]))
                 shares[msg.sender] = 0;
@@ -65,18 +65,18 @@
 
 这里的问题不是很严重，因为有限的 gas 也作为 ``send`` 的一部分，但仍然暴露了一个缺陷：
 |ether| 的传输过程中总是可以包含代码执行，所以接收者可以是一个回调进入 ``withdraw`` 的合约。
-这就会使其多次得到退款，从而将合约中的全部 |ether| 取走。
+这就会使其多次得到退款，从而将合约中的全部 |ether| 提取。
 特别地，下面的合约将允许一个攻击者多次得到退款，因为它使用了 ``call`` ，默认发送所有剩余的 gas。
 
 ::
 
     pragma solidity ^0.4.0;
 
-    // THIS CONTRACT CONTAINS A BUG - DO NOT USE
+    // 不要使用这个合约，其中包含一个 bug。
     contract Fund {
-        /// Mapping of ether shares of the contract.
+        /// 合约中 |ether| 分成的映射。
         mapping(address => uint) shares;
-        /// Withdraw your share.
+        /// 提取你的分成。
         function withdraw() public {
             if (msg.sender.call.value(shares[msg.sender])())
                 shares[msg.sender] = 0;
@@ -90,9 +90,9 @@
     pragma solidity ^0.4.11;
 
     contract Fund {
-        /// Mapping of ether shares of the contract.
+        /// 合约中 |ether| 分成的映射。
         mapping(address => uint) shares;
-        /// Withdraw your share.
+        /// 提取你的分成。
         function withdraw() public {
             var share = shares[msg.sender];
             shares[msg.sender] = 0;
@@ -165,7 +165,7 @@ tx.origin
 
     pragma solidity ^0.4.11;
 
-    // THIS CONTRACT CONTAINS A BUG - DO NOT USE
+    // 不要使用这个合约，其中包含一个 bug。
     contract TxUserWallet {
         address owner;
 
