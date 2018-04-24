@@ -1,3 +1,5 @@
+.. include:: glossaries.rst
+
 #############
 杂项
 #############
@@ -5,37 +7,52 @@
 .. index:: storage, state variable, mapping
 
 ************************************
-Layout of State Variables in Storage
+|storage| 中的状态变量储存结构
 ************************************
 
 Statically-sized variables (everything except mapping and dynamically-sized array types) are laid out contiguously in storage starting from position ``0``. Multiple items that need less than 32 bytes are packed into a single storage slot if possible, according to the following rules:
+静态大小的变量（除 |mapping| 和动态数组之外的所有类型）都从位置 ``0`` 开始连续放置在 |storage| 中。如果可能的话，存储需求少于 32 字节的多个变量会被打包到一个 |storage_slot| 中，规则如下：
 
 - The first item in a storage slot is stored lower-order aligned.
 - Elementary types use only that many bytes that are necessary to store them.
 - If an elementary type does not fit the remaining part of a storage slot, it is moved to the next storage slot.
 - Structs and array data always start a new slot and occupy whole slots (but items inside a struct or array are packed tightly according to these rules).
+- |storage_slot| 的第一项会以低位对齐（即右对齐）的方式储存。
+- 基本类型仅使用它们所需的那么多字节。
+- 如果 |storage_slot| 中的剩余空间不足以储存一个基本类型，那么它会被移入下一个 |storage_slot| 。
+- 结构（struct）和数组数据总是会占用一整个新插槽（但结构或数组中的各项，都会以这些规则进行打包）。
 
 .. warning::
     When using elements that are smaller than 32 bytes, your contract's gas usage may be higher.
     This is because the EVM operates on 32 bytes at a time. Therefore, if the element is smaller
     than that, the EVM must use more operations in order to reduce the size of the element from 32
     bytes to the desired size.
+    使用小于 32 字节的元素时，你的合约的 gas 使用量可能高于使用 32 字节的元素时。这是因为 |evm| 每次会操作32个字节，
+    所以如果元素比 32 字节小，|evm| 必须使用更多的操作才能将其大小缩减到到所需的大小。
 
     It is only beneficial to use reduced-size arguments if you are dealing with storage values
     because the compiler will pack multiple elements into one storage slot, and thus, combine
     multiple reads or writes into a single operation. When dealing with function arguments or memory
     values, there is no inherent benefit because the compiler does not pack these values.
+    仅当你处理 |storage_slot| 中的值时候，使用缩减大小的参数才是有益的。因为编译器会将多个元素打包到一个 |storage_slot| 中，
+    从而将多个读或写合并到一次对存储的操作中。而在处理函数参数或 |memory| 中的值时，因为编译器不会打包这些值，所以没有什么益处。
 
     Finally, in order to allow the EVM to optimize for this, ensure that you try to order your
     storage variables and ``struct`` members such that they can be packed tightly. For example,
     declaring your storage variables in the order of ``uint128, uint128, uint256`` instead of
     ``uint128, uint256, uint128``, as the former will only take up two slots of storage whereas the
     latter will take up three.
+    最后，为了允许 |evm| 对此进行优化，请确保你对 |storage| 中的变量和 ``struct`` 成员的书写顺序允许它们被紧密地打包。
+    例如，按照 ``uint128，uint128，uint256`` 的顺序声明你的存储变量，而不是 ``uint128，uint256，uint128``，
+    因为前者只占用两个 |storage_slot|，而后者将占用三个。
 
 The elements of structs and arrays are stored after each other, just as if they were given explicitly.
+结构和数组中的元素都是顺序存储的，就像它们被明确给定的那样。
 
 Due to their unpredictable size, mapping and dynamically-sized array types use a Keccak-256 hash
 computation to find the starting position of the value or the array data. These starting positions are always full stack slots.
+由于 |mapping| 和动态数组的大小是不可预知的，所以我们使用Keccak-256哈希计算来找到具体数值或数组数据的起始位置。
+这些起始位置本身的数值总是会占满堆栈插槽。
 
 The mapping or the dynamic array itself
 occupies an (unfilled) slot in storage at some position ``p`` according to the above rule (or by
@@ -43,10 +60,17 @@ recursively applying this rule for mappings to mappings or arrays of arrays). Fo
 Array data is located at ``keccak256(p)`` and the value corresponding to a mapping key
 ``k`` is located at ``keccak256(k . p)`` where ``.`` is concatenation. If the value is again a
 non-elementary type, the positions are found by adding an offset of ``keccak256(k . p)``.
+|mapping| 或动态数组本身会根据上述规则来在某个位置 ``p`` 处占用一个（未填充的）存储中的插槽（或递归地将该规则应用到 |mapping| 的 |mapping| 或数组的数组）。
+对于动态数组，此插槽中会存储数组中元素的数量（字节数组和字符串在这里是一个例外，见下文）。对于 |mapping| ，该插槽未被使用（但它仍是需要的，
+以使两个相同的 |mapping| 在彼此之后会使用不同的散列分布）。数组的数据会位于 ``keccak256(p)``； |mapping| 中的键 ``k`` 所对应的值会位于 ``keccak256(k . p)``，
+其中 ``.`` 是连接符。如果该值又是一个非基本类型，则通过添加 ``keccak256(k . p)`` 作为偏移量来找到位置。
 
 ``bytes`` and ``string`` store their data in the same slot where also the length is stored if they are short. In particular: If the data is at most ``31`` bytes long, it is stored in the higher-order bytes (left aligned) and the lowest-order byte stores ``length * 2``. If it is longer, the main slot stores ``length * 2 + 1`` and the data is stored as usual in ``keccak256(slot)``.
+如果 ``bytes`` 和 ``string`` 的数据很短，那么它们的长度也会和数据一起存储到同一个插槽。具体地说：如果数据长度小于等于 31 字节，
+则它存储在高位字节（左对齐），最低位字节存储 ``length * 2``。如果数据长度超出 31 字节，则在主插槽存储 ``length * 2 + 1``，
+数据照常存储在 ``keccak256(slot)`` 中。
 
-So for the following contract snippet::
+所以对于以下合约片段::
 
     pragma solidity ^0.4.0;
 
@@ -57,42 +81,50 @@ So for the following contract snippet::
     }
 
 The position of ``data[4][9].b`` is at ``keccak256(uint256(9) . keccak256(uint256(4) . uint256(1))) + 1``.
+``data[4][9].b`` 的位置将是 ``keccak256(uint256(9) . keccak256(uint256(4) . uint256(1))) + 1``。
 
 .. index: memory layout
 
-****************
-Layout in Memory
-****************
+**********************
+|memory| 中的存储结构
+**********************
 
 Solidity reserves three 256-bit slots:
+Solidity 保留了三个 256 位的插槽：
 
 -  0 - 64: scratch space for hashing methods
 - 64 - 96: currently allocated memory size (aka. free memory pointer)
+-  0 - 63 字节：用于保存方法（函数）哈希的临时空间
+- 64 - 96 字节：当前已分配的 |memory| 大小（又名，空闲 |memory| 指针）
 
 Scratch space can be used between statements (ie. within inline assembly).
+临时空间可以在语句之间使用（即在内联汇编之中）。
 
 Solidity always places new objects at the free memory pointer and memory is never freed (this might change in the future).
+Solidity 总会把新对象保存在空闲 |memory| 指针的位置，所以这段内存实际上从来不会空闲（在未来可能会修改这个机制）。
 
 .. warning::
   There are some operations in Solidity that need a temporary memory area larger than 64 bytes and therefore will not fit into the scratch space. They will be placed where the free memory points to, but given their short lifecycle, the pointer is not updated. The memory may or may not be zeroed out. Because of this, one shouldn't expect the free memory to be zeroed out.
-
+  Solidity 中有一些操作需要大于64字节的临时内存区域，因此这种数据无法保存到临时空间里。它们将被放置在空闲内存指向的位置，但由于这种数据的生命周期较短，这个指针不会即时更新。这部分内存可能会被清零也可能不会。所以我们不应该期望这些所谓的空闲内存总会被清零。
 
 .. index: calldata layout
 
 *******************
-Layout of Call Data
+调用数据存储结构
 *******************
 
 When a Solidity contract is deployed and when it is called from an
 account, the input data is assumed to be in the format in :ref:`the ABI
 specification <ABI>`. The ABI specification requires arguments to be padded to multiples of 32
 bytes.  The internal function calls use a different convention.
+当从一个账户调用已部署的 Solidity 合约时，调用数据的格式被认为会遵循 :ref:`ABI 说明<ABI>`。
+根据 ABI 说明的规定，参数需要被整理为 32 字节的倍数。而内部函数调用会使用不同规则。
 
 
 .. index: variable cleanup
 
 *********************************
-Internals - Cleaning Up Variables
+内部机制 - 清理变量
 *********************************
 
 When a value is shorter than 256-bit, in some cases the remaining bits
@@ -104,46 +136,51 @@ to be cleared because the memory contents can be used for computing
 hashes or sent as the data of a message call.  Similarly, before
 storing a value in the storage, the remaining bits need to be cleaned
 because otherwise the garbled value can be observed.
+如果一个数值不足 256 位，那么在某些情况下，不足的位必须被清除。
+Solidity 编译器设计用于在执行任何操作之前清除这些剩余位中可能会造成不利影响的潜在垃圾。
+例如，因为 |memory| 中的内容可以用于计算散列或作为消息调用的数据发送，所以在向 |memory| 写入数值之前，需要清除剩余的位。
+同样，在向 |storage| 中保存数据之前，剩余的位也需要清除，否则就会看到被混淆的数值。
 
 On the other hand, we do not clean the bits if the immediately
 following operation is not affected.  For instance, since any non-zero
 value is considered ``true`` by ``JUMPI`` instruction, we do not clean
 the boolean values before they are used as the condition for
 ``JUMPI``.
+另一方面，如果接下来的操作不会被影响，那我们就不用清除这些位的数据。例如，因为任何非零值都会被 ``JUMPI`` 指令视为 ``true``，
+所以在布尔数据用做 ``JUMPI`` 的条件之前，我们就不用清除它们。
 
 In addition to the design principle above, the Solidity compiler
 cleans input data when it is loaded onto the stack.
+除了以上设计原理之外，Solidity 编译器在把输入数据加载到堆栈时会对它们进行清除剩余位的处理。
 
 Different types have different rules for cleaning up invalid values:
+不同的数据类型有不同的清除无效值的规则：
 
 +---------------+---------------+-------------------+
-|Type           |Valid Values   |Invalid Values Mean|
+|类型           |合法数值       |无效值会导致       |
 +===============+===============+===================+
-|enum of n      |0 until n - 1  |exception          |
-|members        |               |                   |
+|n 个成员的     |0 到 n - 1     |exception          |
+|enum           |               |                   |
 +---------------+---------------+-------------------+
-|bool           |0 or 1         |1                  |
+|bool           |0 或 1         |1                  |
 +---------------+---------------+-------------------+
-|signed integers|sign-extended  |currently silently |
-|               |word           |wraps; in the      |
-|               |               |future exceptions  |
-|               |               |will be thrown     |
-|               |               |                   |
-|               |               |                   |
+|signed integers|以符号开头的   |目前会直接打包；   |
+|               |字（32字节）   |未来会抛出         |
+|               |               |exception          |
 +---------------+---------------+-------------------+
-|unsigned       |higher bits    |currently silently |
-|integers       |zeroed         |wraps; in the      |
-|               |               |future exceptions  |
-|               |               |will be thrown     |
+|unsigned       |高位补 0       |目前会直接打包；   |
+|integers       |               |未来会抛出         |
+|               |               |exception          |
 +---------------+---------------+-------------------+
 
 .. index:: optimizer, common subexpression elimination, constant propagation
 
 *************************
-Internals - The Optimizer
+内部机制 - 优化器
 *************************
 
 The Solidity optimizer operates on assembly, so it can be and also is used by other languages. It splits the sequence of instructions into basic blocks at ``JUMPs`` and ``JUMPDESTs``. Inside these blocks, the instructions are analysed and every modification to the stack, to memory or storage is recorded as an expression which consists of an instruction and a list of arguments which are essentially pointers to other expressions. The main idea is now to find expressions that are always equal (on every input) and combine them into an expression class. The optimizer first tries to find each new expression in a list of already known expressions. If this does not work, the expression is simplified according to rules like ``constant + constant = sum_of_constants`` or ``X * 1 = X``. Since this is done recursively, we can also apply the latter rule if the second factor is a more complex expression where we know that it will always evaluate to one. Modifications to storage and memory locations have to erase knowledge about storage and memory locations which are not known to be different: If we first write to location x and then to location y and both are input variables, the second could overwrite the first, so we actually do not know what is stored at x after we wrote to y. On the other hand, if a simplification of the expression x - y evaluates to a non-zero constant, we know that we can keep our knowledge about what is stored at x.
+Solidity 优化器是在汇编语言级别工作的，所以它可以并且也被其他语言所使用。它通过 ``JUMP`` 和 ``JUMPDEST`` 语句将指令集序列分割为基础的代码块。在这些代码块内的指令集会被分析，并且对堆栈、内存或存储的每个修改都会被记录为表达式，这些表达式由一个指令和基本上是指向其他表达式的参数列表所组成。现在，主要的想法就是找到始终相等的表达式（在每个输入上）并将它们组合到一个表达式类中。优化器首先尝试在已知的表达式列表中查找每个新表达式。如果这不起作用，表达式会以 ``constant + constant = sum_of_constants`` 或 ``X * 1 = X`` 这样的规则进行简化。由于这是递归完成的，所以在我们知道第二个因子是一个更复杂的表达式，且此表达式总是等于 1 的情况下，也可以应用后一个规则。对存储和内存上某个具体位置的修改必须删除有关存储和内存位置的认知，这里边的区别并不为人所知：如果我们先在 x 位置写入，然后在 y 位置写入，且都是输入变量，则第二个可能会覆盖第一个，所以我们实际上并不知道在写入到 y 位置之后在 x 位置存储了什么。另一方面，如果对表达式 x - y 的简化，其结果为非零常数，那么我们知道我们可以保持关于 x 位置存储内容的认知。
 
 At the end of this process, we know which expressions have to be on the stack in the end and have a list of modifications to memory and storage. This information is stored together with the basic blocks and is used to link them. Furthermore, knowledge about the stack, storage and memory configuration is forwarded to the next block(s). If we know the targets of all ``JUMP`` and ``JUMPI`` instructions, we can build a complete control flow graph of the program. If there is only one target we do not know (this can happen as in principle, jump targets can be computed from inputs), we have to erase all knowledge about the input state of a block as it can be the target of the unknown ``JUMP``. If a ``JUMPI`` is found whose condition evaluates to a constant, it is transformed to an unconditional jump.
 
