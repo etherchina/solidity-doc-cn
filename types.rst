@@ -58,22 +58,10 @@ Solidity 提供了几种基本类型，可以用来组合出复杂类型。
 
 除以零或者模零运算都会引发运行时异常。
 
-The result of a shift operation is the type of the left operand. The
-expression ``x << y`` is equivalent to ``x * 2**y``, and ``x >> y`` is
-equivalent to ``x / 2**y``. This means that shifting negative numbers
-sign extends. Shifting by a negative amount throws a runtime exception.
-
 移位运算的结果取决于运算符左边的类型。
 表达式 ``x << y`` 与 ``x * 2**y`` 是等价的，
 ``x >> y`` 与 ``x / 2**y``是等价的。这意味着将负数符号转移。
 按负数位移动会引发运行时异常。
-
-
-.. warning::
-    The results produced by shift right of negative values of signed integer types is different from those produced
-    by other programming languages. In Solidity, shift right maps to division so the shifted negative values
-    are going to be rounded towards zero (truncated). In other programming languages the shift right of negative values
-    works like division with rounding down (towards negative infinity).
 
 ·· warning::
    由有符号整数类型负值右移所产生的结果跟其它语言中所产生的结果是不同的。
@@ -82,41 +70,22 @@ sign extends. Shifting by a negative amount throws a runtime exception.
 
 .. index:: ! ufixed, ! fixed, ! fixed point number
 
-Fixed Point Numbers 定长浮点型
--------------------
-
-.. warning::
-    Fixed point numbers are not fully supported by Solidity yet. They can be declared, but
-    cannot be assigned to or from.
+定长浮点型
+--------
 
 .. warning::
     Solidity 还没有完全支持定长浮点型。可以声明定长浮点型的变量，但不能给它们赋值。
 
-``fixed`` / ``ufixed``: Signed and unsigned fixed point number of various sizes. Keywords ``ufixedMxN`` and ``fixedMxN``, where ``M`` represents the number of bits taken by
-the type and ``N`` represents how many decimal points are available. ``M`` must be divisible by 8 and goes from 8 to 256 bits. ``N`` must be between 0 and 80, inclusive.
-``ufixed`` and ``fixed`` are aliases for ``ufixed128x19`` and ``fixed128x19``, respectively.
-
 ``fixed`` / ``ufixed``：表示各种大小的有符号和无符号的定长浮点型。
-在关键词 ``ufixedMxN`` 和 ``fixedMxN`` 中，``M`` 表示该类型占用的位数，``N``表示可用的十进制长度。
+在关键词 ``ufixedMxN`` 和 ``fixedMxN`` 中，``M`` 表示该类型占用的位数，``N`` 表示可用的十进制长度。
 ``M`` 必须能整除 8，表示范围从 8 到 256 的位数。
 ``N`` 则可以是从 0 到 80 之间的任意数。
-``ufixed`` 和 ``fixed`` 分别是 ``ufixed128x19`` 和 ``fixed128x19`` 的别名。
-
-Operators:
+``ufixed`` 和 ``fixed`` 分别代表 ``ufixed128x19`` 和 ``fixed128x19``。
 
 运算符：
 
-* Comparisons: ``<=``, ``<``, ``==``, ``!=``, ``>=``, ``>`` (evaluate to ``bool``)
-* Arithmetic operators: ``+``, ``-``, unary ``-``, unary ``+``, ``*``, ``/``, ``%`` (remainder)
-
 * 比较运算符：``<=``， ``<``， ``==``， ``!=``， ``>=``， ``>`` （返回值是布尔型）
 * 算术运算符：``+``， ``-``， 一元运算 ``-``， 一元运算 ``+``， ``*``， ``/``， ``%`` （取余数）
-
-.. note::
-    The main difference between floating point (``float`` and ``double`` in many languages, more precisely IEEE 754 numbers) and fixed point numbers is
-    that the number of bits used for the integer and the fractional part (the part after the decimal dot) is flexible in the former, while it is strictly
-    defined in the latter. Generally, in floating point almost the entire space is used to represent the number, while only a small number of bits define
-    where the decimal point is.
 
 .. note::
     浮点型（在许多语言中的 ``float`` 和 ``double`` 类型，更准确地说是 IEEE 754 类型）和定长浮点型之间最大的不同点是，
@@ -127,44 +96,27 @@ Operators:
 
 .. _address:
 
-Address 地址型
--------
-
-``address``: Holds a 20 byte value (size of an Ethereum address). Address types also have members and serve as a base for all contracts.
+地址型
+-----
 
 ``address``：地址型存储一个 20 字节的值（以太坊地址的大小）。
 地址型也有成员变量，并作为所有合约的基础。
 
-Operators:
-
 运算符：
-
-* ``<=``, ``<``, ``==``, ``!=``, ``>=`` and ``>``
 
 * ``<=``， ``<``， ``==``， ``!=``， ``>=`` 和 ``>``
 
 .. note::
-    Starting with version 0.5.0 contracts do not derive from the address type, but can still be explicitly converted to address.
-
-.. note::
-    从0.5.0版本开始，合约不会从地址型派生，但仍然可以明确地转换成地址型。
+    从 0.5.0 版本开始，合约不会从地址型派生，但仍然可以显式地转换成地址型。
 
 .. _members-of-addresses:
 
-Members of Addresses 地址成员变量
-^^^^^^^^^^^^^^^^^^^^
-
-* ``balance`` and ``transfer``
+地址类型成员变量
+^^^^^^^^^^^^^
 
 * ``balance`` 和 ``transfer``
 
-For a quick reference, see :ref:`address_related`.
-
 快速参考，请见 :ref:`address_related`。
-
-
-It is possible to query the balance of an address using the property ``balance``
-and to send Ether (in units of wei) to an address using the ``transfer`` function:
 
 可以使用 ``balance`` 属性来查询一个地址的余额，
 也可以使用 ``transfer`` 函数向一个地址发送 |ether| （以 wei 为单位）：
@@ -176,37 +128,19 @@ and to send Ether (in units of wei) to an address using the ``transfer`` functio
     if (x.balance < 10 && myAddress.balance >= 10) x.transfer(10);
 
 .. note::
-    If ``x`` is a contract address, its code (more specifically: its fallback function, if present) will be executed together with the ``transfer`` call (this is a feature of the EVM and cannot be prevented).
-    If that execution runs out of gas or fails in any way, the Ether transfer will be reverted and the current contract will stop with an exception.
-
-.. note::
-    如果 ``x`` 是一个合约地址，它的代码（具体来说是它的 fallback 函数，如果有的话）会跟 ``transfer`` 函数调用一起执行（这是 EVM 的一个特性，无法改变）。
+    如果 ``x`` 是一个合约地址，它的代码（更具体来说是它的 fallback 函数，如果有的话）会跟 ``transfer`` 函数调用一起执行（这是 EVM 的一个特性，无法阻止）。
     如果在执行过程中用光了 gas 或者因为任何原因执行失败，|ether| 交易会被打回，当前的合约也会在终止的同时抛出异常。
 
 * ``send``
 
-Send is the low-level counterpart of ``transfer``. If the execution fails, the current contract will not stop with an exception, but ``send`` will return ``false``.
-
-``send`` 是比 ``transfer`` 低级一点的函数。如果执行失败，当前的合约在终止时不会抛出异常，但 ``send`` 会返回 ``false``。
-
-.. warning::
-    There are some dangers in using ``send``: The transfer fails if the call stack depth is at 1024
-    (this can always be forced by the caller) and it also fails if the recipient runs out of gas. So in order
-    to make safe Ether transfers, always check the return value of ``send``, use ``transfer`` or even better:
-    use a pattern where the recipient withdraws the money.
+``send`` 是 ``transfer`` 的低级版本。如果执行失败，当前的合约在终止时不会抛出异常，但 ``send`` 会返回 ``false``。
 
 .. warning::
     在使用 ``send`` 的时候会有些风险：如果调用栈深度是 1024 会导致发送失败（这总是可以被调用者强制），如果接收者用光了 gas 也会导致发送失败。
-    所以为了保证 |ether| 发送的安全，一定要检查 ``send`` 的返回值，使用 ``transfer`` 或者更好地办法：
+    所以为了保证 |ether| 发送的安全，一定要检查 ``send`` 的返回值，使用 ``transfer`` 或者更好的办法：
     使用一种接收者可以取回资金的模式。
 
-* ``call``, ``callcode`` and ``delegatecall``
-
 * ``call``， ``callcode`` 和 ``delegatecall``
-
-Furthermore, to interface with contracts that do not adhere to the ABI,
-the function ``call`` is provided which takes an arbitrary number of arguments of any type. These arguments are padded to 32 bytes and concatenated.
-One exception is the case where the first argument is encoded to exactly four bytes. In this case, it is not padded to allow the use of function signatures here.
 
 此外，为了与不符合 |ABI| 的合约交互，于是就有了可以接受任意类型任意数量参数的 ``call`` 函数。
 这些参数连接在一起填充在 32 字节的空间里。
@@ -219,25 +153,10 @@ One exception is the case where the first argument is encoded to exactly four by
     nameReg.call("register", "MyName");
     nameReg.call(bytes4(keccak256("fun(uint256)")), a);
 
-``call`` returns a boolean indicating whether the invoked function terminated (``true``) or caused an EVM exception (``false``).
-It is not possible to access the actual data returned (for this we would need to know the encoding and size in advance).
-
-``call`` 返回的布尔值表明了被调用的函数已经执行完毕（``true``）或者引发了一个 EVM 异常（``false``）规则。
+``call`` 返回的布尔值表明了被调用的函数已经执行完毕（``true``）或者引发了一个 EVM 异常（``false``）。
 无法访问返回的真实数据（为此我们需要事先知道编码和大小）。
 
-It is possible to adjust the supplied gas with the ``.gas()`` modifier::
-
-    namReg.call.gas(1000000)("register", "MyName");
-
-Similarly, the supplied Ether value can be controlled too::
-
-    nameReg.call.value(1 ether)("register", "MyName");
-
-Lastly, these modifiers can be combined. Their order does not matter::
-
-    nameReg.call.gas(1000000).value(1 ether)("register", "MyName");
-
-可以使用 ``.gas()`` 修饰器调整提供的 gas 数量 ::
+可以使用 ``.gas()`` 修改器调整提供的 gas 数量 ::
 
     namReg.call.gas(1000000)("register", "MyName");
 
@@ -245,7 +164,7 @@ Lastly, these modifiers can be combined. Their order does not matter::
 
    nameReg.call.value(1 ether)("register", "MyName"); 
 
-最后一点，这些修饰器可以联合使用。每个修改器出现的顺序不重要 ::
+最后一点，这些修改器可以联合使用。每个修改器出现的顺序不重要 ::
 
    nameReg.call.gas(1000000).value(1 ether)("register", "MyName"); 
 
@@ -260,51 +179,32 @@ Lastly, these modifiers can be combined. Their order does not matter::
 
     一种解决方案是给 gas 和值引入一个特例，并重新检查它们是否在重载的地方出现。
 
-In a similar way, the function ``delegatecall`` can be used:
-the difference is that only the code of the given address is used, all other aspects (storage, balance, ...) are taken from the current contract.
-The purpose of ``delegatecall`` is to use library code which is stored in another contract.
-The user has to ensure that the layout of storage in both contracts is suitable for delegatecall to be used.
-Prior to homestead, only a limited variant called ``callcode`` was available that did not provide access to the original ``msg.sender`` and ``msg.value`` values.
-
 类似地，也可以使用 ``delegatecall``：
 区别在于只使用给定地址的代码，其它属性（存储，余额，……）都取自当前合约。
 ``delegatecall`` 的目的是使用存储在另外一个合约中的库代码。
 用户必须确保两个合约中存储的分布适合使用 delegatecall。
-在 homestead 版本之前，只有一个功能类似但有限的叫作 ``callcode ``的函数可用，但使用它并不能访问 ``msg.sender`` 和 ``msg.value`` 的原始值。
-
-All three functions ``call``, ``delegatecall`` and ``callcode`` are very low-level functions and should only be used as a *last resort* as they break the type-safety of Solidity.
+在 homestead 版本之前，只有一个功能类似但有限的叫作 ``callcode`` 的函数可用，但使用它并不能访问 ``msg.sender`` 和 ``msg.value`` 的原始值。
 
 这三个函数 ``call``， ``delegatecall`` 和 ``callcode`` 都是非常低级的函数，应该只把它们当作 *最后一招* 来使用，因为它们破坏了 Solitity 的类型安全性。
-
-The ``.gas()`` option is available on all three methods, while the ``.value()`` option is not supported for ``delegatecall``.
 
 尽管 ``.value()`` 选项不支持 ``delegatecall``，但三种方法都有 ``.gas()`` 选项。
 
 .. note::
-    All contracts inherit the members of address, so it is possible to query the balance of the
-    current contract using ``this.balance``.
-    所有合约都集成地址类型的所有成员变量，因此可以使用 ``this.balance`` 访问当前合约的余额。
+    所有合约都集成地址类型的所有成员变量，因此可以使用 ``this.balance`` 查询当前合约的余额。
 
 .. note::
-    The use of ``callcode`` is discouraged and will be removed in the future.
     不鼓励使用 ``callcode``，在未来也会将其移除。
 
-
 .. warning::
-    All these functions are low-level functions and should be used with care.
-    Specifically, any unknown contract might be malicious and if you call it, you
-    hand over control to that contract which could in turn call back into
-    your contract, so be prepared for changes to your state variables
-    when the call returns.
     这三个函数都属于低级函数，需要谨慎使用。
     具体来说，任何未知的合约都可能是恶意的。
     你在调用一个合约的同时就将控制权交给了它，它可以反过来调用你的合约，
-    因此，当调用返回时准备好改变你的状态变量。
+    因此，当调用返回时要为你的状态变量的改变做好准备。
 
 .. index:: byte array, bytes32
 
-Fixed-size byte arrays 定长字节数组
-----------------------
+定长字节数组
+----------
 
 ``bytes1``, ``bytes2``, ``bytes3``, ..., ``bytes32``. ``byte`` is an alias for ``bytes1``.
 
