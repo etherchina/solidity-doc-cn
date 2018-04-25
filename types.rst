@@ -206,56 +206,34 @@ Solidity 提供了几种基本类型，可以用来组合出复杂类型。
 定长字节数组
 ----------
 
-``bytes1``, ``bytes2``, ``bytes3``, ..., ``bytes32``. ``byte`` is an alias for ``bytes1``.
-
-关键词有：``bytes1``， ``bytes2``， ``bytes3``， ...， ``bytes32``。``byte`` 是 ``bytes1`` 的别名。
-
-Operators:
+关键词有：``bytes1``， ``bytes2``， ``bytes3``， ...， ``bytes32``。``byte`` 代表 ``bytes1``。
 
 运算符：
 
-* Comparisons: ``<=``, ``<``, ``==``, ``!=``, ``>=``, ``>`` (evaluate to ``bool``)
-* Bit operators: ``&``, ``|``, ``^`` (bitwise exclusive or), ``~`` (bitwise negation), ``<<`` (left shift), ``>>`` (right shift)
 * Index access: If ``x`` is of type ``bytesI``, then ``x[k]`` for ``0 <= k < I`` returns the ``k`` th byte (read-only).
 
 * 比较运算符：``<=``， ``<``， ``==``， ``!=``， ``>=``， ``>`` （返回布尔型）
 * 位运算符： ``&``， ``|``， ``^`` （按位异或）， ``~`` （按位取反）， ``<<`` （左移位）， ``>>`` （右移位）
-* 索引访问：如果 ``x`` 是 ``bytesI`` 类型，那么 ``x[k]`` 且 ``0 <= k < I`` 返回第 ``k`` 个字节（只读）。
-
-The shifting operator works with any integer type as right operand (but will
-return the type of the left operand), which denotes the number of bits to shift by.
-Shifting by a negative amount will cause a runtime exception.
+* 索引访问：如果 ``x`` 是 ``bytesI`` 类型，那么 ``x[k]``（其中 ``0 <= k < I``）返回第 ``k`` 个字节（只读）。
 
 该类型可以和作为右操作数的任何整数类型进行移位运算（但返回结果的类型和左操作数类型相同），右操作数表示需要移动的位数。
 进行负数位移运算会引发运行时异常。
 
-Members:
-
 成员变量：
-
-* ``.length`` yields the fixed length of the byte array (read-only).
 
 * ``.length`` 表示这个字节数组的长度（只读）.
 
 .. note::
-    It is possible to use an array of bytes as ``byte[]``, but it is wasting a lot of space, 31 bytes every element,
-    to be exact, when passing in calls. It is better to use ``bytes``.
     可以将 ``byte[]`` 当作字节数组使用，但这种方式非常浪费存储空间，准确来说，是在传入调用时，每个元素占 31 字节。
     更好地做法是使用 ``bytes``。
 
-Dynamically-sized byte array 变长字节数组
-----------------------------
+变长字节数组
+----------
 
 ``bytes``:
-    Dynamically-sized byte array, see :ref:`arrays`. Not a value-type!
-    变长字节数组，参见 :ref:`arrays`，并不是值类型。
+    变长字节数组，参见 :ref:`arrays`。它并不是值类型。
 ``string``:
-    Dynamically-sized UTF-8-encoded string, see :ref:`arrays`. Not a value-type!
-    变长 UTF-8 编码字符串类型，参见 :ref:`arrays`，并不是值类型。
-
-As a rule of thumb, use ``bytes`` for arbitrary-length raw byte data and ``string``
-for arbitrary-length string (UTF-8) data. If you can limit the length to a certain
-number of bytes, always use one of ``bytes1`` to ``bytes32`` because they are much cheaper.
+    变长 UTF-8 编码字符串类型，参见 :ref:`arrays`。并不是值类型。
 
 根据经验，最好使用 ``bytes`` 存储任意长度的原始字节数据，使用 ``string`` 存储任意长度的字符串（UTF-8编码）数据。
 如果长度可以确定，尽量使用 ``bytes1`` 到 ``bytes32`` 中的一个，因为它们的开销小得多。
@@ -264,23 +242,16 @@ number of bytes, always use one of ``bytes1`` to ``bytes32`` because they are mu
 
 .. _address_literals:
 
-Address Literals 地址常量（Address Literals）
-----------------
+地址常量（Address Literals）
+-------------------------
 
 .. note::
     ``literal``也被译作“字面量”。下文统一译作“常量”
 
-Hexadecimal literals that pass the address checksum test, for example
-``0xdCad3a6d3569DF655070DEd06cb7A1b2Ccd1D3AF`` are of ``address`` type.
-Hexadecimal literals that are between 39 and 41 digits
-long and do not pass the checksum test produce
-a warning and are treated as regular rational number literals.
-
 比如像 ``0xdCad3a6d3569DF655070DEd06cb7A1b2Ccd1D3AF`` 这样的通过了地址校验和测试的十六进制常量属于 ``address`` 类型。
-长度在 39 到 41 个数字的，没有通过校验和测试而产生了一个警告的十六进制常量被当做正常的有理数常量。
+长度在 39 到 41 个数字的，没有通过校验和测试而产生了一个警告的十六进制常量视为正常的有理数常量。
 
 .. note::
-    The mixed-case address checksum format is defined in `EIP-55 <https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md>`_.
     混合大小写的地址校验和格式定义在 `EIP-55 <https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md>`_ 中。
 
 
@@ -288,74 +259,38 @@ a warning and are treated as regular rational number literals.
 
 .. _rational_literals:
 
-Rational and Integer Literals 有理数和整数常量
------------------------------
-
-Integer literals are formed from a sequence of numbers in the range 0-9.
-They are interpreted as decimals. For example, ``69`` means sixty nine.
-Octal literals do not exist in Solidity and leading zeros are invalid.
+有理数和整数常量
+-------------
 
 整数常量由范围在 0-9 的一串数字组成，表现成十进制。
-例如，`69` 表示数字六十九。
+例如，`69` 表示数字 69。
 Solidity 中是没有八进制的，因此前置 0 是无效的。
-
-Decimal fraction literals are formed by a ``.`` with at least one number on
-one side.  Examples include ``1.``, ``.1`` and ``1.3``.
 
 十进制小数常量带有一个 ``.``，至少在其一边会有一个数字。
 有效的事例如：``1.``，``.1``，和 ``1.3``。
 
-Scientific notation is also supported, where the base can have fractions, while the exponent cannot.
-Examples include ``2e10``, ``-2e10``, ``2e-10``, ``2.5e1``.
-
 科学符号也是支持的，尽管指数必须是整数，但基数可以是小数。
 有效的事例如：``2e10``， ``-2e10``， ``2e-10``， ``2.5e1``。
-
-Number literal expressions retain arbitrary precision until they are converted to a non-literal type (i.e. by
-using them together with a non-literal expression).
-This means that computations do not overflow and divisions do not truncate
-in number literal expressions.
 
 数值常量表达式本身支持任意精度，除非它们被转换成了非常量类型（例如，当它们出现在非常量表达式中时就会发生转换）。
 这意味着在数值常量表达式中计算时不会出现溢出或除法截断。
 
-For example, ``(2**800 + 1) - 2**800`` results in the constant ``1`` (of type ``uint8``)
-although intermediate results would not even fit the machine word size. Furthermore, ``.5 * 8`` results
-in the integer ``4`` (although non-integers were used in between).
-
 例如，``(2**800 + 1) - 2**800`` 的结果是常量 ``1``（属于 ``uint8`` 类型），尽管计算的中间结果已经超过了计算机字长。
 此外， ``.5 * 8`` 的结果是整型 ``4``（尽管有非整型参与了计算）。
-
-Any operator that can be applied to integers can also be applied to number literal expressions as
-long as the operands are integers. If any of the two is fractional, bit operations are disallowed
-and exponentiation is disallowed if the exponent is fractional (because that might result in
-a non-rational number).
 
 只要操作数是整型，任意整型支持的运算符都可以被运用在数值常量表达式中。
 如果两个中的任一个数是小数，则不允许进行位运算。如果指数是小数的话，也不支持幂运算（因为这样可能会得到一个无理数）。
 
 .. note::
-    Solidity has a number literal type for each rational number.
-    Integer literals and rational number literals belong to number literal types.
-    Moreover, all number literal expressions (i.e. the expressions that
-    contain only number literals and operators) belong to number literal
-    types.  So the number literal expressions ``1 + 2`` and ``2 + 1`` both
-    belong to the same number literal type for the rational number three.
     Solidity 对每个有理数都有对应的数值常量类型。
     整数常量和有理数常量都属于数值常量类型。
     除此之外，所有的数值常量表达式（即只包含数值常量和运算符的表达式）都属于数值常量类型。
     因此数值常量表达式 ``1 + 2`` 和 ``2 + 1`` 的结果跟有理数三的数值常量类型相同。
 
 .. warning::
-    Division on integer literals used to truncate in earlier versions, but it will now convert into a rational number, i.e. ``5 / 2`` is not equal to ``2``, but to ``2.5``.
     在早期版本中，整数常量的除法也会截断，但在现在的版本中，会将结果转换成一个有理数。例如 ``5 / 2`` 并不等于 ``2``，而是等于 ``2.5``。
 
 .. note::
-    Number literal expressions are converted into a non-literal type as soon as they are used with non-literal
-    expressions. Even though we know that the value of the
-    expression assigned to ``b`` in the following example evaluates to
-    an integer, but the partial expression ``2.5 + a`` does not type check so the code
-    does not compile
     数值常量表达式只要在非常量表达式中使用就会转换成非常量类型。
     在下面的例子中，尽管我们知道 ``b`` 的值是一个整数，但 ``2.5 + a`` 这部分表达式并不进行类型检查，因此编译不能通过。
 
@@ -366,35 +301,23 @@ a non-rational number).
 
 .. index:: literal, literal;string, string
 
-String Literals 字符串常量
----------------
-
-String literals are written with either double or single-quotes (``"foo"`` or ``'bar'``).
-They do not imply trailing zeroes as in C; ``"foo"`` represents three bytes not four.
-As with integer literals, their type can vary, but they are implicitly convertible to ``bytes1``, ..., ``bytes32``, if they fit, to ``bytes`` and to ``string``.
+字符串常量
+--------
 
 字符串常量是指由双引号或单引号引起来的字符串（``"foo"`` 或者 ``'bar'``）。
 不像在 C 语言中那样带有结束符；``"foo"`` 表示 3 个字节而不是 4 个。
-
-String literals support escape characters, such as ``\n``, ``\xNN`` and ``\uNNNN``.
-``\xNN`` takes a hex value and inserts the appropriate byte,
-while ``\uNNNN`` takes a Unicode codepoint and inserts an UTF-8 sequence.
+和整数常量一样，字符串常量的类型也可以发生改变，但它们可以隐式地转换成 ``bytes1``，……，``bytes32``，如果合适的话，还可以转换成 ``bytes`` 以及 ``string``。
 
 字符串常量支持转义字符，例如 ``\n``，``\xNN`` 和 ``\uNNNN``。``\xNN`` 表示一个 16 进制值，最终转换成合适的字节，
 而 ``\uNNNN`` 表示 Unicode 编码值，最终会转换为 UTF-8 的序列。
 
 .. index:: literal, bytes
 
-Hexadecimal Literals 十六进制常量
---------------------
-
-Hexademical Literals are prefixed with the keyword ``hex`` and are enclosed in double or single-quotes (``hex"001122FF"``).
-Their content must be a hexadecimal string and their value will be the binary representation of those values.
+十六进制常量
+----------
 
 十六进制常量以关键字 ``hex`` 打头，后面紧跟着用单引号或双引号引起来的字符串（例如，``hex"001122FF"``）。
-字符串的内容必须是一个十六进制的字符串，它的值将使用二进制表示。
-
-Hexademical Literals behave like String Literals and have the same convertibility restrictions.
+字符串的内容必须是一个十六进制的字符串，它们的值将使用二进制表示。
 
 十六进制常量跟字符串常量很类似，具有相同的转换规则。
 
@@ -402,12 +325,8 @@ Hexademical Literals behave like String Literals and have the same convertibilit
 
 .. _enums:
 
-Enums 枚举类型
------
-
-Enums are one way to create a user-defined type in Solidity. They are explicitly convertible
-to and from all integer types but implicit conversion is not allowed.  The explicit conversions
-check the value ranges at runtime and a failure causes an exception.  Enums needs at least one member.
+枚举类型
+-------
 
 在 Solidity 中，枚举类型可以用来创建自定义类型。
 它可以显式地与整数类型进行转换，但不能隐式转换。
@@ -427,14 +346,8 @@ check the value ranges at runtime and a failure causes an exception.  Enums need
             choice = ActionChoices.GoStraight;
         }
 
-        // Since enum types are not part of the ABI, the signature of "getChoice"
-        // will automatically be changed to "getChoice() returns (uint8)"
-        // for all matters external to Solidity. The integer type used is just
-        // large enough to hold all enum values, i.e. if you have more values,
-        // `uint16` will be used and so on.
-
         // 由于枚举类型不属于 |ABI| 的一部分，因此对于所有来自 Solidity 外部的调用，
-        // "getCoice" 的签名会自动被改成 "getChoice() returns (uint8)"。
+        // "getChoice" 的签名会自动被改成 "getChoice() returns (uint8)"。
         // 整数类型的大小已经足够存储所有枚举类型的值，随着值的个数增加，
         // 可以逐渐使用 `uint16` 或更大的整数类型。
         function getChoice() public view returns (ActionChoices) {
@@ -450,81 +363,37 @@ check the value ranges at runtime and a failure causes an exception.  Enums need
 
 .. _function_types:
 
-Function Types 函数类型
---------------
-
-Function types are the types of functions. Variables of function type
-can be assigned from functions and function parameters of function type
-can be used to pass functions to and return functions from function calls.
-Function types come in two flavours - *internal* and *external* functions:
+函数类型
+-------
 
 函数类型是一种表示函数的类型。可以将一个函数赋值给另一个函数类型的变量，也可以将一个函数作为参数进行传递，还能在函数调用中返回函数类型变量。
 函数类型有两类：- *内部（internal）* 函数和 *外部（external）* 函数：
 
-Internal functions can only be called inside the current contract (more specifically,
-inside the current code unit, which also includes internal library functions
-and inherited functions) because they cannot be executed outside of the
-context of the current contract. Calling an internal function is realized
-by jumping to its entry label, just like when calling a function of the current
-contract internally.
-
 内部函数只能在当前合约内被调用（更具体来说，在当前代码块内，包括内部库函数和继承的函数中），因为它们不能在当前合约上下文的外部被执行。
 调用一个内部函数是通过跳转到它的入口标签来实现的，就像在当前合约的内部调用一个函数。
 
-External functions consist of an address and a function signature and they can
-be passed via and returned from external function calls.
-
 外部函数由一个地址和一个函数签名组成，可以通过外部函数调用传递或者返回。
-
-Function types are notated as follows::
 
 函数类型表示成如下的形式 ::
 
     function (<parameter types>) {internal|external} [pure|constant|view|payable] [returns (<return types>)]
 
-In contrast to the parameter types, the return types cannot be empty - if the
-function type should not return anything, the whole ``returns (<return types>)``
-part has to be omitted.
-
 与参数类型相比，返回类型不能为空 —— 如果函数类型不需要返回，则需要删除整个 ``returns (<return types>)`` 部分。
-
-By default, function types are internal, so the ``internal`` keyword can be
-omitted. In contrast, contract functions themselves are public by default,
-only when used as the name of a type, the default is internal.
 
 函数类型默认是内部函数，因此不需要声明 ``internal`` 关键词。
 与此相反的是，合约中的函数本身默认是 public 的，只有当它被当做类型名称时，默认才是内部函数。
 
-There are two ways to access a function in the current contract: Either directly
-by its name, ``f``, or using ``this.f``. The former will result in an internal
-function, the latter in an external function.
-
 有两种方法可以访问当前合约中的函数：其中一种方法是直接使用它的名字，``f``，另一种方法是使用 ``this.f``。
 前者适用于内部函数，后者适用于外部函数。
-
-If a function type variable is not initialized, calling it will result
-in an exception. The same happens if you call a function after using ``delete``
-on it.
 
 如果当函数类型的变量还没有初始化时就调用它的话会引发一个异常。
 如果在一个函数被 ``delete`` 之后调用它也会发生相同的情况。
 
-If external function types are used outside of the context of Solidity,
-they are treated as the ``function`` type, which encodes the address
-followed by the function identifier together in a single ``bytes24`` type.
-
-如果外部函数类型在 Solidity 的上下文环境意外的地方使用，它们会被视为 ``function`` 类型。
+如果外部函数类型在 Solidity 的上下文环境以外的地方使用，它们会被视为 ``function`` 类型。
 该类型将函数所在地址及其函数标识一起编码为一个 ``bytes24`` 类型。
-
-Note that public functions of the current contract can be used both as an
-internal and as an external function. To use ``f`` as an internal function,
-just use ``f``, if you want to use its external form, use ``this.f``.
 
 请注意，当前合约的 public 函数既可以被当作内部函数也可以被当作外部函数使用。
 如果想将一个函数当作内部函数使用，就用 ``f``调用，如果想将其当作外部函数，使用 ``this.f``。
-
-Additionally, public (or external) functions also have a special member called ``selector``,
-which returns the :ref:`ABI function selector <abi_function_selector>`::
 
 除此之外，public（或外部）函数也有一个特殊的成员变量称作 ``selector``，可以返回 :ref:`ABI 函数选择器 <abi_function_selector>`::
 
@@ -536,15 +405,11 @@ which returns the :ref:`ABI function selector <abi_function_selector>`::
       }
     }
 
-Example that shows how to use internal function types::
-
 如果使用内部函数类型的例子::
 
     pragma solidity ^0.4.16;
 
     library ArrayUtils {
-      // internal functions can be used in internal library functions because
-      // they will be part of the same code context
       // 内部函数可以在内部库函数中使用，
       // 因为它们会成为同一代码上下文的一部分
       function map(uint[] memory self, function (uint) pure returns (uint) f)
@@ -591,8 +456,6 @@ Example that shows how to use internal function types::
       }
     }
 
-Another example that uses external function types::
-
 另外一个使用外部函数类型的例子::
 
     pragma solidity ^0.4.11;
@@ -609,7 +472,6 @@ Another example that uses external function types::
         NewRequest(requests.length - 1);
       }
       function reply(uint requestID, bytes response) public {
-        // Here goes the check that the reply comes from a trusted source
         // 这里要验证 reply 来自可信的源
         requests[requestID].callback(response);
       }
@@ -622,13 +484,11 @@ Another example that uses external function types::
       }
       function oracleResponse(bytes response) public {
         require(msg.sender == address(oracle));
-        // Use the data
         // 使用数据
       }
     }
 
 .. note::
-    Lambda or inline functions are planned but not yet supported.
     Lambda 表达式或者内联函数的引入在计划内，但目前还没支持。
 
 .. index:: ! type;reference, ! reference type, storage, memory, location, array, struct
