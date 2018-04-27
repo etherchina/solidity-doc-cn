@@ -27,7 +27,7 @@ Statically-sized variables (everything except mapping and dynamically-sized arra
     This is because the EVM operates on 32 bytes at a time. Therefore, if the element is smaller
     than that, the EVM must use more operations in order to reduce the size of the element from 32
     bytes to the desired size.
-    使用小于 32 字节的元素时，你的合约的 gas 使用量可能高于使用 32 字节的元素时。这是因为 |evm| 每次会操作32个字节，
+    使用小于 32 字节的元素时，你的合约的 gas 使用量可能高于使用 32 字节的元素时。这是因为 |evm| 每次会操作 32 个字节，
     所以如果元素比 32 字节小，|evm| 必须使用更多的操作才能将其大小缩减到到所需的大小。
 
     It is only beneficial to use reduced-size arguments if you are dealing with storage values
@@ -51,7 +51,7 @@ The elements of structs and arrays are stored after each other, just as if they 
 
 Due to their unpredictable size, mapping and dynamically-sized array types use a Keccak-256 hash
 computation to find the starting position of the value or the array data. These starting positions are always full stack slots.
-由于 |mapping| 和动态数组的大小是不可预知的，所以我们使用Keccak-256哈希计算来找到具体数值或数组数据的起始位置。
+由于 |mapping| 和动态数组的大小是不可预知的，所以我们使用 Keccak-256 哈希计算来找到具体数值或数组数据的起始位置。
 这些起始位置本身的数值总是会占满堆栈插槽。
 
 The mapping or the dynamic array itself
@@ -105,7 +105,7 @@ Solidity 总会把新对象保存在空闲 |memory| 指针的位置，所以这�
 
 .. warning::
   There are some operations in Solidity that need a temporary memory area larger than 64 bytes and therefore will not fit into the scratch space. They will be placed where the free memory points to, but given their short lifecycle, the pointer is not updated. The memory may or may not be zeroed out. Because of this, one shouldn't expect the free memory to be zeroed out.
-  Solidity 中有一些操作需要大于64字节的临时内存区域，因此这种数据无法保存到临时空间里。它们将被放置在空闲内存指向的位置，但由于这种数据的生命周期较短，这个指针不会即时更新。这部分内存可能会被清零也可能不会。所以我们不应该期望这些所谓的空闲内存总会被清零。
+  Solidity 中有一些操作需要大于 64 字节的临时内存区域，因此这种数据无法保存到临时空间里。它们将被放置在空闲内存指向的位置，但由于这种数据的生命周期较短，这个指针不会即时更新。这部分内存可能会被清零也可能不会。所以我们不应该期望这些所谓的空闲内存总会被清零。
 
 .. index: calldata layout
 
@@ -183,10 +183,13 @@ The Solidity optimizer operates on assembly, so it can be and also is used by ot
 Solidity 优化器是在汇编语言级别工作的，所以它可以并且也被其他语言所使用。它通过 ``JUMP`` 和 ``JUMPDEST`` 语句将指令集序列分割为基础的代码块。在这些代码块内的指令集会被分析，并且对堆栈、内存或存储的每个修改都会被记录为表达式，这些表达式由一个指令和基本上是指向其他表达式的参数列表所组成。现在，主要的想法就是找到始终相等的表达式（在每个输入上）并将它们组合到一个表达式类中。优化器首先尝试在已知的表达式列表中查找每个新表达式。如果这不起作用，表达式会以 ``constant + constant = sum_of_constants`` 或 ``X * 1 = X`` 这样的规则进行简化。由于这是递归完成的，所以在我们知道第二个因子是一个更复杂的表达式，且此表达式总是等于 1 的情况下，也可以应用后一个规则。对存储和内存上某个具体位置的修改必须删除有关存储和内存位置的认知，这里边的区别并不为人所知：如果我们先在 x 位置写入，然后在 y 位置写入，且都是输入变量，则第二个可能会覆盖第一个，所以我们实际上并不知道在写入到 y 位置之后在 x 位置存储了什么。另一方面，如果对表达式 x - y 的简化，其结果为非零常数，那么我们知道我们可以保持关于 x 位置存储内容的认知。
 
 At the end of this process, we know which expressions have to be on the stack in the end and have a list of modifications to memory and storage. This information is stored together with the basic blocks and is used to link them. Furthermore, knowledge about the stack, storage and memory configuration is forwarded to the next block(s). If we know the targets of all ``JUMP`` and ``JUMPI`` instructions, we can build a complete control flow graph of the program. If there is only one target we do not know (this can happen as in principle, jump targets can be computed from inputs), we have to erase all knowledge about the input state of a block as it can be the target of the unknown ``JUMP``. If a ``JUMPI`` is found whose condition evaluates to a constant, it is transformed to an unconditional jump.
+在这个过程结束时，我们会知道最后哪些表达式必须在栈上，并且会得到一个修改内存和存储的列表。该信息与基本代码块一起存储并用来链接它们。此外，关于栈、存储和内存的配置信息会被转发到下一个代码块。如果我们知道所有 ``JUMP`` 和 ``JUMPI`` 指令的目标，我们就可以构建一个完整的程序流程图。 如果只有一个我们不知道的目标（原则上可能发生，跳转目标可以基于输入来计算），我们必须消除关于代码块输入状态的所有信息，因为它可能是未知的 ``JUMP`` 目标。如果一个 ``JUMPI`` 的条件等于一个常量，它将被转换为无条件跳转。
 
 As the last step, the code in each block is completely re-generated. A dependency graph is created from the expressions on the stack at the end of the block and every operation that is not part of this graph is essentially dropped. Now code is generated that applies the modifications to memory and storage in the order they were made in the original code (dropping modifications which were found not to be needed) and finally, generates all values that are required to be on the stack in the correct place.
+作为最后一步，每个块中的代码都会被完全重新生成。然后会从代码块的结尾处在栈上的表达式开始创建依赖关系图，且不是该图组成部分的每个操作实质上都会被丢弃。现在，生成的代码将按照原始代码中的顺序对内存和存储进行修改（删除不需要的修改），最终，生成需要在栈中的当前位置保存的所有值。
 
 These steps are applied to each basic block and the newly generated code is used as replacement if it is smaller. If a basic block is split at a ``JUMPI`` and during the analysis, the condition evaluates to a constant, the ``JUMPI`` is replaced depending on the value of the constant, and thus code like
+这些步骤适用于每个基本代码块，如果代码块较小，则新生成的代码将用作替换。如果一个基本代码块在 ``JUMPI`` 处被分割，且在分析过程中被评估为一个常数，则会根据常量的值来替换 ``JUMPI``，因此，类似于
 
 ::
 
@@ -198,6 +201,7 @@ These steps are applied to each basic block and the newly generated code is used
       return 1;
 
 is simplified to code which can also be compiled from
+的代码也就被简化地编译为
 
 ::
 
@@ -205,11 +209,12 @@ is simplified to code which can also be compiled from
     return 1;
 
 even though the instructions contained a jump in the beginning.
+即使原始代码中包含一个跳转。
 
 .. index:: source mappings
 
 ***************
-Source Mappings
+源代码映射
 ***************
 
 As part of the AST output, the compiler provides the range of the source
@@ -217,26 +222,31 @@ code that is represented by the respective node in the AST. This can be
 used for various purposes ranging from static analysis tools that report
 errors based on the AST and debugging tools that highlight local variables
 and their uses.
+作为AST输出的一部分，编译器提供AST中相应节点所代表的源代码范围。这可以用于多种用途，比如从用于报告错误的AST静态分析工具到可以突出显示局部变量及其用途的调试工具。
 
 Furthermore, the compiler can also generate a mapping from the bytecode
 to the range in the source code that generated the instruction. This is again
 important for static analysis tools that operate on bytecode level and
 for displaying the current position in the source code inside a debugger
 or for breakpoint handling.
+此外，编译器还可以生成从字节码到生成该指令的源代码范围的映射。对于在字节码级别上运行的静态分析工具以及在调试器中显示源代码中的当前位置或处理断点，这都是同样重要的。
 
 Both kinds of source mappings use integer indentifiers to refer to source files.
 These are regular array indices into a list of source files usually called
 ``"sourceList"``, which is part of the combined-json and the output of
 the json / npm compiler.
+这两种源映射都使用整数标识符来引用源文件。这些是通常称为 ``“sourceList”`` 的源文件列表的常规数组索引，它们是 combined-json 和 json / npm 编译器输出的一部分。
 
 The source mappings inside the AST use the following
 notation:
+AST内的源代码映射使用以下表示法：
 
 ``s:l:f``
 
 Where ``s`` is the byte-offset to the start of the range in the source file,
 ``l`` is the length of the source range in bytes and ``f`` is the source
 index mentioned above.
+其中，``s`` 是源代码文件中范围起始处的字节偏移量，``l`` 是源代码范围的长度（以字节为单位），``f`` 是上述源代码索引。
 
 The encoding in the source mapping for the bytecode is more complicated:
 It is a list of ``s:l:f:j`` separated by ``;``. Each of these
@@ -245,21 +255,26 @@ but have to use the instruction offset (push instructions are longer than a sing
 The fields ``s``, ``l`` and ``f`` are as above and ``j`` can be either
 ``i``, ``o`` or ``-`` signifying whether a jump instruction goes into a
 function, returns from a function or is a regular jump as part of e.g. a loop.
+针对字节码的源代码映射的编码方式更加复杂：它是由 ``;`` 分隔的 ``s:l:f:j`` 列表。每个元素都对应一条指令，即不能使用字节偏移量，但必须使用指令偏移量（push 指令长于一个字节）。字段 ``s``，``l`` 和 ``f`` 如上所述，``j`` 可以是 ``i``，``o`` 或 ``-``，表示一个跳转指令是否进入一个函数、是否从一个函数返回或者是否是一个常规跳转的一部分，例如一个循环。
 
 In order to compress these source mappings especially for bytecode, the
 following rules are used:
+为了压缩这些源代码映射，特别是对字节码的映射，我们将使用以下规则：
 
  - If a field is empty, the value of the preceding element is used.
  - If a ``:`` is missing, all following fields are considered empty.
+ - 如果一个字段为空，则使用前一个元素中对应位置的值。
+ - 如果缺少 ``:``，则后续所有字段都被视为空。
 
 This means the following source mappings represent the same information:
+这意味着以下的源代码映射是等价的：
 
 ``1:2:1;1:9:1;2:1:2;2:1:2;2:1:2``
 
 ``1:2:1;:9;2::2;;``
 
 ***************
-Tips and Tricks
+技巧和窍门
 ***************
 
 * Use ``delete`` on arrays to delete all its elements.
@@ -268,19 +283,26 @@ Tips and Tricks
 * If you end up checking conditions on input or state a lot at the beginning of your functions, try using :ref:`modifiers`.
 * If your contract has a function called ``send`` but you want to use the built-in send-function, use ``address(contractVariable).send(amount)``.
 * Initialise storage structs with a single assignment: ``x = MyStruct({a: 1, b: 2});``
+* 可以使用 ``delete`` 来删除数组中的所有元素。
+* 对 struct 中的元素使用更短的数据类型，并对它们进行排序，以便将短数据类型组合在一起。这可以降低 gas 消耗，因为多个 ``SSTORE`` 操作可能会被合并成一个（``SSTORE`` 消耗 5000 或 20000 的 gas，所以这应该是你想要优化的）。使用 gas 估算器（启用优化器）来检查！
+* 将你的状态变量设置为 public ——编译器会为你自动创建 :ref:`getters <visibility-and-getters>` 。
+* 如果你最终需要在函数开始位置检查很多输入条件或者状态变量的值，你可以尝试使用 :ref:`modifiers` 。
+* 如果你的合约有一个 ``send`` 函数，但你想要使用内置的 send 函数，你可以使用 ``address(contractVariable).send(amount)``。
+* 使用一个赋值语句就可以初始化 struct：``x = MyStruct({a: 1, b: 2});``
 
 **********
-Cheatsheet
+速查表
 **********
 
 .. index:: precedence
 
 .. _order:
 
-Order of Precedence of Operators
+操作符优先级
 ================================
 
 The following is the order of precedence for operators, listed in order of evaluation.
+以下是按评估顺序列出的操作符优先级。
 
 +------------+-------------------------------------+--------------------------------------------+
 | Precedence | Description                         | Operator                                   |
@@ -340,15 +362,15 @@ The following is the order of precedence for operators, listed in order of evalu
 
 .. index:: assert, block, coinbase, difficulty, number, block;number, timestamp, block;timestamp, msg, data, gas, sender, value, now, gas price, origin, revert, require, keccak256, ripemd160, sha256, ecrecover, addmod, mulmod, cryptography, this, super, selfdestruct, balance, send
 
-Global Variables
+全局变量
 ================
 
-- ``block.blockhash(uint blockNumber) returns (bytes32)``: hash of the given block - only works for 256 most recent blocks
-- ``block.coinbase`` (``address``): current block miner's address
-- ``block.difficulty`` (``uint``): current block difficulty
-- ``block.gaslimit`` (``uint``): current block gaslimit
-- ``block.number`` (``uint``): current block number
-- ``block.timestamp`` (``uint``): current block timestamp
+- ``block.blockhash(uint blockNumber) returns (bytes32)``：指定区块的区块哈希——仅可用于最新的256个区块
+- ``block.coinbase`` （``address``）：挖出当前区块的矿工的地址
+- ``block.difficulty`` （``uint``）：当前区块的难度值
+- ``block.gaslimit`` （``uint``）：当前区块的 gas 上限
+- ``block.number`` （``uint``）：当前区块的区块号
+- ``block.timestamp`` （``uint``）：当前区块的时间戳
 - ``msg.data`` (``bytes``): complete calldata
 - ``msg.gas`` (``uint``): remaining gas
 - ``msg.sender`` (``address``): sender of the message (current call)
@@ -376,7 +398,7 @@ Global Variables
 
 .. index:: visibility, public, private, external, internal
 
-Function Visibility Specifiers
+函数可见性说明符
 ==============================
 
 ::
@@ -393,7 +415,7 @@ Function Visibility Specifiers
 
 .. index:: modifiers, pure, view, payable, constant, anonymous, indexed
 
-Modifiers
+修改器
 =========
 
 - ``pure`` for functions: Disallows modification or access of state - this is not enforced yet.
@@ -404,7 +426,7 @@ Modifiers
 - ``anonymous`` for events: Does not store event signature as topic.
 - ``indexed`` for event parameters: Stores the parameter as topic.
 
-Reserved Keywords
+保留字
 =================
 
 These keywords are reserved in Solidity. They might become part of the syntax in the future:
