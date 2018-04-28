@@ -10,62 +10,34 @@
 |storage| 中的状态变量储存结构
 ************************************
 
-Statically-sized variables (everything except mapping and dynamically-sized array types) are laid out contiguously in storage starting from position ``0``. Multiple items that need less than 32 bytes are packed into a single storage slot if possible, according to the following rules:
 静态大小的变量（除 |mapping| 和动态数组之外的所有类型）都从位置 ``0`` 开始连续放置在 |storage| 中。如果可能的话，存储需求少于 32 字节的多个变量会被打包到一个 |storage_slot| 中，规则如下：
 
-- The first item in a storage slot is stored lower-order aligned.
-- Elementary types use only that many bytes that are necessary to store them.
-- If an elementary type does not fit the remaining part of a storage slot, it is moved to the next storage slot.
-- Structs and array data always start a new slot and occupy whole slots (but items inside a struct or array are packed tightly according to these rules).
 - |storage_slot| 的第一项会以低位对齐（即右对齐）的方式储存。
 - 基本类型仅使用它们所需的那么多字节。
 - 如果 |storage_slot| 中的剩余空间不足以储存一个基本类型，那么它会被移入下一个 |storage_slot| 。
 - 结构（struct）和数组数据总是会占用一整个新插槽（但结构或数组中的各项，都会以这些规则进行打包）。
 
 .. warning::
-    When using elements that are smaller than 32 bytes, your contract's gas usage may be higher.
-    This is because the EVM operates on 32 bytes at a time. Therefore, if the element is smaller
-    than that, the EVM must use more operations in order to reduce the size of the element from 32
-    bytes to the desired size.
     使用小于 32 字节的元素时，你的合约的 gas 使用量可能高于使用 32 字节的元素时。这是因为 |evm| 每次会操作 32 个字节，
     所以如果元素比 32 字节小，|evm| 必须使用更多的操作才能将其大小缩减到到所需的大小。
 
-    It is only beneficial to use reduced-size arguments if you are dealing with storage values
-    because the compiler will pack multiple elements into one storage slot, and thus, combine
-    multiple reads or writes into a single operation. When dealing with function arguments or memory
-    values, there is no inherent benefit because the compiler does not pack these values.
     仅当你处理 |storage_slot| 中的值时候，使用缩减大小的参数才是有益的。因为编译器会将多个元素打包到一个 |storage_slot| 中，
     从而将多个读或写合并到一次对存储的操作中。而在处理函数参数或 |memory| 中的值时，因为编译器不会打包这些值，所以没有什么益处。
 
-    Finally, in order to allow the EVM to optimize for this, ensure that you try to order your
-    storage variables and ``struct`` members such that they can be packed tightly. For example,
-    declaring your storage variables in the order of ``uint128, uint128, uint256`` instead of
-    ``uint128, uint256, uint128``, as the former will only take up two slots of storage whereas the
-    latter will take up three.
     最后，为了允许 |evm| 对此进行优化，请确保你对 |storage| 中的变量和 ``struct`` 成员的书写顺序允许它们被紧密地打包。
     例如，按照 ``uint128，uint128，uint256`` 的顺序声明你的存储变量，而不是 ``uint128，uint256，uint128``，
     因为前者只占用两个 |storage_slot|，而后者将占用三个。
 
-The elements of structs and arrays are stored after each other, just as if they were given explicitly.
 结构和数组中的元素都是顺序存储的，就像它们被明确给定的那样。
 
-Due to their unpredictable size, mapping and dynamically-sized array types use a Keccak-256 hash
-computation to find the starting position of the value or the array data. These starting positions are always full stack slots.
 由于 |mapping| 和动态数组的大小是不可预知的，所以我们使用 Keccak-256 哈希计算来找到具体数值或数组数据的起始位置。
 这些起始位置本身的数值总是会占满堆栈插槽。
 
-The mapping or the dynamic array itself
-occupies an (unfilled) slot in storage at some position ``p`` according to the above rule (or by
-recursively applying this rule for mappings to mappings or arrays of arrays). For a dynamic array, this slot stores the number of elements in the array (byte arrays and strings are an exception here, see below). For a mapping, the slot is unused (but it is needed so that two equal mappings after each other will use a different hash distribution).
-Array data is located at ``keccak256(p)`` and the value corresponding to a mapping key
-``k`` is located at ``keccak256(k . p)`` where ``.`` is concatenation. If the value is again a
-non-elementary type, the positions are found by adding an offset of ``keccak256(k . p)``.
 |mapping| 或动态数组本身会根据上述规则来在某个位置 ``p`` 处占用一个（未填充的）存储中的插槽（或递归地将该规则应用到 |mapping| 的 |mapping| 或数组的数组）。
 对于动态数组，此插槽中会存储数组中元素的数量（字节数组和字符串在这里是一个例外，见下文）。对于 |mapping| ，该插槽未被使用（但它仍是需要的，
 以使两个相同的 |mapping| 在彼此之后会使用不同的散列分布）。数组的数据会位于 ``keccak256(p)``； |mapping| 中的键 ``k`` 所对应的值会位于 ``keccak256(k . p)``，
 其中 ``.`` 是连接符。如果该值又是一个非基本类型，则通过添加 ``keccak256(k . p)`` 作为偏移量来找到位置。
 
-``bytes`` and ``string`` store their data in the same slot where also the length is stored if they are short. In particular: If the data is at most ``31`` bytes long, it is stored in the higher-order bytes (left aligned) and the lowest-order byte stores ``length * 2``. If it is longer, the main slot stores ``length * 2 + 1`` and the data is stored as usual in ``keccak256(slot)``.
 如果 ``bytes`` 和 ``string`` 的数据很短，那么它们的长度也会和数据一起存储到同一个插槽。具体地说：如果数据长度小于等于 31 字节，
 则它存储在高位字节（左对齐），最低位字节存储 ``length * 2``。如果数据长度超出 31 字节，则在主插槽存储 ``length * 2 + 1``，
 数据照常存储在 ``keccak256(slot)`` 中。
@@ -80,7 +52,6 @@ non-elementary type, the positions are found by adding an offset of ``keccak256(
       mapping(uint => mapping(uint => s)) data;
     }
 
-The position of ``data[4][9].b`` is at ``keccak256(uint256(9) . keccak256(uint256(4) . uint256(1))) + 1``.
 ``data[4][9].b`` 的位置将是 ``keccak256(uint256(9) . keccak256(uint256(4) . uint256(1))) + 1``。
 
 .. index: memory layout
@@ -89,22 +60,16 @@ The position of ``data[4][9].b`` is at ``keccak256(uint256(9) . keccak256(uint25
 |memory| 中的存储结构
 **********************
 
-Solidity reserves three 256-bit slots:
 Solidity 保留了三个 256 位的插槽：
 
--  0 - 64: scratch space for hashing methods
-- 64 - 96: currently allocated memory size (aka. free memory pointer)
 -  0 - 63 字节：用于保存方法（函数）哈希的临时空间
 - 64 - 96 字节：当前已分配的 |memory| 大小（又名，空闲 |memory| 指针）
 
-Scratch space can be used between statements (ie. within inline assembly).
 临时空间可以在语句之间使用（即在内联汇编之中）。
 
-Solidity always places new objects at the free memory pointer and memory is never freed (this might change in the future).
 Solidity 总会把新对象保存在空闲 |memory| 指针的位置，所以这段内存实际上从来不会空闲（在未来可能会修改这个机制）。
 
 .. warning::
-  There are some operations in Solidity that need a temporary memory area larger than 64 bytes and therefore will not fit into the scratch space. They will be placed where the free memory points to, but given their short lifecycle, the pointer is not updated. The memory may or may not be zeroed out. Because of this, one shouldn't expect the free memory to be zeroed out.
   Solidity 中有一些操作需要大于 64 字节的临时内存区域，因此这种数据无法保存到临时空间里。它们将被放置在空闲内存指向的位置，但由于这种数据的生命周期较短，这个指针不会即时更新。这部分内存可能会被清零也可能不会。所以我们不应该期望这些所谓的空闲内存总会被清零。
 
 .. index: calldata layout
@@ -113,13 +78,8 @@ Solidity 总会把新对象保存在空闲 |memory| 指针的位置，所以这�
 调用数据存储结构
 *******************
 
-When a Solidity contract is deployed and when it is called from an
-account, the input data is assumed to be in the format in :ref:`the ABI
-specification <ABI>`. The ABI specification requires arguments to be padded to multiples of 32
-bytes.  The internal function calls use a different convention.
 当从一个账户调用已部署的 Solidity 合约时，调用数据的格式被认为会遵循 :ref:`ABI 说明<ABI>`。
 根据 ABI 说明的规定，参数需要被整理为 32 字节的倍数。而内部函数调用会使用不同规则。
-
 
 .. index: variable cleanup
 
@@ -127,33 +87,16 @@ bytes.  The internal function calls use a different convention.
 内部机制 - 清理变量
 *********************************
 
-When a value is shorter than 256-bit, in some cases the remaining bits
-must be cleaned.
-The Solidity compiler is designed to clean such remaining bits before any operations
-that might be adversely affected by the potential garbage in the remaining bits.
-For example, before writing a value to the memory, the remaining bits need
-to be cleared because the memory contents can be used for computing
-hashes or sent as the data of a message call.  Similarly, before
-storing a value in the storage, the remaining bits need to be cleaned
-because otherwise the garbled value can be observed.
 如果一个数值不足 256 位，那么在某些情况下，不足的位必须被清除。
 Solidity 编译器设计用于在执行任何操作之前清除这些剩余位中可能会造成不利影响的潜在垃圾。
 例如，因为 |memory| 中的内容可以用于计算散列或作为消息调用的数据发送，所以在向 |memory| 写入数值之前，需要清除剩余的位。
 同样，在向 |storage| 中保存数据之前，剩余的位也需要清除，否则就会看到被混淆的数值。
 
-On the other hand, we do not clean the bits if the immediately
-following operation is not affected.  For instance, since any non-zero
-value is considered ``true`` by ``JUMPI`` instruction, we do not clean
-the boolean values before they are used as the condition for
-``JUMPI``.
 另一方面，如果接下来的操作不会被影响，那我们就不用清除这些位的数据。例如，因为任何非零值都会被 ``JUMPI`` 指令视为 ``true``，
 所以在布尔数据用做 ``JUMPI`` 的条件之前，我们就不用清除它们。
 
-In addition to the design principle above, the Solidity compiler
-cleans input data when it is loaded onto the stack.
 除了以上设计原理之外，Solidity 编译器在把输入数据加载到堆栈时会对它们进行清除剩余位的处理。
 
-Different types have different rules for cleaning up invalid values:
 不同的数据类型有不同的清除无效值的规则：
 
 +---------------+---------------+-------------------+
@@ -179,16 +122,12 @@ Different types have different rules for cleaning up invalid values:
 内部机制 - 优化器
 *************************
 
-The Solidity optimizer operates on assembly, so it can be and also is used by other languages. It splits the sequence of instructions into basic blocks at ``JUMPs`` and ``JUMPDESTs``. Inside these blocks, the instructions are analysed and every modification to the stack, to memory or storage is recorded as an expression which consists of an instruction and a list of arguments which are essentially pointers to other expressions. The main idea is now to find expressions that are always equal (on every input) and combine them into an expression class. The optimizer first tries to find each new expression in a list of already known expressions. If this does not work, the expression is simplified according to rules like ``constant + constant = sum_of_constants`` or ``X * 1 = X``. Since this is done recursively, we can also apply the latter rule if the second factor is a more complex expression where we know that it will always evaluate to one. Modifications to storage and memory locations have to erase knowledge about storage and memory locations which are not known to be different: If we first write to location x and then to location y and both are input variables, the second could overwrite the first, so we actually do not know what is stored at x after we wrote to y. On the other hand, if a simplification of the expression x - y evaluates to a non-zero constant, we know that we can keep our knowledge about what is stored at x.
 Solidity 优化器是在汇编语言级别工作的，所以它可以并且也被其他语言所使用。它通过 ``JUMP`` 和 ``JUMPDEST`` 语句将指令集序列分割为基础的代码块。在这些代码块内的指令集会被分析，并且对堆栈、内存或存储的每个修改都会被记录为表达式，这些表达式由一个指令和基本上是指向其他表达式的参数列表所组成。现在，主要的想法就是找到始终相等的表达式（在每个输入上）并将它们组合到一个表达式类中。优化器首先尝试在已知的表达式列表中查找每个新表达式。如果这不起作用，表达式会以 ``constant + constant = sum_of_constants`` 或 ``X * 1 = X`` 这样的规则进行简化。由于这是递归完成的，所以在我们知道第二个因子是一个更复杂的表达式，且此表达式总是等于 1 的情况下，也可以应用后一个规则。对存储和内存上某个具体位置的修改必须删除有关存储和内存位置的认知，这里边的区别并不为人所知：如果我们先在 x 位置写入，然后在 y 位置写入，且都是输入变量，则第二个可能会覆盖第一个，所以我们实际上并不知道在写入到 y 位置之后在 x 位置存储了什么。另一方面，如果对表达式 x - y 的简化，其结果为非零常数，那么我们知道我们可以保持关于 x 位置存储内容的认知。
 
-At the end of this process, we know which expressions have to be on the stack in the end and have a list of modifications to memory and storage. This information is stored together with the basic blocks and is used to link them. Furthermore, knowledge about the stack, storage and memory configuration is forwarded to the next block(s). If we know the targets of all ``JUMP`` and ``JUMPI`` instructions, we can build a complete control flow graph of the program. If there is only one target we do not know (this can happen as in principle, jump targets can be computed from inputs), we have to erase all knowledge about the input state of a block as it can be the target of the unknown ``JUMP``. If a ``JUMPI`` is found whose condition evaluates to a constant, it is transformed to an unconditional jump.
 在这个过程结束时，我们会知道最后哪些表达式必须在栈上，并且会得到一个修改内存和存储的列表。该信息与基本代码块一起存储并用来链接它们。此外，关于栈、存储和内存的配置信息会被转发到下一个代码块。如果我们知道所有 ``JUMP`` 和 ``JUMPI`` 指令的目标，我们就可以构建一个完整的程序流程图。 如果只有一个我们不知道的目标（原则上可能发生，跳转目标可以基于输入来计算），我们必须消除关于代码块输入状态的所有信息，因为它可能是未知的 ``JUMP`` 目标。如果一个 ``JUMPI`` 的条件等于一个常量，它将被转换为无条件跳转。
 
-As the last step, the code in each block is completely re-generated. A dependency graph is created from the expressions on the stack at the end of the block and every operation that is not part of this graph is essentially dropped. Now code is generated that applies the modifications to memory and storage in the order they were made in the original code (dropping modifications which were found not to be needed) and finally, generates all values that are required to be on the stack in the correct place.
 作为最后一步，每个块中的代码都会被完全重新生成。然后会从代码块的结尾处在栈上的表达式开始创建依赖关系图，且不是该图组成部分的每个操作实质上都会被丢弃。现在，生成的代码将按照原始代码中的顺序对内存和存储进行修改（删除不需要的修改），最终，生成需要在栈中的当前位置保存的所有值。
 
-These steps are applied to each basic block and the newly generated code is used as replacement if it is smaller. If a basic block is split at a ``JUMPI`` and during the analysis, the condition evaluates to a constant, the ``JUMPI`` is replaced depending on the value of the constant, and thus code like
 这些步骤适用于每个基本代码块，如果代码块较小，则新生成的代码将用作替换。如果一个基本代码块在 ``JUMPI`` 处被分割，且在分析过程中被评估为一个常数，则会根据常量的值来替换 ``JUMPI``，因此，类似于
 
 ::
@@ -200,7 +139,6 @@ These steps are applied to each basic block and the newly generated code is used
     else
       return 1;
 
-is simplified to code which can also be compiled from
 的代码也就被简化地编译为
 
 ::
@@ -208,7 +146,6 @@ is simplified to code which can also be compiled from
     data[7] = 9;
     return 1;
 
-even though the instructions contained a jump in the beginning.
 即使原始代码中包含一个跳转。
 
 .. index:: source mappings
@@ -217,56 +154,25 @@ even though the instructions contained a jump in the beginning.
 源代码映射
 ***************
 
-As part of the AST output, the compiler provides the range of the source
-code that is represented by the respective node in the AST. This can be
-used for various purposes ranging from static analysis tools that report
-errors based on the AST and debugging tools that highlight local variables
-and their uses.
 作为AST输出的一部分，编译器提供AST中相应节点所代表的源代码范围。这可以用于多种用途，比如从用于报告错误的AST静态分析工具到可以突出显示局部变量及其用途的调试工具。
 
-Furthermore, the compiler can also generate a mapping from the bytecode
-to the range in the source code that generated the instruction. This is again
-important for static analysis tools that operate on bytecode level and
-for displaying the current position in the source code inside a debugger
-or for breakpoint handling.
 此外，编译器还可以生成从字节码到生成该指令的源代码范围的映射。对于在字节码级别上运行的静态分析工具以及在调试器中显示源代码中的当前位置或处理断点，这都是同样重要的。
 
-Both kinds of source mappings use integer indentifiers to refer to source files.
-These are regular array indices into a list of source files usually called
-``"sourceList"``, which is part of the combined-json and the output of
-the json / npm compiler.
 这两种源映射都使用整数标识符来引用源文件。这些是通常称为 ``“sourceList”`` 的源文件列表的常规数组索引，它们是 combined-json 和 json / npm 编译器输出的一部分。
 
-The source mappings inside the AST use the following
-notation:
 AST内的源代码映射使用以下表示法：
 
 ``s:l:f``
 
-Where ``s`` is the byte-offset to the start of the range in the source file,
-``l`` is the length of the source range in bytes and ``f`` is the source
-index mentioned above.
 其中，``s`` 是源代码文件中范围起始处的字节偏移量，``l`` 是源代码范围的长度（以字节为单位），``f`` 是上述源代码索引。
 
-The encoding in the source mapping for the bytecode is more complicated:
-It is a list of ``s:l:f:j`` separated by ``;``. Each of these
-elements corresponds to an instruction, i.e. you cannot use the byte offset
-but have to use the instruction offset (push instructions are longer than a single byte).
-The fields ``s``, ``l`` and ``f`` are as above and ``j`` can be either
-``i``, ``o`` or ``-`` signifying whether a jump instruction goes into a
-function, returns from a function or is a regular jump as part of e.g. a loop.
 针对字节码的源代码映射的编码方式更加复杂：它是由 ``;`` 分隔的 ``s:l:f:j`` 列表。每个元素都对应一条指令，即不能使用字节偏移量，但必须使用指令偏移量（push 指令长于一个字节）。字段 ``s``，``l`` 和 ``f`` 如上所述，``j`` 可以是 ``i``，``o`` 或 ``-``，表示一个跳转指令是否进入一个函数、是否从一个函数返回或者是否是一个常规跳转的一部分，例如一个循环。
 
-In order to compress these source mappings especially for bytecode, the
-following rules are used:
 为了压缩这些源代码映射，特别是对字节码的映射，我们将使用以下规则：
 
- - If a field is empty, the value of the preceding element is used.
- - If a ``:`` is missing, all following fields are considered empty.
  - 如果一个字段为空，则使用前一个元素中对应位置的值。
  - 如果缺少 ``:``，则后续所有字段都被视为空。
 
-This means the following source mappings represent the same information:
 这意味着以下的源代码映射是等价的：
 
 ``1:2:1;1:9:1;2:1:2;2:1:2;2:1:2``
@@ -277,12 +183,6 @@ This means the following source mappings represent the same information:
 技巧和窍门
 ***************
 
-* Use ``delete`` on arrays to delete all its elements.
-* Use shorter types for struct elements and sort them such that short types are grouped together. This can lower the gas costs as multiple ``SSTORE`` operations might be combined into a single (``SSTORE`` costs 5000 or 20000 gas, so this is what you want to optimise). Use the gas price estimator (with optimiser enabled) to check!
-* Make your state variables public - the compiler will create :ref:`getters <visibility-and-getters>` for you automatically.
-* If you end up checking conditions on input or state a lot at the beginning of your functions, try using :ref:`modifiers`.
-* If your contract has a function called ``send`` but you want to use the built-in send-function, use ``address(contractVariable).send(amount)``.
-* Initialise storage structs with a single assignment: ``x = MyStruct({a: 1, b: 2});``
 * 可以使用 ``delete`` 来删除数组中的所有元素。
 * 对 struct 中的元素使用更短的数据类型，并对它们进行排序，以便将短数据类型组合在一起。这可以降低 gas 消耗，因为多个 ``SSTORE`` 操作可能会被合并成一个（``SSTORE`` 消耗 5000 或 20000 的 gas，所以这应该是你想要优化的）。使用 gas 估算器（启用优化器）来检查！
 * 将你的状态变量设置为 public ——编译器会为你自动创建 :ref:`getters <visibility-and-getters>` 。
@@ -301,63 +201,62 @@ This means the following source mappings represent the same information:
 操作符优先级
 ================================
 
-The following is the order of precedence for operators, listed in order of evaluation.
 以下是按评估顺序列出的操作符优先级。
 
 +------------+-------------------------------------+--------------------------------------------+
-| Precedence | Description                         | Operator                                   |
+| 优先级     | 描述                                | 操作符                                     |
 +============+=====================================+============================================+
-| *1*        | Postfix increment and decrement     | ``++``, ``--``                             |
+| *1*        | 后置自增和自减                      | ``++``, ``--``                             |
 +            +-------------------------------------+--------------------------------------------+
-|            | New expression                      | ``new <typename>``                         |
+|            | 创建类型实例                        | ``new <typename>``                         |
 +            +-------------------------------------+--------------------------------------------+
-|            | Array subscripting                  | ``<array>[<index>]``                       |
+|            | 数组元素                            | ``<array>[<index>]``                       |
 +            +-------------------------------------+--------------------------------------------+
-|            | Member access                       | ``<object>.<member>``                      |
+|            | 访问成员                            | ``<object>.<member>``                      |
 +            +-------------------------------------+--------------------------------------------+
-|            | Function-like call                  | ``<func>(<args...>)``                      |
+|            | 函数调用                            | ``<func>(<args...>)``                      |
 +            +-------------------------------------+--------------------------------------------+
-|            | Parentheses                         | ``(<statement>)``                          |
+|            | 小括号                              | ``(<statement>)``                          |
 +------------+-------------------------------------+--------------------------------------------+
-| *2*        | Prefix increment and decrement      | ``++``, ``--``                             |
+| *2*        | 前置自增和自减                      | ``++``, ``--``                             |
 +            +-------------------------------------+--------------------------------------------+
-|            | Unary plus and minus                | ``+``, ``-``                               |
+|            | 一元运算的加和减                    | ``+``, ``-``                               |
 +            +-------------------------------------+--------------------------------------------+
-|            | Unary operations                    | ``delete``                                 |
+|            | 一元操作符                          | ``delete``                                 |
 +            +-------------------------------------+--------------------------------------------+
-|            | Logical NOT                         | ``!``                                      |
+|            | 逻辑非                              | ``!``                                      |
 +            +-------------------------------------+--------------------------------------------+
-|            | Bitwise NOT                         | ``~``                                      |
+|            | 按位非                              | ``~``                                      |
 +------------+-------------------------------------+--------------------------------------------+
-| *3*        | Exponentiation                      | ``**``                                     |
+| *3*        | 乘方                                | ``**``                                     |
 +------------+-------------------------------------+--------------------------------------------+
-| *4*        | Multiplication, division and modulo | ``*``, ``/``, ``%``                        |
+| *4*        | 乘、除和模运算                      | ``*``, ``/``, ``%``                        |
 +------------+-------------------------------------+--------------------------------------------+
-| *5*        | Addition and subtraction            | ``+``, ``-``                               |
+| *5*        | 算术加和减                          | ``+``, ``-``                               |
 +------------+-------------------------------------+--------------------------------------------+
-| *6*        | Bitwise shift operators             | ``<<``, ``>>``                             |
+| *6*        | 移位操作符                          | ``<<``, ``>>``                             |
 +------------+-------------------------------------+--------------------------------------------+
-| *7*        | Bitwise AND                         | ``&``                                      |
+| *7*        | 按位与                              | ``&``                                      |
 +------------+-------------------------------------+--------------------------------------------+
-| *8*        | Bitwise XOR                         | ``^``                                      |
+| *8*        | 按位异或                            | ``^``                                      |
 +------------+-------------------------------------+--------------------------------------------+
-| *9*        | Bitwise OR                          | ``|``                                      |
+| *9*        | 按位或                              | ``|``                                      |
 +------------+-------------------------------------+--------------------------------------------+
-| *10*       | Inequality operators                | ``<``, ``>``, ``<=``, ``>=``               |
+| *10*       | 非等操作符                          | ``<``, ``>``, ``<=``, ``>=``               |
 +------------+-------------------------------------+--------------------------------------------+
-| *11*       | Equality operators                  | ``==``, ``!=``                             |
+| *11*       | 等于操作符                          | ``==``, ``!=``                             |
 +------------+-------------------------------------+--------------------------------------------+
-| *12*       | Logical AND                         | ``&&``                                     |
+| *12*       | 逻辑与                              | ``&&``                                     |
 +------------+-------------------------------------+--------------------------------------------+
-| *13*       | Logical OR                          | ``||``                                     |
+| *13*       | 逻辑或                              | ``||``                                     |
 +------------+-------------------------------------+--------------------------------------------+
-| *14*       | Ternary operator                    | ``<conditional> ? <if-true> : <if-false>`` |
+| *14*       | 三元操作符                          | ``<conditional> ? <if-true> : <if-false>`` |
 +------------+-------------------------------------+--------------------------------------------+
-| *15*       | Assignment operators                | ``=``, ``|=``, ``^=``, ``&=``, ``<<=``,    |
+| *15*       | 赋值操作符                          | ``=``, ``|=``, ``^=``, ``&=``, ``<<=``,    |
 |            |                                     | ``>>=``, ``+=``, ``-=``, ``*=``, ``/=``,   |
 |            |                                     | ``%=``                                     |
 +------------+-------------------------------------+--------------------------------------------+
-| *16*       | Comma operator                      | ``,``                                      |
+| *16*       | 逗号                                | ``,``                                      |
 +------------+-------------------------------------+--------------------------------------------+
 
 .. index:: assert, block, coinbase, difficulty, number, block;number, timestamp, block;timestamp, msg, data, gas, sender, value, now, gas price, origin, revert, require, keccak256, ripemd160, sha256, ecrecover, addmod, mulmod, cryptography, this, super, selfdestruct, balance, send
@@ -371,30 +270,30 @@ The following is the order of precedence for operators, listed in order of evalu
 - ``block.gaslimit`` （``uint``）：当前区块的 gas 上限
 - ``block.number`` （``uint``）：当前区块的区块号
 - ``block.timestamp`` （``uint``）：当前区块的时间戳
-- ``msg.data`` (``bytes``): complete calldata
-- ``msg.gas`` (``uint``): remaining gas
-- ``msg.sender`` (``address``): sender of the message (current call)
-- ``msg.value`` (``uint``): number of wei sent with the message
-- ``now`` (``uint``): current block timestamp (alias for ``block.timestamp``)
-- ``tx.gasprice`` (``uint``): gas price of the transaction
-- ``tx.origin`` (``address``): sender of the transaction (full call chain)
-- ``assert(bool condition)``: abort execution and revert state changes if condition is ``false`` (use for internal error)
-- ``require(bool condition)``: abort execution and revert state changes if condition is ``false`` (use for malformed input or error in external component)
-- ``revert()``: abort execution and revert state changes
-- ``keccak256(...) returns (bytes32)``: compute the Ethereum-SHA-3 (Keccak-256) hash of the :ref:`(tightly packed) arguments <abi_packed_mode>`
-- ``sha3(...) returns (bytes32)``: an alias to ``keccak256``
-- ``sha256(...) returns (bytes32)``: compute the SHA-256 hash of the :ref:`(tightly packed) arguments <abi_packed_mode>`
-- ``ripemd160(...) returns (bytes20)``: compute the RIPEMD-160 hash of the :ref:`(tightly packed) arguments <abi_packed_mode>`
-- ``ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address)``: recover address associated with the public key from elliptic curve signature, return zero on error
-- ``addmod(uint x, uint y, uint k) returns (uint)``: compute ``(x + y) % k`` where the addition is performed with arbitrary precision and does not wrap around at ``2**256``. Assert that ``k != 0`` starting from version 0.5.0.
-- ``mulmod(uint x, uint y, uint k) returns (uint)``: compute ``(x * y) % k`` where the multiplication is performed with arbitrary precision and does not wrap around at ``2**256``. Assert that ``k != 0`` starting from version 0.5.0.
-- ``this`` (current contract's type): the current contract, explicitly convertible to ``address``
-- ``super``: the contract one level higher in the inheritance hierarchy
-- ``selfdestruct(address recipient)``: destroy the current contract, sending its funds to the given address
-- ``suicide(address recipient)``: an alias to ``selfdestruct``
-- ``<address>.balance`` (``uint256``): balance of the :ref:`address` in Wei
-- ``<address>.send(uint256 amount) returns (bool)``: send given amount of Wei to :ref:`address`, returns ``false`` on failure
-- ``<address>.transfer(uint256 amount)``: send given amount of Wei to :ref:`address`, throws on failure
+- ``msg.data`` （``bytes``）：完整的 calldata
+- ``msg.gas`` （``uint``）：剩余的 gas
+- ``msg.sender`` （``address``）：消息发送方（当前调用）
+- ``msg.value`` （``uint``）：随消息发送的 wei 的数量
+- ``now`` （``uint``）：当前区块的时间戳（等价于 ``block.timestamp``）
+- ``tx.gasprice`` （``uint``）：交易的 gas price
+- ``tx.origin`` （``address``）：交易发送方（完整调用链上的原始发送方）
+- ``assert(bool condition)``：如果条件值为 ``false`` 则中止执行并回复所有状态变更（用做内部错误）
+- ``require(bool condition)``：如果条件值为 ``false`` 则中止执行并回复所有状态变更（用做异常输入或外部组件错误）
+- ``revert()``：中止执行并回复所有状态变更
+- ``keccak256(...) returns (bytes32)``：计算 :ref:`(tightly packed) arguments <abi_packed_mode>` 的 Ethereum-SHA-3（Keccak-256）哈希
+- ``sha3(...) returns (bytes32)``：等价于 ``keccak256``
+- ``sha256(...) returns (bytes32)``：计算 :ref:`(tightly packed) arguments <abi_packed_mode>` 的 SHA-256 哈希
+- ``ripemd160(...) returns (bytes20)``：计算 :ref:`(tightly packed) arguments <abi_packed_mode>` 的 RIPEMD-160 哈希
+- ``ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address)``：基于椭圆曲线签名找回与指定公钥关联的地址，发生错误的时候返回 0
+- ``addmod(uint x, uint y, uint k) returns (uint)``：计算 ``(x + y) % k`` 的值，其中加法的结果即使超过 ``2**256`` 也不会被截取。从 0.5.0 版本开始会加入对 ``k != 0`` 的 assert（即会在此函数开头执行 ``assert(k != 0);`` 作为参数检查，译者注）。
+- ``mulmod(uint x, uint y, uint k) returns (uint)``：计算 ``(x * y) % k`` 的值，其中乘法的结果即使超过 ``2**256`` 也不会被截取。从 0.5.0 版本开始会加入对 ``k != 0`` 的 assert（即会在此函数开头执行 ``assert(k != 0);`` 作为参数检查，译者注）。
+- ``this`` （类型为当前合约的变量）：当前合约实例，可以准确地转换为 ``address``
+- ``super``：当前合约的上一级继承关系的合约
+- ``selfdestruct(address recipient)``：销毁当前合约，把余额发送到给定地址
+- ``suicide(address recipient)``：等价于 ``selfdestruct``
+- ``<address>.balance`` （``uint256``）： :ref:`address` 的余额，以 Wei 为单位
+- ``<address>.send(uint256 amount) returns (bool)``：向 :ref:`address` 发送给定数量的 Wei，失败时返回 ``false``
+- ``<address>.transfer(uint256 amount)``：向 :ref:`address` 发送给定数量的 Wei，失败时会把错误抛出（throw）
 
 .. index:: visibility, public, private, external, internal
 
@@ -407,34 +306,33 @@ The following is the order of precedence for operators, listed in order of evalu
         return true;
     }
 
-- ``public``: visible externally and internally (creates a :ref:`getter function<getter-functions>` for storage/state variables)
-- ``private``: only visible in the current contract
-- ``external``: only visible externally (only for functions) - i.e. can only be message-called (via ``this.func``)
-- ``internal``: only visible internally
-
+- ``public``：内部、外部均可见（参考为存储/状态变量创建 :ref:`getter 函数<getter-functions>`）
+- ``private``：仅在当前合约内可见
+- ``external``：仅在外部可见（仅可修饰函数）——就是说，仅可用于消息调用（即使在合约内调用，也只能通过 ``this.func`` 的方式）
+- ``internal``：仅在内部可见（也就是在当前 Solidity 源代码文件内均可见，不仅限于当前合约内，译者注）
 
 .. index:: modifiers, pure, view, payable, constant, anonymous, indexed
 
 修改器
 =========
 
-- ``pure`` for functions: Disallows modification or access of state - this is not enforced yet.
-- ``view`` for functions: Disallows modification of state - this is not enforced yet.
-- ``payable`` for functions: Allows them to receive Ether together with a call.
-- ``constant`` for state variables: Disallows assignment (except initialisation), does not occupy storage slot.
-- ``constant`` for functions: Same as ``view``.
-- ``anonymous`` for events: Does not store event signature as topic.
-- ``indexed`` for event parameters: Stores the parameter as topic.
+- ``pure`` 修饰函数时：不允许修改或访问状态——但目前并不是强制的。
+- ``view`` 修饰函数时：不允许修改状态——但目前不是强制的。
+- ``payable`` 修饰函数时：允许从调用中接收 |ether| 。
+- ``constant`` 修饰状态变量时：不允许赋值（除初始化以外），不会占据 |storage_slot| 。
+- ``constant`` 修饰函数时：与 ``view`` 等价。
+- ``anonymous`` 修饰事件时：不把事件签名作为 topic 存储。
+- ``indexed`` 修饰事件时：将参数作为 topic 存储。
 
 保留字
 =================
 
-These keywords are reserved in Solidity. They might become part of the syntax in the future:
+以下是 Solidity 的保留字，未来可能会变为语法的一部分：
 
 ``abstract``, ``after``, ``case``, ``catch``, ``default``, ``final``, ``in``, ``inline``, ``let``, ``match``, ``null``,
 ``of``, ``relocatable``, ``static``, ``switch``, ``try``, ``type``, ``typeof``.
 
-Language Grammar
+语法表
 ================
 
 .. literalinclude:: grammar.txt
