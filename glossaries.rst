@@ -74,3 +74,27 @@
 .. |modifier| raw:: html
 
   <ruby>修饰器<rp>（</rp><rt>modifier</rt><rp>）</rp></ruby>
+
+.. |remapping| raw:: html
+
+  <ruby>重映射<rp>（</rp><rt>remapping</rt><rp>）</rp></ruby>
+
+.. |mapping| raw:: html
+
+  <ruby>映射<rp>（</rp><rt>mapping</rt><rp>）</rp></ruby>
+
+.. |storage_slot| raw:: html
+
+  <ruby>存储插槽<rp>（</rp><rt>storage slot</rt><rp>）</rp></ruby>
+
+.. |stack| raw:: html
+
+  <ruby>堆栈<rp>（</rp><rt>stack</rt><rp>）</rp></ruby>
+
+.. |token| raw:: html
+
+  <ruby>通证<rp>（</rp><rt>token</rt><rp>）</rp></ruby>
+
+.. |low_level_function| raw:: html
+
+  <ruby>低级函数<rp>（</rp><rt>low-level function</rt><rp>）</rp></ruby>

@@ -2,10 +2,9 @@
 深入理解Solidity
 #################
 
-This section should provide you with all you need to know about Solidity.
-If something is missing here, please contact us on
-`Gitter <https://gitter.im/ethereum/solidity>`_ or make a pull request on
-`Github <https://github.com/ethereum/solidity/pulls>`_.
+本章将为你提供所有关于Solidity的、你需要知道的知识。
+如果你发现缺少了什么，请在 `Gitter <https://gitter.im/ethereum/solidity>`_ 上联系我们；
+或者在 `Github <https://github.com/ethereum/solidity/pulls>`_ 上创建 pull request 。
 
 .. toctree::
    :maxdepth: 2

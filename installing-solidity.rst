@@ -115,7 +115,7 @@ Docker
     # Install 0.4.8
     brew install https://raw.githubusercontent.com/ethereum/homebrew-ethereum/77cce03da9f289e5a3ffe579840d3c5dc0a62717/solidity.rb
 
-Gentoo Linux 下也提供了安装包，可使用``emerge``进行安装：
+Gentoo Linux 下也提供了安装包，可使用 ``emerge`` 进行安装：
 
 .. code:: bash
 
