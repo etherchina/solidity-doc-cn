@@ -1,107 +1,98 @@
+.. include :: glossaries.rst
 .. _security_considerations:
 
 #######################
 安全考量
 #######################
 
-While it is usually quite easy to build software that works as expected,
-it is much harder to check that nobody can use it in a way that was **not** anticipated.
+尽管在通常情况下编写一个按照预期运行的软件很简单，
+但想要确保没有人能够以出乎意料的方式使用它就困难多了。
 
-In Solidity, this is even more important because you can use smart contracts
-to handle tokens or, possibly, even more valuable things. Furthermore, every
-execution of a smart contract happens in public and, in addition to that,
-the source code is often available.
+在 Solidity 中，这一点尤为重要，因为智能合约可以用来处理通证，甚至有可能是更有价值的东西。
+除此之外，智能合约的每一次执行都是公开的，而且源代码也通常是容易获得的。
 
-Of course you always have to consider how much is at stake:
-You can compare a smart contract with a web service that is open to the
-public (and thus, also to malicious actors) and perhaps even open source.
-If you only store your grocery list on that web service, you might not have
-to take too much care, but if you manage your bank account using that web service,
-you should be more careful.
+当然，你总是需要考虑有多大的风险：
+你可以将智能合约与公开的（当然也对恶意用户开放）、甚至是开源的网络服务相比较。
+如果你只是在某个网络服务上存储你的购物清单，则可能不必太在意，
+但如果你使用那个网络服务管理你的银行帐户，
+那就需要特别当心了。
 
-This section will list some pitfalls and general security recommendations but
-can, of course, never be complete. Also, keep in mind that even if your
-smart contract code is bug-free, the compiler or the platform itself might
-have a bug. A list of some publicly known security-relevant bugs of the compiler
-can be found in the
-:ref:`list of known bugs<known_bugs>`, which is also machine-readable. Note
-that there is a bug bounty program that covers the code generator of the
-Solidity compiler.
+本节将列出一些陷阱和一般性的安全建议，但这绝对不全面。
+另外，请时刻注意的是即使你的智能合约代码没有 bug，
+但编译器或者平台本身可能存在 bug。
+一个已知的编译器安全相关的 bug 列表可以在 :ref:`已知bug列表<known_bugs>` 找到，
+这个列表也可以用程序读取。
+请注意其中有一个涵盖了 Solidity 编译器的代码生成器的 bug 悬赏项目。
 
-As always, with open source documentation, please help us extend this section
-(especially, some examples would not hurt)!
+我们的文档是开源的，请一如既往地帮助我们扩展这一节的内容（何况其中一些例子并不会造成损失）！
 
 ********
 陷阱
 ********
 
-Private Information and Randomness
+私有信息和随机性
 ==================================
 
-Everything you use in a smart contract is publicly visible, even
-local variables and state variables marked ``private``.
+在智能合约中你所用的一切都是公开可见的，即便是局部变量和被标记成 ``private`` 的状态变量也是如此。
 
-Using random numbers in smart contracts is quite tricky if you do not want
-miners to be able to cheat.
+如果不想让矿工作弊的话，在智能合约中使用随机数会很棘手
+（译者注：在智能合约中使用随机数很难保证节点不作弊，
+这是因为智能合约中的随机数一般要依赖计算节点的本地时间得到，
+而本地时间是可以被恶意节点伪造的，因此这种方法并不安全。
+通行的做法是采用 |off_chain| 的第三方服务，比如 Oraclize 来获取随机数）。
 
-Re-Entrancy
+重入
 ===========
 
-Any interaction from a contract (A) with another contract (B) and any transfer
-of Ether hands over control to that contract (B). This makes it possible for B
-to call back into A before this interaction is completed. To give an example,
-the following code contains a bug (it is just a snippet and not a
-complete contract):
+任何从合约 A 到合约 B 的交互以及任何从合约 A 到合约 B 的 |ether| 的转移，都会将控制权交给合约 B。
+这使得合约 B 能够在交互结束前回调 A 中的代码。
+举个例子，下面的代码中有一个 bug（这只是一个代码段，不是完整的合约）：
 
 ::
 
     pragma solidity ^0.4.0;
 
-    // THIS CONTRACT CONTAINS A BUG - DO NOT USE
+    // 不要使用这个合约，其中包含一个 bug。
     contract Fund {
-        /// Mapping of ether shares of the contract.
+        /// 合约中 |ether| 分成的映射。
         mapping(address => uint) shares;
-        /// Withdraw your share.
+        /// 提取你的分成。
         function withdraw() public {
             if (msg.sender.send(shares[msg.sender]))
                 shares[msg.sender] = 0;
         }
     }
 
-The problem is not too serious here because of the limited gas as part
-of ``send``, but it still exposes a weakness: Ether transfer can always
-include code execution, so the recipient could be a contract that calls
-back into ``withdraw``. This would let it get multiple refunds and
-basically retrieve all the Ether in the contract. In particular, the
-following contract will allow an attacker to refund multiple times
-as it uses ``call`` which forwards all remaining gas by default:
+这里的问题不是很严重，因为有限的 gas 也作为 ``send`` 的一部分，但仍然暴露了一个缺陷：
+|ether| 的传输过程中总是可以包含代码执行，所以接收者可以是一个回调进入 ``withdraw`` 的合约。
+这就会使其多次得到退款，从而将合约中的全部 |ether| 提取。
+特别地，下面的合约将允许一个攻击者多次得到退款，因为它使用了 ``call`` ，默认发送所有剩余的 gas。
 
 ::
 
     pragma solidity ^0.4.0;
 
-    // THIS CONTRACT CONTAINS A BUG - DO NOT USE
+    // 不要使用这个合约，其中包含一个 bug。
     contract Fund {
-        /// Mapping of ether shares of the contract.
+        /// 合约中 |ether| 分成的映射。
         mapping(address => uint) shares;
-        /// Withdraw your share.
+        /// 提取你的分成。
         function withdraw() public {
             if (msg.sender.call.value(shares[msg.sender])())
                 shares[msg.sender] = 0;
         }
     }
 
-To avoid re-entrancy, you can use the Checks-Effects-Interactions pattern as
-outlined further below:
+为了避免重入，你可以使用下面撰写的“检查-生效-交互”（Checks-Effects-Interactions）模式：
 
 ::
 
     pragma solidity ^0.4.11;
 
     contract Fund {
-        /// Mapping of ether shares of the contract.
+        /// 合约中 |ether| 分成的映射。
         mapping(address => uint) shares;
-        /// Withdraw your share.
+        /// 提取你的分成。
         function withdraw() public {
             var share = shares[msg.sender];
             shares[msg.sender] = 0;
@@ -109,80 +100,72 @@ outlined further below:
         }
     }
 
-Note that re-entrancy is not only an effect of Ether transfer but of any
-function call on another contract. Furthermore, you also have to take
-multi-contract situations into account. A called contract could modify the
-state of another contract you depend on.
+请注意重入不仅是 |ether| 传输的其中一个影响，还包括任何对另一个合约的函数调用。
+更进一步说，你也不得不考虑多合约的情况。
+一个被调用的合约可以修改你所依赖的另一个合约的状态。
 
-Gas Limit and Loops
+gas 限制和循环
 ===================
 
-Loops that do not have a fixed number of iterations, for example, loops that depend on storage values, have to be used carefully:
-Due to the block gas limit, transactions can only consume a certain amount of gas. Either explicitly or just due to
-normal operation, the number of iterations in a loop can grow beyond the block gas limit which can cause the complete
-contract to be stalled at a certain point. This may not apply to ``constant`` functions that are only executed
-to read data from the blockchain. Still, such functions may be called by other contracts as part of on-chain operations
-and stall those. Please be explicit about such cases in the documentation of your contracts.
+必须谨慎使用没有固定迭代次数的循环，例如依赖于 |storage| 值的循环：
+由于区块 gas 有限，交易只能消耗一定数量的 gas。
+无论是明确指出的还是正常运行过程中的，循环中的数次迭代操作所消耗的 gas 都有可能超出区块的 gas 限制，从而导致整个合约在某个时刻骤然停止。
+这可能不适用于只被用来从区块链中读取数据的 ``constant`` 函数。
+尽管如此，这些函数仍然可能会被其它合约当作 |on_chain| 操作的一部分来调用，并使那些操作骤然停止。
+请在合约代码的说明文档中明确说明这些情况。
 
-Sending and Receiving Ether
+发送和接收 |ether|
 ===========================
 
-- Neither contracts nor "external accounts" are currently able to prevent that someone sends them Ether.
-  Contracts can react on and reject a regular transfer, but there are ways
-  to move Ether without creating a message call. One way is to simply "mine to"
-  the contract address and the second way is using ``selfdestruct(x)``.
+- 目前无论是合约还是“外部账户”都不能阻止有人给它们发送 |ether|。
+  合约可以对一个正常的转账做出反应并拒绝它，但还有些方法可以不通过创建消息来发送 |ether|。
+  其中一种方法就是单纯地向合约地址“挖矿”，另一种方法就是使用 ``selfdestruct(x)`` 。
 
-- If a contract receives Ether (without a function being called), the fallback function is executed.
-  If it does not have a fallback function, the Ether will be rejected (by throwing an exception).
-  During the execution of the fallback function, the contract can only rely
-  on the "gas stipend" (2300 gas) being available to it at that time. This stipend is not enough to access storage in any way.
-  To be sure that your contract can receive Ether in that way, check the gas requirements of the fallback function
-  (for example in the "details" section in Remix).
+- 如果一个合约收到了 |ether| （且没有函数被调用），就会执行 fallback 函数。
+  如果没有 fallback 函数，那么 |ether| 会被拒收（同时会抛出异常）。
+  在 fallback 函数执行过程中，合约只能依靠此时可用的“gas 津贴”（2300 gas）来执行。
+  这笔津贴并不足以用来完成任何方式的 |storage| 访问。
+  为了确保你的合约可以通过这种方式收到 |ether|，请你核对 fallback 函数所需的 gas 数量
+  （在 Remix 的“详细”章节会举例说明）。
 
-- There is a way to forward more gas to the receiving contract using
-  ``addr.call.value(x)()``. This is essentially the same as ``addr.transfer(x)``,
-  only that it forwards all remaining gas and opens up the ability for the
-  recipient to perform more expensive actions (and it only returns a failure code
-  and does not automatically propagate the error). This might include calling back
-  into the sending contract or other state changes you might not have thought of.
-  So it allows for great flexibility for honest users but also for malicious actors.
+- 有一种方法可以通过使用 ``addr.call.value(x)()`` 向接收合约发送更多的 gas。
+  这本质上跟 ``addr.transfer(x)`` 是一样的，
+  只不过前者发送所有剩余的 gas，并且使得接收者有能力执行更加昂贵的操作
+  （它只会返回一个错误代码，而且也不会自动传播这个错误）。
+  这可能包括回调发送合约或者你想不到的其它状态改变的情况。
+  因此这种方法无论是给诚实用户还是恶意行为者都提供了极大的灵活性。
 
-- If you want to send Ether using ``address.transfer``, there are certain details to be aware of:
+- 如果你想要使用 ``address.transfer`` 发送 |ether| ，你需要注意以下几个细节：
 
-  1. If the recipient is a contract, it causes its fallback function to be executed which can, in turn, call back the sending contract.
-  2. Sending Ether can fail due to the call depth going above 1024. Since the caller is in total control of the call
-     depth, they can force the transfer to fail; take this possibility into account or use ``send`` and make sure to always check its return value. Better yet,
-     write your contract using a pattern where the recipient can withdraw Ether instead.
-  3. Sending Ether can also fail because the execution of the recipient contract
-     requires more than the allotted amount of gas (explicitly by using ``require``,
-     ``assert``, ``revert``, ``throw`` or
-     because the operation is just too expensive) - it "runs out of gas" (OOG).
-     If you use ``transfer`` or ``send`` with a return value check, this might provide a
-     means for the recipient to block progress in the sending contract. Again, the best practice here is to use
-     a :ref:`"withdraw" pattern instead of a "send" pattern <withdrawal_pattern>`.
+  1. 如果接收者是一个合约，它会执行自己的 fallback 函数，从而可以回调发送 |ether| 的合约。
+  2. 如果调用的深度超过 1024，发送 |ether| 也会失败。由于调用者对调用深度有完全的控制权，他们可以强制使这次发送失败；
+     请考虑这种可能性，或者使用 ``send`` 并且确保每次都核对它的返回值。
+     更好的方法是使用一种接收者可以取回 |ether| 的方式编写你的合约。
+  3. 发送 |ether| 也可能因为接收方合约的执行所需的 gas 多于分配的 gas 数量而失败
+     （确切地说，是使用了 ``require`` ， ``assert``， ``revert`` ， ``throw`` 或者因为这个操作过于昂贵） - “gas 不够用了”。
+     如果你使用 ``transfer`` 或者 ``send`` 的同时带有返回值检查，这就为接收者提供了在发送合约中阻断进程的方法。
+     再次说明，最佳实践是使用 :ref:`“取回”模式而不是“发送”模式<withdrawal_pattern>`。
 
-Callstack Depth
+调用栈深度
 ===============
 
-External function calls can fail any time because they exceed the maximum
-call stack of 1024. In such situations, Solidity throws an exception.
-Malicious actors might be able to force the call stack to a high value
-before they interact with your contract.
+外部函数调用随时会失败，因为它们超过了调用栈的上限 1024。
+在这种情况下，Solidity 会抛出一个异常。
+恶意行为者也许能够在与你的合约交互之前强制将调用栈设置成一个比较高的值。
 
-Note that ``.send()`` does **not** throw an exception if the call stack is
-depleted but rather returns ``false`` in that case. The low-level functions
-``.call()``, ``.callcode()`` and ``.delegatecall()`` behave in the same way.
+请注意，使用 ``.send()`` 时如果超出调用栈 **并不会** 抛出异常，而是会返回 ``false``。
+低级的函数比如 ``.call()``，``.callcode()`` 和 ``.delegatecall()`` 也都是这样的。
 
 tx.origin
 =========
 
-Never use tx.origin for authorization. Let's say you have a wallet contract like this:
+永远不要使用 tx.origin 做身份认证。假设你有一个如下的钱包合约：
 
 ::
 
     pragma solidity ^0.4.11;
 
-    // THIS CONTRACT CONTAINS A BUG - DO NOT USE
+    // 不要使用这个合约，其中包含一个 bug。
     contract TxUserWallet {
         address owner;
 
@@ -196,7 +179,7 @@ Never use tx.origin for authorization. Let's say you have a wallet contract like
         }
     }
 
-Now someone tricks you into sending ether to the address of this attack wallet:
+现在有人欺骗你，将 |ether| 发送到了这个恶意钱包的地址：
 
 ::
 
@@ -218,90 +201,75 @@ Now someone tricks you into sending ether to the address of this attack wallet:
         }
     }
 
-If your wallet had checked ``msg.sender`` for authorization, it would get the address of the attack wallet, instead of the owner address. But by checking ``tx.origin``, it gets the original address that kicked off the transaction, which is still the owner address. The attack wallet instantly drains all your funds.
+如果你的钱包通过核查 ``msg.sender`` 来验证发送方身份，你就会得到恶意钱包的地址，而不是所有者的地址。
+但是通过核查 ``tx.origin`` ，得到的就会是启动交易的原始地址，它仍然会是所有者的地址。
+恶意钱包会立即将你的资金抽出。
 
 
-Minor Details
+细枝末节
 =============
 
-- In ``for (var i = 0; i < arrayName.length; i++) { ... }``, the type of ``i`` will be ``uint8``, because this is the smallest type that is required to hold the value ``0``. If the array has more than 255 elements, the loop will not terminate.
-- The ``constant`` keyword for functions is currently not enforced by the compiler.
-  Furthermore, it is not enforced by the EVM, so a contract function that "claims"
-  to be constant might still cause changes to the state.
-- Types that do not occupy the full 32 bytes might contain "dirty higher order bits".
-  This is especially important if you access ``msg.data`` - it poses a malleability risk:
-  You can craft transactions that call a function ``f(uint8 x)`` with a raw byte argument
-  of ``0xff000001`` and with ``0x00000001``. Both are fed to the contract and both will
-  look like the number ``1`` as far as ``x`` is concerned, but ``msg.data`` will
-  be different, so if you use ``keccak256(msg.data)`` for anything, you will get different results.
+- 在 ``for (var i = 0; i < arrayName.length; i++) { ... }`` 中， ``i`` 的类型会变为 ``uint8`` ，
+  因为这是保存 ``0`` 值所需的最小类型。如果数组超过 255 个元素，则循环不会终止。
+- ``constant`` 关键字并不是编译器强制的，另外也不是 |evm| 强制的，
+  因此一个“声明”为 ``constant`` 的函数可能仍然会发生状态发生变化。
+- 不占用完整 32 字节的类型可能包含“脏高位”。这在当你访问 ``msg.data`` 的时候尤为重要 —— 它带来了延展性风险：
+  你既可以用原始字节 ``0xff000001`` 也可以用 ``0x00000001`` 作为参数来调用函数 ``f(uint8 x)`` 以构造交易。
+  这两个参数都会被正常提供给合约，并且 ``x`` 的值看起来都像是数字 ``1``，
+  但 ``msg.data`` 会不一样，所以如果你无论怎么使用 ``keccak256(msg.data)``，你都会得到不同的结果。
 
 ***************
 推荐做法
 ***************
 
-Restrict the Amount of Ether
+限定 |ether| 的数量
 ============================
 
-Restrict the amount of Ether (or other tokens) that can be stored in a smart
-contract. If your source code, the compiler or the platform has a bug, these
-funds may be lost. If you want to limit your loss, limit the amount of Ether.
+限定 |storage| 在一个智能合约中 |ether| （或者其它通证）的数量。
+如果你的源代码、编译器或者平台出现了 bug，可能会导致这些资产丢失。
+如果你想控制你的损失，就要限定 |ether| 的数量。
 
-Keep it Small and Modular
+保持合约简练且模块化
 =========================
 
-Keep your contracts small and easily understandable. Single out unrelated
-functionality in other contracts or into libraries. General recommendations
-about source code quality of course apply: Limit the amount of local variables,
-the length of functions and so on. Document your functions so that others
-can see what your intention was and whether it is different than what the code does.
+保持你的合约短小精炼且易于理解。
+找出无关于其它合约或库的功能。
+有关源码质量可以采用的一般建议：
+限制局部变量的数量以及函数的长度等等。
+将实现的函数文档化，这样别人看到代码的时候就可以理解你的意图，并判断代码是否按照正确的意图实现。
 
-Use the Checks-Effects-Interactions Pattern
-===========================================
+使用“检查-生效-交互”（Checks-Effects-Interactions）模式
+============================================================
 
-Most functions will first perform some checks (who called the function,
-are the arguments in range, did they send enough Ether, does the person
-have tokens, etc.). These checks should be done first.
+大多数函数会首先做一些检查工作（例如谁调用了函数，参数是否在取值范围之内，它们是否发送了足够的 |ether| ，用户是否具有通证等等）。
+这些检查工作应该首先被完成。
 
-As the second step, if all checks passed, effects to the state variables
-of the current contract should be made. Interaction with other contracts
-should be the very last step in any function.
+第二步，如果所有检查都通过了，应该接着进行会影响当前合约状态变量的那些处理。
+与其它合约的交互应该是任何函数的最后一步。
 
-Early contracts delayed some effects and waited for external function
-calls to return in a non-error state. This is often a serious mistake
-because of the re-entrancy problem explained above.
+早期合约延迟了一些效果的产生，为了等待外部函数调用以非错误状态返回。
+由于上文所述的重入问题，这通常会导致严重的后果。
 
-Note that, also, calls to known contracts might in turn cause calls to
-unknown contracts, so it is probably better to just always apply this pattern.
+请注意，对已知合约的调用反过来也可能导致对未知合约的调用，所以最好是一直保持使用这个模式编写代码。
 
-Include a Fail-Safe Mode
-========================
+包含故障-安全（Fail-Safe）模式
+====================================
 
-While making your system fully decentralised will remove any intermediary,
-it might be a good idea, especially for new code, to include some kind
-of fail-safe mechanism:
+尽管将系统完全去中心化可以省去许多中间环节，但包含某种故障-安全模式仍然是好的做法，尤其是对于新的代码来说：
 
-You can add a function in your smart contract that performs some
-self-checks like "Has any Ether leaked?",
-"Is the sum of the tokens equal to the balance of the contract?" or similar things.
-Keep in mind that you cannot use too much gas for that, so help through off-chain
-computations might be needed there.
+你可以在你的智能合约中增加一个函数实现某种程度上的自检查，比如“ |ether| 是否会泄露？”，
+“通证的总和是否与合约的余额相等？”等等。
+请记住，你不能使用太多的 gas，所以可能需要通过 |off_chain| 计算来辅助。
 
-If the self-check fails, the contract automatically switches into some kind
-of "failsafe" mode, which, for example, disables most of the features, hands over
-control to a fixed and trusted third party or just converts the contract into
-a simple "give me back my money" contract.
-
+如果自检查没有通过，合约就会自动切换到某种“故障安全”模式，
+例如，关闭大部分功能，将控制权交给某个固定的可信第三方，或者将合约转换成一个简单的“退回我的钱”合约。
 
 *******************
 形式化验证
 *******************
 
-Using formal verification, it is possible to perform an automated mathematical
-proof that your source code fulfills a certain formal specification.
-The specification is still formal (just as the source code), but usually much
-simpler.
+使用形式化验证可以执行自动化的数学证明，保证源代码符合特定的正式规范。
+规范仍然是正式的（就像源代码一样），但通常要简单得多。
 
-Note that formal verification itself can only help you understand the
-difference between what you did (the specification) and how you did it
-(the actual implementation). You still need to check whether the specification
-is what you wanted and that you did not miss any unintended effects of it.
+请注意形式化验证本身只能帮助你理解你做的（规范）和你怎么做（实际的实现）的之间的差别。
+你仍然需要检查这个规范是否是想要的，而且没有漏掉由它产生的任何非计划内的效果。
