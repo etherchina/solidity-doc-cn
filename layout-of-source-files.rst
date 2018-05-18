@@ -129,8 +129,8 @@ Solidity 源文件结构
 .. code-block:: bash
 
   solc module1:github.com/ethereum/dapp-bin/=/usr/local/dapp-bin/ \
-module2:github.com/ethereum/dapp-bin/=/usr/local/dapp-bin_old/ \
-source.sol
+  module2:github.com/ethereum/dapp-bin/=/usr/local/dapp-bin_old/ \
+  source.sol
 
 这样， ``module2`` 中的所有导入都指向旧版本，而 ``module1`` 中的导入则获取新版本。
 
