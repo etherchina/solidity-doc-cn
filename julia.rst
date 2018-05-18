@@ -1,10 +1,10 @@
-.. include:: glossaries.rst
 
 ############################################################
 可用于（内联）装配的语言：Joyfully Universal Language
 ############################################################
 
 .. _julia:
+.. include:: glossaries.rst
 
 .. index:: ! assembly, ! asm, ! evmasm, ! julia
 
