@@ -4,19 +4,17 @@
 
 .. index:: wei, finney, szabo, ether
 
-Ether Units
+|ether| 单位
 ===========
 
-A literal number can take a suffix of ``wei``, ``finney``, ``szabo`` or ``ether`` to convert between the subdenominations of Ether, where Ether currency numbers without a postfix are assumed to be Wei, e.g. ``2 ether == 2000 finney`` evaluates to ``true``.
+|ether| 单位之间的换算就是在数字后边加上 ``wei``、 ``finney``、 ``szabo`` 或 ``ether`` 来实现的，如果后面没有单位，缺省为 Wei。例如 ``2 ether == 2000 finney`` 的逻辑判断值为 ``true``。
 
 .. index:: time, seconds, minutes, hours, days, weeks, years
 
-Time Units
+时间单位
 ==========
 
-Suffixes like ``seconds``, ``minutes``, ``hours``, ``days``, ``weeks`` and
-``years`` after literal numbers can be used to convert between units of time where seconds are the base
-unit and units are considered naively in the following way:
+秒是缺省时间单位，在时间单位之间，数字后面带有 ``seconds``、 ``minutes``、 ``hours``、 ``days``、 ``weeks`` 和 ``years`` 的可以进行换算，基本换算关系如下：
 
  * ``1 == 1 seconds``
  * ``1 minutes == 60 seconds``
@@ -25,14 +23,9 @@ unit and units are considered naively in the following way:
  * ``1 weeks == 7 days``
  * ``1 years == 365 days``
 
-Take care if you perform calendar calculations using these units, because
-not every year equals 365 days and not even every day has 24 hours
-because of `leap seconds <https://en.wikipedia.org/wiki/Leap_second>`_.
-Due to the fact that leap seconds cannot be predicted, an exact calendar
-library has to be updated by an external oracle.
+由于闰秒造成的每年不都是 365 天、每天不都是 24 小时 `leap seconds <https://en.wikipedia.org/wiki/Leap_second>`_，所以如果你要使用这些单位计算日期和时间，请注意这个问题。因为闰秒是无法预测的，所以需要借助外部的预言机（oracle，是一种链外数据服务，译者注）来对一个确定的日期代码库进行时间矫正。
 
-These suffixes cannot be applied to variables. If you want to
-interpret some input variable in e.g. days, you can do it in the following way::
+这些后缀不能直接用在变量后边。如果想用时间单位（例如 days）来将输入变量换算为时间，你可以用如下方式来完成：
 
     function f(uint start, uint daysAfter) public {
         if (now >= start + daysAfter * 1 days) {
@@ -40,90 +33,79 @@ interpret some input variable in e.g. days, you can do it in the following way::
         }
     }
 
-Special Variables and Functions
+特殊变量和函数
 ===============================
 
-There are special variables and functions which always exist in the global
-namespace and are mainly used to provide information about the blockchain.
+在全局命名空间中已经存在了（预设了）一些特殊的变量和函数，他们主要用来提供关于区块链的信息。
 
 .. index:: block, coinbase, difficulty, number, block;number, timestamp, block;timestamp, msg, data, gas, sender, value, now, gas price, origin
 
 
-Block and Transaction Properties
+区块和交易属性
 --------------------------------
 
-- ``block.blockhash(uint blockNumber) returns (bytes32)``: hash of the given block - only works for 256 most recent blocks excluding current
-- ``block.coinbase`` (``address``): current block miner's address
-- ``block.difficulty`` (``uint``): current block difficulty
-- ``block.gaslimit`` (``uint``): current block gaslimit
-- ``block.number`` (``uint``): current block number
-- ``block.timestamp`` (``uint``): current block timestamp as seconds since unix epoch
-- ``msg.data`` (``bytes``): complete calldata
-- ``msg.gas`` (``uint``): remaining gas
-- ``msg.sender`` (``address``): sender of the message (current call)
-- ``msg.sig`` (``bytes4``): first four bytes of the calldata (i.e. function identifier)
-- ``msg.value`` (``uint``): number of wei sent with the message
-- ``now`` (``uint``): current block timestamp (alias for ``block.timestamp``)
-- ``tx.gasprice`` (``uint``): gas price of the transaction
-- ``tx.origin`` (``address``): sender of the transaction (full call chain)
+- ``block.blockhash(uint blockNumber) returns (bytes32)``: 给定区块的哈希—仅对最近的 256 个区块有效而不包括当前区块
+- ``block.coinbase`` (``address``): 挖出当前区块的矿工地址
+- ``block.difficulty`` (``uint``): 当前区块难度
+- ``block.gaslimit`` (``uint``): 当前区块 gas 限额
+- ``block.number`` (``uint``): 当前区块号
+- ``block.timestamp`` (``uint``): 自 unix epoch 起始当前区块以秒计的时间戳
+- ``msg.data`` (``bytes``): 完整的 calldata
+- ``msg.gas`` (``uint``): 剩余 gas
+- ``msg.sender`` (``address``): 消息发送者（当前调用）
+- ``msg.sig`` (``bytes4``): calldata 的前 4 字节（也就是函数标识符）
+- ``msg.value`` (``uint``): 随消息发送的 wei 的数量
+- ``now`` (``uint``): 目前区块时间戳（``block.timestamp``）
+- ``tx.gasprice`` (``uint``): 交易的 gas 价格
+- ``tx.origin`` (``address``): 交易发起者（完全的调用链）
 
 .. note::
-    The values of all members of ``msg``, including ``msg.sender`` and
-    ``msg.value`` can change for every **external** function call.
-    This includes calls to library functions.
+    对于每一个**外部函数**调用，包括 ``msg.sender`` 和 ``msg.value`` 在内所有 ``msg`` 成员的值都会变化。这里包括对库函数的调用。
 
 .. note::
-    Do not rely on ``block.timestamp``, ``now`` and ``block.blockhash`` as a source of randomness,
-    unless you know what you are doing.
+    不要依赖 ``block.timestamp``、 ``now`` 和 ``block.blockhash`` 产生随机数，除非你知道自己在做什么。
 
-    Both the timestamp and the block hash can be influenced by miners to some degree.
-    Bad actors in the mining community can for example run a casino payout function on a chosen hash
-    and just retry a different hash if they did not receive any money.
+    时间戳和区块哈希在一定程度上都可能受到挖矿矿工影响。例如，挖矿社区中的恶意矿工可以用某个给定的哈希来运行赌场合约的 payout 函数，而如果他们没收到钱，还可以用一个不同的哈希重新尝试。
 
-    The current block timestamp must be strictly larger than the timestamp of the last block,
-    but the only guarantee is that it will be somewhere between the timestamps of two
-    consecutive blocks in the canonical chain.
-
+    当前区块的时间戳必须严格大于最后一个区块的时间戳，但这里唯一能确保的只是它会是在权威链上的两个连续区块的时间戳之间的数值。
+    
 .. note::
-    The block hashes are not available for all blocks for scalability reasons.
-    You can only access the hashes of the most recent 256 blocks, all other
-    values will be zero.
+    基于可扩展因素，区块哈希不是对所有区块都有效。你仅仅可以访问最近 256 个区块的哈希，其余的哈希均为零。
 
 .. index:: assert, revert, require
 
-Error Handling
+错误处理
 --------------
 
 ``assert(bool condition)``:
-    throws if the condition is not met - to be used for internal errors.
+    如果条件不满足就抛出—用于内部错误。
 ``require(bool condition)``:
-    throws if the condition is not met - to be used for errors in inputs or external components.
+    如果条件不满足就抛掉—用于输入或者外部组件引起的错误。 
 ``revert()``:
-    abort execution and revert state changes
+    终止运行并恢复状态变动。
 
 .. index:: keccak256, ripemd160, sha256, ecrecover, addmod, mulmod, cryptography,
 
-Mathematical and Cryptographic Functions
+数学和密码学函数
 ----------------------------------------
 
 ``addmod(uint x, uint y, uint k) returns (uint)``:
-    compute ``(x + y) % k`` where the addition is performed with arbitrary precision and does not wrap around at ``2**256``. Assert that ``k != 0`` starting from version 0.5.0.
+    计算 ``(x + y) % k``，加法会在任意精度下执行，并且加法的结果即使超过 ``2**256`` 也不会被截取。从 0.5.0 版本的编译器开始会加入对 ``k != 0`` 的校验（assert）。
 ``mulmod(uint x, uint y, uint k) returns (uint)``:
-    compute ``(x * y) % k`` where the multiplication is performed with arbitrary precision and does not wrap around at ``2**256``. Assert that ``k != 0`` starting from version 0.5.0.
+    计算 ``(x * y) % k``，乘法会在任意精度下执行，并且乘法的结果即使超过 ``2**256`` 也不会被截取。从 0.5.0 版本的编译器开始会加入对 ``k != 0`` 的校验（assert）。
 ``keccak256(...) returns (bytes32)``:
-    compute the Ethereum-SHA-3 (Keccak-256) hash of the :ref:`(tightly packed) arguments <abi_packed_mode>`
+    计算 :ref:`(tightly packed) arguments <abi_packed_mode>` 的 Ethereum-SHA-3 （Keccak-256）哈希。
 ``sha256(...) returns (bytes32)``:
-    compute the SHA-256 hash of the :ref:`(tightly packed) arguments <abi_packed_mode>`
+    计算 :ref:`(tightly packed) arguments <abi_packed_mode>` 的 SHA-256 哈希。
 ``sha3(...) returns (bytes32)``:
-    alias to ``keccak256``
+     等价于 keccak256。
 ``ripemd160(...) returns (bytes20)``:
-    compute RIPEMD-160 hash of the :ref:`(tightly packed) arguments <abi_packed_mode>`
-``ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address)``:
-    recover the address associated with the public key from elliptic curve signature or return zero on error
+    计算 :ref:`(tightly packed) arguments <abi_packed_mode>` 的 RIPEMD-160 哈希。
+``ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address)`` ：
+    利用椭圆曲线签名恢复与公钥相关的地址，错误返回零值。
     (`example usage <https://ethereum.stackexchange.com/q/1777/222>`_)
 
-In the above, "tightly packed" means that the arguments are concatenated without padding.
-This means that the following are all identical::
+上文中的“tightly packed”是指不会对参数值进行 padding 处理（就是说所有参数值的字节码是连续存放的，译者注），这意味着下边这些调用都是等价的：
 
     keccak256("ab", "c")
     keccak256("abc")
@@ -131,58 +113,52 @@ This means that the following are all identical::
     keccak256(6382179)
     keccak256(97, 98, 99)
 
-If padding is needed, explicit type conversions can be used: ``keccak256("\x00\x12")`` is the
-same as ``keccak256(uint16(0x12))``.
+如果需要 padding，可以使用显式类型转换：``keccak256("\x00\x12")`` 和 ``keccak256(uint16(0x12))`` 是一样的。
 
-Note that constants will be packed using the minimum number of bytes required to store them.
-This means that, for example, ``keccak256(0) == keccak256(uint8(0))`` and
-``keccak256(0x12345678) == keccak256(uint32(0x12345678))``.
+请注意，常量值会使用存储它们所需要的最少字节数进行打包。例如：``keccak256(0) == keccak256(uint8(0))``，``keccak256(0x12345678) == keccak256(uint32(0x12345678))``。
 
-It might be that you run into Out-of-Gas for ``sha256``, ``ripemd160`` or ``ecrecover`` on a *private blockchain*. The reason for this is that those are implemented as so-called precompiled contracts and these contracts only really exist after they received the first message (although their contract code is hardcoded). Messages to non-existing contracts are more expensive and thus the execution runs into an Out-of-Gas error. A workaround for this problem is to first send e.g. 1 Wei to each of the contracts before you use them in your actual contracts. This is not an issue on the official or test net.
+在一个私链上，你很有可能碰到由于 ``sha256``、``ripemd160`` 或者 ``ecrecover`` 引起的 Out-of-Gas。这个原因就是他们被当做所谓的预编译合约而执行，并且在第一次收到消息后这些合约才真正存在（尽管合约代码是硬代码）。发送到不存在的合约的消息非常昂贵，所以实际的执行会导致 Out-of-Gas 错误。在你的合约中实际使用它们之前，给每个合约发送一点儿以太币，比如 1 Wei。这在官方网络或测试网络上不是问题。
 
 .. index:: balance, send, transfer, call, callcode, delegatecall
 .. _address_related:
 
-Address Related
+地址相关
 ---------------
 
 ``<address>.balance`` (``uint256``):
-    balance of the :ref:`address` in Wei
+    以 Wei 为单位的 :ref:`address` 的余额。
 ``<address>.transfer(uint256 amount)``:
-    send given amount of Wei to :ref:`address`, throws on failure, forwards 2300 gas stipend, not adjustable
+    向 :ref:`address` 发送数量为 amount 的 Wei，失败时抛出异常，发送 2300 gas 的矿工费，不可调节。
 ``<address>.send(uint256 amount) returns (bool)``:
-    send given amount of Wei to :ref:`address`, returns ``false`` on failure, forwards 2300 gas stipend, not adjustable
+    向 :ref:`address` 发送数量为 amount 的 Wei，失败时返回 ``false``，发送 2300 gas 的矿工费用，不可调节。
 ``<address>.call(...) returns (bool)``:
-    issue low-level ``CALL``, returns ``false`` on failure, forwards all available gas, adjustable
-``<address>.callcode(...) returns (bool)``:
-    issue low-level ``CALLCODE``, returns ``false`` on failure, forwards all available gas, adjustable
+    发出底层 ``CALL``，失败时返回 ``false``，发送所有可用 gas，不可调节。
+``<address>.callcode(...) returns (bool)``：
+    发出底层 ``CALLCODE``，失败时返回 ``false``，发送所有可用 gas，不可调节。
 ``<address>.delegatecall(...) returns (bool)``:
-    issue low-level ``DELEGATECALL``, returns ``false`` on failure, forwards all available gas, adjustable
+    发出底层 ``DELEGATECALL``，失败时返回 ``false``，发送所有可用 gas，不可调节。
 
-For more information, see the section on :ref:`address`.
+更多信息，参考 :ref:`address` 部分：
 
 .. warning::
-    There are some dangers in using ``send``: The transfer fails if the call stack depth is at 1024
-    (this can always be forced by the caller) and it also fails if the recipient runs out of gas. So in order
-    to make safe Ether transfers, always check the return value of ``send``, use ``transfer`` or even better:
-    Use a pattern where the recipient withdraws the money.
+    使用 send 有很多危险：如果调用栈深度已经达到 1024（这总是可以由调用者所强制指定），转账会失败；并且如果接收者用光了 gas，转账同样会失败。为了保证以太币转账安全，总是检查 ``send`` 的返回值，利用 ``transfer`` 或者下面更好的方式：
+    用这种接收者取回钱的模式。
 
 .. note::
-    The use of ``callcode`` is discouraged and will be removed in the future.
+     不鼓励使用 ``callcode``，并且将来它会被移除。
 
 .. index:: this, selfdestruct
 
-Contract Related
+合约相关
 ----------------
 
 ``this`` (current contract's type):
-    the current contract, explicitly convertible to :ref:`address`
+    当前合约，可以明确转换为 :ref:`address`。
 
 ``selfdestruct(address recipient)``:
-    destroy the current contract, sending its funds to the given :ref:`address`
+    销毁合约，并把余额发送到指定 :ref:`address`。
 
 ``suicide(address recipient)``:
-    alias to ``selfdestruct``
+     等价于 selfdestruct。
 
-Furthermore, all functions of the current contract are callable directly including the current function.
-
+此外，当前合约内的所有函数都可以被直接调用，包括当前函数。
