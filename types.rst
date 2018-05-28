@@ -1,4 +1,3 @@
-.. include:: glossaries.rst
 .. index:: type
 
 .. _types:
@@ -182,8 +181,6 @@ Solidity 提供了几种基本类型，可以用来组合出复杂类型。
 
 这三个函数 ``call``， ``delegatecall`` 和 ``callcode`` 都是非常低级的函数，应该只把它们当作 *最后一招* 来使用，因为它们破坏了 Solidity 的类型安全性。
 
-尽管 ``.value()`` 选项不支持 ``delegatecall``，但三种方法都有 ``.gas()`` 选项。
-
 .. note::
     所有合约都继承了地址（address）的成员变量，因此可以使用 ``this.balance`` 查询当前合约的余额。
 
@@ -228,9 +225,6 @@ Solidity 提供了几种基本类型，可以用来组合出复杂类型。
 ``string``:
     变长 UTF-8 编码字符串类型，参见 :ref:`arrays`。并不是值类型。
 
-根据经验，最好使用 ``bytes`` 存储任意长度的原始字节数据，使用 ``string`` 存储任意长度的字符串（UTF-8编码）数据。
-如果长度可以确定，尽量使用 ``bytes1`` 到 ``bytes32`` 中的一个，因为它们的开销小得多。
-
 .. index:: address, literal;address
 
 .. _address_literals:
@@ -243,7 +237,6 @@ Solidity 提供了几种基本类型，可以用来组合出复杂类型。
 
 .. note::
     混合大小写的地址校验和格式定义在 `EIP-55 <https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md>`_ 中。
-
 
 .. index:: literal, literal;rational
 
@@ -317,11 +310,6 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 
 枚举类型
 --------
-
-在 Solidity 中，枚举类型可以用来创建自定义类型。
-它可以显式地与整数类型进行转换，但不能隐式转换。
-显式的转换会在运行时检查数值的范围，如果转换失败则会引发一个异常。
-枚举类型至少需要一名成员。下面是枚举类型的一个例子：
 
 ::
 
@@ -490,6 +478,8 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 由于拷贝这些类型变量的开销相当大，我们不得不考虑它的存储位置，是将它们保存在 ** |memory| ** （并不是永久存储）中，
 还是 ** |storage| ** （保存状态变量的地方）中。
 
+.. index:: ! type;reference, ! reference type, storage, memory, location, array, struct
+
 数据位置
 ---------
 
@@ -564,8 +554,6 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 ``bytes`` 和 ``string`` 类型的变量是特殊的数组。
 ``bytes`` 类似于 ``byte[]``，但它在 calldata 中会被“紧打包”（译者注：将元素连续地存在一起，不会按每 32 字节一单元的方式来存放）。
 ``string`` 与 ``bytes`` 相同，但（暂时）不允许用长度或索引来访问。
-
-因此出于开销考虑，使用 ``bytes`` 比 ``byte[]`` 更好。
 
 .. note::
     如果想要访问以字节表示的字符串 ``s``，请使用 ``bytes(s).length`` / ``bytes(s)[7] = 'x';``。

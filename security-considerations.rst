@@ -52,11 +52,11 @@
 
     pragma solidity ^0.4.0;
 
-    // THIS CONTRACT CONTAINS A BUG - DO NOT USE
+    // 不要使用这个合约，其中包含一个 bug。
     contract Fund {
-        /// Mapping of ether shares of the contract.
+        /// 合约中 |ether| 分成的映射。
         mapping(address => uint) shares;
-        /// Withdraw your share.
+        /// 提取你的分成。
         function withdraw() public {
             if (msg.sender.send(shares[msg.sender]))
                 shares[msg.sender] = 0;
@@ -65,18 +65,18 @@
 
 这里的问题不是很严重，因为有限的 gas 也作为 ``send`` 的一部分，但仍然暴露了一个缺陷：
 |ether| 的传输过程中总是可以包含代码执行，所以接收者可以是一个回调进入 ``withdraw`` 的合约。
-这就会使其多次得到退款，从而将合约中的全部 |ether| 取走。
+这就会使其多次得到退款，从而将合约中的全部 |ether| 提取。
 特别地，下面的合约将允许一个攻击者多次得到退款，因为它使用了 ``call`` ，默认发送所有剩余的 gas。
 
 ::
 
     pragma solidity ^0.4.0;
 
-    // THIS CONTRACT CONTAINS A BUG - DO NOT USE
+    // 不要使用这个合约，其中包含一个 bug。
     contract Fund {
-        /// Mapping of ether shares of the contract.
+        /// 合约中 |ether| 分成的映射。
         mapping(address => uint) shares;
-        /// Withdraw your share.
+        /// 提取你的分成。
         function withdraw() public {
             if (msg.sender.call.value(shares[msg.sender])())
                 shares[msg.sender] = 0;
@@ -90,9 +90,9 @@
     pragma solidity ^0.4.11;
 
     contract Fund {
-        /// Mapping of ether shares of the contract.
+        /// 合约中 |ether| 分成的映射。
         mapping(address => uint) shares;
-        /// Withdraw your share.
+        /// 提取你的分成。
         function withdraw() public {
             var share = shares[msg.sender];
             shares[msg.sender] = 0;
@@ -121,7 +121,7 @@ gas 限制和循环
   合约可以对一个正常的转账做出反应并拒绝它，但还有些方法可以不通过创建消息来发送 |ether|。
   其中一种方法就是单纯地向合约地址“挖矿”，另一种方法就是使用 ``selfdestruct(x)`` 。
 
-- 如果一个合约收到了 |ether|（且没有函数被调用），就会执行 fallback 函数。
+- 如果一个合约收到了 |ether| （且没有函数被调用），就会执行 fallback 函数。
   如果没有 fallback 函数，那么 |ether| 会被拒收（同时会抛出异常）。
   在 fallback 函数执行过程中，合约只能依靠此时可用的“gas 津贴”（2300 gas）来执行。
   这笔津贴并不足以用来完成任何方式的 |storage| 访问。
@@ -165,7 +165,7 @@ tx.origin
 
     pragma solidity ^0.4.11;
 
-    // THIS CONTRACT CONTAINS A BUG - DO NOT USE
+    // 不要使用这个合约，其中包含一个 bug。
     contract TxUserWallet {
         address owner;
 
@@ -212,7 +212,7 @@ tx.origin
 - 在 ``for (var i = 0; i < arrayName.length; i++) { ... }`` 中， ``i`` 的类型会变为 ``uint8`` ，
   因为这是保存 ``0`` 值所需的最小类型。如果数组超过 255 个元素，则循环不会终止。
 - ``constant`` 关键字并不是编译器强制的，另外也不是 |evm| 强制的，
-因此一个“声明”为 ``constant`` 的函数可能仍然会发生状态发生变化。
+  因此一个“声明”为 ``constant`` 的函数可能仍然会发生状态发生变化。
 - 不占用完整 32 字节的类型可能包含“脏高位”。这在当你访问 ``msg.data`` 的时候尤为重要 —— 它带来了延展性风险：
   你既可以用原始字节 ``0xff000001`` 也可以用 ``0x00000001`` 作为参数来调用函数 ``f(uint8 x)`` 以构造交易。
   这两个参数都会被正常提供给合约，并且 ``x`` 的值看起来都像是数字 ``1``，
@@ -239,7 +239,7 @@ tx.origin
 将实现的函数文档化，这样别人看到代码的时候就可以理解你的意图，并判断代码是否按照正确的意图实现。
 
 使用“检查-生效-交互”（Checks-Effects-Interactions）模式
-===========================================
+============================================================
 
 大多数函数会首先做一些检查工作（例如谁调用了函数，参数是否在取值范围之内，它们是否发送了足够的 |ether| ，用户是否具有通证等等）。
 这些检查工作应该首先被完成。
@@ -253,7 +253,7 @@ tx.origin
 请注意，对已知合约的调用反过来也可能导致对未知合约的调用，所以最好是一直保持使用这个模式编写代码。
 
 包含故障-安全（Fail-Safe）模式
-========================
+====================================
 
 尽管将系统完全去中心化可以省去许多中间环节，但包含某种故障-安全模式仍然是好的做法，尤其是对于新的代码来说：
 
