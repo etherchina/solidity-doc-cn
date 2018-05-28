@@ -576,8 +576,8 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 
     contract C {
         function f(uint len) public pure {
-            uint[] |memory| a = new uint[](7);
-            bytes |memory| b = new bytes(len);
+            uint[] memory a = new uint[](7);
+            bytes memory b = new bytes(len);
             // 这里我们有 a.length == 7 以及 b.length == len
             a[6] = 8;
         }
