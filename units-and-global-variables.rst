@@ -1,3 +1,5 @@
+.. include:: glossaries.rst
+
 **************************************
 单元和全局变量
 **************************************
@@ -5,7 +7,7 @@
 .. index:: wei, finney, szabo, ether
 
 |ether| 单位
-===========
+==============
 
 |ether| 单位之间的换算就是在数字后边加上 ``wei``、 ``finney``、 ``szabo`` 或 ``ether`` 来实现的，如果后面没有单位，缺省为 Wei。例如 ``2 ether == 2000 finney`` 的逻辑判断值为 ``true``。
 
@@ -27,9 +29,11 @@
 
 这些后缀不能直接用在变量后边。如果想用时间单位（例如 days）来将输入变量换算为时间，你可以用如下方式来完成：
 
+::
+
     function f(uint start, uint daysAfter) public {
         if (now >= start + daysAfter * 1 days) {
-          // ...
+            // ...
         }
     }
 
