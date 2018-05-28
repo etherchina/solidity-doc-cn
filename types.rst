@@ -157,7 +157,7 @@ Solidity 提供了几种基本类型，可以用来组合出复杂类型。
 ``call`` 返回的布尔值表明了被调用的函数已经执行完毕（``true``）或者引发了一个 EVM 异常（``false``）。
 无法访问返回的真实数据（为此我们需要事先知道编码和大小）。
 
-可以使用 ``.gas()`` 修改器调整提供的 gas 数量 ::
+可以使用 ``.gas()`` |modifier| 调整提供的 gas 数量 ::
 
     namReg.call.gas(1000000)("register", "MyName");
 
@@ -165,12 +165,12 @@ Solidity 提供了几种基本类型，可以用来组合出复杂类型。
 
    nameReg.call.value(1 ether)("register", "MyName"); 
 
-最后一点，这些修改器可以联合使用。每个修改器出现的顺序不重要 ::
+最后一点，这些 |modifier| 可以联合使用。每个修改器出现的顺序不重要 ::
 
    nameReg.call.gas(1000000).value(1 ether)("register", "MyName"); 
 
 .. note::
-    目前还不能在重载函数中使用 gas 或者 value 修改器。
+    目前还不能在重载函数中使用 gas 或者 value |modifier| 。
 
     一种解决方案是给 gas 和值引入一个特例，并重新检查它们是否在重载的地方出现。
 
@@ -667,7 +667,7 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
     contract ArrayContract {
         uint[2**20] m_aLotOfIntegers;
         // 注意下面的代码并不是一对动态数组，
-        // 而是一个元素为一对变量的数组（例如，一个元素为长度为二的定长数组的变长数组）。
+        // 而是一个数组元素为一对变量的动态数组（也就是数组元素为长度为 2 的定长数组的动态数组）。
         bool[2][] m_pairsOfFlags;
         // newPairs 存储在 memory 中 —— 函数参数默认的存储位置
 
