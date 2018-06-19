@@ -1,39 +1,32 @@
+
 ############################################################
 可用于（内联）装配的语言：Joyfully Universal Language
 ############################################################
 
 .. _julia:
+.. include:: glossaries.rst
 
 .. index:: ! assembly, ! asm, ! evmasm, ! julia
 
-JULIA is an intermediate language that can compile to various different backends
-(EVM 1.0, EVM 1.5 and eWASM are planned).
-Because of that, it is designed to be a usable common denominator of all three
-platforms.
-It can already be used for "inline assembly" inside Solidity and
-future versions of the Solidity compiler will even use JULIA as intermediate
-language. It should also be easy to build high-level optimizer stages for JULIA.
+JULIA是一种可以编译到各种不同后端的中间语言（ |evm| 1.0，|evm| 1.5，而 eWASM 也在计划中）。
+正因为如此，它被设计成为这三种平台的可用的共同标准。
+它已经可以用于 Solidity 内部的“内联汇编”，并且未来版本的 Solidity 编译器甚至会将 JULIA 用作中间语言。 为 JULIA 构建高级的优化器阶段也将会很容易。
 
 .. note::
 
-    Note that the flavour used for "inline assembly" does not have types
-    (everything is ``u256``) and the built-in functions are identical
-    to the EVM opcodes. Please resort to the inline assembly documentation
-    for details.
+    请注意，用于“内联汇编”的书写风格是不带类型的（所有的都是 ``u256``），内置函数与 |evm| 操作码相同。
+    有关详细信息，请参阅内联汇编文档。
 
-The core components of JULIA are functions, blocks, variables, literals,
-for-loops, if-statements, switch-statements, expressions and assignments to variables.
+JULIA 的核心组件是函数，代码块，变量，字面量，for 循环，if 条件语句，switch 条件语句，表达式和变量赋值。
 
-JULIA is typed, both variables and literals must specify the type with postfix
-notation. The supported types are ``bool``, ``u8``, ``s8``, ``u32``, ``s32``,
-``u64``, ``s64``, ``u128``, ``s128``, ``u256`` and ``s256``.
+JULIA 是强类型的，变量和字面量都需要通过前缀符号来指明类型。支持的类型有：``bool``， ``u8``， ``s8``， ``u32``， ``s32``，
+``u64``， ``s64``， ``u128``， ``s128``， ``u256`` 和 ``s256``。
 
-JULIA in itself does not even provide operators. If the EVM is targeted,
-opcodes will be available as built-in functions, but they can be reimplemented
-if the backend changes. For a list of mandatory built-in functions, see the section below.
+JULIA本身甚至不提供操作符。 如果目标平台是 |evm|，则操作码将作为内置函数提供，但如果后端平台发生了变化，则可以重新实现它们。
+有关强制性的内置函数的列表，请参阅下面的章节。
 
-The following example program assumes that the EVM opcodes ``mul``, ``div``
-and ``mod`` are available either natively or as functions and computes exponentiation.
+
+以下示例程序假定 |evm| 操作码 ``mul``，``div`` 和 ``mo`` 是原生支持或可以作为函数用以计算指数的。
 
 .. code::
 
@@ -52,9 +45,7 @@ and ``mod`` are available either natively or as functions and computes exponenti
         }
     }
 
-It is also possible to implement the same function using a for-loop
-instead of with recursion. Here, we need the EVM opcodes ``lt`` (less-than)
-and ``add`` to be available.
+也可用 for 循环代替递归来实现相同的功能。这里，我们需要 |evm| 操作码 ``lt`` （小于）和 ``add`` 可用。
 
 .. code::
 
@@ -72,141 +63,117 @@ and ``add`` to be available.
 JULIA语言说明
 ======================
 
-JULIA code is described in this chapter. JULIA code is usually placed into a JULIA object, which is described in the following chapter.
+本章介绍 JULIA 代码。 JULIA 代码通常放置在 JULIA 对象中，它将在下一章中介绍。
 
-Grammar::
+语法::
 
-    Block = '{' Statement* '}'
-    Statement =
-        Block |
-        FunctionDefinition |
-        VariableDeclaration |
-        Assignment |
-        Expression |
+    代码块 = '{' 语句* '}'
+    语句 =
+        代码块 |
+        函数定义 |
+        变量声明 |
+        赋值 |
+        表达式 |
         Switch |
-        ForLoop |
-        BreakContinue
-    FunctionDefinition =
-        'function' Identifier '(' TypedIdentifierList? ')'
-        ( '->' TypedIdentifierList )? Block
-    VariableDeclaration =
-        'let' TypedIdentifierList ( ':=' Expression )?
-    Assignment =
-        IdentifierList ':=' Expression
-    Expression =
-        FunctionCall | Identifier | Literal
-    If =
-        'if' Expression Block
-    Switch =
-        'switch' Expression Case* ( 'default' Block )?
+        For 循环 |
+        循环中断
+    函数定义 =
+        'function' 标识符 '(' 带类型的标识符列表? ')'
+        ( '->' 带类型的标识符列表 )? 代码块
+    变量声明 =
+        'let' 带类型的标识符列表 ( ':=' 表达式 )?
+    赋值 =
+        标识符列表 ':=' 表达式
+    表达式 =
+        函数调用 | 标识符 | 字面量
+    If 条件语句 =
+        'if' 表达式 代码块
+    Switch 条件语句 =
+        'switch' 表达式 Case* ( 'default' 代码块 )?
     Case =
-        'case' Literal Block
-    ForLoop =
-        'for' Block Expression Block Block
-    BreakContinue =
+        'case' 字面量 代码块
+    For 循环 =
+        'for' 代码块 表达式 代码块 代码块
+    循环中断 =
         'break' | 'continue'
-    FunctionCall =
-        Identifier '(' ( Expression ( ',' Expression )* )? ')'
-    Identifier = [a-zA-Z_$] [a-zA-Z_0-9]*
-    IdentifierList = Identifier ( ',' Identifier)*
-    TypeName = Identifier | BuiltinTypeName
-    BuiltinTypeName = 'bool' | [us] ( '8' | '32' | '64' | '128' | '256' )
-    TypedIdentifierList = Identifier ':' TypeName ( ',' Identifier ':' TypeName )*
-    Literal =
-        (NumberLiteral | StringLiteral | HexLiteral | TrueLiteral | FalseLiteral) ':' TypeName
-    NumberLiteral = HexNumber | DecimalNumber
-    HexLiteral = 'hex' ('"' ([0-9a-fA-F]{2})* '"' | '\'' ([0-9a-fA-F]{2})* '\'')
-    StringLiteral = '"' ([^"\r\n\\] | '\\' .)* '"'
-    TrueLiteral = 'true'
-    FalseLiteral = 'false'
-    HexNumber = '0x' [0-9a-fA-F]+
-    DecimalNumber = [0-9]+
+    函数调用 =
+        标识符 '(' ( 表达式 ( ',' 表达式 )* )? ')'
+    标识符 = [a-zA-Z_$] [a-zA-Z_0-9]*
+    标识符列表 = 标识符 ( ',' 标识符)*
+    类型名 = 标识符 | 内置的类型名
+    内置的类型名 = 'bool' | [us] ( '8' | '32' | '64' | '128' | '256' )
+    带类型的标识符列表 = 标识符 ':' 类型名 ( ',' 标识符 ':' 类型名 )*
+    字面量 =
+        (数字字面量 | 字符串字面量 | 十六进制字面量 | True字面量 | False字面量) ':' 类型名
+    数字字面量 = 十六进制数字 | 十进制数字
+    十六进制字面量 = 'hex' ('"' ([0-9a-fA-F]{2})* '"' | '\'' ([0-9a-fA-F]{2})* '\'')
+    字符串字面量 = '"' ([^"\r\n\\] | '\\' .)* '"'
+    True字面量 = 'true'
+    False字面量 = 'false'
+    十六进制数字 = '0x' [0-9a-fA-F]+
+    十进制数字 = [0-9]+
 
-Restrictions on the Grammar
+语法层面的限制
 ---------------------------
 
-Switches must have at least one case (including the default case).
-If all possible values of the expression is covered, the default case should
-not be allowed (i.e. a switch with a ``bool`` expression and having both a
-true and false case should not allow a default case).
 
-Every expression evaluates to zero or more values. Identifiers and Literals
-evaluate to exactly
-one value and function calls evaluate to a number of values equal to the
-number of return values of the function called.
+Switches 必须至少有一个 case（包括 default ）。
+如果表达式的所有可能值都被覆盖了，那么不应该允许使用 default
+（即带 ``bool`` 表达式的 switch 语句同时具有 true case 和 false case 的情况下不应再有 default 语句）。
 
-In variable declarations and assignments, the right-hand-side expression
-(if present) has to evaluate to a number of values equal to the number of
-variables on the left-hand-side.
-This is the only situation where an expression evaluating
-to more than one value is allowed.
 
-Expressions that are also statements (i.e. at the block level) have to
-evaluate to zero values.
+每个表达式都求值为零个或多个值。 标识符和字面量求值为一个值，函数调用求值为所调用函数的返回值。
 
-In all other situations, expressions have to evaluate to exactly one value.
+在变量声明和赋值中，右侧表达式（如果存在）求值后，必须得出与左侧变量数量相等的值。
+这是唯一允许求值出多个值的表达式。
 
-The ``continue`` and ``break`` statements can only be used inside loop bodies
-and have to be in the same function as the loop (or both have to be at the
-top level).
-The condition part of the for-loop has to evaluate to exactly one value.
+那种同时又是语句的表达式（即在代码块的层次）求值结果必须只有零个值。
 
-Literals cannot be larger than the their type. The largest type defined is 256-bit wide.
+在其他所有情况中，表达式求值后必须仅有一个值。
 
-Scoping Rules
--------------
+``continue`` 和 ``break`` 语句只能用在循环体中，并且必须与循环处于同一个函数中（或者两者都必须在顶层）。
 
-Scopes in JULIA are tied to Blocks (exceptions are functions and the for loop
-as explained below) and all declarations
-(``FunctionDefinition``, ``VariableDeclaration``)
-introduce new identifiers into these scopes.
+for 循环的条件部分的求值结果只能为一个值。
 
-Identifiers are visible in
-the block they are defined in (including all sub-nodes and sub-blocks).
-As an exception, identifiers defined in the "init" part of the for-loop
-(the first block) are visible in all other parts of the for-loop
-(but not outside of the loop).
-Identifiers declared in the other parts of the for loop respect the regular
-syntatical scoping rules.
-The parameters and return parameters of functions are visible in the
-function body and their names cannot overlap.
+字面量不可以大于它们本身的类型。已定义的最大类型宽度为 256 比特。
 
-Variables can only be referenced after their declaration. In particular,
-variables cannot be referenced in the right hand side of their own variable
-declaration.
-Functions can be referenced already before their declaration (if they are visible).
 
-Shadowing is disallowed, i.e. you cannot declare an identifier at a point
-where another identifier with the same name is also visible, even if it is
-not accessible.
+作用域规则
+---------------
 
-Inside functions, it is not possible to access a variable that was declared
-outside of that function.
+JULIA 中的作用域是与块（除了函数和 for 循环，如下所述）和所有引入新的标识符到作用域中的声明
+（ ``FunctionDefinition`` ，``VariableDeclaration`` ）紧密绑定的。
 
-Formal Specification
+标识符在将其定义的块中可见（包括所有子节点和子块）。
+作为例外，for 循环的 “init” 部分中（第一个块）定义的标识符在 for 循环的所有其他部分（但不在循环之外）中都是可见的。
+在 for 循环的其他部分声明的标识符遵守常规的作用域语法规则。
+函数的参数和返回参数在函数体中可见，并且它们的名称不能相同。
+
+
+变量只能在声明后引用。 尤其是，变量不能在它们自己的变量声明的右边被引用。
+函数可以在声明之前被引用（如果它们是可见的）。
+
+Shadowing 是不被允许的，即是说，你不能在同名标识符已经可见的情况下又定义该标识符，即使它是不可访问的。
+
+在函数内，不可能访问声明在函数外的变量。
+
+
+形式规范
 --------------------
 
-We formally specify JULIA by providing an evaluation function E overloaded
-on the various nodes of the AST. Any functions can have side effects, so
-E takes two state objects and the AST node and returns two new
-state objects and a variable number of other values.
-The two state objects are the global state object
-(which in the context of the EVM is the memory, storage and state of the
-blockchain) and the local state object (the state of local variables, i.e. a
-segment of the stack in the EVM).
-If the AST node is a statement, E returns the two state objects and a "mode",
-which is used for the ``break`` and ``continue`` statements.
-If the AST node is an expression, E returns the two state objects and
-as many values as the expression evaluates to.
+我们通过在 AST 的各个节点上提供重载的求值函数 E 来正式指定 JULIA。
+任何函数都可能有副作用，所以 E 接受两个状态对象和 AST 节点作为它的参数，并返回两个新的状态对象和数量可变的其他值。
+
+这两个状态对象是全局状态对象（在 |evm| 的上下文中是 |memory|，|storage| 和区块链的状态）和本地状态对象（局部变量的状态，即 |evm| 中堆栈的某个段）。
+如果 AST 节点是一个语句，E 将返回两个状态对象和一个用于 break 和 continue 语句的 “mode”。
+如果 AST 节点是表达式，则 E 返回两个状态对象，并返回与表达式求值结果相同数量的值。
 
 
-The exact nature of the global state is unspecified for this high level
-description. The local state ``L`` is a mapping of identifiers ``i`` to values ``v``,
-denoted as ``L[i] = v``.
+在这份高层次的描述中，并没有对全局状态的确切本质进行说明。
+本地状态 ``L`` 是标识符 ``i`` 到值 ``v`` 的映射，表示为 ``L[i] = v``。
+对于标识符 ``v``, 我们用 ``$v`` 作为标识符的名字。
 
-For an identifier ``v``, let ``$v`` be the name of the identifier.
-
-We will use a destructuring notation for the AST nodes.
+我们将为 AST 节点使用解构符号。
 
 .. code::
 
@@ -237,9 +204,9 @@ We will use a destructuring notation for the AST nodes.
     E(G, L, <for { i1, ..., in } condition post body>: ForLoop) =
         if n >= 1:
             let G1, L1, mode = E(G, L, i1, ..., in)
-            // mode has to be regular due to the syntactic restrictions
+            // 由于语法限制，mode 必须是规则的
             let G2, L2, mode = E(G1, L1, for {} condition post body)
-            // mode has to be regular due to the syntactic restrictions
+            // 由于语法限制，mode 必须是规则的
             let L3 be the restriction of L2 to only variables of L
             G2, L3, regular
         else:
@@ -268,7 +235,7 @@ We will use a destructuring notation for the AST nodes.
     E(G, L, <switch condition case l1:t1 st1 ... case ln:tn stn default st'>: Switch) =
         let G0, L0, v = E(G, L, condition)
         // i = 1 .. n
-        // Evaluate literals, context doesn't matter
+        // 对字面量求值，上下文无关
         let _, _, v1 = E(G0, L0, l1)
         ...
         let _, _, vn = E(G0, L0, ln)
@@ -300,26 +267,27 @@ We will use a destructuring notation for the AST nodes.
     E(G, L, n: DecimalNumber) = G, L, dec(n),
         where dec is the decimal decoding function
 
-Type Conversion Functions
+类型转换函数
 -------------------------
 
-JULIA has no support for implicit type conversion and therefore functions exists to provide explicit conversion.
-When converting a larger type to a shorter type a runtime exception can occur in case of an overflow.
+JULIA不支持隐式类型转换，因此存在提供显式转换的函数。
+在将较大类型转换为较短类型时，如果发生溢出，则可能会发生运行时异常。
 
-The following type conversion functions must be available:
+以下类型转换函数必须可用：
+
 - ``u32tobool(x:u32) -> y:bool``
 - ``booltou32(x:bool) -> y:u32``
 - ``u32tou64(x:u32) -> y:u64``
 - ``u64tou32(x:u64) -> y:u32``
-- etc. (TBD)
+- 等等。 (TBD)
 
-Low-level Functions
+低级函数
 -------------------
 
-The following functions must be available:
+以下函数必须可用:
 
 +---------------------------------------------------------------------------------------------------------------+
-| *Arithmetics*                                                                                                 |
+| *算术函数*                                                                                                    |
 +---------------------------------------------------------------------------------------------------------------+
 | addu256(x:u256, y:u256) -> z:u256           | x + y                                                           |
 +---------------------------------------------------------------------------------------------------------------+
@@ -329,45 +297,45 @@ The following functions must be available:
 +---------------------------------------------------------------------------------------------------------------+
 | divu256(x:u256, y:u256) -> z:u256           | x / y                                                           |
 +---------------------------------------------------------------------------------------------------------------+
-| divs256(x:s256, y:s256) -> z:s256           | x / y, for signed numbers in two's complement                   |
+| divs256(x:s256, y:s256) -> z:s256           | x / y, 有符号数用补码形式                                       |
 +---------------------------------------------------------------------------------------------------------------+
 | modu256(x:u256, y:u256) -> z:u256           | x % y                                                           |
 +---------------------------------------------------------------------------------------------------------------+
-| mods256(x:s256, y:s256) -> z:s256           | x % y, for signed numbers in two's complement                   |
+| mods256(x:s256, y:s256) -> z:s256           | x % y, 有符号数用补码形式                                       |
 +---------------------------------------------------------------------------------------------------------------+
 | signextendu256(i:u256, x:u256) -> z:u256    | sign extend from (i*8+7)th bit counting from least significant  |
 +---------------------------------------------------------------------------------------------------------------+
-| expu256(x:u256, y:u256) -> z:u256           | x to the power of y                                             |
+| expu256(x:u256, y:u256) -> z:u256           | x 的 y 次方                                                     |
 +---------------------------------------------------------------------------------------------------------------+
 | addmodu256(x:u256, y:u256, m:u256) -> z:u256| (x + y) % m with arbitrary precision arithmetics                |
 +---------------------------------------------------------------------------------------------------------------+
 | mulmodu256(x:u256, y:u256, m:u256) -> z:u256| (x * y) % m with arbitrary precision arithmetics                |
 +---------------------------------------------------------------------------------------------------------------+
-| ltu256(x:u256, y:u256) -> z:bool            | 1 if x < y, 0 otherwise                                         |
+| ltu256(x:u256, y:u256) -> z:bool            | 若 x < y 为 1, 否则为 0                                         |
 +---------------------------------------------------------------------------------------------------------------+
-| gtu256(x:u256, y:u256) -> z:bool            | 1 if x > y, 0 otherwise                                         |
+| gtu256(x:u256, y:u256) -> z:bool            | 若 x > y 为 1, 否则为 0                                         |
 +---------------------------------------------------------------------------------------------------------------+
-| sltu256(x:s256, y:s256) -> z:bool           | 1 if x < y, 0 otherwise, for signed numbers in two's complement |
+| sltu256(x:s256, y:s256) -> z:bool           | 若 x < y 为 1, 否则为 0，有符号数用补码形式                     |
 +---------------------------------------------------------------------------------------------------------------+
-| sgtu256(x:s256, y:s256) -> z:bool           | 1 if x > y, 0 otherwise, for signed numbers in two's complement |
+| sgtu256(x:s256, y:s256) -> z:bool           | 若 x > y 为 1, 否则为 0，有符号数用补码形式                     |
 +---------------------------------------------------------------------------------------------------------------+
-| equ256(x:u256, y:u256) -> z:bool            | 1 if x == y, 0 otherwise                                        |
+| equ256(x:u256, y:u256) -> z:bool            | 若 x == y 为 1, 否则为 0                                        |
 +---------------------------------------------------------------------------------------------------------------+
-| notu256(x:u256) -> z:u256                   | ~x, every bit of x is negated                                   |
+| notu256(x:u256) -> z:u256                   | ~x, 对 x 按位非                                                 |
 +---------------------------------------------------------------------------------------------------------------+
-| andu256(x:u256, y:u256) -> z:u256           | bitwise and of x and y                                          |
+| andu256(x:u256, y:u256) -> z:u256           | x 和 y 按位与                                                   |
 +---------------------------------------------------------------------------------------------------------------+
-| oru256(x:u256, y:u256) -> z:u256            | bitwise or of x and y                                           |
+| oru256(x:u256, y:u256) -> z:u256            | x 和 y 按位或                                                   |
 +---------------------------------------------------------------------------------------------------------------+
-| xoru256(x:u256, y:u256) -> z:u256           | bitwise xor of x and y                                          |
+| xoru256(x:u256, y:u256) -> z:u256           | x 和 y 按位异或                                                 |
 +---------------------------------------------------------------------------------------------------------------+
-| shlu256(x:u256, y:u256) -> z:u256           | logical left shift of x by y                                    |
+| shlu256(x:u256, y:u256) -> z:u256           | 将 x 逻辑左移 y 位                                              |
 +---------------------------------------------------------------------------------------------------------------+
-| shru256(x:u256, y:u256) -> z:u256           | logical right shift of x by y                                   |
+| shru256(x:u256, y:u256) -> z:u256           | 将 x 逻辑右移 y 位                                              |
 +---------------------------------------------------------------------------------------------------------------+
-| saru256(x:u256, y:u256) -> z:u256           | arithmetic right shift of x by y                                |
+| saru256(x:u256, y:u256) -> z:u256           | 将 x 算术右移 y 位                                              |
 +---------------------------------------------------------------------------------------------------------------+
-| byte(n:u256, x:u256) -> v:u256              | nth byte of x, where the most significant byte is the 0th byte  |
+| byte(n:u256, x:u256) -> v:u256              | x 的第 n 字节，这里是大端模式                                   |
 | Cannot this be just replaced by and256(shr256(n, x), 0xff) and let it be optimised out by the EVM backend?    |
 +---------------------------------------------------------------------------------------------------------------+
 | *Memory and storage*                                                                                          |
@@ -376,130 +344,129 @@ The following functions must be available:
 +---------------------------------------------------------------------------------------------------------------+
 | mstore(p:u256, v:u256)                      | mem[p..(p+32)) := v                                             |
 +---------------------------------------------------------------------------------------------------------------+
-| mstore8(p:u256, v:u256)                     | mem[p] := v & 0xff    - only modifies a single byte             |
+| mstore8(p:u256, v:u256)                     | mem[p] := v & 0xff    - 仅修改单个字节                          |
 +---------------------------------------------------------------------------------------------------------------+
 | sload(p:u256) -> v:u256                     | storage[p]                                                      |
 +---------------------------------------------------------------------------------------------------------------+
 | sstore(p:u256, v:u256)                      | storage[p] := v                                                 |
 +---------------------------------------------------------------------------------------------------------------+
-| msize() -> size:u256                        | size of memory, i.e. largest accessed memory index, albeit due  |
-|                                             | due to the memory extension function, which extends by words,   |
-|                                             | this will always be a multiple of 32 bytes                      |
+| msize() -> size:u256                        | 内存的大小, 即已访问过的内存的最大下标，                        |
+|                                             | 因为内存扩展的限制（只能按字进行扩展）                          |
+|                                             | 返回值永远都是 32 字节的倍数                                    |
 +---------------------------------------------------------------------------------------------------------------+
-| *Execution control*                                                                                           |
+| *执行控制*                                                                                                    |
 +---------------------------------------------------------------------------------------------------------------+
-| create(v:u256, p:u256, s:u256)              | create new contract with code mem[p..(p+s)) and send v wei      |
-|                                             | and return the new address                                      |
+| create(v:u256, p:u256, s:u256)              | 以 mem[p..(p+s)) 上的代码创建一个新合约，发送                   |
+|                                             | v 个 wei，并返回一个新的地址                                    |
 +---------------------------------------------------------------------------------------------------------------+
-| call(g:u256, a:u256, v:u256, in:u256,       | call contract at address a with input mem[in..(in+insize))      |
-| insize:u256, out:u256,                      | providing g gas and v wei and output area                       |
-| outsize:u256)                               | mem[out..(out+outsize)) returning 0 on error (eg. out of gas)   |
-| -> r:u256                                   | and 1 on success                                                |
+| call(g:u256, a:u256, v:u256, in:u256,       | 调用地址 a 上的合约，以 mem[in..(in+insize)) 作为输入           |
+| insize:u256, out:u256,                      | 一并发送 g gas 和 v wei ，以 mem[out..(out+outsize))            |
+| outsize:u256)                               | 作为输出空间。若错误，返回 0 （比如，gas 用光                   |
+| -> r:u256                                   | 成功，返回 1                                                    |
 +---------------------------------------------------------------------------------------------------------------+
-| callcode(g:u256, a:u256, v:u256, in:u256,   | identical to ``call`` but only use the code from a              |
-| insize:u256, out:u256,                      | and stay in the context of the                                  |
-| outsize:u256) -> r:u256                     | current contract otherwise                                      |
+| callcode(g:u256, a:u256, v:u256, in:u256,   | 相当于 ``call`` 但仅仅使用地址 a 上的代码，                     |
+| insize:u256, out:u256,                      | 而留在当前合约的上下文当中                                      |
+| outsize:u256) -> r:u256                     |                                                                 |
 +---------------------------------------------------------------------------------------------------------------+
-| delegatecall(g:u256, a:u256, in:u256,       | identical to ``callcode``,                                      |
-| insize:u256, out:u256,                      | but also keep ``caller``                                        |
-| outsize:u256) -> r:u256                     | and ``callvalue``                                               |
+| delegatecall(g:u256, a:u256, in:u256,       | 相当于 ``callcode``，                                           |
+| insize:u256, out:u256,                      | 但同时保留 ``caller``                                           |
+| outsize:u256) -> r:u256                     | 和 ``callvalue``                                                |
 +---------------------------------------------------------------------------------------------------------------+
-| stop()                                      | stop execution, identical to return(0,0)                        |
-| Perhaps it would make sense retiring this as it equals to return(0,0). It can be an optimisation by the EVM   |
-| backend.                                                                                                      |
+| stop()                                      | 停止执行，等同于 return(0,0)                                    |
+| 可能需要下线该函数，毕竟它等同于 return(0,0)。这可以作为 EVM 后端的优化选项                                   |
 +---------------------------------------------------------------------------------------------------------------+
-| abort()                                     | abort (equals to invalid instruction on EVM)                    |
+| abort()                                     | 终止 (相当于EVM上的非法指令)                                    |
 +---------------------------------------------------------------------------------------------------------------+
-| return(p:u256, s:u256)                      | end execution, return data mem[p..(p+s))                        |
+| return(p:u256, s:u256)                      | 终止执行，返回 mem[p..(p+s)) 上的数据                           |
 +---------------------------------------------------------------------------------------------------------------+
-| revert(p:u256, s:u256)                      | end execution, revert state changes, return data mem[p..(p+s))  |
+| revert(p:u256, s:u256)                      | 终止执行，恢复状态变更，返回 mem[p..(p+s)) 上的数据             |
 +---------------------------------------------------------------------------------------------------------------+
-| selfdestruct(a:u256)                        | end execution, destroy current contract and send funds to a     |
+| selfdestruct(a:u256)                        | 终止执行，销毁当前合约，并且将余额发送到地址 a                  |
 +---------------------------------------------------------------------------------------------------------------+
-| log0(p:u256, s:u256)                        | log without topics and data mem[p..(p+s))                       |
+| log0(p:u256, s:u256)                        | 用 mem[p..(p+s)] 上的数据产生日志，但没有 topic                 |
 +---------------------------------------------------------------------------------------------------------------+
-| log1(p:u256, s:u256, t1:u256)               | log with topic t1 and data mem[p..(p+s))                        |
+| log1(p:u256, s:u256, t1:u256)               | 用 mem[p..(p+s)] 上的数据和 topic t1 产生日志                   |
 +---------------------------------------------------------------------------------------------------------------+
-| log2(p:u256, s:u256, t1:u256, t2:u256)      | log with topics t1, t2 and data mem[p..(p+s))                   |
+| log2(p:u256, s:u256, t1:u256, t2:u256)      | 用 mem[p..(p+s)] 上的数据和 topic t1，t2 产生日志               |
 +---------------------------------------------------------------------------------------------------------------+
-| log3(p:u256, s:u256, t1:u256, t2:u256,      | log with topics t, t2, t3 and data mem[p..(p+s))                |
+| log3(p:u256, s:u256, t1:u256, t2:u256,      | 用 mem[p..(p+s)] 上的数据和 topic t1，t2，t3 产生日志           |
 | t3:u256)                                    |                                                                 |
 +---------------------------------------------------------------------------------------------------------------+
-| log4(p:u256, s:u256, t1:u256, t2:u256,      | log with topics t1, t2, t3, t4 and data mem[p..(p+s))           |
-| t3:u256, t4:u256)                           |                                                                 |
+| log4(p:u256, s:u256, t1:u256, t2:u256,      | 用 mem[p..(p+s)] 上的数据和 topic t1，t2，t3，t4                |
+| t3:u256, t4:u256)                           | 产生日志                                                        |
 +---------------------------------------------------------------------------------------------------------------+
-| *State queries*                                                                                               |
+| *状态查询*                                                                                                    |
 +---------------------------------------------------------------------------------------------------------------+
-| blockcoinbase() -> address:u256             | current mining beneficiary                                      |
+| blockcoinbase() -> address:u256             | 当前的矿工                                                      |
 +---------------------------------------------------------------------------------------------------------------+
-| blockdifficulty() -> difficulty:u256        | difficulty of the current block                                 |
+| blockdifficulty() -> difficulty:u256        | 当前区块的难度                                                  |
 +---------------------------------------------------------------------------------------------------------------+
-| blockgaslimit() -> limit:u256               | block gas limit of the current block                            |
+| blockgaslimit() -> limit:u256               | 当前区块的区块 gas 限制                                         |
 +---------------------------------------------------------------------------------------------------------------+
-| blockhash(b:u256) -> hash:u256              | hash of block nr b - only for last 256 blocks excluding current |
+| blockhash(b:u256) -> hash:u256              | 区块号为 b 的区块的哈希，                                       |
+|                                             | 仅可用于最近的 256 个区块，不包含当前区块                       |
 +---------------------------------------------------------------------------------------------------------------+
-| blocknumber() -> block:u256                 | current block number                                            |
+| blocknumber() -> block:u256                 | 当前区块号                                                      |
 +---------------------------------------------------------------------------------------------------------------+
-| blocktimestamp() -> timestamp:u256          | timestamp of the current block in seconds since the epoch       |
+| blocktimestamp() -> timestamp:u256          | 自 epoch 开始的，当前块的时间戳，以秒为单位                     |
 +---------------------------------------------------------------------------------------------------------------+
-| txorigin() -> address:u256                  | transaction sender                                              |
+| txorigin() -> address:u256                  | 交易的发送方                                                    |
 +---------------------------------------------------------------------------------------------------------------+
-| txgasprice() -> price:u256                  | gas price of the transaction                                    |
+| txgasprice() -> price:u256                  | 交易中的 gas 价格                                               |
 +---------------------------------------------------------------------------------------------------------------+
-| gasleft() -> gas:u256                       | gas still available to execution                                |
+| gasleft() -> gas:u256                       | 还可用于执行的 gas                                              |
 +---------------------------------------------------------------------------------------------------------------+
-| balance(a:u256) -> v:u256                   | wei balance at address a                                        |
+| balance(a:u256) -> v:u256                   | 地址 a 上的 wei 余额                                            |
 +---------------------------------------------------------------------------------------------------------------+
-| this() -> address:u256                      | address of the current contract / execution context             |
+| this() -> address:u256                      | 当前合约／执行上下文的地址                                      |
 +---------------------------------------------------------------------------------------------------------------+
-| caller() -> address:u256                    | call sender (excluding delegatecall)                            |
+| caller() -> address:u256                    | 调用的发送方 (不包含委托调用)                                   |
 +---------------------------------------------------------------------------------------------------------------+
-| callvalue() -> v:u256                       | wei sent together with the current call                         |
+| callvalue() -> v:u256                       | 与当前调用一起发送的 wei                                        |
 +---------------------------------------------------------------------------------------------------------------+
-| calldataload(p:u256) -> v:u256              | call data starting from position p (32 bytes)                   |
+| calldataload(p:u256) -> v:u256              | 从 position p 开始的 calldata (32 字节)                         |
 +---------------------------------------------------------------------------------------------------------------+
-| calldatasize() -> v:u256                    | size of call data in bytes                                      |
+| calldatasize() -> v:u256                    | 以字节为单位的 calldata 的大小                                  |
 +---------------------------------------------------------------------------------------------------------------+
-| calldatacopy(t:u256, f:u256, s:u256)        | copy s bytes from calldata at position f to mem at position t   |
+| calldatacopy(t:u256, f:u256, s:u256)        | 从位置为 f 的 calldata 中，拷贝 s 字节到内存位置 t              |
 +---------------------------------------------------------------------------------------------------------------+
-| codesize() -> size:u256                     | size of the code of the current contract / execution context    |
+| codesize() -> size:u256                     | 当前合约／执行上下文的代码大小                                  |
 +---------------------------------------------------------------------------------------------------------------+
-| codecopy(t:u256, f:u256, s:u256)            | copy s bytes from code at position f to mem at position t       |
+| codecopy(t:u256, f:u256, s:u256)            | 从 code 位置 f 拷贝 s 字节到内存位置 t                          |
 +---------------------------------------------------------------------------------------------------------------+
-| extcodesize(a:u256) -> size:u256            | size of the code at address a                                   |
+| extcodesize(a:u256) -> size:u256            | 地址 a 上的代码大小                                             |
 +---------------------------------------------------------------------------------------------------------------+
-| extcodecopy(a:u256, t:u256, f:u256, s:u256) | like codecopy(t, f, s) but take code at address a               |
+| extcodecopy(a:u256, t:u256, f:u256, s:u256) | 相当于 codecopy(t, f, s)，但从地址 a 获取代码                   |
 +---------------------------------------------------------------------------------------------------------------+
-| *Others*                                                                                                      |
+| *其他*                                                                                                        |
 +---------------------------------------------------------------------------------------------------------------+
-| discardu256(unused:u256)                    | discard value                                                   |
+| discardu256(unused:u256)                    | 丢弃值                                                          |
 +---------------------------------------------------------------------------------------------------------------+
-| splitu256tou64(x:u256) -> (x1:u64, x2:u64,  | split u256 to four u64's                                        |
+| splitu256tou64(x:u256) -> (x1:u64, x2:u64,  | 将一个 u256 拆分为四个 u64                                      |
 |                            x3:u64, x4:u64)  |                                                                 |
 +---------------------------------------------------------------------------------------------------------------+
-| combineu64tou256(x1:u64, x2:u64, x3:u64,    | combine four u64's into a single u256                           |
+| combineu64tou256(x1:u64, x2:u64, x3:u64,    | 将四个 u64 组合为一个 u256                                      |
 |                  x4:u64) -> (x:u256)        |                                                                 |
 +---------------------------------------------------------------------------------------------------------------+
 | sha3(p:u256, s:u256) -> v:u256              | keccak(mem[p...(p+s)))                                          |
 +---------------------------------------------------------------------------------------------------------------+
 
-Backends
+后端
 --------
 
-Backends or targets are the translators from JULIA to a specific bytecode. Each of the backends can expose functions
-prefixed with the name of the backend. We reserve ``evm_`` and ``ewasm_`` prefixes for the two proposed backends.
+后端或目标负责将 JULIA 翻译到特定字节码。 每个后端都可以暴露以后端名称为前缀的函数。 我们为两个建议的后端保留 ``evm_`` 和 ``ewasm_`` 前缀。
 
-Backend: EVM
+后端: EVM
 ------------
 
-The EVM target will have all the underlying EVM opcodes exposed with the `evm_` prefix.
+目标 |evm| 将具有所有用 `evm_` 前缀暴露的|evm| 底层操作码。
 
-Backend: "EVM 1.5"
+后端: "EVM 1.5"
 ------------------
 
 TBD
 
-Backend: eWASM
+后端: eWASM
 --------------
 
 TBD
@@ -507,32 +474,31 @@ TBD
 JULIA对象说明
 =============================
 
-Grammar::
+语法::
 
-    TopLevelObject = 'object' '{' Code? ( Object | Data )* '}'
-    Object = 'object' StringLiteral '{' Code? ( Object | Data )* '}'
-    Code = 'code' Block
-    Data = 'data' StringLiteral HexLiteral
-    HexLiteral = 'hex' ('"' ([0-9a-fA-F]{2})* '"' | '\'' ([0-9a-fA-F]{2})* '\'')
-    StringLiteral = '"' ([^"\r\n\\] | '\\' .)* '"'
+    顶层对象 = 'object' '{' 代码? ( 对象 | 数据 )* '}'
+    对象 = 'object' 字符串字面量 '{' 代码? ( 对象 | 数据 )* '}'
+    代码 = 'code' 代码块
+    数据 = 'data' 字符串字面量 十六进制字面量
+    十六进制字面量 = 'hex' ('"' ([0-9a-fA-F]{2})* '"' | '\'' ([0-9a-fA-F]{2})* '\'')
+    字符串字面量 = '"' ([^"\r\n\\] | '\\' .)* '"'
 
-Above, ``Block`` refers to ``Block`` in the JULIA code grammar explained in the previous chapter.
+在上面，``代码块`` 指的是前一章中解释的 JULIA 代码语法中的 ``代码块``。
 
-An example JULIA Object is shown below:
+JULIA 对象示例如下:
 
 ..code::
 
-    // Code consists of a single object. A single "code" node is the code of the object.
-    // Every (other) named object or data section is serialized and
-    // made accessible to the special built-in functions datacopy / dataoffset / datasize
+    // 代码由单个对象组成。 单个 “code” 节点是对象的代码。
+    // 每个（其他）命名的对象或数据部分都被序列化
+    // 并可供特殊内置函数：datacopy / dataoffset / datasize 用于访问
     object {
         code {
             let size = datasize("runtime")
             let offset = allocate(size)
-            // This will turn into a memory->memory copy for eWASM and
-            // a codecopy for EVM
+            // 这里，对于 eWASM 变为一个内存到内存的拷贝，对于 EVM 则相当于 codecopy
             datacopy(dataoffset("runtime"), offset, size)
-            // this is a constructor and the runtime code is returned
+            // 这是一个构造函数，并且运行时代码会被返回
             return(offset, size)
         }
 
@@ -540,28 +506,26 @@ An example JULIA Object is shown below:
 
         object "runtime" {
             code {
-                // runtime code
+                // 运行时代码
 
                 let size = datasize("Contract2")
                 let offset = allocate(size)
-                // This will turn into a memory->memory copy for eWASM and
-                // a codecopy for EVM
+                // 这里，对于 eWASM 变为一个内存到内存的拷贝，对于 EVM 则相当于 codecopy
                 datacopy(dataoffset("Contract2"), offset, size)
-                // constructor parameter is a single number 0x1234
+                // 构造函数参数是一个数字 0x1234
                 mstore(add(offset, size), 0x1234)
                 create(offset, add(size, 32))
             }
 
-            // Embedded object. Use case is that the outside is a factory contract,
-            // and Contract2 is the code to be created by the factory
+            // 内嵌对象。使用场景是，外层是一个工厂合约，而 Contract2 将是由工厂生成的代码
             object "Contract2" {
                 code {
-                    // code here ...
+                    // 代码在这 ...
                 }
 
                 object "runtime" {
                     code {
-                        // code here ...
+                        // 代码在这 ...
                     }
                  }
 
