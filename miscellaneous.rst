@@ -307,7 +307,7 @@ AST 内的源代码映射使用以下表示法：
 - ``this`` （类型为当前合约的变量）：当前合约实例，可以准确地转换为 ``address``
 - ``super``：当前合约的上一级继承关系的合约
 - ``selfdestruct(address recipient)``：销毁当前合约，把余额发送到给定地址
-- ``suicide(address recipient)``：一个不推荐使用的 ``selfdestruct`` 的同义词
+- ``suicide(address recipient)``：与 ``selfdestruct`` 等价，但已不推荐使用
 - ``<address>.balance`` （``uint256``）： :ref:`address` 的余额，以 Wei 为单位
 - ``<address>.send(uint256 amount) returns (bool)``：向 :ref:`address` 发送给定数量的 Wei，失败时返回 ``false``
 - ``<address>.transfer(uint256 amount)``：向 :ref:`address` 发送给定数量的 Wei，失败时会把错误抛出（throw）
