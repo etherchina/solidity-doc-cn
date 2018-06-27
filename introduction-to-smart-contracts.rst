@@ -24,7 +24,7 @@
             storedData = x;
         }
 
-        function get() public constant returns (uint) {
+        function get() public view returns (uint) {
             return storedData;
         }
     }
@@ -103,7 +103,7 @@ Mappings 可以看作是一个 `哈希表 <https://en.wikipedia.org/wiki/Hash_ta
 
 .. index:: event
 
-``event Sent(address from, address to, uint amount);`` 这行声明了一个所谓的“事件（event）”，它会在 ``send`` 函数的最后一行被发出。 用户界面（当然也包括服务器应用程序）可以监听区块链上正在发送的事件，而不会花费太多成本。一旦它被发出，监听该事件的listener都将收到通知。而所有的事件都包含了 ``from`` ， ``to`` 和 ``amount`` 三个参数，可方便追踪事务。 为了监听这个事件，你可以使用如下代码：
+``event Sent(address from, address to, uint amount);`` 这行声明了一个所谓的“事件（event）”，它会在 ``send`` 函数的最后一行被发出。用户界面（当然也包括服务器应用程序）可以监听区块链上正在发送的事件，而不会花费太多成本。一旦它被发出，监听该事件的listener都将收到通知。而所有的事件都包含了 ``from`` ， ``to`` 和 ``amount`` 三个参数，可方便追踪事务。 为了监听这个事件，你可以使用如下代码：
 ::
 
     Coin.Sent().watch({}, '', function(error, result) {
@@ -149,7 +149,7 @@ Mappings 可以看作是一个 `哈希表 <https://en.wikipedia.org/wiki/Hash_ta
 
 此外，交易总是由发送人（创建者）签名。
 
-这样，就可非常简单地为数据库的特定修改增加访问保护机制。 在电子货币的例子中，一个简单的检查可以确保只有持有账户密钥的人才能从中转账。
+这样，就可非常简单地为数据库的特定修改增加访问保护机制。在电子货币的例子中，一个简单的检查可以确保只有持有账户密钥的人才能从中转账。
 
 .. index:: ! block
 
@@ -204,7 +204,10 @@ Mappings 可以看作是一个 `哈希表 <https://en.wikipedia.org/wiki/Hash_ta
 
 如果目标账户是零账户（账户地址为 ``0`` )，此交易将创建一个 **新合约** 。
 如前文所述，合约的地址不是零地址，而是通过合约创建者的地址和从该地址发出过的交易数量计算得到的（所谓的“nonce”）。
-这个用来创建合约的交易的 payload 会被转换为 EVM 字节码并执行。执行的输出将作为合约代码被永久存储。这意味着，为创建一个合约，你不需要向合约发送真正的合约代码，而是发送能够产生真正代码的代码。
+这个用来创建合约的交易的 payload 会被转换为 EVM 字节码并执行。执行的输出将作为合约代码被永久存储。这意味着，为创建一个合约，你不需要发送实际的合约代码，而是发送能够产生合约代码的代码。
+
+.. note::
+  在合约创建的过程中，它的代码还是空的。所以直到构造函数执行结束，你都不应该在其中调用合约自己函数。
 
 .. index:: ! gas, ! gas price
 
