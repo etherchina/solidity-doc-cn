@@ -27,8 +27,8 @@ npm / Node.js
 使用 `npm` 可以便捷地安装Solidity编译器solcjs。但该 `solcjs` 程序的功能相对于本页下面的所有其他选项都要少。在 :ref:`commandline-compiler` 一章中，我们假定你使用的是完整功能的编译器。 所以，如果你是从 `npm` 安装 `solcjs` ，就此打住，直接跳到 `solc-js  <https://github.com/ethereum/solc-js>`_ 去了解。
 
 
-注意: `solc-js <https://github.com/ethereum/solc-js>`_ 是利用 Emscripten 从 C++ 版的 solc 跨平台编译为 JavaScript 的，因此，可在 JavaScript 项目中使用 solcjs（如同 Remix）。
-具体介绍请查看 `solc-js <https://github.com/ethereum/solc-js>`_ 代码库。
+注意: solc-js 项目是利用 Emscripten 从 C++ 版的 solc 跨平台编译为 JavaScript 的，因此，可在 JavaScript 项目中使用 solcjs（如同 Remix）。
+具体介绍请参考 solc-js 代码库。
 
 .. code:: bash
 
@@ -100,7 +100,6 @@ Docker
     brew upgrade
     brew tap ethereum/ethereum
     brew install solidity
-    brew linkapps solidity
 
 
 如果你需要特定版本的 Solidity ，你需要从 Github 上安装一个 Homebrew formula。
@@ -173,19 +172,34 @@ Solidity 在 OS X 下构建，必须 `安装 Homebrew <http://brew.sh>`_
 
 在Windows下构建Solidity，需下载的依赖软件包：
 
-+------------------------------+-------------------------------------------------------+
-| 软件                         | 备注                                                  |
-+==============================+=======================================================+
-| `Git for Windows`_           | C从Github上获取源码的命令行工具                       |
-+------------------------------+-------------------------------------------------------+
-| `CMake`_                     | 跨平台构建文件生成器                                  |
-+------------------------------+-------------------------------------------------------+
-| `Visual Studio 2015`_        | C++编译开发环境                                       |
-+------------------------------+-------------------------------------------------------+
++-----------------------------------+-------------------------------------------------------+
+| 软件                              | 备注                                                  |
++===================================+=======================================================+
+| `Git for Windows`_                | C从Github上获取源码的命令行工具                       |
++-----------------------------------+-------------------------------------------------------+
+| `CMake`_                          | 跨平台构建文件生成器                                  |
++-----------------------------------+-------------------------------------------------------+
+| `Visual Studio 2017 Build Tools`_ | C++ 编译器                                            |
++-----------------------------------+-------------------------------------------------------+
+| `Visual Studio 2017`_  (Optional) | C++ 编译器和开发环境                                  |
++-----------------------------------+-------------------------------------------------------+
+
+如果你已经有了 IDE，仅需要编译器和相关的库，你可以安装 Visual Studio 2017 Build Tools。
+
+Visual Studio 2017 提供了 IDE 以及必要的编译器和库。所以如果你还没有一个 IDE 并且想要开发 Solidity，那么 Visual Studio 2017 将是一个可以使你获得所有工具的简单选择。
+
+这里是一个在 Visual Studio 2017 Build Tools 或 Visual Studio 2017 中应该安装的组件列表：
+
+* Visual Studio C++ core features
+* VC++ 2017 v141 toolset (x86,x64)
+* Windows Universal CRT SDK
+* Windows 8.1 SDK
+* C++/CLI support
 
 .. _Git for Windows: https://git-scm.com/download/win
 .. _CMake: https://cmake.org/download/
-.. _Visual Studio 2015: https://www.visualstudio.com/products/vs-2015-product-editions
+.. _Visual Studio 2017: https://www.visualstudio.com/vs/
+.. _Visual Studio 2017 Build Tools: https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017
 
 
 外部依赖
@@ -230,7 +244,7 @@ Solidity 使用 CMake 来配置构建。Linux、macOS 和其他 Unix系统上的
 
     mkdir build
     cd build
-    cmake -G "Visual Studio 14 2015 Win64" ..
+    cmake -G "Visual Studio 15 2017 Win64" ..
 
 这组指令的最后一句，会在 build 目录下创建一个 **solidity.sln** 文件，双击后，默认会使用 Visual Studio 打开。我们建议在VS上创建 **RelWithDebugInfo** 配置文件。
 
