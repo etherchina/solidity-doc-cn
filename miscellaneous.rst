@@ -54,25 +54,28 @@
 
 ``data[4][9].b`` 的位置将是 ``keccak256(uint256(9) . keccak256(uint256(4) . uint256(1))) + 1``。
 
-.. index: memory layout
+.. index:: memory layout
 
 **********************
 |memory| 中的存储结构
 **********************
 
-Solidity 保留了三个 256 位的插槽：
+Solidity 保留了 4 个 32 字节的插槽（slot）：
 
--  0 - 63 字节：用于保存方法（函数）哈希的临时空间
-- 64 - 96 字节：当前已分配的 |memory| 大小（又名，空闲 |memory| 指针）
+- ``0x00`` - ``0x3f``：用于保存方法（函数）哈希的临时空间
+- ``0x40`` - ``0x5f``：当前已分配的 |memory| 大小（又名，空闲 |memory| 指针）
+- ``0x60`` - ``0x7f``：0 值插槽
 
-临时空间可以在语句之间使用（即在内联汇编之中）。
+临时空间可以在语句之间使用（即在内联汇编之中）。0 值插槽则用来对动态内存数组进行初始化，且永远不会写入数据（因而可用的初始内存指针为 ``0x80``）。
 
 Solidity 总会把新对象保存在空闲 |memory| 指针的位置，所以这段内存实际上从来不会空闲（在未来可能会修改这个机制）。
 
 .. warning::
   Solidity 中有一些操作需要大于 64 字节的临时内存区域，因此这种数据无法保存到临时空间里。它们将被放置在空闲内存指向的位置，但由于这种数据的生命周期较短，这个指针不会即时更新。这部分内存可能会被清零也可能不会。所以我们不应该期望这些所谓的空闲内存总会被清零。
 
-.. index: calldata layout
+  尽管使用 ``msize`` 来到达非零内存区域是个好主意，然而非临时性地使用这样的指针，而不更新可用内存指针也会产生有害的结果。
+
+.. index:: calldata layout
 
 *******************
 调用数据存储结构
@@ -81,7 +84,7 @@ Solidity 总会把新对象保存在空闲 |memory| 指针的位置，所以这�
 当从一个账户调用已部署的 Solidity 合约时，调用数据的格式被认为会遵循 :ref:`ABI 说明<ABI>`。
 根据 ABI 说明的规定，参数需要被整理为 32 字节的倍数。而内部函数调用会使用不同规则。
 
-.. index: variable cleanup
+.. index:: variable cleanup
 
 *********************************
 内部机制 - 清理变量
@@ -154,13 +157,16 @@ Solidity 优化器是在汇编语言级别工作的，所以它可以并且也�
 源代码映射
 ***************
 
-作为AST输出的一部分，编译器提供AST中相应节点所代表的源代码范围。这可以用于多种用途，比如从用于报告错误的AST静态分析工具到可以突出显示局部变量及其用途的调试工具。
+作为 AST 输出的一部分，编译器提供 AST 中相应节点所代表的源代码范围。这可以用于多种用途，比如从用于报告错误的 AST 静态分析工具到可以突出显示局部变量及其用途的调试工具。
 
 此外，编译器还可以生成从字节码到生成该指令的源代码范围的映射。对于在字节码级别上运行的静态分析工具以及在调试器中显示源代码中的当前位置或处理断点，这都是同样重要的。
 
 这两种源映射都使用整数标识符来引用源文件。这些是通常称为 ``“sourceList”`` 的源文件列表的常规数组索引，它们是 combined-json 和 json / npm 编译器输出的一部分。
 
-AST内的源代码映射使用以下表示法：
+.. note::
+    在指令没有与任何特定的代码文件关联的情况下，源代码映射会将 ``-1`` 赋值给一个整数标识符。这会在字节码阶段发生，源于由编译器生成的内联汇编语句。
+
+AST 内的源代码映射使用以下表示法：
 
 ``s:l:f``
 
@@ -177,7 +183,7 @@ AST内的源代码映射使用以下表示法：
 
 ``1:2:1;1:9:1;2:1:2;2:1:2;2:1:2``
 
-``1:2:1;:9;2::2;;``
+``1:2:1;:9;2:1:2;;``
 
 ***************
 技巧和窍门
@@ -189,6 +195,9 @@ AST内的源代码映射使用以下表示法：
 * 如果你最终需要在函数开始位置检查很多输入条件或者状态变量的值，你可以尝试使用 :ref:`modifiers` 。
 * 如果你的合约有一个 ``send`` 函数，但你想要使用内置的 send 函数，你可以使用 ``address(contractVariable).send(amount)``。
 * 使用一个赋值语句就可以初始化 struct：``x = MyStruct({a: 1, b: 2});``
+
+.. note::
+    如果存储结构具有“紧打包（tightly packed）”，可以用分开的赋值语句来初始化：``x.a = 1; x.b = 2;``。这样可以使优化器更容易地一次性更新存储，使赋值的开销更小。
 
 **********
 速查表
@@ -264,14 +273,19 @@ AST内的源代码映射使用以下表示法：
 全局变量
 ================
 
-- ``block.blockhash(uint blockNumber) returns (bytes32)``：指定区块的区块哈希——仅可用于最新的256个区块
+- ``abi.encode(...) returns (bytes)``： :ref:`ABI <ABI>` - 对给定参数进行编码
+- ``abi.encodePacked(...) returns (bytes)``：对给定参数执行 :ref:`紧打包编码 <abi_packed_mode>`
+- ``abi.encodeWithSelector(bytes4 selector, ...) returns (bytes)``： :ref:`ABI <ABI>` - 对给定参数进行编码，并以给定的函数选择器作为起始的 4 字节数据一起返回
+- ``abi.encodeWithSignature(string signature, ...) returns (bytes)``：等价于 ``abi.encodeWithSelector(bytes4(keccak256(signature), ...)``
+- ``block.blockhash(uint blockNumber) returns (bytes32)``：指定区块的区块哈希——仅可用于最新的 256 个区块且不包括当前区块；而 blocks 从 0.4.22 版本开始已经不推荐使用，由 ``blockhash(uint blockNumber)`` 代替
 - ``block.coinbase`` （``address``）：挖出当前区块的矿工的地址
 - ``block.difficulty`` （``uint``）：当前区块的难度值
 - ``block.gaslimit`` （``uint``）：当前区块的 gas 上限
 - ``block.number`` （``uint``）：当前区块的区块号
 - ``block.timestamp`` （``uint``）：当前区块的时间戳
+- ``gasleft() returns (uint256)``：剩余的 gas
 - ``msg.data`` （``bytes``）：完整的 calldata
-- ``msg.gas`` （``uint``）：剩余的 gas
+- ``msg.gas`` （``uint``）：剩余的 gas - 自 0.4.21 版本开始已经不推荐使用，由 ``gesleft()`` 代替
 - ``msg.sender`` （``address``）：消息发送方（当前调用）
 - ``msg.value`` （``uint``）：随消息发送的 wei 的数量
 - ``now`` （``uint``）：当前区块的时间戳（等价于 ``block.timestamp``）
@@ -279,21 +293,34 @@ AST内的源代码映射使用以下表示法：
 - ``tx.origin`` （``address``）：交易发送方（完整调用链上的原始发送方）
 - ``assert(bool condition)``：如果条件值为 ``false`` 则中止执行并回退所有状态变更（用做内部错误）
 - ``require(bool condition)``：如果条件值为 ``false`` 则中止执行并回退所有状态变更（用做异常输入或外部组件错误）
+- ``require(bool condition, string message)``：如果条件值为 ``false`` 则中止执行并回退所有状态变更（用做异常输入或外部组件错误），可以同时提供错误消息
 - ``revert()``：中止执行并回复所有状态变更
-- ``keccak256(...) returns (bytes32)``：计算 :ref:`(tightly packed) arguments <abi_packed_mode>` 的 Ethereum-SHA-3（Keccak-256）哈希
+- ``revert(string message)``：中止执行并回复所有状态变更，可以同时提供错误消息
+- ``blockhash(uint blockNumber) returns (bytes32)``：指定区块的区块哈希——仅可用于最新的 256 个区块
+- ``keccak256(...) returns (bytes32)``：计算 :ref:`紧打包编码 <abi_packed_mode>` 的 Ethereum-SHA-3（Keccak-256）哈希
 - ``sha3(...) returns (bytes32)``：等价于 ``keccak256``
-- ``sha256(...) returns (bytes32)``：计算 :ref:`(tightly packed) arguments <abi_packed_mode>` 的 SHA-256 哈希
-- ``ripemd160(...) returns (bytes20)``：计算 :ref:`(tightly packed) arguments <abi_packed_mode>` 的 RIPEMD-160 哈希
+- ``sha256(...) returns (bytes32)``：计算 :ref:`紧打包编码 <abi_packed_mode>` 的 SHA-256 哈希
+- ``ripemd160(...) returns (bytes20)``：计算 :ref:`紧打包编码 <abi_packed_mode>` 的 RIPEMD-160 哈希
 - ``ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address)``：基于椭圆曲线签名找回与指定公钥关联的地址，发生错误的时候返回 0
 - ``addmod(uint x, uint y, uint k) returns (uint)``：计算 ``(x + y) % k`` 的值，其中加法的结果即使超过 ``2**256`` 也不会被截取。从 0.5.0 版本开始会加入对 ``k != 0`` 的 assert（即会在此函数开头执行 ``assert(k != 0);`` 作为参数检查，译者注）。
 - ``mulmod(uint x, uint y, uint k) returns (uint)``：计算 ``(x * y) % k`` 的值，其中乘法的结果即使超过 ``2**256`` 也不会被截取。从 0.5.0 版本开始会加入对 ``k != 0`` 的 assert（即会在此函数开头执行 ``assert(k != 0);`` 作为参数检查，译者注）。
 - ``this`` （类型为当前合约的变量）：当前合约实例，可以准确地转换为 ``address``
 - ``super``：当前合约的上一级继承关系的合约
 - ``selfdestruct(address recipient)``：销毁当前合约，把余额发送到给定地址
-- ``suicide(address recipient)``：等价于 ``selfdestruct``
+- ``suicide(address recipient)``：一个不推荐使用的 ``selfdestruct`` 的同义词
 - ``<address>.balance`` （``uint256``）： :ref:`address` 的余额，以 Wei 为单位
 - ``<address>.send(uint256 amount) returns (bool)``：向 :ref:`address` 发送给定数量的 Wei，失败时返回 ``false``
 - ``<address>.transfer(uint256 amount)``：向 :ref:`address` 发送给定数量的 Wei，失败时会把错误抛出（throw）
+
+.. note::
+    不要用 ``block.timestamp``、``now`` 或者 ``blockhash`` 作为随机种子，除非你明确知道你在做什么。
+
+    时间戳和区块哈希都可以在一定程度上被矿工所影响。如果你用哈希值作为随机种子，那么例如挖矿团体中的坏人就可以使用给定的哈希来执行一个赌场功能，如果他们没赢钱，他们可以简单地换一个哈希再试。
+
+    当前区块的时间戳必须比前一个区块的时间戳大，但唯一可以确定的就是它会是权威链（主链或者主分支）上两个连续区块时间戳之间的一个数值。
+
+.. note::
+    出于扩展性的原因，你无法取得所有区块的哈希。只有最新的 256 个区块的哈希可以拿到，其他的都将为 0。
 
 .. index:: visibility, public, private, external, internal
 
@@ -306,7 +333,7 @@ AST内的源代码映射使用以下表示法：
         return true;
     }
 
-- ``public``：内部、外部均可见（参考为存储/状态变量创建 :ref:`getter 函数<getter-functions>`）
+- ``public``：内部、外部均可见（参考为存储/状态变量创建 :ref:`getter 函数 <getter-functions>`）
 - ``private``：仅在当前合约内可见
 - ``external``：仅在外部可见（仅可修饰函数）——就是说，仅可用于消息调用（即使在合约内调用，也只能通过 ``this.func`` 的方式）
 - ``internal``：仅在内部可见（也就是在当前 Solidity 源代码文件内均可见，不仅限于当前合约内，译者注）
@@ -329,8 +356,11 @@ AST内的源代码映射使用以下表示法：
 
 以下是 Solidity 的保留字，未来可能会变为语法的一部分：
 
-``abstract``, ``after``, ``case``, ``catch``, ``default``, ``final``, ``in``, ``inline``, ``let``, ``match``, ``null``,
-``of``, ``relocatable``, ``static``, ``switch``, ``try``, ``type``, ``typeof``.
+``abstract``, ``after``, ``alias``, ``apply``, ``auto``, ``case``, ``catch``, ``copyof``, ``default``,
+``define``, ``final``, ``immutable``, ``implements``, ``in``, ``inline``, ``let``, ``macro``, ``match``,
+``mutable``, ``null``, ``of``, ``override``, ``partial``, ``promise``, ``reference``, ``relocatable``,
+``sealed``, ``sizeof``, ``static``, ``supports``, ``switch``, ``try``, ``type``, ``typedef``, ``typeof``,
+``unchecked``.
 
 语法表
 ================
