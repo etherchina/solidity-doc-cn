@@ -16,10 +16,10 @@ ContractPart = StateVariableDeclaration | UsingForDeclaration
 
 InheritanceSpecifier = UserDefinedTypeName ( '(' Expression ( ',' Expression )* ')' )?
 
-StateVariableDeclaration = TypeName ( 'public' | 'internal' | 'private' | 'constant' )? Identifier ('=' Expression)? ';'
+StateVariableDeclaration = TypeName ( 'public' | 'internal' | 'private' | 'constant' )* Identifier ('=' Expression)? ';'
 UsingForDeclaration = 'using' Identifier 'for' ('*' | TypeName) ';'
 StructDefinition = 'struct' Identifier '{'
-                     ( VariableDeclaration ';' (VariableDeclaration ';')* )? '}'
+                     ( VariableDeclaration ';' (VariableDeclaration ';')* ) '}'
 
 ModifierDefinition = 'modifier' Identifier ParameterList? Block
 ModifierInvocation = Identifier ( '(' ExpressionList? ')' )?
@@ -57,13 +57,13 @@ Mapping = 'mapping' '(' ElementaryTypeName '=>' TypeName ')'
 ArrayTypeName = TypeName '[' Expression? ']'
 FunctionTypeName = 'function' FunctionTypeParameterList ( 'internal' | 'external' | StateMutability )*
                    ( 'returns' FunctionTypeParameterList )?
-StorageLocation = 'memory' | 'storage'
+StorageLocation = 'memory' | 'storage' | 'calldata'
 StateMutability = 'pure' | 'constant' | 'view' | 'payable'
 
 Block = '{' Statement* '}'
 Statement = IfStatement | WhileStatement | ForStatement | Block | InlineAssemblyStatement |
             ( DoWhileStatement | PlaceholderStatement | Continue | Break | Return |
-              Throw | SimpleStatement ) ';'
+              Throw | EmitStatement | SimpleStatement ) ';'
 
 ExpressionStatement = Expression
 IfStatement = 'if' '(' Expression ')' Statement ( 'else' Statement )?
@@ -77,7 +77,8 @@ Continue = 'continue'
 Break = 'break'
 Return = 'return' Expression?
 Throw = 'throw'
-VariableDefinition = ('var' IdentifierList | VariableDeclaration) ( '=' Expression )?
+EmitStatement = 'emit' FunctionCall
+VariableDefinition = ('var' IdentifierList | VariableDeclaration | '(' VariableDeclaration? (',' VariableDeclaration? )* ')' ) ( '=' Expression )?
 IdentifierList = '(' ( Identifier? ',' )* Identifier? ')'
 
 // Precedence by order (see github.com/ethereum/solidity/pull/732)

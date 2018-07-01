@@ -10,16 +10,6 @@
 基本问题
 ***************
 
-合约范本
-========
-
-请参考由 fivedogit 收集整理的一些 `合约范本 <https://github.com/fivedogit/solidity-baby-steps/tree/master/contracts/>`_，另外请为 Solidity 的每一个特征建立一份 `测试合约 <https://github.com/ethereum/solidity/blob/develop/test/libsolidity/SolidityEndToEndTest.cpp>`_。
-
-创建并发布一个最基本的能用的合约
-================================
-
-这是个最简单的例子：`greeter <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/05_greeter.sol>`_。
-
 可以在特定的区块上进行操作吗？(比如发布一个合约或执行一笔交易)
 ==============================================================
 
@@ -53,25 +43,6 @@
 `例子 <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/05_greeter.sol>`_
 
 需要注意的是，如果你已经在合约顶部做了引用 ``import "mortal"`` 并且声明了 ``contract SomeContract is mortal { ...`` ，然后再在已存在此合约的编译器中进行编译（包含 `Remix <https://remix.ethereum.org/>`_），那么 ``kill()`` 就会自动执行。当一份合约被声明为 mortal 时，你可以仿照我的例子，使用 ``contractname.kill.sendTransaction({from:eth.coinbase})`` 来中止它。
-
-在合约中存储以太币
-==================
-
-诀窍是在合约中使用 ``{from:someaddress, value: web3.toWei(3,"ether")...}``
-
-参考 `endowment_retriever.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/30_endowment_retriever.sol>`_ 。
-
-使用 non-constant 函数（即会改变合约状态的函数，译者注）（请求 ``sendTransaction`` ）来对合约中的变量进行递增
-========================================================================================================================
-
-参考 `value_incrementer.sol <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/20_value_incrementer.sol>`_ 。
-
-让合约把费用返还给你（不使用 ``selfdestruct(...)``）
-==============================================================
-
-这个例子展示了如何将费用从一份合约发送至一个地址。
-
-参考 `endowment_retriever <https://github.com/fivedogit/solidity-baby-steps/blob/master/contracts/30_endowment_retriever.sol>`_ 。
 
 调用 Solidity 方法可以返回一个数组或字符串（``string``）吗？
 =====================================================================
@@ -194,9 +165,9 @@
 
 替代方案是可以在错误时抛出（``throw``），这同样能复原整个交易，当你遇到意外情况时不失为一个好的选择。
 
-如果你不想抛出，也可以返回一对值（a pair）::
+如果你不想抛出，也可以返回一对（a pair）值 ::
 
-    pragma solidity ^0.4.16;
+    pragma solidity >0.4.23 <0.5.0;
 
     contract C {
         uint[] counters;
@@ -212,7 +183,7 @@
         }
 
         function checkCounter(uint index) public view {
-            var (counter, error) = getCounter(index);
+            (uint counter, bool error) = getCounter(index);
             if (error) {
                 // ...
             } else {
@@ -448,12 +419,27 @@
 
 ::
 
-    int8[] memory memArr;        // 第一种情况
-    memArr.length++;             // 非法操作
-    int8[5] storageArr;          // 第二种情况
-    somearray.length++;          // 非法操作
-    int8[5] storage storageArr2; // 第二种情况附加显式定义
-    somearray2.length++;         // 合法操作
+    // 这将无法编译通过
+
+    pragma solidity ^0.4.18;
+
+    contract C {
+        int8[] dynamicStorageArray;
+        int8[5] fixedStorageArray;
+
+        function f() {
+            int8[] memory memArr;        // 第一种情况
+            memArr.length++;             // 非法
+
+            int8[5] storage storageArr = fixedStorageArray;   // 第二种情况
+            storageArr.length++;                             // 非法
+
+            int8[] storage storageArr2 = dynamicStorageArray;
+            storageArr2.length++;                     // 非法
+
+
+        }
+    }
 
 **重要提醒：** 在 Solidity 中，数组维数的声明方向是和在 C 或 Java 中的声明方向相反的，但访问方式相同。
 

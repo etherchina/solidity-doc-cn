@@ -13,7 +13,7 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 下面您将会看到，使用 Solidity 语言，可以为投票、众筹、秘密竞价（盲拍）、多重签名的钱包以及其他应用创建合约。
 
 .. note::
-    目前尝试 Solidity 编程的最好的方式是使用 `Remix <https://remix.ethereum.org/>`_ （需要时间加载，请耐心等待）。Remix 是一个基于 Web 的 IDE，它可以让你编写 Solidity 智能合约，然后部署并运行该智能合约。
+    目前尝试 Solidity 编程的最好的方式是使用 `Remix <https://remix.ethereum.org/>`_ （需要时间加载，请耐心等待）。Remix 是一个基于 Web 浏览器的 IDE，它可以让你编写 Solidity 智能合约，然后部署并运行该智能合约。
 
 .. warning::
     因为软件是人编写的，就会有 bug，所以，创建智能合约也应该遵循软件开发领域熟知的最佳实践。这些实践包括代码审查、测试、审计和正确性证明。也请注意，有时候用户在代码方面比软件的作者更谙熟。最后，区块链本身有些东西需要留意，请参考 :ref:`security_considerations`。
@@ -26,6 +26,7 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 * `简体中文版 <https://solidity-cn.readthedocs.io/>`_
 * `西班牙语版 <https://solidity-es.readthedocs.io>`_
 * `俄语版 <https://github.com/ethereum/wiki/wiki/%5BRussian%5D-%D0%A0%D1%83%D0%BA%D0%BE%D0%B2%D0%BE%D0%B4%D1%81%D1%82%D0%B2%D0%BE-%D0%BF%D0%BE-Solidity>`_ (已过时)
+* `韩语版 <http://solidity-kr.readthedocs.io>`_ (in progress)
 
 
 有用的链接
@@ -142,7 +143,7 @@ Solidity 工具列表
    using-the-compiler.rst
    metadata.rst
    abi-spec.rst
-   julia.rst
+   yul.rst
    style-guide.rst
    common-patterns.rst
    bugs.rst

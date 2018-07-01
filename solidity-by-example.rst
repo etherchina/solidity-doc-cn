@@ -25,7 +25,7 @@
 
 ::
 
-    pragma solidity ^0.4.16;
+    pragma solidity ^0.4.22;
 
     /// @title 委托投票
     contract Ballot {
@@ -53,7 +53,7 @@
         Proposal[] public proposals;
 
         /// 为 `proposalNames` 中的每个提案，创建一个新的（投票）表决
-        function Ballot(bytes32[] proposalNames) public {
+        constructor(bytes32[] proposalNames) public {
             chairperson = msg.sender;
             voters[chairperson].weight = 1;
             //对于提供的每个提案名称，
@@ -71,14 +71,20 @@
         // 授权 `voter` 对这个（投票）表决进行投票
         // 只有 `chairperson` 可以调用该函数。
         function giveRightToVote(address voter) public {
-            // 若 `require` 的入参判定为 `false`，
-            // 则终止函数，恢复所有对状态和以太币账户的变动，并且也不会消耗 gas 。
-            // 如果函数被错误的调用，使用require，将是一个很好的选择。
+            // 若 `require` 的第一个参数的计算结果为 `false`，
+            // 则终止执行，撤销所有对状态和以太币余额的改动。
+            // 在旧版的 EVM 中这曾经会消耗所有 gas，但现在不会了。
+            // 使用 require 来检查函数是否被正确地调用，是一个好习惯。
+            // 你也可以在 require 的第二个参数中提供一个对错误情况的解释。
             require(
-                (msg.sender == chairperson) &&
-                !voters[voter].voted &&
-                (voters[voter].weight == 0)
+                msg.sender == chairperson,
+                "Only chairperson can give right to vote."
             );
+            require(
+                !voters[voter].voted,
+                "The voter already voted."
+            );
+            require(voters[voter].weight == 0);
             voters[voter].weight = 1;
         }
 
@@ -86,10 +92,9 @@
         function delegate(address to) public {
             // 传引用
             Voter storage sender = voters[msg.sender];
-            require(!sender.voted);
+            require(!sender.voted, "You already voted.");
 
-            // 委托给自己是不允许的
-            require(to != msg.sender);
+            require(to != msg.sender, "Self-delegation is disallowed.");
 
             // 委托是可以传递的，只要被委托者 `to` 也设置了委托。
             // 一般来说，这种循环委托是危险的。因为，如果传递的链条太长，
@@ -100,12 +105,12 @@
                 to = voters[to].delegate;
 
                 // 不允许闭环委托
-                require(to != msg.sender);
+                require(to != msg.sender, "Found loop in delegation.");
             }
 
             // `sender` 是一个引用, 相当于对 `voters[msg.sender].voted` 进行修改
             sender.voted = true;
-            sender.delegate = to;
+            sender.delegate_ = to;
             Voter storage delegate_ = voters[to];
             if (delegate_.voted) {
                 // 若被委托者已经投过票了，直接增加得票数
@@ -120,7 +125,7 @@
         /// 投给提案 `proposals[proposal].name`.
         function vote(uint proposal) public {
             Voter storage sender = voters[msg.sender];
-            require(!sender.voted);
+            require(!sender.voted, "Already voted.");
             sender.voted = true;
             sender.vote = proposal;
 
@@ -177,7 +182,7 @@
 
 ::
 
-    pragma solidity ^0.4.21;
+    pragma solidity ^0.4.22;
 
     contract SimpleAuction {
         // 拍卖的参数。
@@ -205,7 +210,7 @@
 
         /// 以受益者地址 `_beneficiary` 的名义，
         /// 创建一个简单的拍卖，拍卖时间为 `_biddingTime` 秒。
-        function SimpleAuction(
+        constructor(
             uint _biddingTime,
             address _beneficiary
         ) public {
@@ -220,10 +225,16 @@
             // 对于能接收以太币的函数，关键字 payable 是必须的。
 
             // 如果拍卖已结束，撤销函数的调用。
-            require(now <= auctionEnd);
+            require(
+                now <= auctionEnd,
+                "Auction already ended."
+            );
 
             // 如果出价不够高，返还你的钱
-            require(msg.value > highestBid);
+            require(
+                msg.value > highestBid,
+                "There already is a higher bid."
+            );
 
             if (highestBid != 0) {
                 // 返还出价时，简单地直接调用 highestBidder.send(highestBid) 函数，
@@ -267,8 +278,8 @@
             // 则它也会被认为是与外部合约有交互的。
 
             // 1. 条件
-            require(now >= auctionEnd); // 拍卖尚未结束
-            require(!ended); // 该函数已被调用
+            require(now >= auctionEnd, "Auction not yet ended.");
+            require(!ended, "auctionEnd has already been called.");
 
             // 2. 生效
             ended = true;
@@ -301,7 +312,7 @@
 
 ::
 
-    pragma solidity ^0.4.21;
+    pragma solidity >0.4.23 <0.5.0;
 
     contract BlindAuction {
         struct Bid {
@@ -330,7 +341,7 @@
         modifier onlyBefore(uint _time) { require(now < _time); _; }
         modifier onlyAfter(uint _time) { require(now > _time); _; }
 
-        function BlindAuction(
+        constructor(
             uint _biddingTime,
             uint _revealTime,
             address _beneficiary
@@ -375,8 +386,8 @@
 
             uint refund;
             for (uint i = 0; i < length; i++) {
-                var bid = bids[msg.sender][i];
-                var (value, fake, secret) =
+                Bid storage bid = bids[msg.sender][i];
+                (uint value, bool fake, bytes32 secret) =
                         (_values[i], _fake[i], _secret[i]);
                 if (bid.blindedBid != keccak256(value, fake, secret)) {
                     // 出价未能正确披露
@@ -401,7 +412,7 @@
             if (value <= highestBid) {
                 return false;
             }
-            if (highestBidder != 0) {
+            if (highestBidder != address(0)) {
                 // 返还之前的最高出价
                 pendingReturns[highestBidder] += highestBid;
             }
@@ -444,7 +455,7 @@
 
 ::
 
-    pragma solidity ^0.4.21;
+    pragma solidity ^0.4.22;
 
     contract Purchase {
         uint public value;
@@ -456,29 +467,41 @@
         //确保 `msg.value` 是一个偶数。
         //如果它是一个奇数，则它将被截断。
         //通过乘法检查它不是奇数。
-        function Purchase() public payable {
+        constructor() public payable {
             seller = msg.sender;
             value = msg.value / 2;
-            require((2 * value) == msg.value);
+            require((2 * value) == msg.value, "Value has to be even.");
         }
 
         modifier condition(bool _condition) {
-            require(_condition);
+            require(
+                msg.sender == buyer,
+                "Only buyer can call this."
+            );
             _;
         }
 
         modifier onlyBuyer() {
-            require(msg.sender == buyer);
+            require(
+                msg.sender == buyer,
+                "Only buyer can call this."
+            );
             _;
         }
 
         modifier onlySeller() {
-            require(msg.sender == seller);
+            require(
+                msg.sender == seller,
+                "Only seller can call this."
+            );
             _;
         }
 
         modifier inState(State _state) {
-            require(state == _state);
+            require(
+                state == _state,
+                "Invalid state."
+            );
             _;
         }
 
@@ -495,7 +518,7 @@
         {
             emit Aborted();
             state = State.Inactive;
-            seller.transfer(this.balance);
+            seller.transfer(address(this).balance);
         }
 
         /// 买家确认购买。
@@ -525,7 +548,7 @@
 
             // 注意: 这实际上允许买方和卖方阻止退款 - 应该使用取回模式。
             buyer.transfer(value);
-            seller.transfer(this.balance);
+            seller.transfer(address(this).balance);
         }
     }
 

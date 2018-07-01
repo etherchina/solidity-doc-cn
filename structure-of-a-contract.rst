@@ -58,13 +58,16 @@
 
 ::
 
-    pragma solidity ^0.4.11;
+    pragma solidity ^0.4.22;
 
     contract Purchase {
         address public seller;
 
         modifier onlySeller() { // 修饰器
-            require(msg.sender == seller);
+            require(
+                msg.sender == seller,
+                "Only seller can call this."
+            );
             _;
         }
         
@@ -81,13 +84,13 @@
 事件是与以太坊虚拟机日志工具的方便接口。
 ::
 
-    pragma solidity ^0.4.0;
+    pragma solidity ^0.4.21;
     contract SimpleAuction {
         event HighestBidIncreased(address bidder, uint amount); // 事件
 
         function bid() public payable {
             // ...
-            HighestBidIncreased(msg.sender, msg.value); // 触发事件
+            emit HighestBidIncreased(msg.sender, msg.value); // 触发事件
         }
     }
 
@@ -117,7 +120,7 @@
 枚举类型
 ==========
 
-枚举可用来创建有一定数量的值的自定义类型（参阅类型章节中的 :ref:`enums`）。 
+枚举可用来创建由一定数量的“常量值”构成的自定义类型（参阅类型章节中的 :ref:`enums`）。 
 
 ::
 
