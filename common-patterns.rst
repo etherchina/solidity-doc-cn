@@ -109,7 +109,7 @@
 
 ::
 
-    pragma solidity ^0.4.11;
+    pragma solidity ^0.4.22;
 
     contract AccessRestriction {
         // 这些将在构造阶段被赋值
@@ -126,7 +126,10 @@
         // 函数调用。
         modifier onlyBy(address _account)
         {
-            require(msg.sender == _account);
+            require(
+                msg.sender == _account,
+                "Sender not authorized."
+            );
             // 不要忘记写 `_;`！
             // 它会被实际使用这个修饰器的
             // 函数体所替代。
@@ -143,7 +146,10 @@
         }
 
         modifier onlyAfter(uint _time) {
-            require(now >= _time);
+            require(
+                now >= _time,
+                "Function called too early."
+            );
             _;
         }
 
@@ -165,7 +171,10 @@
         // 这在 0.4.0 版本以前的 Solidity 中很危险，
         // 因为很可能会跳过 `_;` 之后的代码。
         modifier costs(uint _amount) {
-            require(msg.value >= _amount);
+            require(
+                msg.value >= _amount,
+                "Not enough Ether provided."
+            );
             _;
             if (msg.value > _amount)
                 msg.sender.send(msg.value - _amount);
@@ -173,6 +182,7 @@
 
         function forceOwnerChange(address _newOwner)
             public
+            payable
             costs(200 ether)
         {
             owner = _newOwner;
@@ -235,7 +245,7 @@
 
 ::
 
-    pragma solidity ^0.4.11;
+    pragma solidity ^0.4.22;
 
     contract StateMachine {
         enum Stages {
@@ -252,7 +262,10 @@
         uint public creationTime = now;
 
         modifier atStage(Stages _stage) {
-            require(stage == _stage);
+            require(
+                stage == _stage,
+                "Function cannot be called at this time."
+            );
             _;
         }
 
