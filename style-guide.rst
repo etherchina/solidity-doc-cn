@@ -107,6 +107,110 @@
         }
     }
 
+.. _maximum_line_length:
+
+代码行的最大长度
+===================
+
+基于 `PEP 8 recommendation <https://www.python.org/dev/peps/pep-0008/#maximum-line-length>`_ ，将代码行的字符长度控制在 79（或 99）字符来帮助读者阅读代码。
+
+折行时应该遵从以下指引：
+
+1. 第一个参数不应该紧跟在左括号后边
+2. 用一个、且只用一个缩进
+3. 每个函数应该单起一行
+4. 结束符号 :code:`);` 应该单独放在最后一行
+
+函数调用
+
+Yes::
+
+    thisFunctionCallIsReallyLong(
+        longArgument1, 
+        longArgument2, 
+        longArgument3
+    );
+
+No::
+
+    thisFunctionCallIsReallyLong(longArgument1, 
+                                  longArgument2, 
+                                  longArgument3
+    );
+                                  
+    thisFunctionCallIsReallyLong(longArgument1, 
+        longArgument2, 
+        longArgument3
+    );                                  
+                                  
+    thisFunctionCallIsReallyLong(
+        longArgument1, longArgument2,
+        longArgument3
+    );                                    
+
+    thisFunctionCallIsReallyLong(
+    longArgument1, 
+    longArgument2, 
+    longArgument3
+    );
+
+    thisFunctionCallIsReallyLong(
+        longArgument1, 
+        longArgument2, 
+        longArgument3);        
+
+赋值语句
+
+Yes::
+
+    thisIsALongNestedMapping[being][set][to_some_value] = someFunction(
+        argument1,
+        argument2,
+        argument3,
+        argument4
+    );
+
+No::
+
+    thisIsALongNestedMapping[being][set][to_some_value] = someFunction(argument1,
+                                                                       argument2,
+                                                                       argument3,
+                                                                       argument4);
+
+事件定义和事件发生
+
+Yes::
+
+    event LongAndLotsOfArgs(
+        adress sender,
+        adress recipient,
+        uint256 publicKey,
+        uint256 amount,
+        bytes32[] options
+    );
+
+    LongAndLotsOfArgs(
+        sender,
+        recipient,
+        publicKey,
+        amount,
+        options
+    );
+
+No::
+
+    event LongAndLotsOfArgs(adress sender,
+                            adress recipient,
+                            uint256 publicKey,
+                            uint256 amount,
+                            bytes32[] options);
+
+    LongAndLotsOfArgs(sender,
+                      recipient,
+                      publicKey,
+                      amount,
+                      options); 
+
 源文件编码格式
 ====================
 
@@ -159,7 +263,7 @@ Import 语句应始终放在文件的顶部。
 - 内部函数和变量
 - 私有函数和变量
 
-在一个分组中，把 ``constant`` 函数放在最后。
+在一个分组中，把 ``view`` 和 ``pure`` 函数放在最后。
 
 正确写法::
 
@@ -175,7 +279,10 @@ Import 语句应始终放在文件的顶部。
         // External functions
         // ...
 
-        // External functions that are constant
+        // External functions that are view
+        // ...
+
+        // External functions that are pure
         // ...
 
         // Public functions
@@ -407,6 +514,20 @@ fallback 函数中不要包含空格：
     function increment(uint x) public pure returns (uint) {
         return x + 1;}
 
+你应该严格地标示所有函数的可见性，包括构造函数。 
+
+Yes::
+
+    function explicitlyPublic(uint val) public {
+        doSomething();
+    }
+
+No::
+
+    function implicitlyPublic(uint val) {
+        doSomething(); 
+    }
+
 函数的可见性修饰符应该出现在任何自定义修饰符之前。
 
 正确写法::
@@ -514,6 +635,50 @@ fallback 函数中不要包含空格：
         priced
         returns (address) {
         doSomething();
+    }
+
+多行输出参数和返回值语句应该遵从 :ref:`代码行的最大长度 <maximum_line_length>` 一节的说明。
+
+Yes::
+
+    function thisFunctionNameIsReallyLong(
+        address a,
+        address b,
+        address c
+    ) 
+        public 
+        returns (
+            address someAddressName, 
+            uint256 LongArgument, 
+            uint256 Argument
+        )
+    {    
+        doSomething()
+        
+        return (
+            veryLongReturnArg1, 
+            veryLongReturnArg2, 
+            veryLongReturnArg3
+        );
+    }
+
+No::
+
+    function thisFunctionNameIsReallyLong(
+        address a,
+        address b,
+        address c
+    ) 
+        public 
+        returns (address someAddressName, 
+                 uint256 LongArgument, 
+                 uint256 Argument)
+    {    
+        doSomething()
+        
+        return (veryLongReturnArg1, 
+                veryLongReturnArg1, 
+                veryLongReturnArg1);
     }
 
 对于继承合约中需要参数的构造函数，如果函数声明很长或难以阅读，建议将基础构造函数像多个修饰符的风格那样
