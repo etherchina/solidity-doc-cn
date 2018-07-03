@@ -1,3 +1,4 @@
+.. include:: glossaries.rst
 .. index:: type
 
 .. _types:
@@ -6,121 +7,120 @@
 类型
 *****
 
-Solidity is a statically typed language, which means that the type of each
-variable (state and local) needs to be specified (or at least known -
-see :ref:`type-deduction` below) at
-compile-time. Solidity provides several elementary types which can be combined
-to form complex types.
+Solidity 是一种静态类型语言，这意味着每个变量（状态变量和局部变量）都需要在编译时指定变量的类型（或至少可以推导出变量类型——参考下文的 :ref:`type-deduction` ）。
+Solidity 提供了几种基本类型，可以用来组合出复杂类型。
 
-In addition, types can interact with each other in expressions containing
-operators. For a quick reference of the various operators, see :ref:`order`.
+除此之外，类型之间可以在包含运算符号的表达式中进行交互。
+关于各种运算符号，可以参考 :ref:`order` 。
 
 .. index:: ! value type, ! type;value
 
-Value Types
-===========
+值类型
+======
 
-The following types are also called value types because variables of these
-types will always be passed by value, i.e. they are always copied when they
-are used as function arguments or in assignments.
+以下类型也称为值类型，因为这些类型的变量将始终按值来传递。
+也就是说，当这些变量被用作函数参数或者用在赋值语句中时，总会进行值拷贝。
 
 .. index:: ! bool, ! true, ! false
 
-Booleans
+布尔类型
 --------
 
-``bool``: The possible values are constants ``true`` and ``false``.
+``bool`` ：可能的取值为字面常数值 ``true`` 和 ``false`` 。
 
-Operators:
+运算符：
 
-*  ``!`` (logical negation)
-*  ``&&`` (logical conjunction, "and")
-*  ``||`` (logical disjunction, "or")
-*  ``==`` (equality)
-*  ``!=`` (inequality)
+*  ``!`` （逻辑非）
+*  ``&&`` （逻辑与， "and" ）
+*  ``||`` （逻辑或， "or" ）
+*  ``==`` （等于）
+*  ``!=`` （不等于）
 
-The operators ``||`` and ``&&`` apply the common short-circuiting rules. This means that in the expression ``f(x) || g(y)``, if ``f(x)`` evaluates to ``true``, ``g(y)`` will not be evaluated even if it may have side-effects.
+运算符 ``||`` 和 ``&&`` 都遵循同样的短路（ short-circuiting ）规则。就是说在表达式 ``f(x) || g(y)`` 中，
+如果 ``f(x)`` 的值为 ``true`` ，那么 ``g(y)`` 就不会被执行，即使会出现一些副作用。
 
 .. index:: ! uint, ! int, ! integer
 
-Integers
---------
+整型
+----
 
-``int`` / ``uint``: Signed and unsigned integers of various sizes. Keywords ``uint8`` to ``uint256`` in steps of ``8`` (unsigned of 8 up to 256 bits) and ``int8`` to ``int256``. ``uint`` and ``int`` are aliases for ``uint256`` and ``int256``, respectively.
+``int`` / ``uint`` ：分别表示有符号和无符号的不同位数的整型变量。
+支持关键字 ``uint8`` 到 ``uint256`` （无符号，从 8 位到 256 位）以及 ``int8`` 到 ``int256``，以 ``8`` 位为步长递增。
+``uint`` 和 ``int`` 分别是 ``uint256`` 和 ``int256`` 的别名。
 
-Operators:
+运算符：
 
-* Comparisons: ``<=``, ``<``, ``==``, ``!=``, ``>=``, ``>`` (evaluate to ``bool``)
-* Bit operators: ``&``, ``|``, ``^`` (bitwise exclusive or), ``~`` (bitwise negation)
-* Arithmetic operators: ``+``, ``-``, unary ``-``, unary ``+``, ``*``, ``/``, ``%`` (remainder), ``**`` (exponentiation), ``<<`` (left shift), ``>>`` (right shift)
+* 比较运算符： ``<=`` ， ``<`` ， ``==`` ， ``!=`` ， ``>=`` ， ``>`` （返回布尔值）
+* 位运算符： ``&`` ， ``|`` ， ``^`` （异或）， ``~`` （位取反）
+* 算数运算符： ``+`` ， ``-`` ， 一元运算 ``-`` ， 一元运算 ``+`` ， ``*`` ， ``/`` ， ``%`` （取余） ， ``**`` （幂）， ``<<`` （左移位） ， ``>>`` （右移位）
 
-Division always truncates (it is just compiled to the ``DIV`` opcode of the EVM), but it does not truncate if both
-operators are :ref:`literals<rational_literals>` (or literal expressions).
+除法总是会截断的（仅被编译为 EVM 中的 ``DIV`` 操作码），
+但如果操作数都是 :ref:`字面常数（literals）<rational_literals>` （或者字面常数表达式），则不会截断。
 
-Division by zero and modulus with zero throws a runtime exception.
+除以零或者模零运算都会引发运行时异常。
 
-The result of a shift operation is the type of the left operand. The
-expression ``x << y`` is equivalent to ``x * 2**y``, and ``x >> y`` is
-equivalent to ``x / 2**y``. This means that shifting negative numbers
-sign extends. Shifting by a negative amount throws a runtime exception.
+移位运算的结果取决于运算符左边的类型。
+表达式 ``x << y`` 与 ``x * 2**y`` 是等价的，
+``x >> y`` 与 ``x / 2**y`` 是等价的。这意味对一个负数进行移位会导致其符号消失。
+按负数位移动会引发运行时异常。
 
 .. warning::
-    The results produced by shift right of negative values of signed integer types is different from those produced
-    by other programming languages. In Solidity, shift right maps to division so the shifted negative values
-    are going to be rounded towards zero (truncated). In other programming languages the shift right of negative values
-    works like division with rounding down (towards negative infinity).
+   由有符号整数类型负值右移所产生的结果跟其它语言中所产生的结果是不同的。
+   在 Solidity 中，右移和除是等价的，因此对一个负数进行右移操作会导致向 0 的取整（截断）。
+   而在其它语言中， 对负数进行右移类似于（向负无穷）取整。
 
 .. index:: ! ufixed, ! fixed, ! fixed point number
 
-Fixed Point Numbers
--------------------
+定长浮点型
+----------
 
 .. warning::
-    Fixed point numbers are not fully supported by Solidity yet. They can be declared, but
-    cannot be assigned to or from.
+    Solidity 还没有完全支持定长浮点型。可以声明定长浮点型的变量，但不能给它们赋值或把它们赋值给其他变量。。
 
-``fixed`` / ``ufixed``: Signed and unsigned fixed point number of various sizes. Keywords ``ufixedMxN`` and ``fixedMxN``, where ``M`` represents the number of bits taken by
-the type and ``N`` represents how many decimal points are available. ``M`` must be divisible by 8 and goes from 8 to 256 bits. ``N`` must be between 0 and 80, inclusive.
-``ufixed`` and ``fixed`` are aliases for ``ufixed128x19`` and ``fixed128x19``, respectively.
+``fixed`` / ``ufixed``：表示各种大小的有符号和无符号的定长浮点型。
+在关键字 ``ufixedMxN`` 和 ``fixedMxN`` 中，``M`` 表示该类型占用的位数，``N`` 表示可用的小数位数。
+``M`` 必须能整除 8，即 8 到 256 位。
+``N`` 则可以是从 0 到 80 之间的任意数。
+``ufixed`` 和 ``fixed`` 分别是 ``ufixed128x19`` 和 ``fixed128x19`` 的别名。
 
-Operators:
+运算符：
 
-* Comparisons: ``<=``, ``<``, ``==``, ``!=``, ``>=``, ``>`` (evaluate to ``bool``)
-* Arithmetic operators: ``+``, ``-``, unary ``-``, unary ``+``, ``*``, ``/``, ``%`` (remainder)
+* 比较运算符：``<=``， ``<``， ``==``， ``!=``， ``>=``， ``>`` （返回值是布尔型）
+* 算术运算符：``+``， ``-``， 一元运算 ``-``， 一元运算 ``+``， ``*``， ``/``， ``%`` （取余数）
 
 .. note::
-    The main difference between floating point (``float`` and ``double`` in many languages, more precisely IEEE 754 numbers) and fixed point numbers is
-    that the number of bits used for the integer and the fractional part (the part after the decimal dot) is flexible in the former, while it is strictly
-    defined in the latter. Generally, in floating point almost the entire space is used to represent the number, while only a small number of bits define
-    where the decimal point is.
+    浮点型（在许多语言中的 ``float`` 和 ``double`` 类型，更准确地说是 IEEE 754 类型）和定长浮点型之间最大的不同点是，
+    在前者中整数部分和小数部分（小数点后的部分）需要的位数是灵活可变的，而后者中这两部分的长度受到严格的规定。
+    一般来说，在浮点型中，几乎整个空间都用来表示数字，但只有少数的位来表示小数点的位置。
 
 .. index:: address, balance, send, call, callcode, delegatecall, transfer
 
 .. _address:
 
-Address
--------
+地址类型
+--------------
 
-``address``: Holds a 20 byte value (size of an Ethereum address). Address types also have members and serve as a base for all contracts.
+``address``：地址类型存储一个 20 字节的值（以太坊地址的大小）。
+地址类型也有成员变量，并作为所有合约的基础。
 
-Operators:
+运算符：
 
-* ``<=``, ``<``, ``==``, ``!=``, ``>=`` and ``>``
+* ``<=``， ``<``， ``==``， ``!=``， ``>=`` 和 ``>``
 
 .. note::
-    Starting with version 0.5.0 contracts do not derive from the address type, but can still be explicitly converted to address.
+    从 0.5.0 版本开始，合约不会从地址类型派生，但仍然可以显式地转换成地址类型。
 
 .. _members-of-addresses:
 
-Members of Addresses
-^^^^^^^^^^^^^^^^^^^^
+地址类型成员变量
+^^^^^^^^^^^^^^^^
 
-* ``balance`` and ``transfer``
+* ``balance`` 和 ``transfer``
 
-For a quick reference, see :ref:`address_related`.
+快速参考，请见 :ref:`address_related`。
 
-It is possible to query the balance of an address using the property ``balance``
-and to send Ether (in units of wei) to an address using the ``transfer`` function:
+可以使用 ``balance`` 属性来查询一个地址的余额，
+也可以使用 ``transfer`` 函数向一个地址发送 |ether| （以 wei 为单位）：
 
 ::
 
@@ -129,22 +129,24 @@ and to send Ether (in units of wei) to an address using the ``transfer`` functio
     if (x.balance < 10 && myAddress.balance >= 10) x.transfer(10);
 
 .. note::
-    If ``x`` is a contract address, its code (more specifically: its fallback function, if present) will be executed together with the ``transfer`` call (this is a feature of the EVM and cannot be prevented). If that execution runs out of gas or fails in any way, the Ether transfer will be reverted and the current contract will stop with an exception.
+    如果 ``x`` 是一个合约地址，它的代码（更具体来说是它的 fallback 函数，如果有的话）会跟 ``transfer`` 函数调用一起执行（这是 EVM 的一个特性，无法阻止）。
+    如果在执行过程中用光了 gas 或者因为任何原因执行失败，|ether| 交易会被打回，当前的合约也会在终止的同时抛出异常。
 
 * ``send``
 
-Send is the low-level counterpart of ``transfer``. If the execution fails, the current contract will not stop with an exception, but ``send`` will return ``false``.
+``send`` 是 ``transfer`` 的低级版本。如果执行失败，当前的合约不会因为异常而终止，但 ``send`` 会返回 ``false``。
 
 .. warning::
-    There are some dangers in using ``send``: The transfer fails if the call stack depth is at 1024
-    (this can always be forced by the caller) and it also fails if the recipient runs out of gas. So in order
-    to make safe Ether transfers, always check the return value of ``send``, use ``transfer`` or even better:
-    use a pattern where the recipient withdraws the money.
+    在使用 ``send`` 的时候会有些风险：如果调用栈深度是 1024 会导致发送失败（这总是可以被调用者强制），如果接收者用光了 gas 也会导致发送失败。
+    所以为了保证 |ether| 发送的安全，一定要检查 ``send`` 的返回值，使用 ``transfer`` 或者更好的办法：
+    使用一种接收者可以取回资金的模式。
 
-* ``call``, ``callcode`` and ``delegatecall``
+* ``call``， ``callcode`` 和 ``delegatecall``
 
-Furthermore, to interface with contracts that do not adhere to the ABI,
-the function ``call`` is provided which takes an arbitrary number of arguments of any type. These arguments are padded to 32 bytes and concatenated. One exception is the case where the first argument is encoded to exactly four bytes. In this case, it is not padded to allow the use of function signatures here.
+此外，为了与不符合 |ABI| 的合约交互，于是就有了可以接受任意类型任意数量参数的 ``call`` 函数。
+这些参数会被打包到以 32 字节为单位的连续区域中存放。
+其中一个例外是当第一个参数被编码成正好 4 个字节的情况。
+在这种情况下，这个参数后边不会填充后续参数编码，以允许使用函数签名。
 
 ::
 
@@ -152,148 +154,129 @@ the function ``call`` is provided which takes an arbitrary number of arguments o
     nameReg.call("register", "MyName");
     nameReg.call(bytes4(keccak256("fun(uint256)")), a);
 
-``call`` returns a boolean indicating whether the invoked function terminated (``true``) or caused an EVM exception (``false``). It is not possible to access the actual data returned (for this we would need to know the encoding and size in advance).
+``call`` 返回的布尔值表明了被调用的函数已经执行完毕（``true``）或者引发了一个 EVM 异常（``false``）。
+无法访问返回的真实数据（为此我们需要事先知道编码和大小）。
 
-It is possible to adjust the supplied gas with the ``.gas()`` modifier::
+可以使用 ``.gas()`` |modifier| 调整提供的 gas 数量 ::
 
     namReg.call.gas(1000000)("register", "MyName");
 
-Similarly, the supplied Ether value can be controlled too::
+类似地，也能控制提供的 |ether| 的值 ::
 
-    nameReg.call.value(1 ether)("register", "MyName");
+   nameReg.call.value(1 ether)("register", "MyName"); 
 
-Lastly, these modifiers can be combined. Their order does not matter::
+最后一点，这些 |modifier| 可以联合使用。每个修改器出现的顺序不重要 ::
 
-    nameReg.call.gas(1000000).value(1 ether)("register", "MyName");
-
-.. note::
-    It is not yet possible to use the gas or value modifiers on overloaded functions.
-
-    A workaround is to introduce a special case for gas and value and just re-check
-    whether they are present at the point of overload resolution.
-
-In a similar way, the function ``delegatecall`` can be used: the difference is that only the code of the given address is used, all other aspects (storage, balance, ...) are taken from the current contract. The purpose of ``delegatecall`` is to use library code which is stored in another contract. The user has to ensure that the layout of storage in both contracts is suitable for delegatecall to be used. Prior to homestead, only a limited variant called ``callcode`` was available that did not provide access to the original ``msg.sender`` and ``msg.value`` values.
-
-All three functions ``call``, ``delegatecall`` and ``callcode`` are very low-level functions and should only be used as a *last resort* as they break the type-safety of Solidity.
-
-The ``.gas()`` option is available on all three methods, while the ``.value()`` option is not supported for ``delegatecall``.
+   nameReg.call.gas(1000000).value(1 ether)("register", "MyName"); 
 
 .. note::
-    All contracts inherit the members of address, so it is possible to query the balance of the
-    current contract using ``this.balance``.
+    目前还不能在重载函数中使用 gas 或者 value |modifier| 。
+
+    一种解决方案是给 gas 和值引入一个特例，并重新检查它们是否在重载的地方出现。
+
+类似地，也可以使用 ``delegatecall``：
+区别在于只使用给定地址的代码，其它属性（存储，余额，……）都取自当前合约。
+``delegatecall`` 的目的是使用存储在另外一个合约中的库代码。
+用户必须确保两个合约中的存储结构都适用于 delegatecall。
+在 homestead 版本之前，只有一个功能类似但作用有限的 ``callcode`` 的函数可用，但它不能获取委托方的 ``msg.sender`` 和 ``msg.value``。
+
+这三个函数 ``call``， ``delegatecall`` 和 ``callcode`` 都是非常低级的函数，应该只把它们当作 *最后一招* 来使用，因为它们破坏了 Solidity 的类型安全性。
 
 .. note::
-    The use of ``callcode`` is discouraged and will be removed in the future.
+    所有合约都继承了地址（address）的成员变量，因此可以使用 ``this.balance`` 查询当前合约的余额。
+
+.. note::
+    不鼓励使用 ``callcode``，在未来也会将其移除。
 
 .. warning::
-    All these functions are low-level functions and should be used with care.
-    Specifically, any unknown contract might be malicious and if you call it, you
-    hand over control to that contract which could in turn call back into
-    your contract, so be prepared for changes to your state variables
-    when the call returns.
+    这三个函数都属于低级函数，需要谨慎使用。
+    具体来说，任何未知的合约都可能是恶意的。
+    你在调用一个合约的同时就将控制权交给了它，它可以反过来调用你的合约，
+    因此，当调用返回时要为你的状态变量的改变做好准备。
 
 .. index:: byte array, bytes32
 
+定长字节数组
+------------
 
-Fixed-size byte arrays
-----------------------
+关键字有：``bytes1``， ``bytes2``， ``bytes3``， ...， ``bytes32``。``byte`` 是 ``bytes1`` 的别名。
 
-``bytes1``, ``bytes2``, ``bytes3``, ..., ``bytes32``. ``byte`` is an alias for ``bytes1``.
+运算符：
 
-Operators:
+* 比较运算符：``<=``， ``<``， ``==``， ``!=``， ``>=``， ``>`` （返回布尔型）
+* 位运算符： ``&``， ``|``， ``^`` （按位异或）， ``~`` （按位取反）， ``<<`` （左移位）， ``>>`` （右移位）
+* 索引访问：如果 ``x`` 是 ``bytesI`` 类型，那么 ``x[k]`` （其中 ``0 <= k < I``）返回第 ``k`` 个字节（只读）。
 
-* Comparisons: ``<=``, ``<``, ``==``, ``!=``, ``>=``, ``>`` (evaluate to ``bool``)
-* Bit operators: ``&``, ``|``, ``^`` (bitwise exclusive or), ``~`` (bitwise negation), ``<<`` (left shift), ``>>`` (right shift)
-* Index access: If ``x`` is of type ``bytesI``, then ``x[k]`` for ``0 <= k < I`` returns the ``k`` th byte (read-only).
+该类型可以和作为右操作数的任何整数类型进行移位运算（但返回结果的类型和左操作数类型相同），右操作数表示需要移动的位数。
+进行负数位移运算会引发运行时异常。
 
-The shifting operator works with any integer type as right operand (but will
-return the type of the left operand), which denotes the number of bits to shift by.
-Shifting by a negative amount will cause a runtime exception.
+成员变量：
 
-Members:
-
-* ``.length`` yields the fixed length of the byte array (read-only).
+* ``.length`` 表示这个字节数组的长度（只读）.
 
 .. note::
-    It is possible to use an array of bytes as ``byte[]``, but it is wasting a lot of space, 31 bytes every element,
-    to be exact, when passing in calls. It is better to use ``bytes``.
+    可以将 ``byte[]`` 当作字节数组使用，但这种方式非常浪费存储空间，准确来说，是在传入调用时，每个元素会浪费 31 字节。
+    更好地做法是使用 ``bytes``。
 
-Dynamically-sized byte array
-----------------------------
+变长字节数组
+------------
 
 ``bytes``:
-    Dynamically-sized byte array, see :ref:`arrays`. Not a value-type!
+    变长字节数组，参见 :ref:`arrays`。它并不是值类型。
 ``string``:
-    Dynamically-sized UTF-8-encoded string, see :ref:`arrays`. Not a value-type!
-
-As a rule of thumb, use ``bytes`` for arbitrary-length raw byte data and ``string``
-for arbitrary-length string (UTF-8) data. If you can limit the length to a certain
-number of bytes, always use one of ``bytes1`` to ``bytes32`` because they are much cheaper.
+    变长 UTF-8 编码字符串类型，参见 :ref:`arrays`。并不是值类型。
 
 .. index:: address, literal;address
 
 .. _address_literals:
 
-Address Literals
-----------------
+地址字面常数（Address Literals）
+---------------------------------------
 
-Hexadecimal literals that pass the address checksum test, for example
-``0xdCad3a6d3569DF655070DEd06cb7A1b2Ccd1D3AF`` are of ``address`` type.
-Hexadecimal literals that are between 39 and 41 digits
-long and do not pass the checksum test produce
-a warning and are treated as regular rational number literals.
+比如像 ``0xdCad3a6d3569DF655070DEd06cb7A1b2Ccd1D3AF`` 这样的通过了地址校验和测试的十六进制字面常数属于 ``address`` 类型。
+长度在 39 到 41 个数字的，没有通过校验和测试而产生了一个警告的十六进制字面常数视为正常的有理数字面常数。
 
 .. note::
-    The mixed-case address checksum format is defined in `EIP-55 <https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md>`_.
+    混合大小写的地址校验和格式定义在 `EIP-55 <https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md>`_ 中。
 
 .. index:: literal, literal;rational
 
 .. _rational_literals:
 
-Rational and Integer Literals
------------------------------
+有理数和整数字面常数
+----------------------------
 
-Integer literals are formed from a sequence of numbers in the range 0-9.
-They are interpreted as decimals. For example, ``69`` means sixty nine.
-Octal literals do not exist in Solidity and leading zeros are invalid.
+整数字面常数由范围在 0-9 的一串数字组成，表现成十进制。
+例如，`69` 表示数字 69。
+Solidity 中是没有八进制的，因此前置 0 是无效的。
 
-Decimal fraction literals are formed by a ``.`` with at least one number on
-one side.  Examples include ``1.``, ``.1`` and ``1.3``.
+十进制小数字面常数带有一个 ``.``，至少在其一边会有一个数字。
+比如：``1.``，``.1``，和 ``1.3``。
 
-Scientific notation is also supported, where the base can have fractions, while the exponent cannot.
-Examples include ``2e10``, ``-2e10``, ``2e-10``, ``2.5e1``.
+科学符号也是支持的，尽管指数必须是整数，但底数可以是小数。
+比如：``2e10``， ``-2e10``， ``2e-10``， ``2.5e1``。
 
-Number literal expressions retain arbitrary precision until they are converted to a non-literal type (i.e. by
-using them together with a non-literal expression).
-This means that computations do not overflow and divisions do not truncate
-in number literal expressions.
+数值字面常数表达式本身支持任意精度，除非它们被转换成了非字面常数类型（也就是说，当它们出现在非字面常数表达式中时就会发生转换）。
+这意味着在数值常量表达式中, 计算不会溢出而除法也不会截断。
 
-For example, ``(2**800 + 1) - 2**800`` results in the constant ``1`` (of type ``uint8``)
-although intermediate results would not even fit the machine word size. Furthermore, ``.5 * 8`` results
-in the integer ``4`` (although non-integers were used in between).
+例如， ``(2**800 + 1) - 2**800`` 的结果是字面常数 ``1`` （属于 ``uint8`` 类型），尽管计算的中间结果已经超过了 |evm| 的机器字长度。
+此外， ``.5 * 8`` 的结果是整型 ``4`` （尽管有非整型参与了计算）。
 
-Any operator that can be applied to integers can also be applied to number literal expressions as
-long as the operands are integers. If any of the two is fractional, bit operations are disallowed
-and exponentiation is disallowed if the exponent is fractional (because that might result in
-a non-rational number).
+只要操作数是整型，任意整型支持的运算符都可以被运用在数值字面常数表达式中。
+如果两个中的任一个数是小数，则不允许进行位运算。如果指数是小数的话，也不支持幂运算（因为这样可能会得到一个无理数）。
 
 .. note::
-    Solidity has a number literal type for each rational number.
-    Integer literals and rational number literals belong to number literal types.
-    Moreover, all number literal expressions (i.e. the expressions that
-    contain only number literals and operators) belong to number literal
-    types.  So the number literal expressions ``1 + 2`` and ``2 + 1`` both
-    belong to the same number literal type for the rational number three.
+    Solidity 对每个有理数都有对应的数值字面常数类型。
+    整数字面常数和有理数字面常数都属于数值字面常数类型。
+    除此之外，所有的数值字面常数表达式（即只包含数值字面常数和运算符的表达式）都属于数值字面常数类型。
+    因此数值字面常数表达式 ``1 + 2`` 和 ``2 + 1`` 的结果跟有理数三的数值字面常数类型相同。
 
 .. warning::
-    Division on integer literals used to truncate in earlier versions, but it will now convert into a rational number, i.e. ``5 / 2`` is not equal to ``2``, but to ``2.5``.
+    在早期版本中，整数字面常数的除法也会截断，但在现在的版本中，会将结果转换成一个有理数。即 ``5 / 2`` 并不等于 ``2``，而是等于 ``2.5``。
 
 .. note::
-    Number literal expressions are converted into a non-literal type as soon as they are used with non-literal
-    expressions. Even though we know that the value of the
-    expression assigned to ``b`` in the following example evaluates to
-    an integer, but the partial expression ``2.5 + a`` does not type check so the code
-    does not compile
+    数值字面常数表达式只要在非字面常数表达式中使用就会转换成非字面常数类型。
+    在下面的例子中，尽管我们知道 ``b`` 的值是一个整数，但 ``2.5 + a`` 这部分表达式并不进行类型检查，因此编译不能通过。
 
 ::
 
@@ -302,32 +285,32 @@ a non-rational number).
 
 .. index:: literal, literal;string, string
 
-String Literals
----------------
+字符串字面常数
+---------------------
 
-String literals are written with either double or single-quotes (``"foo"`` or ``'bar'``).  They do not imply trailing zeroes as in C; ``"foo"`` represents three bytes not four.  As with integer literals, their type can vary, but they are implicitly convertible to ``bytes1``, ..., ``bytes32``, if they fit, to ``bytes`` and to ``string``.
+字符串字面常数是指由双引号或单引号引起来的字符串（``"foo"`` 或者 ``'bar'``）。
+不像在 C 语言中那样带有结束符；``"foo"`` 相当于 3 个字节而不是 4 个。
+和整数字面常数一样，字符串字面常数的类型也可以发生改变，但它们可以隐式地转换成 ``bytes1``，……，``bytes32``，如果合适的话，还可以转换成 ``bytes`` 以及 ``string``。
 
-String literals support escape characters, such as ``\n``, ``\xNN`` and ``\uNNNN``. ``\xNN`` takes a hex value and inserts the appropriate byte, while ``\uNNNN`` takes a Unicode codepoint and inserts an UTF-8 sequence.
+字符串字面常数支持转义字符，例如 ``\n``，``\xNN`` 和 ``\uNNNN``。``\xNN`` 表示一个 16 进制值，最终转换成合适的字节，
+而 ``\uNNNN`` 表示 Unicode 编码值，最终会转换为 UTF-8 的序列。
 
 .. index:: literal, bytes
 
-Hexadecimal Literals
---------------------
+十六进制字面常数
+---------------------
 
-Hexademical Literals are prefixed with the keyword ``hex`` and are enclosed in double or single-quotes (``hex"001122FF"``). Their content must be a hexadecimal string and their value will be the binary representation of those values.
+十六进制字面常数以关键字 ``hex`` 打头，后面紧跟着用单引号或双引号引起来的字符串（例如，``hex"001122FF"``）。
+字符串的内容必须是一个十六进制的字符串，它们的值将使用二进制表示。
 
-Hexademical Literals behave like String Literals and have the same convertibility restrictions.
+十六进制字面常数跟字符串字面常数很类似，具有相同的转换规则。
 
 .. index:: enum
 
 .. _enums:
 
-Enums
------
-
-Enums are one way to create a user-defined type in Solidity. They are explicitly convertible
-to and from all integer types but implicit conversion is not allowed.  The explicit conversions
-check the value ranges at runtime and a failure causes an exception.  Enums needs at least one member.
+枚举类型
+----------------
 
 ::
 
@@ -342,11 +325,10 @@ check the value ranges at runtime and a failure causes an exception.  Enums need
             choice = ActionChoices.GoStraight;
         }
 
-        // Since enum types are not part of the ABI, the signature of "getChoice"
-        // will automatically be changed to "getChoice() returns (uint8)"
-        // for all matters external to Solidity. The integer type used is just
-        // large enough to hold all enum values, i.e. if you have more values,
-        // `uint16` will be used and so on.
+        // 由于枚举类型不属于 |ABI| 的一部分，因此对于所有来自 Solidity 外部的调用，
+        // "getChoice" 的签名会自动被改成 "getChoice() returns (uint8)"。
+        // 整数类型的大小已经足够存储所有枚举类型的值，随着值的个数增加，
+        // 可以逐渐使用 `uint16` 或更大的整数类型。
         function getChoice() public view returns (ActionChoices) {
             return choice;
         }
@@ -360,54 +342,39 @@ check the value ranges at runtime and a failure causes an exception.  Enums need
 
 .. _function_types:
 
-Function Types
---------------
+函数类型
+----------------
 
-Function types are the types of functions. Variables of function type
-can be assigned from functions and function parameters of function type
-can be used to pass functions to and return functions from function calls.
-Function types come in two flavours - *internal* and *external* functions:
+函数类型是一种表示函数的类型。可以将一个函数赋值给另一个函数类型的变量，也可以将一个函数作为参数进行传递，还能在函数调用中返回函数类型变量。
+函数类型有两类：- *内部（internal）* 函数和 *外部（external）* 函数：
 
-Internal functions can only be called inside the current contract (more specifically,
-inside the current code unit, which also includes internal library functions
-and inherited functions) because they cannot be executed outside of the
-context of the current contract. Calling an internal function is realized
-by jumping to its entry label, just like when calling a function of the current
-contract internally.
+内部函数只能在当前合约内被调用（更具体来说，在当前代码块内，包括内部库函数和继承的函数中），因为它们不能在当前合约上下文的外部被执行。
+调用一个内部函数是通过跳转到它的入口标签来实现的，就像在当前合约的内部调用一个函数。
 
-External functions consist of an address and a function signature and they can
-be passed via and returned from external function calls.
+外部函数由一个地址和一个函数签名组成，可以通过外部函数调用传递或者返回。
 
-Function types are notated as follows::
+函数类型表示成如下的形式 ::
 
     function (<parameter types>) {internal|external} [pure|constant|view|payable] [returns (<return types>)]
 
-In contrast to the parameter types, the return types cannot be empty - if the
-function type should not return anything, the whole ``returns (<return types>)``
-part has to be omitted.
+与参数类型相反，返回类型不能为空 —— 如果函数类型不需要返回，则需要删除整个 ``returns (<return types>)`` 部分。
 
-By default, function types are internal, so the ``internal`` keyword can be
-omitted. In contrast, contract functions themselves are public by default,
-only when used as the name of a type, the default is internal.
+函数类型默认是内部函数，因此不需要声明 ``internal`` 关键字。
+与此相反的是，合约中的函数本身默认是 public 的，只有当它被当做类型名称时，默认才是内部函数。
 
-There are two ways to access a function in the current contract: Either directly
-by its name, ``f``, or using ``this.f``. The former will result in an internal
-function, the latter in an external function.
+有两种方法可以访问当前合约中的函数：一种是直接使用它的名字，``f`` ，另一种是使用 ``this.f`` 。
+前者适用于内部函数，后者适用于外部函数。
 
-If a function type variable is not initialized, calling it will result
-in an exception. The same happens if you call a function after using ``delete``
-on it.
+如果当函数类型的变量还没有初始化时就调用它的话会引发一个异常。
+如果在一个函数被 ``delete`` 之后调用它也会发生相同的情况。
 
-If external function types are used outside of the context of Solidity,
-they are treated as the ``function`` type, which encodes the address
-followed by the function identifier together in a single ``bytes24`` type.
+如果外部函数类型在 Solidity 的上下文环境以外的地方使用，它们会被视为 ``function`` 类型。
+该类型将函数地址紧跟其函数标识一起编码为一个 ``bytes24`` 类型。。
 
-Note that public functions of the current contract can be used both as an
-internal and as an external function. To use ``f`` as an internal function,
-just use ``f``, if you want to use its external form, use ``this.f``.
+请注意，当前合约的 public 函数既可以被当作内部函数也可以被当作外部函数使用。
+如果想将一个函数当作内部函数使用，就用 ``f`` 调用，如果想将其当作外部函数，使用 ``this.f`` 。
 
-Additionally, public (or external) functions also have a special member called ``selector``,
-which returns the :ref:`ABI function selector <abi_function_selector>`::
+除此之外，public（或 external）函数也有一个特殊的成员变量称作 ``selector``，可以返回 :ref:`ABI 函数选择器 <abi_function_selector>`::
 
     pragma solidity ^0.4.16;
 
@@ -417,13 +384,13 @@ which returns the :ref:`ABI function selector <abi_function_selector>`::
       }
     }
 
-Example that shows how to use internal function types::
+如果使用内部函数类型的例子::
 
     pragma solidity ^0.4.16;
 
     library ArrayUtils {
-      // internal functions can be used in internal library functions because
-      // they will be part of the same code context
+      // 内部函数可以在内部库函数中使用，
+      // 因为它们会成为同一代码上下文的一部分
       function map(uint[] memory self, function (uint) pure returns (uint) f)
         internal
         pure
@@ -468,7 +435,7 @@ Example that shows how to use internal function types::
       }
     }
 
-Another example that uses external function types::
+另外一个使用外部函数类型的例子::
 
     pragma solidity ^0.4.11;
 
@@ -484,141 +451,125 @@ Another example that uses external function types::
         NewRequest(requests.length - 1);
       }
       function reply(uint requestID, bytes response) public {
-        // Here goes the check that the reply comes from a trusted source
+        // 这里要验证 reply 来自可信的源
         requests[requestID].callback(response);
       }
     }
 
     contract OracleUser {
-      Oracle constant oracle = Oracle(0x1234567); // known contract
+      Oracle constant oracle = Oracle(0x1234567); // 已知的合约
       function buySomething() {
         oracle.query("USD", this.oracleResponse);
       }
       function oracleResponse(bytes response) public {
         require(msg.sender == address(oracle));
-        // Use the data
+        // 使用数据
       }
     }
 
 .. note::
-    Lambda or inline functions are planned but not yet supported.
+    Lambda 表达式或者内联函数的引入在计划内，但目前还没支持。
 
 .. index:: ! type;reference, ! reference type, storage, memory, location, array, struct
 
-Reference Types
-==================
+引用类型
+========
 
-Complex types, i.e. types which do not always fit into 256 bits have to be handled
-more carefully than the value-types we have already seen. Since copying
-them can be quite expensive, we have to think about whether we want them to be
-stored in **memory** (which is not persisting) or **storage** (where the state
-variables are held).
+比起之前讨论过的值类型，在处理复杂的类型（即占用的空间超过 256 位的类型）时，我们需要更加谨慎。
+由于拷贝这些类型变量的开销相当大，我们不得不考虑它的存储位置，是将它们保存在 ** |memory| ** （并不是永久存储）中，
+还是 ** |storage| ** （保存状态变量的地方）中。
 
-Data location
--------------
+.. index:: ! type;reference, ! reference type, storage, memory, location, array, struct
 
-Every complex type, i.e. *arrays* and *structs*, has an additional
-annotation, the "data location", about whether it is stored in memory or in storage. Depending on the
-context, there is always a default, but it can be overridden by appending
-either ``storage`` or ``memory`` to the type. The default for function parameters (including return parameters) is ``memory``, the default for local variables is ``storage`` and the location is forced
-to ``storage`` for state variables (obviously).
+数据位置
+---------
 
-There is also a third data location, ``calldata``, which is a non-modifiable,
-non-persistent area where function arguments are stored. Function parameters
-(not return parameters) of external functions are forced to ``calldata`` and
-behave mostly like ``memory``.
+所有的复杂类型，即 *数组* 和 *结构* 类型，都有一个额外属性，“数据位置”，说明数据是保存在 |memory| 中还是 |storage| 中。
+根据上下文不同，大多数时候数据有默认的位置，但也可以通过在类型名后增加关键字 ``storage`` 或 ``memory`` 进行修改。
+函数参数（包括返回的参数）的数据位置默认是 ``memory``，
+局部变量的数据位置默认是 ``storage``，状态变量的数据位置强制是 ``storage`` （这是显而易见的）。
 
-Data locations are important because they change how assignments behave:
-assignments between storage and memory and also to a state variable (even from other state variables)
-always create an independent copy.
-Assignments to local storage variables only assign a reference though, and
-this reference always points to the state variable even if the latter is changed
-in the meantime.
-On the other hand, assignments from a memory stored reference type to another
-memory-stored reference type do not create a copy.
+也存在第三种数据位置， ``calldata`` ，这是一块只读的，且不会永久存储的位置，用来存储函数参数。
+外部函数的参数（非返回参数）的数据位置被强制指定为 ``calldata`` ，效果跟 ``memory`` 差不多。
+
+数据位置的指定非常重要，因为它们影响着赋值行为：
+在 |storage| 和 |memory| 之间两两赋值，或者 |storage| 向状态变量（甚至是从其它状态变量）赋值都会创建一份独立的拷贝。
+然而状态变量向局部变量赋值时仅仅传递一个引用，而且这个引用总是指向状态变量，因此后者改变的同时前者也会发生改变。
+另一方面，从一个 |memory| 存储的引用类型向另一个 |memory| 存储的引用类型赋值并不会创建拷贝。
 
 ::
 
     pragma solidity ^0.4.0;
 
     contract C {
-        uint[] x; // the data location of x is storage
+        uint[] x; // x 的数据存储位置是 storage
 
-        // the data location of memoryArray is memory
+        // memoryArray 的数据存储位置是 memory
         function f(uint[] memoryArray) public {
-            x = memoryArray; // works, copies the whole array to storage
-            var y = x; // works, assigns a pointer, data location of y is storage
-            y[7]; // fine, returns the 8th element
-            y.length = 2; // fine, modifies x through y
-            delete x; // fine, clears the array, also modifies y
-            // The following does not work; it would need to create a new temporary /
-            // unnamed array in storage, but storage is "statically" allocated:
+            x = memoryArray; // 将整个数组拷贝到 storage 中，可行
+            var y = x;  // 分配一个指针（其中 y 的数据存储位置是 storage），可行
+            y[7]; // 返回第 8 个元素，可行
+            y.length = 2; // 通过 y 修改 x，可行
+            delete x; // 清除数组，同时修改 y，可行
+            // 下面的就不可行了；需要在 storage 中创建新的未命名的临时数组， /
+            // 但 storage 是“静态”分配的：
             // y = memoryArray;
-            // This does not work either, since it would "reset" the pointer, but there
-            // is no sensible location it could point to.
+            // 下面这一行也不可行，因为这会“重置”指针，
+            // 但并没有可以让它指向的合适的存储位置。
             // delete y;
-            g(x); // calls g, handing over a reference to x
-            h(x); // calls h and creates an independent, temporary copy in memory
+            
+            g(x); // 调用 g 函数，同时移交对 x 的引用
+            h(x); // 调用 h 函数，同时在 memory 中创建一个独立的临时拷贝
         }
 
         function g(uint[] storage storageArray) internal {}
         function h(uint[] memoryArray) public {}
     }
 
-Summary
-^^^^^^^
+总结
+^^^^^
 
-Forced data location:
- - parameters (not return) of external functions: calldata
- - state variables: storage
+强制指定的数据位置：
+ - 外部函数的参数（不包括返回参数）： calldata
+ - 状态变量： storage
 
-Default data location:
- - parameters (also return) of functions: memory
- - all other local variables: storage
+默认数据位置：
+ - 函数参数（包括返回参数）： memory
+ - 所有其它局部变量： storage
 
 .. index:: ! array
 
 .. _arrays:
 
-Arrays
-------
+数组
+-----
 
-Arrays can have a compile-time fixed size or they can be dynamic.
-For storage arrays, the element type can be arbitrary (i.e. also other
-arrays, mappings or structs). For memory arrays, it cannot be a mapping and
-has to be an ABI type if it is an argument of a publicly-visible function.
+数组可以在声明时指定长度，也可以动态调整大小。
+对于 |storage| 的数组来说，元素类型可以是任意的（即元素也可以是数组类型，映射类型或者结构体）。
+对于 |memory| 的数组来说，元素类型不能是映射类型，如果作为 public 函数的参数，它只能是 ABI 类型。
 
-An array of fixed size ``k`` and element type ``T`` is written as ``T[k]``,
-an array of dynamic size as ``T[]``. As an example, an array of 5 dynamic
-arrays of ``uint`` is ``uint[][5]`` (note that the notation is reversed when
-compared to some other languages). To access the second uint in the
-third dynamic array, you use ``x[2][1]`` (indices are zero-based and
-access works in the opposite way of the declaration, i.e. ``x[2]``
-shaves off one level in the type from the right).
+一个元素类型为 ``T``，固定长度为 ``k`` 的数组可以声明为 ``T[k]``，而动态数组声明为 ``T[]``。
+举个例子，一个长度为 5，元素类型为 ``uint`` 的动态数组的数组，应声明为 ``uint[][5]`` （注意这里跟其它语言比，数组长度的声明位置是反的）。
+要访问第三个动态数组的第二个元素，你应该使用 x[2][1]（数组下标是从 0 开始的，且访问数组时的下标顺序与声明时相反，也就是说，x[2] 是从右边减少了一级）。。
 
-Variables of type ``bytes`` and ``string`` are special arrays. A ``bytes`` is similar to ``byte[]``,
-but it is packed tightly in calldata. ``string`` is equal to ``bytes`` but does not allow
-length or index access (for now).
-
-So ``bytes`` should always be preferred over ``byte[]`` because it is cheaper.
+``bytes`` 和 ``string`` 类型的变量是特殊的数组。
+``bytes`` 类似于 ``byte[]``，但它在 calldata 中会被“紧打包”（译者注：将元素连续地存在一起，不会按每 32 字节一单元的方式来存放）。
+``string`` 与 ``bytes`` 相同，但（暂时）不允许用长度或索引来访问。
 
 .. note::
-    If you want to access the byte-representation of a string ``s``, use
-    ``bytes(s).length`` / ``bytes(s)[7] = 'x';``. Keep in mind
-    that you are accessing the low-level bytes of the UTF-8 representation,
-    and not the individual characters!
+    如果想要访问以字节表示的字符串 ``s``，请使用 ``bytes(s).length`` / ``bytes(s)[7] = 'x';``。
+    注意这时你访问的是 UTF-8 形式的低级 bytes 类型，而不是单个的字符。
 
-It is possible to mark arrays ``public`` and have Solidity create a :ref:`getter <visibility-and-getters>`.
-The numeric index will become a required parameter for the getter.
+可以将数组标识为 ``public``，从而让 Solidity 创建一个 :ref:`getter <visibility-and-getters>`。
+之后必须使用数字下标作为参数来访问 getter。
 
 .. index:: ! array;allocating, new
 
-Allocating Memory Arrays
-^^^^^^^^^^^^^^^^^^^^^^^^
+创建内存数组
+^^^^^^^^^^^^^
 
-Creating arrays with variable length in memory can be done using the ``new`` keyword.
-As opposed to storage arrays, it is **not** possible to resize memory arrays by assigning to
-the ``.length`` member.
+可使用 ``new`` 关键字在内存中创建变长数组。
+与 |storage| 数组相反的是，你 *不能* 通过修改成员变量 ``.length`` 改变 |memory| 数组的大小。
 
 ::
 
@@ -628,18 +579,17 @@ the ``.length`` member.
         function f(uint len) public pure {
             uint[] memory a = new uint[](7);
             bytes memory b = new bytes(len);
-            // Here we have a.length == 7 and b.length == len
+            // 这里我们有 a.length == 7 以及 b.length == len
             a[6] = 8;
         }
     }
 
 .. index:: ! array;literals, !inline;arrays
 
-Array Literals / Inline Arrays
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+数组字面常数 / 内联数组
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Array literals are arrays that are written as an expression and are not
-assigned to a variable right away.
+数组字面常数是写作表达式形式的数组，并且不会立即赋值给变量。
 
 ::
 
@@ -654,54 +604,50 @@ assigned to a variable right away.
         }
     }
 
-The type of an array literal is a memory array of fixed size whose base
-type is the common type of the given elements. The type of ``[1, 2, 3]`` is
-``uint8[3] memory``, because the type of each of these constants is ``uint8``.
-Because of that, it was necessary to convert the first element in the example
-above to ``uint``. Note that currently, fixed size memory arrays cannot
-be assigned to dynamically-sized memory arrays, i.e. the following is not
-possible:
+数组字面常数是一种定长的 |memory| 数组类型，它的基础类型由其中元素的普通类型决定。
+例如，``[1, 2, 3]`` 的类型是 ``uint8[3] memory``，因为其中的每个字面常数的类型都是 ``uint8``。
+正因为如此，有必要将上面这个例子中的第一个元素转换成 ``uint`` 类型。
+目前需要注意的是，定长的 |memory| 数组并不能赋值给变长的 |memory| 数组，下面是个反例：
 
 ::
 
-    // This will not compile.
+    // 这段代码并不能编译。
 
     pragma solidity ^0.4.0;
 
     contract C {
         function f() public {
-            // The next line creates a type error because uint[3] memory
-            // cannot be converted to uint[] memory.
+            // 这一行引发了一个类型错误，因为 unint[3] memory
+            // 不能转换成 uint[] memory。
             uint[] x = [uint(1), 3, 4];
         }
     }
 
-It is planned to remove this restriction in the future but currently creates
-some complications because of how arrays are passed in the ABI.
+已经计划在未来移除这样的限制，但目前数组在 ABI 中传递的问题造成了一些麻烦。
 
 .. index:: ! array;length, length, push, !array;push
 
-Members
-^^^^^^^
+成员
+^^^^^^
 
 **length**:
-    Arrays have a ``length`` member to hold their number of elements.
-    Dynamic arrays can be resized in storage (not in memory) by changing the
-    ``.length`` member. This does not happen automatically when attempting to access elements outside the current length. The size of memory arrays is fixed (but dynamic, i.e. it can depend on runtime parameters) once they are created.
+    数组有 ``length`` 成员变量表示当前数组的长度。
+    动态数组可以在 |storage| （而不是 |memory| ）中通过改变成员变量 ``.length`` 改变数组大小。
+    并不能通过访问超出当前数组长度的方式实现自动扩展数组的长度。
+    一经创建，|memory| 数组的大小就是固定的（但却是动态的，也就是说，它依赖于运行时的参数）。
+
 **push**:
-     Dynamic storage arrays and ``bytes`` (not ``string``) have a member function called ``push`` that can be used to append an element at the end of the array. The function returns the new length.
+    变长的 |storage| 数组以及 ``bytes`` 类型（而不是 ``string`` 类型）都有一个叫做 ``push`` 的成员函数，它用来附加新的元素到数组末尾。
+    这个函数将返回新的数组长度。
 
 .. warning::
-    It is not yet possible to use arrays of arrays in external functions.
+    在外部函数中目前还不能使用多维数组。
 
 .. warning::
-    Due to limitations of the EVM, it is not possible to return
-    dynamic content from external function calls. The function ``f`` in
-    ``contract C { function f() returns (uint[]) { ... } }`` will return
-    something if called from web3.js, but not if called from Solidity.
+    由于 |evm| 的限制，不能通过外部函数调用返回动态的内容。
+    例如，如果通过 web3.js 调用 ``contract C { function f() returns (uint[]) { ... } }`` 中的 ``f`` 函数，它会返回一些内容，但通过 Solidity 不可以。
 
-    The only workaround for now is to use large statically-sized arrays.
-
+    目前唯一的变通方法是使用大型的静态数组。
 
 ::
 
@@ -709,40 +655,40 @@ Members
 
     contract ArrayContract {
         uint[2**20] m_aLotOfIntegers;
-        // Note that the following is not a pair of dynamic arrays but a
-        // dynamic array of pairs (i.e. of fixed size arrays of length two).
+        // 注意下面的代码并不是一对动态数组，
+        // 而是一个数组元素为一对变量的动态数组（也就是数组元素为长度为 2 的定长数组的动态数组）。
         bool[2][] m_pairsOfFlags;
-        // newPairs is stored in memory - the default for function arguments
+        // newPairs 存储在 memory 中 —— 函数参数默认的存储位置
 
         function setAllFlagPairs(bool[2][] newPairs) public {
-            // assignment to a storage array replaces the complete array
+            // 向一个 storage 的数组赋值会替代整个数组
             m_pairsOfFlags = newPairs;
         }
 
         function setFlagPair(uint index, bool flagA, bool flagB) public {
-            // access to a non-existing index will throw an exception
+            // 访问一个不存在的数组下标会引发一个异常
             m_pairsOfFlags[index][0] = flagA;
             m_pairsOfFlags[index][1] = flagB;
         }
 
         function changeFlagArraySize(uint newSize) public {
-            // if the new size is smaller, removed array elements will be cleared
+            // 如果 newSize 更小，那么超出的元素会被清除
             m_pairsOfFlags.length = newSize;
         }
 
         function clear() public {
-            // these clear the arrays completely
+            // 这些代码会将数组全部清空
             delete m_pairsOfFlags;
             delete m_aLotOfIntegers;
-            // identical effect here
+            // 这里也是实现同样的功能
             m_pairsOfFlags.length = 0;
         }
 
         bytes m_byteData;
 
         function byteArrays(bytes data) public {
-            // byte arrays ("bytes") are different as they are stored without padding,
-            // but can be treated identical to "uint8[]"
+            // 字节的数组（语言意义中的 byte 的复数 ``bytes``）不一样，因为它们不是填充式存储的，
+            // 但可以当作和 "uint8[]" 一样对待
             m_byteData = data;
             m_byteData.length += 7;
             m_byteData[3] = byte(8);
@@ -754,9 +700,9 @@ Members
         }
 
         function createMemoryArray(uint size) public pure returns (bytes) {
-            // Dynamic memory arrays are created using `new`:
+            // 使用 `new` 创建动态 memory 数组：
             uint[2][] memory arrayOfPairs = new uint[2][](size);
-            // Create a dynamic byte array:
+            // 创建一个动态字节数组：
             bytes memory b = new bytes(200);
             for (uint i = 0; i < b.length; i++)
                 b[i] = byte(i);
@@ -769,18 +715,17 @@ Members
 
 .. _structs:
 
-Structs
+结构体
 -------
 
-Solidity provides a way to define new types in the form of structs, which is
-shown in the following example:
+Solidity 支持通过构造结构体的形式定义新的类型，以下是一个结构体使用的示例：
 
 ::
 
     pragma solidity ^0.4.11;
 
     contract CrowdFunding {
-        // Defines a new type with two fields.
+        // 定义的新类型包含两个属性。
         struct Funder {
             address addr;
             uint amount;
@@ -798,16 +743,16 @@ shown in the following example:
         mapping (uint => Campaign) campaigns;
 
         function newCampaign(address beneficiary, uint goal) public returns (uint campaignID) {
-            campaignID = numCampaigns++; // campaignID is return variable
-            // Creates new struct and saves in storage. We leave out the mapping type.
+            campaignID = numCampaigns++; // campaignID 作为一个变量返回
+            // 创建新的结构体示例，存储在 storage 中。我们先不关注映射类型。
             campaigns[campaignID] = Campaign(beneficiary, goal, 0, 0);
         }
 
         function contribute(uint campaignID) public payable {
             Campaign storage c = campaigns[campaignID];
-            // Creates a new temporary memory struct, initialised with the given values
-            // and copies it over to storage.
-            // Note that you can also use Funder(msg.sender, msg.value) to initialise.
+            // 以给定的值初始化，创建一个新的临时 memory 结构体，
+            // 并将其拷贝到 storage 中。
+            // 注意你也可以使用 Funder(msg.sender, msg.value) 来初始化。
             c.funders[c.numFunders++] = Funder({addr: msg.sender, amount: msg.value});
             c.amount += msg.value;
         }
@@ -823,49 +768,39 @@ shown in the following example:
         }
     }
 
-The contract does not provide the full functionality of a crowdfunding
-contract, but it contains the basic concepts necessary to understand structs.
-Struct types can be used inside mappings and arrays and they can itself
-contain mappings and arrays.
+上面的合约只是一个简化版的众筹合约，但它已经足以让我们理解结构体的基础概念。
+结构体类型可以作为元素用在映射和数组中，其自身也可以包含映射和数组作为成员变量。
 
-It is not possible for a struct to contain a member of its own type,
-although the struct itself can be the value type of a mapping member.
-This restriction is necessary, as the size of the struct has to be finite.
+尽管结构体本身可以作为映射的值类型成员，但它并不能包含自身。
+这个限制是有必要的，因为结构体的大小必须是有限的。
 
-Note how in all the functions, a struct type is assigned to a local variable
-(of the default storage data location).
-This does not copy the struct but only stores a reference so that assignments to
-members of the local variable actually write to the state.
+注意在函数中使用结构体时，一个结构体是如何赋值给一个局部变量（默认存储位置是 |storage| ）的。
+在这个过程中并没有拷贝这个结构体，而是保存一个引用，所以对局部变量成员的赋值实际上会被写入状态。
 
-Of course, you can also directly access the members of the struct without
-assigning it to a local variable, as in
-``campaigns[campaignID].amount = 0``.
+当然，你也可以直接访问结构体的成员而不用将其赋值给一个局部变量，就像这样，
+``campaigns[campaignID].amount = 0``。
 
 .. index:: !mapping
 
-Mappings
-========
+映射
+=====
 
-Mapping types are declared as ``mapping(_KeyType => _ValueType)``.
-Here ``_KeyType`` can be almost any type except for a mapping, a dynamically sized array, a contract, an enum and a struct.
-``_ValueType`` can actually be any type, including mappings.
+映射类型在声明时的形式为 ``mapping(_KeyType => _ValueType)``。
+其中 ``_KeyType`` 可以是除了映射、变长数组、合约、枚举以及结构体以外的几乎所有类型。
+``_ValueType`` 可以是包括映射类型在内的任何类型。
 
-Mappings can be seen as `hash tables <https://en.wikipedia.org/wiki/Hash_table>`_ which are virtually initialized such that
-every possible key exists and is mapped to a value whose byte-representation is
-all zeros: a type's :ref:`default value <default-value>`. The similarity ends here, though: The key data is not actually stored
-in a mapping, only its ``keccak256`` hash used to look up the value.
+映射可以视作 `哈希表 <https://en.wikipedia.org/wiki/Hash_table>`，它们在实际的初始化过程中创建每个可能的 key，
+并将其映射到字节形式全是零的值：一个类型的 :ref:`默认值 <default-value>`。然而下面是映射与哈希表不同的地方：
+在映射中，实际上并不存储 key，而是存储它的 ``keccak256`` 哈希值，从而便于查询实际的值。
 
-Because of this, mappings do not have a length or a concept of a key or value being "set".
+正因为如此，映射是没有长度的，也没有 key 的集合或 value 的集合的概念。
 
-Mappings are only allowed for state variables (or as storage reference types
-in internal functions).
+只有状态变量（或者在 internal 函数中的对于存储变量的引用）可以使用映射类型。。
 
-It is possible to mark mappings ``public`` and have Solidity create a :ref:`getter <visibility-and-getters>`.
-The ``_KeyType`` will become a required parameter for the getter and it will
-return ``_ValueType``.
+可以将映射声明为 ``public``，然后来让 Solidity 创建一个 :ref:`getter <visibility-and-getters>`。
+``_KeyType`` 将成为 getter 的必须参数，并且 getter 会返回 ``_ValueType``。
 
-The ``_ValueType`` can be a mapping too. The getter will have one parameter
-for each ``_KeyType``, recursively.
+``_ValueType`` 也可以是一个映射。这时在使用 getter 时将将需要递归地传入每个 ``_KeyType`` 参数。
 
 ::
 
@@ -889,26 +824,32 @@ for each ``_KeyType``, recursively.
 
 
 .. note::
-  Mappings are not iterable, but it is possible to implement a data structure on top of them.
-  For an example, see `iterable mapping <https://github.com/ethereum/dapp-bin/blob/master/library/iterable_mapping.sol>`_.
+  递归不支持迭代，但可以在此之上实现一个这样的数据结构。
+  例子可以参考 `可迭代的映射 <https://github.com/ethereum/dapp-bin/blob/master/library/iterable_mapping.sol>`_。
 
 .. index:: assignment, ! delete, lvalue
 
-Operators Involving LValues
-===========================
+涉及 LValues 的运算符
+=====================
 
-If ``a`` is an LValue (i.e. a variable or something that can be assigned to), the following operators are available as shorthands:
+如果 ``a`` 是一个 LValue（即一个变量或者其它可以被复制的东西），以下运算符都可以使用简写：
 
-``a += e`` is equivalent to ``a = a + e``. The operators ``-=``, ``*=``, ``/=``, ``%=``, ``|=``, ``&=`` and ``^=`` are defined accordingly. ``a++`` and ``a--`` are equivalent to ``a += 1`` / ``a -= 1`` but the expression itself still has the previous value of ``a``. In contrast, ``--a`` and ``++a`` have the same effect on ``a`` but return the value after the change.
+``a += e`` 等同于 ``a = a + e``。 其它运算符 ``-=``， ``*=``， ``/=``， ``%=``， ``|=``， ``&=`` 以及 ``^=`` 都是如此定义的。
+``a++`` 和 ``a--`` 分别等同于 ``a += 1`` 和 ``a -= 1``，但表达式本身的值等于 ``a`` 在计算之前的值。
+与之相反，``--a`` 和 ``++a`` 虽然最终 ``a`` 的结果与之前的表达式相同，但表达式的返回值是计算之后的值。
 
-delete
-------
+删除
+-----
 
-``delete a`` assigns the initial value for the type to ``a``. I.e. for integers it is equivalent to ``a = 0``, but it can also be used on arrays, where it assigns a dynamic array of length zero or a static array of the same length with all elements reset. For structs, it assigns a struct with all members reset.
+``delete a`` 的结果是将 ``a`` 的类型在初始化时的值赋值给 ``a``。即对于整型变量来说，相当于 ``a = 0``，
+但 delete 也适用于数组，对于动态数组来说，是将数组的长度设为 0，而对于静态数组来说，是将数组中的所有元素重置。
+如果对象是结构体，则将结构体中的所有属性重置。
 
-``delete`` has no effect on whole mappings (as the keys of mappings may be arbitrary and are generally unknown). So if you delete a struct, it will reset all members that are not mappings and also recurse into the members unless they are mappings. However, individual keys and what they map to can be deleted.
+``delete`` 对整个映射是无效的（因为映射的键可以是任意的，通常也是未知的）。
+因此在你删除一个结构体时，结果将重置所有的非映射属性，这个过程是递归进行的，除非它们是映射。
+然而，单个的键及其映射的值是可以被删除的。
 
-It is important to note that ``delete a`` really behaves like an assignment to ``a``, i.e. it stores a new object in ``a``.
+理解 ``delete a`` 的效果就像是给 ``a`` 赋值很重要，换句话说，这相当于在 ``a`` 中存储了一个新的对象。
 
 ::
 
@@ -920,78 +861,65 @@ It is important to note that ``delete a`` really behaves like an assignment to `
 
         function f() public {
             uint x = data;
-            delete x; // sets x to 0, does not affect data
-            delete data; // sets data to 0, does not affect x which still holds a copy
+            delete x; // 将 x 设为 0，并不影响数据
+            delete data; // 将 data 设为 0，并不影响 x，因为它仍然有个副本
             uint[] storage y = dataArray;
-            delete dataArray; // this sets dataArray.length to zero, but as uint[] is a complex object, also
-            // y is affected which is an alias to the storage object
-            // On the other hand: "delete y" is not valid, as assignments to local variables
-            // referencing storage objects can only be made from existing storage objects.
+            delete dataArray; 
+            // 将 dataArray.length 设为 0，但由于 uint[] 是一个复杂的对象，y 也将受到影响，
+            // 因为它是一个存储位置是 storage 的对象的别名。
+            // 另一方面："delete y" 是非法的，引用了 storage 对象的局部变量只能由已有的 storage 对象赋值。
         }
     }
 
 .. index:: ! type;conversion, ! cast
 
-Conversions between Elementary Types
-====================================
+基本类型之间的转换
+==================
 
-Implicit Conversions
---------------------
+隐式转换
+---------
 
-If an operator is applied to different types, the compiler tries to
-implicitly convert one of the operands to the type of the other (the same is
-true for assignments). In general, an implicit conversion between value-types
-is possible if it
-makes sense semantically and no information is lost: ``uint8`` is convertible to
-``uint16`` and ``int128`` to ``int256``, but ``int8`` is not convertible to ``uint256``
-(because ``uint256`` cannot hold e.g. ``-1``).
-Furthermore, unsigned integers can be converted to bytes of the same or larger
-size, but not vice-versa. Any type that can be converted to ``uint160`` can also
-be converted to ``address``.
+如果一个运算符用在两个不同类型的变量之间，那么编译器将隐式地将其中一个类型转换为另一个类型（不同类型之间的赋值也是一样）。
+一般来说，只要值类型之间的转换在语义上行得通，而且转换的过程中没有信息丢失，那么隐式转换基本都是可以实现的：
+``uint8`` 可以转换成 ``uint16``，``int128`` 转换成 ``int256``，但 ``int8`` 不能转换成 ``uint256``
+（因为 ``uint256`` 不能涵盖某些值，例如，``-1``）。
+更进一步来说，无符号整型可以转换成跟它大小相等或更大的字节类型，但反之不能。
+任何可以转换成 ``uint160`` 的类型都可以转换成 ``address`` 类型。
 
-Explicit Conversions
---------------------
+显式转换
+---------
 
-If the compiler does not allow implicit conversion but you know what you are
-doing, an explicit type conversion is sometimes possible. Note that this may
-give you some unexpected behaviour so be sure to test to ensure that the
-result is what you want! Take the following example where you are converting
-a negative ``int8`` to a ``uint``:
+如果某些情况下编译器不支持隐式转换，但是你很清楚你要做什么，这种情况可以考虑显式转换。
+注意这可能会发生一些无法预料的后果，因此一定要进行测试，确保结果是你想要的！
+下面的示例是将一个 ``int8`` 类型的负数转换成 ``uint``：
 
 ::
 
     int8 y = -3;
     uint x = uint(y);
 
-At the end of this code snippet, ``x`` will have the value ``0xfffff..fd`` (64 hex
-characters), which is -3 in the two's complement representation of 256 bits.
+这段代码的最后，``x`` 的值将是 ``0xfffff..fd`` （64 个 16 进制字符），因为这是 -3 的 256 位补码形式。
 
-If a type is explicitly converted to a smaller type, higher-order bits are
-cut off::
+如果一个类型显式转换成更小的类型，相应的高位将被舍弃 ::
 
     uint32 a = 0x12345678;
-    uint16 b = uint16(a); // b will be 0x5678 now
+    uint16 b = uint16(a); // 此时 b 的值是 0x5678
 
 .. index:: ! type;deduction, ! var
 
 .. _type-deduction:
 
-Type Deduction
-==============
+类型推断
+=========
 
-For convenience, it is not always necessary to explicitly specify the type of a
-variable, the compiler automatically infers it from the type of the first
-expression that is assigned to the variable::
+为了方便起见，没有必要每次都精确指定一个变量的类型，编译器会根据分配该变量的第一个表达式的类型自动推断该变量的类型 ::
 
     uint24 x = 0x123;
     var y = x;
 
-Here, the type of ``y`` will be ``uint24``. Using ``var`` is not possible for function
-parameters or return parameters.
+这里 ``y`` 的类型将是 ``uint24``。不能对函数参数或者返回参数使用 ``var``。
 
 .. warning::
-    The type is only deduced from the first assignment, so
-    the loop in the following snippet is infinite, as ``i`` will have the type
-    ``uint8`` and the highest value of this type is smaller than ``2000``.
+    类型只能从第一次赋值中推断出来，因此以下代码中的循环是无限的，
+    原因是``i`` 的类型是 ``uint8``，而这个类型变量的最大值比 ``2000`` 小。
     ``for (var i = 0; i < 2000; i++) { ... }``
-

@@ -6,56 +6,40 @@
 已知bug列表
 ##################
 
-Below, you can find a JSON-formatted list of some of the known security-relevant bugs in the
-Solidity compiler. The file itself is hosted in the `Github repository
-<https://github.com/ethereum/solidity/blob/develop/docs/bugs.json>`_.
-The list stretches back as far as version 0.3.0, bugs known to be present only
-in versions preceding that are not listed.
+在下面，你可以找到一个 JSON 格式的列表，上面列出了 Solidity 编译器上一些已知的安全相关的 bug。
+该文件被放置于 `Github 仓库 <https://github.com/ethereum/solidity/blob/develop/docs/bugs.json>`_ 。
+该列表可以追溯到 0.3.0 版本，只在此版本之前存在的 bug 没有被列入。
 
-There is another file called `bugs_by_version.json
-<https://github.com/ethereum/solidity/blob/develop/docs/bugs_by_version.json>`_,
-which can be used to check which bugs affect a specific version of the compiler.
+这里，还有另外一个 `bugs_by_version.json <https://github.com/ethereum/solidity/blob/develop/docs/bugs_by_version.json>`_ 文件。
+该文件可用于查询特定的某个编译器版本会受哪些 bug 影响。
 
-Contract source verification tools and also other tools interacting with
-contracts should consult this list according to the following criteria:
+合约的源文件检查工具以及其他与合约交互的工具，需基于以下规则查阅上述 bug 列表文件：
 
- - It is mildly suspicious if a contract was compiled with a nightly
-   compiler version instead of a released version. This list does not keep
-   track of unreleased or nightly versions.
- - It is also mildly suspicious if a contract was compiled with a version that was
-   not the most recent at the time the contract was created. For contracts
-   created from other contracts, you have to follow the creation chain
-   back to a transaction and use the date of that transaction as creation date.
- - It is highly suspicious if a contract was compiled with a compiler that
-   contains a known bug and the contract was created at a time where a newer
-   compiler version containing a fix was already released.
+ - 如果合约是用每日构建版本的编译器编译，而不是发布版本的编译器，那就有点可疑了。上述bug列表不跟踪未发布或每日构建版本的编译器。
+ - 如果一个合约并不是由它被创建时点的最新版本编译器所编译的，那么这也是值得怀疑的。对于由其他合约创建的合约，您必须沿着创建链追溯最初交易，并使用该交易的日期作为创建日期。
+ - 高度可疑的情况是，如果一份合约由一个包含已知 bug 的编译器编译，但在合约创建时，已修复了相应 bug 的新版编译器已经发布了。
 
-The JSON file of known bugs below is an array of objects, one for each bug,
-with the following keys:
+下面这份包含已知 bug 的 JSON 文件实际上是一个对象数组，每个对象对应一个 bug，并包含以下的 keys :
 
 name
-    Unique name given to the bug
+    赋予该 bug 的唯一的名字
 summary
-    Short description of the bug
+    对该 bug 的简要描述
 description
-    Detailed description of the bug
+    对该 bug 的详细描述
 link
-    URL of a website with more detailed information, optional
+    包含更多详尽信息的链接，可选
 introduced
-    The first published compiler version that contained the bug, optional
+    第一个包含该 bug 的编译器的发布版本，可选
 fixed
-    The first published compiler version that did not contain the bug anymore
+    第一个不再包含该 bug 的编译器的发布版本
 publish
-    The date at which the bug became known publicly, optional
+    该 bug 被公开的日期，可选
 severity
-    Severity of the bug: very low, low, medium, high. Takes into account
-    discoverability in contract tests, likelihood of occurrence and
-    potential damage by exploits.
+    bug 的严重性： very low， low， medium， high。综合考虑了在合约测试中的可发现性、发生的可能性和被利用后的潜在损害。
 conditions
-    Conditions that have to be met to trigger the bug. Currently, this
-    is an object that can contain a boolean value ``optimizer``, which
-    means that the optimizer has to be switched on to enable the bug.
-    If no conditions are given, assume that the bug is present.
+    触发该 bug 所需满足的条件。当前，这是一个包含了 ``optimizer`` 布尔值的对象，这意味着只有打开优化器选项时，才会触发该 bug。
+    如果没有给出任何条件，则意味着此 bug 始终存在。
 
 .. literalinclude:: bugs.json
    :language: js

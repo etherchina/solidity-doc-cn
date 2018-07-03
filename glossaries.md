@@ -10,4 +10,4 @@
  - ether：以太币
  - double-spend attack：双花攻击
  - transaction: 事务
-
+ - version pragma: 版本杂注

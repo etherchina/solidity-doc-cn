@@ -1,7 +1,8 @@
-###################
+############################
 根据例子学习Solidity
-###################
+############################
 
+.. include:: glossaries.rst
 .. index:: voting, ballot
 
 .. _voting:
@@ -10,73 +11,56 @@
 投票
 ******
 
-The following contract is quite complex, but showcases
-a lot of Solidity's features. It implements a voting
-contract. Of course, the main problems of electronic
-voting is how to assign voting rights to the correct
-persons and how to prevent manipulation. We will not
-solve all problems here, but at least we will show
-how delegated voting can be done so that vote counting
-is **automatic and completely transparent** at the
-same time.
+以下的合约相当复杂，但展示了很多Solidity的功能。它实现了一个投票合约。
+当然，电子投票的主要问题是如何将投票权分配给正确的人员以及如何防止被操纵。
+我们不会在这里解决所有的问题，但至少我们会展示如何进行委托投票，同时，计票又是 **自动和完全透明的** 。
 
-The idea is to create one contract per ballot,
-providing a short name for each option.
-Then the creator of the contract who serves as
-chairperson will give the right to vote to each
-address individually.
+我们的想法是为每个（投票）表决创建一份合约，为每个选项提供简称。
+然后作为合约的创造者——即主席，将给予每个独立的地址以投票权。
 
-The persons behind the addresses can then choose
-to either vote themselves or to delegate their
-vote to a person they trust.
+地址后面的人可以选择自己投票，或者委托给他们信任的人来投票。
 
-At the end of the voting time, ``winningProposal()``
-will return the proposal with the largest number
-of votes.
+在投票时间结束时，``winningProposal()`` 将返回获得最多投票的提案。
+
 
 ::
 
-    pragma solidity ^0.4.16;
+    pragma solidity ^0.4.22;
 
-    /// @title Voting with delegation.
+    /// @title 委托投票
     contract Ballot {
-        // This declares a new complex type which will
-        // be used for variables later.
-        // It will represent a single voter.
+        // 这里声明了一个新的复合类型用于稍后的变量
+        // 它用来表示一个选民
         struct Voter {
-            uint weight; // weight is accumulated by delegation
-            bool voted;  // if true, that person already voted
-            address delegate; // person delegated to
-            uint vote;   // index of the voted proposal
+            uint weight; // 计票的权重
+            bool voted;  // 若为真，代表该人已投票
+            address delegate; // 被委托人
+            uint vote;   // 投票提案的索引
         }
 
-        // This is a type for a single proposal.
+        // 提案的类型
         struct Proposal {
-            bytes32 name;   // short name (up to 32 bytes)
-            uint voteCount; // number of accumulated votes
+            bytes32 name;   // 简称（最长32个字节）
+            uint voteCount; // 得票数
         }
 
         address public chairperson;
 
-        // This declares a state variable that
-        // stores a `Voter` struct for each possible address.
+        // 这声明了一个状态变量，为每个可能的地址存储一个 `Voter`。
         mapping(address => Voter) public voters;
 
-        // A dynamically-sized array of `Proposal` structs.
+        // 一个 `Proposal` 结构类型的动态数组
         Proposal[] public proposals;
 
-        /// Create a new ballot to choose one of `proposalNames`.
-        function Ballot(bytes32[] proposalNames) public {
+        /// 为 `proposalNames` 中的每个提案，创建一个新的（投票）表决
+        constructor(bytes32[] proposalNames) public {
             chairperson = msg.sender;
             voters[chairperson].weight = 1;
-
-            // For each of the provided proposal names,
-            // create a new proposal object and add it
-            // to the end of the array.
+            //对于提供的每个提案名称，
+            //创建一个新的 Proposal 对象并把它添加到数组的末尾。
             for (uint i = 0; i < proposalNames.length; i++) {
-                // `Proposal({...})` creates a temporary
-                // Proposal object and `proposals.push(...)`
-                // appends it to the end of `proposals`.
+                // `Proposal({...})` 创建一个临时 Proposal 对象，
+                // `proposals.push(...)` 将其添加到 `proposals` 的末尾
                 proposals.push(Proposal({
                     name: proposalNames[i],
                     voteCount: 0
@@ -84,168 +68,149 @@ of votes.
             }
         }
 
-        // Give `voter` the right to vote on this ballot.
-        // May only be called by `chairperson`.
+        // 授权 `voter` 对这个（投票）表决进行投票
+        // 只有 `chairperson` 可以调用该函数。
         function giveRightToVote(address voter) public {
-            // If the argument of `require` evaluates to `false`,
-            // it terminates and reverts all changes to
-            // the state and to Ether balances. It is often
-            // a good idea to use this if functions are
-            // called incorrectly. But watch out, this
-            // will currently also consume all provided gas
-            // (this is planned to change in the future).
-            require((msg.sender == chairperson) && !voters[voter].voted && (voters[voter].weight == 0));
+            // 若 `require` 的第一个参数的计算结果为 `false`，
+            // 则终止执行，撤销所有对状态和以太币余额的改动。
+            // 在旧版的 EVM 中这曾经会消耗所有 gas，但现在不会了。
+            // 使用 require 来检查函数是否被正确地调用，是一个好习惯。
+            // 你也可以在 require 的第二个参数中提供一个对错误情况的解释。
+            require(
+                msg.sender == chairperson,
+                "Only chairperson can give right to vote."
+            );
+            require(
+                !voters[voter].voted,
+                "The voter already voted."
+            );
+            require(voters[voter].weight == 0);
             voters[voter].weight = 1;
         }
 
-        /// Delegate your vote to the voter `to`.
+        /// 把你的投票委托到投票者 `to`。
         function delegate(address to) public {
-            // assigns reference
+            // 传引用
             Voter storage sender = voters[msg.sender];
-            require(!sender.voted);
+            require(!sender.voted, "You already voted.");
 
-            // Self-delegation is not allowed.
-            require(to != msg.sender);
+            require(to != msg.sender, "Self-delegation is disallowed.");
 
-            // Forward the delegation as long as
-            // `to` also delegated.
-            // In general, such loops are very dangerous,
-            // because if they run too long, they might
-            // need more gas than is available in a block.
-            // In this case, the delegation will not be executed,
-            // but in other situations, such loops might
-            // cause a contract to get "stuck" completely.
+            // 委托是可以传递的，只要被委托者 `to` 也设置了委托。
+            // 一般来说，这种循环委托是危险的。因为，如果传递的链条太长，
+            // 则可能需消耗的gas要多于区块中剩余的（大于区块设置的gasLimit），
+            // 这种情况下，委托不会被执行。
+            // 而在另一些情况下，如果形成闭环，则会让合约完全卡住。
             while (voters[to].delegate != address(0)) {
                 to = voters[to].delegate;
 
-                // We found a loop in the delegation, not allowed.
-                require(to != msg.sender);
+                // 不允许闭环委托
+                require(to != msg.sender, "Found loop in delegation.");
             }
 
-            // Since `sender` is a reference, this
-            // modifies `voters[msg.sender].voted`
+            // `sender` 是一个引用, 相当于对 `voters[msg.sender].voted` 进行修改
             sender.voted = true;
-            sender.delegate = to;
-            Voter storage delegate = voters[to];
-            if (delegate.voted) {
-                // If the delegate already voted,
-                // directly add to the number of votes
-                proposals[delegate.vote].voteCount += sender.weight;
+            sender.delegate_ = to;
+            Voter storage delegate_ = voters[to];
+            if (delegate_.voted) {
+                // 若被委托者已经投过票了，直接增加得票数
+                proposals[delegate_.vote].voteCount += sender.weight;
             } else {
-                // If the delegate did not vote yet,
-                // add to her weight.
-                delegate.weight += sender.weight;
+                // 若被委托者还没投票，增加委托者的权重
+                delegate_.weight += sender.weight;
             }
         }
 
-        /// Give your vote (including votes delegated to you)
-        /// to proposal `proposals[proposal].name`.
+        /// 把你的票(包括委托给你的票)，
+        /// 投给提案 `proposals[proposal].name`.
         function vote(uint proposal) public {
             Voter storage sender = voters[msg.sender];
-            require(!sender.voted);
+            require(!sender.voted, "Already voted.");
             sender.voted = true;
             sender.vote = proposal;
 
-            // If `proposal` is out of the range of the array,
-            // this will throw automatically and revert all
-            // changes.
+            // 如果 `proposal` 超过了数组的范围，则会自动抛出异常，并恢复所有的改动
             proposals[proposal].voteCount += sender.weight;
         }
 
-        /// @dev Computes the winning proposal taking all
-        /// previous votes into account.
+        /// @dev 结合之前所有的投票，计算出最终胜出的提案
         function winningProposal() public view
-                returns (uint winningProposal)
+                returns (uint winningProposal_)
         {
             uint winningVoteCount = 0;
             for (uint p = 0; p < proposals.length; p++) {
                 if (proposals[p].voteCount > winningVoteCount) {
                     winningVoteCount = proposals[p].voteCount;
-                    winningProposal = p;
+                    winningProposal_ = p;
                 }
             }
         }
 
-        // Calls winningProposal() function to get the index
-        // of the winner contained in the proposals array and then
-        // returns the name of the winner
+        // 调用 winningProposal() 函数以获取提案数组中获胜者的索引，并以此返回获胜者的名称
         function winnerName() public view
-                returns (bytes32 winnerName)
+                returns (bytes32 winnerName_)
         {
-            winnerName = proposals[winningProposal()].name;
+            winnerName_ = proposals[winningProposal()].name;
         }
     }
 
-Possible Improvements
+
+可能的优化
 =====================
 
-Currently, many transactions are needed to assign the rights
-to vote to all participants. Can you think of a better way?
+当前，为了把投票权分配给所有参与者，需要执行很多交易。你有没有更好的主意？
 
 .. index:: auction;blind, auction;open, blind auction, open auction
 
-*************
+***********************
 秘密竞价（盲拍）
-*************
+***********************
 
-In this section, we will show how easy it is to create a
-completely blind auction contract on Ethereum.
-We will start with an open auction where everyone
-can see the bids that are made and then extend this
-contract into a blind auction where it is not
-possible to see the actual bid until the bidding
-period ends.
+在本节中，我们将展示如何轻松地在以太坊上创建一个秘密竞价的合约。
+我们将从公开拍卖开始，每个人都可以看到出价，然后将此合约扩展到盲拍合约，
+在竞标期结束之前无法看到实际出价。
 
 .. _simple_auction:
 
-Simple Open Auction
+简单的公开拍卖
 ===================
 
-The general idea of the following simple auction contract
-is that everyone can send their bids during
-a bidding period. The bids already include sending
-money / ether in order to bind the bidders to their
-bid. If the highest bid is raised, the previously
-highest bidder gets her money back.
-After the end of the bidding period, the
-contract has to be called manually for the
-beneficiary to receive his money - contracts cannot
-activate themselves.
+以下简单的拍卖合约的总体思路是每个人都可以在投标期内发送他们的出价。
+出价已经包含了资金/以太币，来将投标人与他们的投标绑定。
+如果最高出价提高了（被其他出价者的出价超过），之前出价最高的出价者可以拿回她的钱。
+在投标期结束后，受益人需要手动调用合约来接收他的钱 - 合约不能自己激活接收。
 
 ::
 
-    pragma solidity ^0.4.11;
+    pragma solidity ^0.4.22;
 
     contract SimpleAuction {
-        // Parameters of the auction. Times are either
-        // absolute unix timestamps (seconds since 1970-01-01)
-        // or time periods in seconds.
+        // 拍卖的参数。
         address public beneficiary;
+        // 时间是unix的绝对时间戳（自1970-01-01以来的秒数）
+        // 或以秒为单位的时间段。
         uint public auctionEnd;
 
-        // Current state of the auction.
+        // 拍卖的当前状态
         address public highestBidder;
         uint public highestBid;
 
-        // Allowed withdrawals of previous bids
+        //可以取回的之前的出价
         mapping(address => uint) pendingReturns;
 
-        // Set to true at the end, disallows any change
+        // 拍卖结束后设为 true，将禁止所有的变更
         bool ended;
 
-        // Events that will be fired on changes.
+        // 变更触发的事件
         event HighestBidIncreased(address bidder, uint amount);
         event AuctionEnded(address winner, uint amount);
 
-        // The following is a so-called natspec comment,
-        // recognizable by the three slashes.
-        // It will be shown when the user is asked to
-        // confirm a transaction.
+        // 以下是所谓的 natspec 注释，可以通过三个斜杠来识别。
+        // 当用户被要求确认交易时将显示。
 
-        /// Create a simple auction with `_biddingTime`
-        /// seconds bidding time on behalf of the
-        /// beneficiary address `_beneficiary`.
-        function SimpleAuction(
+        /// 以受益者地址 `_beneficiary` 的名义，
+        /// 创建一个简单的拍卖，拍卖时间为 `_biddingTime` 秒。
+        constructor(
             uint _biddingTime,
             address _beneficiary
         ) public {
@@ -253,49 +218,46 @@ activate themselves.
             auctionEnd = now + _biddingTime;
         }
 
-        /// Bid on the auction with the value sent
-        /// together with this transaction.
-        /// The value will only be refunded if the
-        /// auction is not won.
+        /// 对拍卖进行出价，具体的出价随交易一起发送。
+        /// 如果没有在拍卖中胜出，则返还出价。
         function bid() public payable {
-            // No arguments are necessary, all
-            // information is already part of
-            // the transaction. The keyword payable
-            // is required for the function to
-            // be able to receive Ether.
+            // 参数不是必要的。因为所有的信息已经包含在了交易中。
+            // 对于能接收以太币的函数，关键字 payable 是必须的。
 
-            // Revert the call if the bidding
-            // period is over.
-            require(now <= auctionEnd);
+            // 如果拍卖已结束，撤销函数的调用。
+            require(
+                now <= auctionEnd,
+                "Auction already ended."
+            );
 
-            // If the bid is not higher, send the
-            // money back.
-            require(msg.value > highestBid);
+            // 如果出价不够高，返还你的钱
+            require(
+                msg.value > highestBid,
+                "There already is a higher bid."
+            );
 
-            if (highestBidder != 0) {
-                // Sending back the money by simply using
-                // highestBidder.send(highestBid) is a security risk
-                // because it could execute an untrusted contract.
-                // It is always safer to let the recipients
-                // withdraw their money themselves.
+            if (highestBid != 0) {
+                // 返还出价时，简单地直接调用 highestBidder.send(highestBid) 函数，
+                // 是有安全风险的，因为它有可能执行一个非信任合约。
+                // 更为安全的做法是让接收方自己提取金钱。
                 pendingReturns[highestBidder] += highestBid;
             }
             highestBidder = msg.sender;
             highestBid = msg.value;
-            HighestBidIncreased(msg.sender, msg.value);
+            emit HighestBidIncreased(msg.sender, msg.value);
         }
 
-        /// Withdraw a bid that was overbid.
+        /// 取回出价（当该出价已被超越）
         function withdraw() public returns (bool) {
             uint amount = pendingReturns[msg.sender];
             if (amount > 0) {
-                // It is important to set this to zero because the recipient
-                // can call this function again as part of the receiving call
-                // before `send` returns.
+                // 这里很重要，首先要设零值。
+                // 因为，作为接收调用的一部分，
+                // 接收者可以在 `send` 返回之前，重新调用该函数。
                 pendingReturns[msg.sender] = 0;
 
                 if (!msg.sender.send(amount)) {
-                    // No need to call throw here, just reset the amount owing
+                    // 这里不需抛出异常，只需重置未付款
                     pendingReturns[msg.sender] = amount;
                     return false;
                 }
@@ -303,75 +265,54 @@ activate themselves.
             return true;
         }
 
-        /// End the auction and send the highest bid
-        /// to the beneficiary.
+        /// 结束拍卖，并把最高的出价发送给受益人
         function auctionEnd() public {
-            // It is a good guideline to structure functions that interact
-            // with other contracts (i.e. they call functions or send Ether)
-            // into three phases:
-            // 1. checking conditions
-            // 2. performing actions (potentially changing conditions)
-            // 3. interacting with other contracts
-            // If these phases are mixed up, the other contract could call
-            // back into the current contract and modify the state or cause
-            // effects (ether payout) to be performed multiple times.
-            // If functions called internally include interaction with external
-            // contracts, they also have to be considered interaction with
-            // external contracts.
+            // 对于可与其他合约交互的函数（意味着它会调用其他函数或发送以太币），
+            // 一个好的指导方针是将其结构分为三个阶段：
+            // 1. 检查条件
+            // 2. 执行动作 (可能会改变条件)
+            // 3. 与其他合约交互
+            // 如果这些阶段相混合，其他的合约可能会回调当前合约并修改状态，
+            // 或者导致某些效果（比如支付以太币）多次生效。
+            // 如果合约内调用的函数包含了与外部合约的交互，
+            // 则它也会被认为是与外部合约有交互的。
 
-            // 1. Conditions
-            require(now >= auctionEnd); // auction did not yet end
-            require(!ended); // this function has already been called
+            // 1. 条件
+            require(now >= auctionEnd, "Auction not yet ended.");
+            require(!ended, "auctionEnd has already been called.");
 
-            // 2. Effects
+            // 2. 生效
             ended = true;
-            AuctionEnded(highestBidder, highestBid);
+            emit AuctionEnded(highestBidder, highestBid);
 
-            // 3. Interaction
+            // 3. 交互
             beneficiary.transfer(highestBid);
         }
     }
 
-Blind Auction
-=============
+秘密竞拍（盲拍）
+=====================
 
-The previous open auction is extended to a blind auction
-in the following. The advantage of a blind auction is
-that there is no time pressure towards the end of
-the bidding period. Creating a blind auction on a
-transparent computing platform might sound like a
-contradiction, but cryptography comes to the rescue.
+之前的公开拍卖接下来将被扩展为一个秘密竞拍。
+秘密竞拍的好处是在投标结束前不会有时间压力。
+在一个透明的计算平台上进行秘密竞拍听起来像是自相矛盾，但密码学可以实现它。
 
-During the **bidding period**, a bidder does not
-actually send her bid, but only a hashed version of it.
-Since it is currently considered practically impossible
-to find two (sufficiently long) values whose hash
-values are equal, the bidder commits to the bid by that.
-After the end of the bidding period, the bidders have
-to reveal their bids: They send their values
-unencrypted and the contract checks that the hash value
-is the same as the one provided during the bidding period.
+在 **投标期间** ，投标人实际上并没有发送她的出价，而只是发送一个哈希版本的出价。
+由于目前几乎不可能找到两个（足够长的）值，其哈希值是相等的，因此投标人可通过该方式提交报价。
+在投标结束后，投标人必须公开他们的出价：他们不加密的发送他们的出价，合约检查出价的哈希值是否与投标期间提供的相同。
 
-Another challenge is how to make the auction
-**binding and blind** at the same time: The only way to
-prevent the bidder from just not sending the money
-after he won the auction is to make her send it
-together with the bid. Since value transfers cannot
-be blinded in Ethereum, anyone can see the value.
+另一个挑战是如何使拍卖同时做到 **绑定和秘密** :
+唯一能阻止投标者在她赢得拍卖后不付款的方式是，让她将钱连同出价一起发出。
+但由于资金转移在 |ethereum| 中不能被隐藏，因此任何人都可以看到转移的资金。
 
-The following contract solves this problem by
-accepting any value that is larger than the highest
-bid. Since this can of course only be checked during
-the reveal phase, some bids might be **invalid**, and
-this is on purpose (it even provides an explicit
-flag to place invalid bids with high value transfers):
-Bidders can confuse competition by placing several
-high or low invalid bids.
-
+下面的合约通过接受任何大于最高出价的值来解决这个问题。
+当然，因为这只能在披露阶段进行检查，有些出价可能是 **无效** 的，
+并且，这是故意的(与高出价一起，它甚至提供了一个明确的标志来标识无效的出价):
+投标人可以通过设置几个或高或低的无效出价来迷惑竞争对手。
 
 ::
 
-    pragma solidity ^0.4.11;
+    pragma solidity >0.4.23 <0.5.0;
 
     contract BlindAuction {
         struct Bid {
@@ -389,19 +330,18 @@ high or low invalid bids.
         address public highestBidder;
         uint public highestBid;
 
-        // Allowed withdrawals of previous bids
+        // 可以取回的之前的出价
         mapping(address => uint) pendingReturns;
 
         event AuctionEnded(address winner, uint highestBid);
 
-        /// Modifiers are a convenient way to validate inputs to
-        /// functions. `onlyBefore` is applied to `bid` below:
-        /// The new function body is the modifier's body where
-        /// `_` is replaced by the old function body.
+        /// 使用 modifier 可以更便捷的校验函数的入参。
+        /// `onlyBefore` 会被用于后面的 `bid` 函数：
+        /// 新的函数体是由 modifier 本身的函数体，并用原函数体替换 `_;` 语句来组成的。
         modifier onlyBefore(uint _time) { require(now < _time); _; }
         modifier onlyAfter(uint _time) { require(now > _time); _; }
 
-        function BlindAuction(
+        constructor(
             uint _biddingTime,
             uint _revealTime,
             address _beneficiary
@@ -411,15 +351,12 @@ high or low invalid bids.
             revealEnd = biddingEnd + _revealTime;
         }
 
-        /// Place a blinded bid with `_blindedBid` = keccak256(value,
-        /// fake, secret).
-        /// The sent ether is only refunded if the bid is correctly
-        /// revealed in the revealing phase. The bid is valid if the
-        /// ether sent together with the bid is at least "value" and
-        /// "fake" is not true. Setting "fake" to true and sending
-        /// not the exact amount are ways to hide the real bid but
-        /// still make the required deposit. The same address can
-        /// place multiple bids.
+        /// 可以通过 `_blindedBid` = keccak256(value, fake, secret)
+        /// 设置一个秘密竞拍。
+        /// 只有在出价披露阶段被正确披露，已发送的以太币才会被退还。
+        /// 如果与出价一起发送的以太币至少为 “value” 且 “fake” 不为真，则出价有效。
+        /// 将 “fake” 设置为 true ，然后发送满足订金金额但又不与出价相同的金额是隐藏实际出价的方法。
+        /// 同一个地址可以放置多个出价。
         function bid(bytes32 _blindedBid)
             public
             payable
@@ -431,9 +368,8 @@ high or low invalid bids.
             }));
         }
 
-        /// Reveal your blinded bids. You will get a refund for all
-        /// correctly blinded invalid bids and for all bids except for
-        /// the totally highest.
+        /// 披露你的秘密竞拍出价。
+        /// 对于所有正确披露的无效出价以及除最高出价以外的所有出价，你都将获得退款。
         function reveal(
             uint[] _values,
             bool[] _fake,
@@ -450,12 +386,12 @@ high or low invalid bids.
 
             uint refund;
             for (uint i = 0; i < length; i++) {
-                var bid = bids[msg.sender][i];
-                var (value, fake, secret) =
+                Bid storage bid = bids[msg.sender][i];
+                (uint value, bool fake, bytes32 secret) =
                         (_values[i], _fake[i], _secret[i]);
                 if (bid.blindedBid != keccak256(value, fake, secret)) {
-                    // Bid was not actually revealed.
-                    // Do not refund deposit.
+                    // 出价未能正确披露
+                    // 不返还订金
                     continue;
                 }
                 refund += bid.deposit;
@@ -463,24 +399,21 @@ high or low invalid bids.
                     if (placeBid(msg.sender, value))
                         refund -= value;
                 }
-                // Make it impossible for the sender to re-claim
-                // the same deposit.
+                // 使发送者不可能再次认领同一笔订金
                 bid.blindedBid = bytes32(0);
             }
             msg.sender.transfer(refund);
         }
 
-        // This is an "internal" function which means that it
-        // can only be called from the contract itself (or from
-        // derived contracts).
+        // 这是一个 "internal" 函数， 意味着它只能在本合约（或继承合约）内被调用
         function placeBid(address bidder, uint value) internal
                 returns (bool success)
         {
             if (value <= highestBid) {
                 return false;
             }
-            if (highestBidder != 0) {
-                // Refund the previously highest bidder.
+            if (highestBidder != address(0)) {
+                // 返还之前的最高出价
                 pendingReturns[highestBidder] += highestBid;
             }
             highestBid = value;
@@ -488,28 +421,26 @@ high or low invalid bids.
             return true;
         }
 
-        /// Withdraw a bid that was overbid.
+        /// 取回出价（当该出价已被超越）
         function withdraw() public {
             uint amount = pendingReturns[msg.sender];
             if (amount > 0) {
-                // It is important to set this to zero because the recipient
-                // can call this function again as part of the receiving call
-                // before `transfer` returns (see the remark above about
-                // conditions -> effects -> interaction).
+                // 这里很重要，首先要设零值。
+                // 因为，作为接收调用的一部分，
+                // 接收者可以在 `transfer` 返回之前重新调用该函数。（可查看上面关于‘条件 -> 影响 -> 交互’的标注）
                 pendingReturns[msg.sender] = 0;
 
                 msg.sender.transfer(amount);
             }
         }
 
-        /// End the auction and send the highest bid
-        /// to the beneficiary.
+        /// 结束拍卖，并把最高的出价发送给受益人
         function auctionEnd()
             public
             onlyAfter(revealEnd)
         {
             require(!ended);
-            AuctionEnded(highestBidder, highestBid);
+            emit AuctionEnded(highestBidder, highestBid);
             ended = true;
             beneficiary.transfer(highestBid);
         }
@@ -524,7 +455,7 @@ high or low invalid bids.
 
 ::
 
-    pragma solidity ^0.4.11;
+    pragma solidity ^0.4.22;
 
     contract Purchase {
         uint public value;
@@ -533,32 +464,44 @@ high or low invalid bids.
         enum State { Created, Locked, Inactive }
         State public state;
 
-        // Ensure that `msg.value` is an even number.
-        // Division will truncate if it is an odd number.
-        // Check via multiplication that it wasn't an odd number.
-        function Purchase() public payable {
+        //确保 `msg.value` 是一个偶数。
+        //如果它是一个奇数，则它将被截断。
+        //通过乘法检查它不是奇数。
+        constructor() public payable {
             seller = msg.sender;
             value = msg.value / 2;
-            require((2 * value) == msg.value);
+            require((2 * value) == msg.value, "Value has to be even.");
         }
 
         modifier condition(bool _condition) {
-            require(_condition);
+            require(
+                msg.sender == buyer,
+                "Only buyer can call this."
+            );
             _;
         }
 
         modifier onlyBuyer() {
-            require(msg.sender == buyer);
+            require(
+                msg.sender == buyer,
+                "Only buyer can call this."
+            );
             _;
         }
 
         modifier onlySeller() {
-            require(msg.sender == seller);
+            require(
+                msg.sender == seller,
+                "Only seller can call this."
+            );
             _;
         }
 
         modifier inState(State _state) {
-            require(state == _state);
+            require(
+                state == _state,
+                "Invalid state."
+            );
             _;
         }
 
@@ -566,52 +509,46 @@ high or low invalid bids.
         event PurchaseConfirmed();
         event ItemReceived();
 
-        /// Abort the purchase and reclaim the ether.
-        /// Can only be called by the seller before
-        /// the contract is locked.
+        ///中止购买并回收以太币。
+        ///只能在合约被锁定之前由卖家调用。
         function abort()
             public
             onlySeller
             inState(State.Created)
         {
-            Aborted();
+            emit Aborted();
             state = State.Inactive;
-            seller.transfer(this.balance);
+            seller.transfer(address(this).balance);
         }
 
-        /// Confirm the purchase as buyer.
-        /// Transaction has to include `2 * value` ether.
-        /// The ether will be locked until confirmReceived
-        /// is called.
+        /// 买家确认购买。
+        /// 交易必须包含 `2 * value` 个以太币。
+        /// 以太币会被锁定，直到 confirmReceived 被调用。
         function confirmPurchase()
             public
             inState(State.Created)
             condition(msg.value == (2 * value))
             payable
         {
-            PurchaseConfirmed();
+            emit PurchaseConfirmed();
             buyer = msg.sender;
             state = State.Locked;
         }
 
-        /// Confirm that you (the buyer) received the item.
-        /// This will release the locked ether.
+        /// 确认你（买家）已经收到商品。
+        /// 这会释放被锁定的以太币。
         function confirmReceived()
             public
             onlyBuyer
             inState(State.Locked)
         {
-            ItemReceived();
-            // It is important to change the state first because
-            // otherwise, the contracts called using `send` below
-            // can call in again here.
+            emit ItemReceived();
+            // 首先修改状态很重要，否则的话，由 `transfer` 所调用的合约可以回调进这里（再次接收以太币）。
             state = State.Inactive;
 
-            // NOTE: This actually allows both the buyer and the seller to
-            // block the refund - the withdraw pattern should be used.
-
+            // 注意: 这实际上允许买方和卖方阻止退款 - 应该使用取回模式。
             buyer.transfer(value);
-            seller.transfer(this.balance);
+            seller.transfer(address(this).balance);
         }
     }
 
