@@ -474,10 +474,7 @@
         }
 
         modifier condition(bool _condition) {
-            require(
-                msg.sender == buyer,
-                "Only buyer can call this."
-            );
+            require(_condition);
             _;
         }
 
