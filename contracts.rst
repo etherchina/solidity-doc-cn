@@ -4,85 +4,67 @@
 合约
 ##########
 
-Contracts in Solidity are similar to classes in object-oriented languages. They
-contain persistent data in state variables and functions that can modify these
-variables. Calling a function on a different contract (instance) will perform
-an EVM function call and thus switch the context such that state variables are
-inaccessible.
+Solidity 合约类似于面向对象语言中的类。合约中有用于数据持久化的状态变量，和可以修改状态变量的函数。
+调用另一个合约实例的函数时，会执行一个 EVM 函数调用，这个操作会切换执行时的上下文，这样，前一个合约的状态变量就不能访问了。
 
 .. index:: ! contract;creation, constructor
 
-******************
-Creating Contracts
-******************
+**********
+创建合约
+**********
 
-Contracts can be created "from outside" via Ethereum transactions or from within Solidity contracts.
+可以通过以太坊交易“从外部”或从 Solidity 合约内部创建合约。
 
-IDEs, such as `Remix <https://remix.ethereum.org/>`_, make the creation process seamless using UI elements.
+一些集成开发环境，例如 `Remix <https://remix.ethereum.org/>`_, 通过使用一些用户界面元素使创建过程更加流畅。
+在以太坊上编程创建合约最好使用 JavaScript API `web3.js <https://github.com/ethereum/web3.js>`_。
+现在，我们已经有了一个叫做 `web3.eth.Contract <https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#new-contract>`_ 的方法能够更容易的创建合约。
 
-Creating contracts programatically on Ethereum is best done via using the JavaScript API `web3.js <https://github.com/ethereum/web3.js>`_.
-As of today it has a method called `web3.eth.Contract <https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#new-contract>`_
-to facilitate contract creation.
-
-When a contract is created, its constructor (a function with the same
-name as the contract) is executed once.
-A constructor is optional. Only one constructor is allowed, and this means
-overloading is not supported.
+创建合约时，会执行一次构造函数（与合约同名的函数）。构造函数是可选的。只允许有一个构造函数，这意味着不支持重载。
 
 .. index:: constructor;arguments
 
-Internally, constructor arguments are passed :ref:`ABI encoded <ABI>` after the code of
-the contract itself, but you do not have to care about this if you use ``web3.js``.
+在内部，构造函数参数在合约代码之后通过 :ref:`ABI 编码 <ABI>` 传递，但是如果你使用 ``web3.js``
+则不必关心这个问题。
 
-If a contract wants to create another contract, the source code
-(and the binary) of the created contract has to be known to the creator.
-This means that cyclic creation dependencies are impossible.
+如果一个合约想要创建另一个合约，那么创建者必须知晓被创建合约的源代码(和二进制代码)。
+这意味着不可能循环创建依赖项。
 
 ::
 
     pragma solidity ^0.4.16;
 
     contract OwnedToken {
-        // TokenCreator is a contract type that is defined below.
-        // It is fine to reference it as long as it is not used
-        // to create a new contract.
+        // TokenCreator 是如下定义的合约类型.
+        // 不创建新合约的话，也可以引用它。
         TokenCreator creator;
         address owner;
         bytes32 name;
 
-        // This is the constructor which registers the
-        // creator and the assigned name.
+        // 这是注册 creator 和设置名称的构造函数。
         function OwnedToken(bytes32 _name) public {
-            // State variables are accessed via their name
-            // and not via e.g. this.owner. This also applies
-            // to functions and especially in the constructors,
-            // you can only call them like that ("internally"),
-            // because the contract itself does not exist yet.
+            // 状态变量通过其名称访问，而不是通过例如 this.owner 的方式访问。
+            // 这也适用于函数，特别是在构造函数中，你只能像这样（“内部地”）调用它们，
+            // 因为合约本身还不存在。
             owner = msg.sender;
-            // We do an explicit type conversion from `address`
-            // to `TokenCreator` and assume that the type of
-            // the calling contract is TokenCreator, there is
-            // no real way to check that.
+            // 从 `address` 到 `TokenCreator` ，是做显式的类型转换
+            // 并且假定调用合约的类型是 TokenCreator，没有真正的方法来检查这一点。
             creator = TokenCreator(msg.sender);
             name = _name;
         }
 
         function changeName(bytes32 newName) public {
-            // Only the creator can alter the name --
-            // the comparison is possible since contracts
-            // are implicitly convertible to addresses.
+            // 只有 creator （即创建当前合约的合约）能够更改名称 —— 因为合约是隐式转换为地址的，
+            // 所以这里的比较是可行的。
             if (msg.sender == address(creator))
                 name = newName;
         }
 
         function transfer(address newOwner) public {
-            // Only the current owner can transfer the token.
+            // 只有当前所有者才能发送 token。
             if (msg.sender != owner) return;
-            // We also want to ask the creator if the transfer
-            // is fine. Note that this calls a function of the
-            // contract defined below. If the call fails (e.g.
-            // due to out-of-gas), the execution here stops
-            // immediately.
+            // 我们也想询问 creator 是否可以发送。
+            // 请注意，这里调用了一个下面定义的合约中的函数。
+            // 如果调用失败（比如，由于 gas 不足），会立即停止执行。
             if (creator.isTokenTransferOK(owner, newOwner))
                 owner = newOwner;
         }
@@ -93,16 +75,14 @@ This means that cyclic creation dependencies are impossible.
            public
            returns (OwnedToken tokenAddress)
         {
-            // Create a new Token contract and return its address.
-            // From the JavaScript side, the return type is simply
-            // `address`, as this is the closest type available in
-            // the ABI.
+            // 创建一个新的 Token 合约并且返回它的地址。
+            // 从 JavaScript 方面来说，返回类型是简单的 `address` 类型，因为
+            // 这是在 ABI 中可用的最接近的类型。
             return new OwnedToken(name);
         }
 
         function changeName(OwnedToken tokenAddress, bytes32 name)  public {
-            // Again, the external type of `tokenAddress` is
-            // simply `address`.
+            // 同样，`tokenAddress` 的外部类型也是 `address` 。
             tokenAddress.changeName(name);
         }
 
@@ -111,7 +91,7 @@ This means that cyclic creation dependencies are impossible.
             view
             returns (bool ok)
         {
-            // Check some arbitrary condition.
+            // 检查一些任意的情况。
             address tokenAddress = msg.sender;
             return (keccak256(newOwner) & 0xff) == (bytes20(tokenAddress) & 0xff);
         }
@@ -122,54 +102,30 @@ This means that cyclic creation dependencies are impossible.
 .. _visibility-and-getters:
 
 **********************
-Visibility and Getters
+可见性和 getter 函数
 **********************
 
-Since Solidity knows two kinds of function calls (internal
-ones that do not create an actual EVM call (also called
-a "message call") and external
-ones that do), there are four types of visibilities for
-functions and state variables.
-
-Functions can be specified as being ``external``,
-``public``, ``internal`` or ``private``, where the default is
-``public``. For state variables, ``external`` is not possible
-and the default is ``internal``.
-
-``external``:
-    External functions are part of the contract
-    interface, which means they can be called from other contracts and
-    via transactions. An external function ``f`` cannot be called
-    internally (i.e. ``f()`` does not work, but ``this.f()`` works).
-    External functions are sometimes more efficient when
-    they receive large arrays of data.
-
-``public``:
-    Public functions are part of the contract
-    interface and can be either called internally or via
-    messages. For public state variables, an automatic getter
-    function (see below) is generated.
-
-``internal``:
-    Those functions and state variables can only be
-    accessed internally (i.e. from within the current contract
-    or contracts deriving from it), without using ``this``.
-
-``private``:
-    Private functions and state variables are only
-    visible for the contract they are defined in and not in
-    derived contracts.
+由于 Solidity 有两种函数调用（内部调用不会产生实际的 EVM 调用或称为“消息调用”，而外部调用则会产生一个 EVM 调用），
+函数和状态变量有四种可见性类型。
+函数可以指定为 ``external`` ，``public`` ，``internal`` 或者 ``private``，默认情况下函数类型为 ``public``。
+对于状态变量，不能设置为 ``external`` ，默认是 ``internal`` 。
+``external`` ：
+    外部函数作为合约接口的一部分，意味着我们可以从其他合约和交易中调用。
+    一个外部函数 ``f`` 不能从内部调用（即 ``f`` 不起作用，但 ``this.f()`` 可以）。
+    当收到大量数据的时候，外部函数有时候会更有效率。
+ ``public`` ：
+    public 函数是合约接口的一部分，可以在内部或通过消息调用。对于公共状态变量，
+    会自动生成一个 getter 函数（见下面）。
+ ``internal`` ：
+    这些函数和状态变量只能是内部访问（即从当前合约内部或从它派生的合约访问），不使用 ``this`` 调用。
+ ``private`` ：
+    private 函数和状态变量仅在当前定义它们的合约中使用，并且不能被派生合约使用。
 
 .. note::
-    Everything that is inside a contract is visible to
-    all external observers. Making something ``private``
-    only prevents other contracts from accessing and modifying
-    the information, but it will still be visible to the
-    whole world outside of the blockchain.
+    合约中的所有内容对外部观察者都是可见的。设置一些 ``private`` 类型只能阻止其他合约访问和修改这些信息，
+    但是对于区块链外的整个世界它仍然是可见的。
 
-The visibility specifier is given after the type for
-state variables and between parameter list and
-return parameter list for functions.
+可见性标识符的定义位置，对于状态变量来说是在类型后面，对于函数是在参数列表和返回关键字中间。
 
 ::
 
@@ -181,13 +137,12 @@ return parameter list for functions.
         uint public data;
     }
 
-In the following example, ``D``, can call ``c.getData()`` to retrieve the value of
-``data`` in state storage, but is not able to call ``f``. Contract ``E`` is derived from
-``C`` and, thus, can call ``compute``.
+在下面的例子中，``D`` 可以调用 ``c.getData（）`` 来获取状态存储中 ``data`` 的值，但不能调用 ``f`` 。
+合约 ``E`` 继承自 ``C`` ，因此可以调用 ``compute``。
 
 ::
 
-    // This will not compile
+    // 下面代码编译错误
 
     pragma solidity ^0.4.0;
 
@@ -203,32 +158,28 @@ In the following example, ``D``, can call ``c.getData()`` to retrieve the value 
     contract D {
         function readData() public {
             C c = new C();
-            uint local = c.f(7); // error: member `f` is not visible
+            uint local = c.f(7); // 错误：成员 `f` 不可见
             c.setData(3);
             local = c.getData();
-            local = c.compute(3, 5); // error: member `compute` is not visible
+            local = c.compute(3, 5); // 错误：成员 `compute` 不可见
         }
     }
 
     contract E is C {
         function g() public {
             C c = new C();
-            uint val = compute(3, 5); // access to internal member (from derived to parent contract)
+            uint val = compute(3, 5); // 访问内部成员（从继承合约访问父合约成员）
         }
     }
 
 .. index:: ! getter;function, ! function;getter
 .. _getter-functions:
 
-Getter Functions
+Getter 函数
 ================
 
-The compiler automatically creates getter functions for
-all **public** state variables. For the contract given below, the compiler will
-generate a function called ``data`` that does not take any
-arguments and returns a ``uint``, the value of the state
-variable ``data``. The initialization of state variables can
-be done at declaration.
+编译器自动为所有 ** public ** 状态变量创建 getter 函数。对于下面给出的合约，编译器会生成一个名为 ``data``的函数，
+该函数不会接收任何参数并返回一个 ``uint`` ，即状态变量 ``data`` 的值。可以在声明时完成状态变量的初始化。
 
 ::
 
@@ -245,10 +196,8 @@ be done at declaration.
         }
     }
 
-The getter functions have external visibility. If the
-symbol is accessed internally (i.e. without ``this.``),
-it is evaluated as a state variable.  If it is accessed externally
-(i.e. with ``this.``), it is evaluated as a function.
+getter 函数具有外部可见性。如果在内部访问 getter（即没有 ``this.`` ），它被认为一个状态变量。
+如果它是外部访问的（即用 ``this.`` ），它被认为为一个函数。
 
 ::
 
@@ -257,12 +206,12 @@ it is evaluated as a state variable.  If it is accessed externally
     contract C {
         uint public data;
         function x() public {
-            data = 3; // internal access
-            uint val = this.data(); // external access
+            data = 3; // 内部访问
+            uint val = this.data(); // 外部访问
         }
     }
 
-The next example is a bit more complex:
+下一个例子稍微复杂一些：
 
 ::
 
@@ -277,27 +226,26 @@ The next example is a bit more complex:
         mapping (uint => mapping(bool => Data[])) public data;
     }
 
-It will generate a function of the following form::
+这将会生成以下形式的函数 ::
 
     function data(uint arg1, bool arg2, uint arg3) public returns (uint a, bytes3 b) {
         a = data[arg1][arg2][arg3].a;
         b = data[arg1][arg2][arg3].b;
     }
 
-Note that the mapping in the struct is omitted because there
-is no good way to provide the key for the mapping.
+请注意，因为没有好的方法来提供映射的键，所以结构中的映射被省略。
 
 .. index:: ! function;modifier
 
 .. _modifiers:
 
 ******************
-Function Modifiers
+函数 |modifier|
 ******************
 
-Modifiers can be used to easily change the behaviour of functions.  For example,
-they can automatically check a condition prior to executing the function. Modifiers are
-inheritable properties of contracts and may be overridden by derived contracts.
+使用 |modifier| 可以轻松改变函数的行为。 例如，它们可以在执行函数之前自动检查某个条件。
+|modifier| 是合约的可继承属性，
+并可能被派生合约覆盖。
 
 ::
 
@@ -307,13 +255,9 @@ inheritable properties of contracts and may be overridden by derived contracts.
         function owned() public { owner = msg.sender; }
         address owner;
 
-        // This contract only defines a modifier but does not use
-        // it: it will be used in derived contracts.
-        // The function body is inserted where the special symbol
-        // `_;` in the definition of a modifier appears.
-        // This means that if the owner calls this function, the
-        // function is executed and otherwise, an exception is
-        // thrown.
+        // 这个合约只定义一个 |modifier|，但并未使用： 它将会在派生合约中用到。
+        // |modifier| 所修饰的函数体会被插入到特殊符号 _; 的位置。
+        // 这意味着如果是 owner 调用这个函数，则函数会被执行，否则会抛出异常。
         modifier onlyOwner {
             require(msg.sender == owner);
             _;
@@ -321,17 +265,15 @@ inheritable properties of contracts and may be overridden by derived contracts.
     }
 
     contract mortal is owned {
-        // This contract inherits the `onlyOwner` modifier from
-        // `owned` and applies it to the `close` function, which
-        // causes that calls to `close` only have an effect if
-        // they are made by the stored owner.
+        // 这个合约从 `owned` 继承了 `onlyOwner` 修饰符，并将其应用于 `close` 函数，
+        // 只有在合约里保存的 owner 调用 `close` 函数，才会生效。
         function close() public onlyOwner {
             selfdestruct(owner);
         }
     }
 
     contract priced {
-        // Modifiers can receive arguments:
+        // 修改器可以接收参数：
         modifier costs(uint price) {
             if (msg.value >= price) {
                 _;
@@ -345,9 +287,7 @@ inheritable properties of contracts and may be overridden by derived contracts.
 
         function Register(uint initialPrice) public { price = initialPrice; }
 
-        // It is important to also provide the
-        // `payable` keyword here, otherwise the function will
-        // automatically reject all Ether sent to it.
+        // 在这里也使用关键字 `payable` 非常重要，否则函数会自动拒绝所有发送给它的以太币。
         function register() public payable costs(price) {
             registeredAddresses[msg.sender] = true;
         }
@@ -366,57 +306,47 @@ inheritable properties of contracts and may be overridden by derived contracts.
             locked = false;
         }
 
-        /// This function is protected by a mutex, which means that
-        /// reentrant calls from within `msg.sender.call` cannot call `f` again.
-        /// The `return 7` statement assigns 7 to the return value but still
-        /// executes the statement `locked = false` in the modifier.
+        // 这个函数受互斥量保护，这意味着 `msg.sender.call` 中的重入调用不能再次调用  `f`。
+        // `return 7` 语句指定返回值为 7，但修改器中的语句 `locked = false` 仍会执行。
         function f() public noReentrancy returns (uint) {
             require(msg.sender.call());
             return 7;
         }
     }
 
-Multiple modifiers are applied to a function by specifying them in a
-whitespace-separated list and are evaluated in the order presented.
+如果同一个函数有多个 |modifier|，它们之间以空格隔开，|modifier| 会依次检查执行。
 
 .. warning::
-    In an earlier version of Solidity, ``return`` statements in functions
-    having modifiers behaved differently.
+    在早期的 Solidity 版本中，有 |modifier| 的函数，``return`` 语句的行为表现不同。
 
 Explicit returns from a modifier or function body only leave the current
 modifier or function body. Return variables are assigned and
 control flow continues after the "_" in the preceding modifier.
 
-Arbitrary expressions are allowed for modifier arguments and in this context,
-all symbols visible from the function are visible in the modifier. Symbols
-introduced in the modifier are not visible in the function (as they might
-change by overriding).
+|modifier| 或函数体中显式的 return 语句仅仅跳出当前的 |modifier| 和函数体。
+返回变量会被赋值，但整个执行逻辑会从前一个 |modifier| 中的定义的 “_” 之后继续执行。
+
+|modifier| 的参数可以是任意表达式，在此上下文中，所有在函数中可见的符号，在 |modifier| 中均可见。
+在 |modifier| 中引入的符号在函数中不可见（可能被重载改变）。
 
 .. index:: ! constant
 
 ************************
-Constant State Variables
+Constant 状态变量
 ************************
 
-State variables can be declared as ``constant``. In this case, they have to be
-assigned from an expression which is a constant at compile time. Any expression
-that accesses storage, blockchain data (e.g. ``now``, ``this.balance`` or
-``block.number``) or
-execution data (``msg.gas``) or make calls to external contracts are disallowed. Expressions
-that might have a side-effect on memory allocation are allowed, but those that
-might have a side-effect on other memory objects are not. The built-in functions
-``keccak256``, ``sha256``, ``ripemd160``, ``ecrecover``, ``addmod`` and ``mulmod``
-are allowed (even though they do call external contracts).
+状态变量可以被声明为 ``constant``。在这种情况下，只能使用那些在编译时有确定值的表达式来给它们赋值。
+任何通过访问 storage，区块链数据（例如 ``now``, ``this.balance`` 或者 ``block.number``）或执行数据（ ``msg.gas`` ）
+或对外部合约的调用来给它们赋值都是不允许的。
+在内存分配上有边界效应（side-effect）的表达式是允许的，但对其他内存对象产生边界效应的表达式则不行。
+内建（built-in）函数 ``keccak256``，``sha256``，``ripemd160``，``ecrecover``，``addmod`` 和 ``mulmod`` 是允许的（即使他们确实会调用外部合约）。
 
-The reason behind allowing side-effects on the memory allocator is that it
-should be possible to construct complex objects like e.g. lookup-tables.
-This feature is not yet fully usable.
+允许带有边界效应的内存分配器的原因是这将允许构建复杂的对象，比如查找表（lookup-table）。
+此功能尚未完全可用。
 
-The compiler does not reserve a storage slot for these variables, and every occurrence is
-replaced by the respective constant expression (which might be computed to a single value by the optimizer).
+编译器不会为这些变量预留存储，它们的每次出现都会被替换为相应的常量表达式（这将可能被优化器计算为实际的某个值）。
 
-Not all types for constants are implemented at this time. The only supported types are
-value types and strings.
+不是所有类型的状态变量都支持用 constant 来修饰，当前支持的仅有值类型和字符串。
 
 ::
 
@@ -432,29 +362,29 @@ value types and strings.
 
 .. _functions:
 
-*********
-Functions
-*********
+******
+函数
+******
 
 .. index:: ! view function, function;view
 
 .. _view-functions:
 
-View Functions
+View 函数
 ==============
 
-Functions can be declared ``view`` in which case they promise not to modify the state.
+可以将函数声明为 ``view`` 类型，这种情况下要保证不修改状态。
 
-The following statements are considered modifying the state:
+下面的语句被认为是修改状态：
 
-#. Writing to state variables.
-#. :ref:`Emitting events <events>`.
-#. :ref:`Creating other contracts <creating-contracts>`.
-#. Using ``selfdestruct``.
-#. Sending Ether via calls.
-#. Calling any function not marked ``view`` or ``pure``.
-#. Using low-level calls.
-#. Using inline assembly that contains certain opcodes.
+#. 修改状态变量。
+#. :ref:`产生事件 <events>`。
+#. :ref:`创建其它合约 <creating-contracts>`。
+#. 使用 ``selfdestruct``。
+#. 通过调用发送以太币。
+#. 调用任何没有标记为 ``view`` 或者 ``pure`` 的函数。
+#. 使用低级调用。
+#. 使用包含特定操作码的内联汇编。
 
 ::
 
@@ -467,30 +397,30 @@ The following statements are considered modifying the state:
     }
 
 .. note::
-  ``constant`` is an alias to ``view``.
+  ``constant`` 是 ``view`` 的别名。
 
 .. note::
-  Getter methods are marked ``view``.
+  Getter 方法被标记为 ``view``。
 
 .. warning::
-  The compiler does not enforce yet that a ``view`` method is not modifying state.
+  编译器没有强制 ``view`` 方法不能修改状态。
 
 .. index:: ! pure function, function;pure
 
 .. _pure-functions:
 
-Pure Functions
+Pure 函数
 ==============
 
-Functions can be declared ``pure`` in which case they promise not to read from or modify the state.
+函数可以声明为 ``pure`` ，在这种情况下，承诺不读取或修改状态。
 
-In addition to the list of state modifying statements explained above, the following are considered reading from the state:
+除了上面解释的状态修改语句列表之外，以下被认为是从状态中读取：
 
-#. Reading from state variables.
-#. Accessing ``this.balance`` or ``<address>.balance``.
-#. Accessing any of the members of ``block``, ``tx``, ``msg`` (with the exception of ``msg.sig`` and ``msg.data``).
-#. Calling any function not marked ``pure``.
-#. Using inline assembly that contains certain opcodes.
+#. 读取状态变量。
+#. 访问 ``this.balance`` 或者 ``<address>.balance``。
+#. 访问 ``block``，``tx``， ``msg`` 中任意成员 （除 ``msg.sig`` 和 ``msg.data`` 之外）。
+#. 调用任何未标记为 ``pure`` 的函数。
+#. 使用包含某些操作码的内联汇编。
 
 ::
 
@@ -503,87 +433,70 @@ In addition to the list of state modifying statements explained above, the follo
     }
 
 .. warning::
-  The compiler does not enforce yet that a ``pure`` method is not reading from the state.
+  编译器没有强制 ``pure`` 方法不能读取状态。
 
 .. index:: ! fallback function, function;fallback
 
 .. _fallback-function:
 
-Fallback Function
+Fallback 函数
 =================
 
-A contract can have exactly one unnamed function. This function cannot have
-arguments and cannot return anything.
-It is executed on a call to the contract if none of the other
-functions match the given function identifier (or if no data was supplied at
-all).
+合约可以有一个未命名的函数。这个函数不能有参数也不能有返回值。
+如果在一个到合约的调用中，没有其他函数与给定的函数标识符匹配（或没有提供调用数据），那么这个函数（fallback 函数）会被执行。
 
-Furthermore, this function is executed whenever the contract receives plain
-Ether (without data). Additionally, in order to receive Ether, the fallback function
-must be marked ``payable``. If no such function exists, the contract cannot receive
-Ether through regular transactions.
+除此之外，每当合约收到以太币（没有任何数据），这个函数就会执行。此外，为了接收以太币，fallback 函数必须标记为 ``payable``。
+如果不存在这样的函数，则合约不能通过常规交易接收以太币。
 
-In such a context, there is usually very little gas available to the function call (to be precise, 2300 gas), so it is important to make fallback functions as cheap as possible. Note that the gas required by a transaction (as opposed to an internal call) that invokes the fallback function is much higher, because each transaction charges an additional amount of 21000 gas or more for things like signature checking.
+在这样的上下文中，通常只有很少的 gas 可以用来完成这个函数调用（准确地说，是 2300 gas），所以使 fallback 函数的调用尽量廉价很重要。
+请注意，调用 fallback 函数的交易（而不是内部调用）所需的 gas 要高得多，因为每次交易都会额外收取 21000 gas 或更多的费用，用于签名检查等操作。
 
-In particular, the following operations will consume more gas than the stipend provided to a fallback function:
+具体来说，以下操作会消耗比 fallback 函数更多的 gas：
 
-- Writing to storage
-- Creating a contract
-- Calling an external function which consumes a large amount of gas
-- Sending Ether
+- 写入存储
+- 创建合约
+- 调用消耗大量 gas 的外部函数
+- 发送以太币
 
-Please ensure you test your fallback function thoroughly to ensure the execution cost is less than 2300 gas before deploying a contract.
+请确保您在部署合约之前彻底测试您的 fallback 函数，以确保执行成本低于 2300 个 gas。
 
 .. note::
-    Even though the fallback function cannot have arguments, one can still use ``msg.data`` to retrieve
-    any payload supplied with the call.
+    即使 fallback 函数不能有参数，仍然可以使用 ``msg.data`` 来获取随调用提供的任何有效数据。
 
 .. warning::
-    Contracts that receive Ether directly (without a function call, i.e. using ``send`` or ``transfer``)
-    but do not define a fallback function
-    throw an exception, sending back the Ether (this was different
-    before Solidity v0.4.0). So if you want your contract to receive Ether,
-    you have to implement a fallback function.
+    一个没有定义 fallback 函数的合约，直接接收以太币（没有函数调用，即使用 ``send`` 或 ``transfer``）会抛出一个异常，
+    并返还以太币（在 Solidity v0.4.0 之前行为会有所不同）。所以如果你想让你的合约接收以太币，必须实现 fallback 函数。
 
 .. warning::
-    A contract without a payable fallback function can receive Ether as a recipient of a `coinbase transaction` (aka `miner block reward`)
-    or as a destination of a ``selfdestruct``.
+    一个没有 payable fallback 函数的合约，可以作为 `coinbase transaction`（又名 `miner block reward` ）的接收者或者作为 ``selfdestruct`` 的目标来接收以太币。
 
-    A contract cannot react to such Ether transfers and thus also cannot reject them. This is a design choice of the EVM and Solidity cannot work around it.
+    一个合约不能对这种以太币转移做出反应，因此也不能拒绝它们。这是 EVM 在设计时就决定好的，而且 Solidity 无法绕过这个问题。
 
-    It also means that ``this.balance`` can be higher than the sum of some manual accounting implemented in a contract (i.e. having a counter updated in the fallback function).
+    这也意味着 ``this.balance`` 可以高于合约中实现的一些手工记帐的总和（即在 fallback 函数中更新的累加器）。
 
 ::
 
     pragma solidity ^0.4.0;
 
     contract Test {
-        // This function is called for all messages sent to
-        // this contract (there is no other function).
-        // Sending Ether to this contract will cause an exception,
-        // because the fallback function does not have the `payable`
-        // modifier.
+        // 发送到这个合约的所有消息都会调用此函数（因为该合约没有其它函数）。
+        // 向这个合约发送以太币会导致异常，因为 fallback 函数没有 `payable` 修饰符
         function() public { x = 1; }
         uint x;
     }
 
 
-    // This contract keeps all Ether sent to it with no way
-    // to get it back.
+    // 这个合约会保留所有发送给它的以太币，没有办法返还。
     contract Sink {
         function() public payable { }
     }
 
     contract Caller {
         function callTest(Test test) public {
-            test.call(0xabcdef01); // hash does not exist
-            // results in test.x becoming == 1.
-
-            // The following will not compile, but even
-            // if someone sends ether to that contract,
-            // the transaction will fail and reject the
-            // Ether.
-            //test.send(2 ether);
+            test.call(0xabcdef01); // 不存在的哈希
+            // 导致 test.x 变成 == 1。
+            // 以下将不会编译，但如果有人向该合约发送以太币，交易将失败并拒绝以太币。
+            // test.send(2 ether）;
         }
     }
 
@@ -591,12 +504,10 @@ Please ensure you test your fallback function thoroughly to ensure the execution
 
 .. _overload-function:
 
-Function Overloading
+函数重载
 ====================
 
-A Contract can have multiple functions of the same name but with different arguments.
-This also applies to inherited functions. The following example shows overloading of the
-``f`` function in the scope of contract ``A``.
+合约可以具有多个不同参数的同名函数。这也适用于继承函数。以下示例展示了合约 ``A`` 中的重载函数 ``f``。
 
 ::
 
@@ -612,8 +523,7 @@ This also applies to inherited functions. The following example shows overloadin
         }
     }
 
-Overloaded functions are also present in the external interface. It is an error if two
-externally visible functions differ by their Solidity types but not by their external types.
+重载函数也存在于外部接口中。如果两个外部可见函数仅区别于 Solidity 内的类型而不是它们的外部类型则会导致错误。
 
 ::
 
@@ -634,19 +544,16 @@ externally visible functions differ by their Solidity types but not by their ext
     }
 
 
-Both ``f`` function overloads above end up accepting the address type for the ABI although
-they are considered different inside Solidity.
+以上两个 ``f`` 函数重载都接受了 ABI 的地址类型，虽然它们在 Solidity 中被认为是不同的。
 
-Overload resolution and Argument matching
+重载解析和参数匹配
 -----------------------------------------
 
-Overloaded functions are selected by matching the function declarations in the current scope
-to the arguments supplied in the function call. Functions are selected as overload candidates
-if all arguments can be implicitly converted to the expected types. If there is not exactly one
-candidate, resolution fails.
+通过将当前范围内的函数声明与函数调用中提供的参数相匹配，可以选择重载函数。
+如果所有参数都可以隐式地转换为预期类型，则选择函数作为重载候选项。如果一个候选都没有，解析失败。
 
 .. note::
-    Return parameters are not taken into account for overload resolution.
+    返回参数不作为重载解析的依据。
 
 ::
 
@@ -662,55 +569,38 @@ candidate, resolution fails.
         }
     }
 
-Calling ``f(50)`` would create a type error since ``250`` can be implicitly converted both to ``uint8``
-and ``uint256`` types. On another hand ``f(256)`` would resolve to ``f(uint256)`` overload as ``256`` cannot be implicitly
-converted to ``uint8``.
+调用  ``f(50)`` 会导致类型错误，因为 ``50`` 既可以被隐式转换为 ``uint8`` 也可以被隐式转换为 ``uint256``。
+另一方面，调用 ``f(256)`` 则会解析为 ``f(uint256)`` 重载，因为 ``256`` 不能隐式转换为 ``uint8``。
 
 .. index:: ! event
 
 .. _events:
 
 ******
-Events
+事件
 ******
 
-Events allow the convenient usage of the EVM logging facilities,
-which in turn can be used to "call" JavaScript callbacks in the user interface
-of a dapp, which listen for these events.
+事件允许我们方便地使用 EVM 的日志基础设施。
+我们可以在 dapp 的用户界面中监听事件，EVM 的日志机制可以反过来“调用”用来监听事件的 Javascript 回调函数。
 
-Events are
-inheritable members of contracts. When they are called, they cause the
-arguments to be stored in the transaction's log - a special data structure
-in the blockchain. These logs are associated with the address of
-the contract and will be incorporated into the blockchain
-and stay there as long as a block is accessible (forever as of
-Frontier and Homestead, but this might change with Serenity). Log and
-event data is not accessible from within contracts (not even from
-the contract that created them).
+事件在合约中可被继承。当他们被调用时，会使参数被存储到交易的日志中 —— 一种区块链中的特殊数据结构。
+这些日志与地址相关联，被并入区块链中，只要区块可以访问就一直存在（在 Frontier 和 Homestead 版本中会被永久保存，在 Serenity 版本中可能会改动)。
+日志和事件在合约内不可直接被访问（甚至是创建日志的合约也不能访问）。
 
-SPV proofs for logs are possible, so if an external entity supplies
-a contract with such a proof, it can check that the log actually
-exists inside the blockchain.  But be aware that block headers have to be supplied because
-the contract can only see the last 256 block hashes.
+对日志的 SPV（Simplified Payment Verification）证明是可能的，如果一个外部实体提供了一个带有这种证明的合约，它可以检查日志是否真实存在于区块链中。
+但需要留意的是，由于合约中仅能访问最近的 256 个区块哈希，所以还需要提供区块头信息。
 
-Up to three parameters can
-receive the attribute ``indexed`` which will cause the respective arguments
-to be searched for: It is possible to filter for specific values of
-indexed arguments in the user interface.
+最多三个参数可以接收 ``indexed`` 属性，从而使它们可以被搜索：在用户界面上可以使用 indexed 参数的特定值来进行过滤。
 
-If arrays (including ``string`` and ``bytes``) are used as indexed arguments, the
-Keccak-256 hash of it is stored as topic instead.
+如果数组（包括 ``string`` 和 ``bytes``）类型被标记为索引项，则它们的 keccak-256 哈希值会被作为 topic 保存。
 
-The hash of the signature of the event is one of the topics except if you
-declared the event with ``anonymous`` specifier. This means that it is
-not possible to filter for specific anonymous events by name.
+除非你用 ``anonymous`` 说明符声明事件，否则事件签名的哈希值是 topic 之一。
+同时也意味着对于匿名事件无法通过名字来过滤。
 
-All non-indexed arguments will be stored in the data part of the log.
+所有非索引参数都将存储在日志的数据部分中。
 
 .. note::
-    Indexed arguments will not be stored themselves.  You can only
-    search for the values, but it is impossible to retrieve the
-    values themselves.
+    索引参数本身不会被保存。你只能搜索它们的值（来确定相应的日志数据是否存在），而不能获取它们的值本身。
 
 ::
 
@@ -724,33 +614,30 @@ All non-indexed arguments will be stored in the data part of the log.
         );
 
         function deposit(bytes32 _id) public payable {
-            // Any call to this function (even deeply nested) can
-            // be detected from the JavaScript API by filtering
-            // for `Deposit` to be called.
+            // 我们可以过滤对 `Deposit` 的调用，从而用 Javascript API 来查明对这个函数的任何调用（甚至是深度嵌套调用）。
             Deposit(msg.sender, _id, msg.value);
         }
     }
 
 The use in the JavaScript API would be as follows:
+在 JavaScript API 的用法如下：
 
 ::
 
-    var abi = /* abi as generated by the compiler */;
+    var abi = /* abi 由编译器产生 */;
     var ClientReceipt = web3.eth.contract(abi);
-    var clientReceipt = ClientReceipt.at("0x1234...ab67" /* address */);
+    var clientReceipt = ClientReceipt.at("0x1234...ab67" /* 地址 */);
 
     var event = clientReceipt.Deposit();
 
-    // watch for changes
+    // 监视变化
     event.watch(function(error, result){
-        // result will contain various information
-        // including the argumets given to the `Deposit`
-        // call.
+        // 结果包括对 `Deposit` 的调用参数在内的各种信息。
         if (!error)
             console.log(result);
     });
 
-    // Or pass a callback to start watching immediately
+    // 或者通过回调立即开始观察
     var event = clientReceipt.Deposit(function(error, result) {
         if (!error)
             console.log(result);
@@ -758,14 +645,12 @@ The use in the JavaScript API would be as follows:
 
 .. index:: ! log
 
-Low-Level Interface to Logs
+日志的底层接口
 ===========================
 
-It is also possible to access the low-level interface to the logging
-mechanism via the functions ``log0``, ``log1``, ``log2``, ``log3`` and ``log4``.
-``logi`` takes ``i + 1`` parameter of type ``bytes32``, where the first
-argument will be used for the data part of the log and the others
-as topics. The event call above can be performed in the same way as
+通过函数 ``log0``，``log1``， ``log2``， ``log3`` 和 ``log4`` 可以访问日志机制的底层接口。
+``logi``  接受 ``i + 1`` 个 ``bytes32`` 类型的参数。其中第一个参数会被用来做为日志的数据部分，
+其它的会做为 topic。上面的事件调用可以以相同的方式执行。
 
 ::
 
@@ -783,26 +668,24 @@ as topics. The event call above can be performed in the same way as
         }
     }
 
-where the long hexadecimal number is equal to
-``keccak256("Deposit(address,hash256,uint256)")``, the signature of the event.
+其中的长十六进制数的计算方法是 ``keccak256("Deposit(address,hash256,uint256)")``，即事件的签名。
 
-Additional Resources for Understanding Events
+其它学习事件机制的资源
 ==============================================
 
-- `Javascript documentation <https://github.com/ethereum/wiki/wiki/JavaScript-API#contract-events>`_
-- `Example usage of events <https://github.com/debris/smart-exchange/blob/master/lib/contracts/SmartExchange.sol>`_
-- `How to access them in js <https://github.com/debris/smart-exchange/blob/master/lib/exchange_transactions.js>`_
+- `Javascript 文档 <https://github.com/ethereum/wiki/wiki/JavaScript-API#contract-events>`_
+- `事件使用例程 <https://github.com/debris/smart-exchange/blob/master/lib/contracts/SmartExchange.sol>`_
+- `如何在 js 中访问它们 <https://github.com/debris/smart-exchange/blob/master/lib/exchange_transactions.js>`_
 
 .. index:: ! inheritance, ! base class, ! contract;base, ! deriving
 
 ***********
-Inheritance
+继承
 ***********
 
-Solidity supports multiple inheritance by copying code including polymorphism.
+通过复制包括多态的代码，Solidity 支持多重继承。
 
-All function calls are virtual, which means that the most derived function
-is called, except when the contract name is explicitly given.
+所有的函数调用都是虚拟的，这意味着最远的派生函数会被调用，除非明确给出合约名称。
 
 When a contract inherits from multiple contracts, only a single
 contract is created on the blockchain, and the code from all the base contracts
