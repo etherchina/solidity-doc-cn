@@ -687,15 +687,12 @@ The use in the JavaScript API would be as follows:
 
 所有的函数调用都是虚拟的，这意味着最远的派生函数会被调用，除非明确给出合约名称。
 
-When a contract inherits from multiple contracts, only a single
-contract is created on the blockchain, and the code from all the base contracts
-is copied into the created contract.
+当一个合约从多个合约继承时，在区块链上只有一个合约被创建，所有基类合约的代码被复制到创建的合约中。
 
-The general inheritance system is very similar to
-`Python's <https://docs.python.org/3/tutorial/classes.html#inheritance>`_,
-especially concerning multiple inheritance.
+总的继承系统与 `Python's <https://docs.python.org/3/tutorial/classes.html#inheritance>`_ ，非常
+相似，特别是多重继承方面。
 
-Details are given in the following example.
+下面的例子进行了详细的说明。
 
 ::
 
@@ -706,20 +703,17 @@ Details are given in the following example.
         address owner;
     }
 
-    // Use `is` to derive from another contract. Derived
-    // contracts can access all non-private members including
-    // internal functions and state variables. These cannot be
-    // accessed externally via `this`, though.
+    // 使用 `is` 从另一个合约派生。派生合约可以访问所有非私有成员，包括内部函数和状态变量，
+    // 但无法通过 `this` 来外部访问。
     contract mortal is owned {
         function kill() {
             if (msg.sender == owner) selfdestruct(owner);
         }
     }
 
-    // These abstract contracts are only provided to make the
-    // interface known to the compiler. Note the function
-    // without body. If a contract does not implement all
-    // functions it can only be used as an interface.
+    // 这些抽象合约仅用于给编译器提供接口。
+    // 注意函数没有函数体。
+    // 如果一个合约没有实现所有函数，则只能用作接口。
     contract Config {
         function lookup(uint id) public returns (address adr);
     }
@@ -729,34 +723,30 @@ Details are given in the following example.
         function unregister() public;
      }
 
-    // Multiple inheritance is possible. Note that `owned` is
-    // also a base class of `mortal`, yet there is only a single
-    // instance of `owned` (as for virtual inheritance in C++).
+    // 可以多重继承。请注意，`owned` 也是 `mortal` 的基类，
+    // 但只有一个 `owned` 实例（就像 C++ 中的虚拟继承）。
     contract named is owned, mortal {
         function named(bytes32 name) {
             Config config = Config(0xD5f9D8D94886E70b06E474c3fB14Fd43E2f23970);
             NameReg(config.lookup(1)).register(name);
         }
 
-        // Functions can be overridden by another function with the same name and
-        // the same number/types of inputs.  If the overriding function has different
-        // types of output parameters, that causes an error.
-        // Both local and message-based function calls take these overrides
-        // into account.
+        // 函数可以被另一个具有相同名称和相同数量/类型输入的函数重载。
+        // 如果重载函数有不同类型的输出参数，会导致错误。
+        // 本地和基于消息的函数调用都会考虑这些重载。
         function kill() public {
             if (msg.sender == owner) {
                 Config config = Config(0xD5f9D8D94886E70b06E474c3fB14Fd43E2f23970);
                 NameReg(config.lookup(1)).unregister();
-                // It is still possible to call a specific
-                // overridden function.
+                // 仍然可以调用特定的重载函数。
                 mortal.kill();
             }
         }
     }
 
-    // If a constructor takes an argument, it needs to be
-    // provided in the header (or modifier-invocation-style at
-    // the constructor of the derived contract (see below)).
+    // 如果构造函数接受参数，
+    // 则需要在声明（合约的构造函数）时提供，
+    // 或在派生合约的构造函数位置以 |modifier| 调用风格提供（见下文）。
     contract PriceFeed is owned, mortal, named("GoldFeed") {
        function updateInfo(uint newInfo) public {
           if (msg.sender == owner) info = newInfo;
@@ -767,9 +757,8 @@ Details are given in the following example.
        uint info;
     }
 
-Note that above, we call ``mortal.kill()`` to "forward" the
-destruction request. The way this is done is problematic, as
-seen in the following example::
+注意，在上边的代码中，我们调用 ``mortal.kill()`` 来“转发”销毁请求。
+这样做法是有问题的，在下面的例子中可以看到::
 
     pragma solidity ^0.4.0;
 
@@ -785,20 +774,18 @@ seen in the following example::
     }
 
     contract Base1 is mortal {
-        function kill() public { /* do cleanup 1 */ mortal.kill(); }
+        function kill() public { /* 清除操作 1 */ mortal.kill(); }
     }
 
     contract Base2 is mortal {
-        function kill() public { /* do cleanup 2 */ mortal.kill(); }
+        function kill() public { /* 清除操作 2 */ mortal.kill(); }
     }
 
     contract Final is Base1, Base2 {
     }
 
-A call to ``Final.kill()`` will call ``Base2.kill`` as the most
-derived override, but this function will bypass
-``Base1.kill``, basically because it does not even know about
-``Base1``.  The way around this is to use ``super``::
+调用 ``Final.kill()`` 时会调用最远的派生重载函数 ``Base2.kill``，但是会绕过 ``Base1.kill``，
+基本上因为它甚至不知道 ``Base1``。解决这个问题的方法是使用 ``super``::
 
     pragma solidity ^0.4.0;
 
@@ -814,35 +801,29 @@ derived override, but this function will bypass
     }
 
     contract Base1 is mortal {
-        function kill() public { /* do cleanup 1 */ super.kill(); }
+        function kill() public { /* 清除操作 1 */ super.kill(); }
     }
 
 
     contract Base2 is mortal {
-        function kill() public { /* do cleanup 2 */ super.kill(); }
+        function kill() public { /* 清除操作 2 */ super.kill(); }
     }
 
     contract Final is Base1, Base2 {
     }
 
-If ``Base2`` calls a function of ``super``, it does not simply
-call this function on one of its base contracts.  Rather, it
-calls this function on the next base contract in the final
-inheritance graph, so it will call ``Base1.kill()`` (note that
-the final inheritance sequence is -- starting with the most
-derived contract: Final, Base2, Base1, mortal, owned).
-The actual function that is called when using super is
-not known in the context of the class where it is used,
-although its type is known. This is similar for ordinary
-virtual method lookup.
+如果 ``Base2`` 调用 ``super`` 的函数，它不会简单在其基类合约上调用该函数。
+相反，它在最终的继承关系图谱的下一个基类合约中调用这个函数，所以它会调用 ``Base1.kill()``
+（注意最终的继承序列是——从最远派生合约开始：Final, Base2, Base1, mortal, ownerd）。
+在类中使用 super 调用的实际函数在当前类的上下文中是未知的，尽管它的类型是已知的。
+这与普通的虚拟方法查找类似。
 
 .. index:: ! base;constructor
 
-Arguments for Base Constructors
+基类构造函数的参数
 ===============================
 
-Derived contracts need to provide all arguments needed for
-the base constructors. This can be done in two ways::
+派生合约需要提供基类构造函数需要的所有参数。这可以通过两种方式来完成::
 
     pragma solidity ^0.4.0;
 
@@ -856,34 +837,27 @@ the base constructors. This can be done in two ways::
         }
     }
 
-One way is directly in the inheritance list (``is Base(7)``).  The other is in
-the way a modifier would be invoked as part of the header of
-the derived constructor (``Base(_y * _y)``). The first way to
-do it is more convenient if the constructor argument is a
-constant and defines the behaviour of the contract or
-describes it. The second way has to be used if the
-constructor arguments of the base depend on those of the
-derived contract. If, as in this silly example, both places
-are used, the modifier-style argument takes precedence.
+一种方法直接在继承列表中调用基类构造函数（``is Base(7)``）。
+另一种方法是像 |modifier| 使用方法一样，
+作为派生合约构造函数定义头的一部分，（``Base(_y * _y)``)。
+如果构造函数参数是常量并且定义或描述了合约的行为，使用第一种方法比较方便。
+如果基类构造函数的参数依赖于派生合约，那么必须使用第二种方法。
+如果像这个简单的例子一样，两个地方都用到了，优先使用 |modifier| 风格的参数。
 
 .. index:: ! inheritance;multiple, ! linearization, ! C3 linearization
 
-Multiple Inheritance and Linearization
+多重继承与线性化
 ======================================
 
-Languages that allow multiple inheritance have to deal with
-several problems.  One is the `Diamond Problem <https://en.wikipedia.org/wiki/Multiple_inheritance#The_diamond_problem>`_.
-Solidity follows the path of Python and uses "`C3 Linearization <https://en.wikipedia.org/wiki/C3_linearization>`_"
-to force a specific order in the DAG of base classes. This
-results in the desirable property of monotonicity but
-disallows some inheritance graphs. Especially, the order in
-which the base classes are given in the ``is`` directive is
-important. In the following code, Solidity will give the
-error "Linearization of inheritance graph impossible".
+编程语言实现多重继承需要解决几个问题。
+一个问题是 `钻石问题 <https://en.wikipedia.org/wiki/Multiple_inheritance#The_diamond_problem>`_。
+Solidity 借鉴了 Python 的方式并且使用“ `C3 线性化 <https://en.wikipedia.org/wiki/C3_linearization>`_ ”强制一个由基类构成的 DAG（有向无环图）保持一个特定的顺序。
+这最终反映为我们所希望的唯一化的结果，但也使某些继承方式变为无效。尤其是，基类在 ``is`` 后面的顺序很重要。
+在下面的代码中，Solidity 会给出“ Linearization of inheritance graph impossible ”这样的错误。
 
 ::
 
-    // This will not compile
+    // 以下代码编译出错
 
     pragma solidity ^0.4.0;
 
@@ -891,28 +865,26 @@ error "Linearization of inheritance graph impossible".
     contract A is X {}
     contract C is A, X {}
 
-The reason for this is that ``C`` requests ``X`` to override ``A``
-(by specifying ``A, X`` in this order), but ``A`` itself
-requests to override ``X``, which is a contradiction that
-cannot be resolved.
+代码编译出错的原因是 ``C`` 要求 ``X`` 重写 ``A``（因为定义的顺序是 ``A, X``），
+但是 ``A`` 本身要求重写``X``，无法解决这种冲突。
 
-A simple rule to remember is to specify the base classes in
-the order from "most base-like" to "most derived".
+可以通过一个简单的规则来记忆：
+以从“最接近的基类”（most base-like）到“最远的继承”（most derived）的顺序来指定所有的基类。
 
-Inheriting Different Kinds of Members of the Same Name
+继承有相同名字的不同类型成员
 ======================================================
 
-When the inheritance results in a contract with a function and a modifier of the same name, it is considered as an error.
-This error is produced also by an event and a modifier of the same name, and a function and an event of the same name.
-As an exception, a state variable getter can override a public function.
+当继承导致一个合约具有相同名字的函数和 |modifier| 时，这会被认为是一个错误。
+当事件和 |modifier| 同名，或者函数和事件同名时，同样会被认为是一个错误。
+有一种例外情况，状态变量的 getter 可以覆盖一个 public 函数。
 
 .. index:: ! contract;abstract, ! abstract contract
 
 ******************
-Abstract Contracts
+抽象合约
 ******************
 
-Contract functions can lack an implementation as in the following example (note that the function declaration header is terminated by ``;``)::
+合约函数可以缺少实现，如下例所示（请注意函数声明头由 ``;`` 结尾）::
 
     pragma solidity ^0.4.0;
 
@@ -920,9 +892,7 @@ Contract functions can lack an implementation as in the following example (note 
         function utterance() public returns (bytes32);
     }
 
-Such contracts cannot be compiled (even if they contain
-implemented functions alongside non-implemented functions),
-but they can be used as base contracts::
+这些合约无法成功编译（即使它们除了未实现的函数还包含其他已经实现了的函数），但他们可以用作基类合约::
 
     pragma solidity ^0.4.0;
 
@@ -934,28 +904,27 @@ but they can be used as base contracts::
         function utterance() public returns (bytes32) { return "miaow"; }
     }
 
-If a contract inherits from an abstract contract and does not implement all non-implemented functions by overriding, it will itself be abstract.
+如果合约继承自抽象合约，并且没有通过重写来实现所有未实现的函数，那么它本身就是抽象的。
 
 .. index:: ! contract;interface, ! interface contract
 
 **********
-Interfaces
+接口
 **********
 
-Interfaces are similar to abstract contracts, but they cannot have any functions implemented. There are further restrictions:
+接口类似于抽象合约，但是它们不能实现任何函数。还有进一步的限制：
 
-#. Cannot inherit other contracts or interfaces.
-#. Cannot define constructor.
-#. Cannot define variables.
-#. Cannot define structs.
-#. Cannot define enums.
+#. 无法继承其他合约或接口。
+#. 无法定义构造函数。
+#. 无法定义变量。
+#. 无法定义结构体
+#. 无法定义枚举。
 
-Some of these restrictions might be lifted in the future.
+将来可能会解除这里的某些限制。
 
-Interfaces are basically limited to what the Contract ABI can represent, and the conversion between the ABI and
-an Interface should be possible without any information loss.
+接口基本上仅限于合约 ABI 可以表示的内容，并且 ABI 和接口之间的转换应该不会丢失任何信息。
 
-Interfaces are denoted by their own keyword:
+接口由它们自己的关键字表示：
 
 ::
 
@@ -965,69 +934,50 @@ Interfaces are denoted by their own keyword:
         function transfer(address recipient, uint amount) public;
     }
 
-Contracts can inherit interfaces as they would inherit other contracts.
+就像继承其他合约一样，合约可以继承接口。
 
 .. index:: ! library, callcode, delegatecall
 
 .. _libraries:
 
 ************
-Libraries
+库
 ************
 
-Libraries are similar to contracts, but their purpose is that they are deployed
-only once at a specific address and their code is reused using the ``DELEGATECALL``
-(``CALLCODE`` until Homestead)
-feature of the EVM. This means that if library functions are called, their code
-is executed in the context of the calling contract, i.e. ``this`` points to the
-calling contract, and especially the storage from the calling contract can be
-accessed. As a library is an isolated piece of source code, it can only access
-state variables of the calling contract if they are explicitly supplied (it
-would have no way to name them, otherwise). Library functions can only be
-called directly (i.e. without the use of ``DELEGATECALL``) if they do not modify
-the state (i.e. if they are ``view`` or ``pure`` functions),
-because libraries are assumed to be stateless. In particular, it is
-not possible to destroy a library unless Solidity's type system is circumvented.
+库与合约类似，它们只需要在特定的地址部署一次，并且它们的代码可以通过 EVM 的 ``DELEGATECALL``
+(Homestead 之前使用 ``CALLCODE`` 关键字)特性进行重用。
+这意味着如果库函数被调用，它的代码在调用合约的上下文中执行，即 ``this`` 指向调用合约，特别是可以访问调用合约的存储。
+因为每个库都是一段独立的代码，所以它仅能访问调用合约明确提供的状态变量（否则它就无法通过名字访问这些变量）。
+因为我们假定库是无状态的，所以如果它们不修改状态（也就是说，如果它们是 ``view`` 或者 ``pure`` 函数），
+库函数仅可以通过直接调用来使用（即不使用 ``DELEGATECALL`` 关键字），
+特别是，除非能规避 Solidity 的类型系统，否则是不可能销毁任何库的。
 
-Libraries can be seen as implicit base contracts of the contracts that use them.
-They will not be explicitly visible in the inheritance hierarchy, but calls
-to library functions look just like calls to functions of explicit base
-contracts (``L.f()`` if ``L`` is the name of the library). Furthermore,
-``internal`` functions of libraries are visible in all contracts, just as
-if the library were a base contract. Of course, calls to internal functions
-use the internal calling convention, which means that all internal types
-can be passed and memory types will be passed by reference and not copied.
-To realize this in the EVM, code of internal library functions
-and all functions called from therein will at compile time be pulled into the calling
-contract, and a regular ``JUMP`` call will be used instead of a ``DELEGATECALL``.
+库可以看作是使用他们的合约的隐式的基类合约。虽然它们在继承关系中不会显式可见，但调用库函数与调用显式的基类合约十分类似
+（如果 ``L`` 是库的话，可以使用 ``L.f()`` 调用库函数）。此外，就像库是基类合约一样，对所有使用库的合约，库的 ``internal`` 函数都是可见的。
+当然，需要使用内部调用约定来调用内部函数，这意味着所有内部类型，内存类型都是通过引用而不是复制来传递。
+为了在 EVM 中实现这些，内部库函数的代码和从其中调用的所有函数都在编译阶段被拉取到调用合约中，然后使用一个 ``JUMP`` 调用来代替 ``DELEGATECALL``。
+
 
 .. index:: using for, set
 
-The following example illustrates how to use libraries (but
-be sure to check out :ref:`using for <using-for>` for a
-more advanced example to implement a set).
+下面的示例说明如何使用库（但也请务必看看 :ref:`using for <using-for>` 有一个实现 set 更好的例子）。
 
 ::
 
     pragma solidity ^0.4.16;
 
     library Set {
-      // We define a new struct datatype that will be used to
-      // hold its data in the calling contract.
+      // 我们定义了一个新的结构体数据类型，用于在调用合约中保存数据。
       struct Data { mapping(uint => bool) flags; }
 
-      // Note that the first parameter is of type "storage
-      // reference" and thus only its storage address and not
-      // its contents is passed as part of the call.  This is a
-      // special feature of library functions.  It is idiomatic
-      // to call the first parameter `self`, if the function can
-      // be seen as a method of that object.
+      // 注意第一个参数是“storage reference”类型，因此在调用中参数传递的只是它的存储地址而不是内容。
+      // 这是库函数的一个特性。如果该函数可以被视为对象的方法，则习惯称第一个参数为 `self`。
       function insert(Data storage self, uint value)
           public
           returns (bool)
       {
           if (self.flags[value])
-              return false; // already there
+              return false; // 已经存在
           self.flags[value] = true;
           return true;
       }
@@ -1037,7 +987,7 @@ more advanced example to implement a set).
           returns (bool)
       {
           if (!self.flags[value])
-              return false; // not there
+              return false; // 不存在
           self.flags[value] = false;
           return true;
       }
@@ -1055,31 +1005,22 @@ more advanced example to implement a set).
         Set.Data knownValues;
 
         function register(uint value) public {
-            // The library functions can be called without a
-            // specific instance of the library, since the
-            // "instance" will be the current contract.
+            // 不需要库的特定实例就可以调用库函数，
+            // 因为当前合约就是“instance”。
             require(Set.insert(knownValues, value));
         }
-        // In this contract, we can also directly access knownValues.flags, if we want.
+        // 如果我们愿意，我们也可以在这个合约中直接访问 knownValues.flags。
     }
 
-Of course, you do not have to follow this way to use
-libraries: they can also be used without defining struct
-data types. Functions also work without any storage
-reference parameters, and they can have multiple storage reference
-parameters and in any position.
+当然，你不必按照这种方式去使用库：它们也可以在不定义结构数据类型的情况下使用。
+函数也不需要任何存储引用参数，库可以出现在任何位置并且可以有多个存储引用参数。
 
-The calls to ``Set.contains``, ``Set.insert`` and ``Set.remove``
-are all compiled as calls (``DELEGATECALL``) to an external
-contract/library. If you use libraries, take care that an
-actual external function call is performed.
-``msg.sender``, ``msg.value`` and ``this`` will retain their values
-in this call, though (prior to Homestead, because of the use of ``CALLCODE``, ``msg.sender`` and
-``msg.value`` changed, though).
+调用 ``Set.contains``，``Set.insert`` 和 ``Set.remove`` 都被编译为外部调用（ ``DELEGATECALL`` ）。
+如果使用库，请注意实际执行的是外部函数调用。
+``msg.sender``， ``msg.value`` 和 ``this`` 在调用中将保留它们的值，
+（在 Homestead 之前，因为使用了 ``CALLCODE``，改变了 ``msg.sender`` 和 ``msg.value``)。
 
-The following example shows how to use memory types and
-internal functions in libraries in order to implement
-custom types without the overhead of external function calls:
+以下示例展示了如何在库中使用内存类型和内部函数来实现自定义类型，而无需支付外部函数调用的开销：
 
 ::
 
@@ -1108,7 +1049,7 @@ custom types without the overhead of external function calls:
                     carry = 0;
             }
             if (carry > 0) {
-                // too bad, we have to add a limb
+                // 太差了，我们需要增加一个 limb
                 uint[] memory newLimbs = new uint[](r.limbs.length + 1);
                 for (i = 0; i < r.limbs.length; ++i)
                     newLimbs[i] = r.limbs[i];
@@ -1147,15 +1088,20 @@ will contain placeholders of the form ``__Set______`` (where
 manually by replacing all those 40 symbols by the hex
 encoding of the address of the library contract.
 
-Restrictions for libraries in comparison to contracts:
+由于编译器无法知道库的部署位置，我们需要通过链接器将这些地址填入最终的字节码中
+（请参阅 :ref:`commandline-compiler` 以了解如何使用命令行编译器来链接字节码）。
+如果这些地址没有作为参数传递给编译器，编译后的十六进制代码将包含 ``__Set______`` 形式的占位符（其中 ``Set`` 是库的名称）。
+可以手动填写地址来将那 40 个字符替换为库合约地址的十六进制编码。
 
-- No state variables
-- Cannot inherit nor be inherited
-- Cannot receive Ether
+与合约相比，库的限制：
 
-(These might be lifted at a later point.)
+- 没有状态变量
+- 不能够继承或被继承
+- 不能接收以太币
 
-Call Protection For Libraries
+（将来有可能会解除这些限制）
+
+库的调用保护
 =============================
 
 As mentioned in the introduction, if a library's code is executed
@@ -1179,6 +1125,16 @@ constant to be pushed onto the stack and the dispatcher
 code compares the current address against this constant
 for any non-view and non-pure function.
 
+如果库的代码是通过 ``CALL`` 来执行，而不是 ``DELEGATECALL`` 或者 ``CALLCODE`` 那么执行的结果会被回退，
+除非是对 ``view`` 或者 ``pure`` 函数的调用。
+
+EVM 没有为合约提供检测是否使用 ``CALL`` 的直接方式，但是合约可以使用 ``ADDRESS`` 操作码找出正在运行的“位置”。
+生成的代码通过比较这个地址和构造时的地址来确定调用模式。
+
+更具体地说，库的运行时代码总是从一个 push 指令开始，它在编译时是 20 字节的零。当部署代码运行时，这个常数
+被内存中的当前地址替换，修改后的代码存储在合约中。在运行时，这导致部署时地址是第一个被 push 到堆栈上的常数，
+对于任何 non-view 和 non-pure 函数，调度器代码都将对比当前地址与这个常数是否一致。
+
 .. index:: ! using for, library
 
 .. _using-for:
@@ -1187,33 +1143,22 @@ for any non-view and non-pure function.
 Using For
 *********
 
-The directive ``using A for B;`` can be used to attach library
-functions (from the library ``A``) to any type (``B``).
-These functions will receive the object they are called on
-as their first parameter (like the ``self`` variable in
-Python).
+指令 ``using A for B;`` 可用于附加库函数（从库 ``A``）到任何类型（``B``）。
+这些函数将接收到调用它们的对象作为它们的第一个参数（像 Python 的 ``self`` 变量）。
 
-The effect of ``using A for *;`` is that the functions from
-the library ``A`` are attached to any type.
+``using A for *;`` 的效果是，库 ``A`` 中的函数被附加在任意的类型上。
 
-In both situations, all functions, even those where the
-type of the first parameter does not match the type of
-the object, are attached. The type is checked at the
-point the function is called and function overload
-resolution is performed.
+在这两种情况下，所有函数都会被附加一个参数，即使它们的第一个参数类型与对象的类型不匹配。
+函数调用和重载解析时才会做类型检查。
 
-The ``using A for B;`` directive is active for the current
-scope, which is limited to a contract for now but will
-be lifted to the global scope later, so that by including
-a module, its data types including library functions are
-available without having to add further code.
+``using A for B;`` 指令仅在当前作用域有效，目前仅限于在当前合约中，后续可能提升到全局范围。
+通过引入一个模块，不需要再添加代码就可以使用包括库函数在内的数据类型。
 
-Let us rewrite the set example from the
-:ref:`libraries` in this way::
+让我们用这种方式将 :ref:`libraries` 中的 set 例子重写::
 
     pragma solidity ^0.4.16;
 
-    // This is the same code as before, just without comments
+    // 这是和之前一样的代码，只是没有注释。
     library Set {
       struct Data { mapping(uint => bool) flags; }
 
@@ -1222,7 +1167,7 @@ Let us rewrite the set example from the
           returns (bool)
       {
           if (self.flags[value])
-            return false; // already there
+            return false; // 已经存在
           self.flags[value] = true;
           return true;
       }
@@ -1232,7 +1177,7 @@ Let us rewrite the set example from the
           returns (bool)
       {
           if (!self.flags[value])
-              return false; // not there
+              return false; // 不存在
           self.flags[value] = false;
           return true;
       }
@@ -1247,7 +1192,7 @@ Let us rewrite the set example from the
     }
 
     contract C {
-        using Set for Set.Data; // this is the crucial change
+        using Set for Set.Data; // 这里是关键的修改
         Set.Data knownValues;
 
         function register(uint value) public {
@@ -1259,7 +1204,7 @@ Let us rewrite the set example from the
         }
     }
 
-It is also possible to extend elementary types in that way::
+也可以像这样扩展基本类型::
 
     pragma solidity ^0.4.16;
 
@@ -1284,7 +1229,7 @@ It is also possible to extend elementary types in that way::
         }
 
         function replace(uint _old, uint _new) public {
-            // This performs the library function call
+            // 执行库函数调用
             uint index = data.indexOf(_old);
             if (index == uint(-1))
                 data.push(_new);
@@ -1293,7 +1238,5 @@ It is also possible to extend elementary types in that way::
         }
     }
 
-Note that all library calls are actual EVM function calls. This means that
-if you pass memory or value types, a copy will be performed, even of the
-``self`` variable. The only situation where no copy will be performed
-is when storage reference variables are used.
+注意，所有库调用都是实际的 EVM 函数调用。这意味着如果传递内存或值类型，都将产生一个副本，即使是 ``self`` 变量。
+使用存储引用变量是唯一不会发生拷贝的情况。 
