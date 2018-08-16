@@ -110,7 +110,7 @@
 
             // `sender` 是一个引用, 相当于对 `voters[msg.sender].voted` 进行修改
             sender.voted = true;
-            sender.delegate_ = to;
+            sender.delegate = to;
             Voter storage delegate_ = voters[to];
             if (delegate_.voted) {
                 // 若被委托者已经投过票了，直接增加得票数
