@@ -690,7 +690,7 @@ The use in the JavaScript API would be as follows:
 
 当一个合约从多个合约继承时，在区块链上只有一个合约被创建，所有基类合约的代码被复制到创建的合约中。
 
-总的继承系统与 `Python's <https://docs.python.org/3/tutorial/classes.html#inheritance>`_ ，非常
+总的继承系统与 `Python的继承系统 <https://docs.python.org/3/tutorial/classes.html#inheritance>`_ ，非常
 相似，特别是多重继承方面。
 
 下面的例子进行了详细的说明。
@@ -704,8 +704,8 @@ The use in the JavaScript API would be as follows:
         address owner;
     }
 
-    // 使用 `is` 从另一个合约派生。派生合约可以访问所有非私有成员，包括内部函数和状态变量，
-    // 但无法通过 `this` 来外部访问。
+    // 使用 is 从另一个合约派生。派生合约可以访问所有非私有成员，包括内部函数和状态变量，
+    // 但无法通过 this 来外部访问。
     contract mortal is owned {
         function kill() {
             if (msg.sender == owner) selfdestruct(owner);
@@ -724,8 +724,8 @@ The use in the JavaScript API would be as follows:
         function unregister() public;
      }
 
-    // 可以多重继承。请注意，`owned` 也是 `mortal` 的基类，
-    // 但只有一个 `owned` 实例（就像 C++ 中的虚拟继承）。
+    // 可以多重继承。请注意，owned 也是 mortal 的基类，
+    // 但只有一个 owned 实例（就像 C++ 中的虚拟继承）。
     contract named is owned, mortal {
         function named(bytes32 name) {
             Config config = Config(0xD5f9D8D94886E70b06E474c3fB14Fd43E2f23970);
@@ -747,7 +747,7 @@ The use in the JavaScript API would be as follows:
 
     // 如果构造函数接受参数，
     // 则需要在声明（合约的构造函数）时提供，
-    // 或在派生合约的构造函数位置以 |modifier| 调用风格提供（见下文）。
+    // 或在派生合约的构造函数位置以修饰器调用风格提供（见下文）。
     contract PriceFeed is owned, mortal, named("GoldFeed") {
        function updateInfo(uint newInfo) public {
           if (msg.sender == owner) info = newInfo;
@@ -866,8 +866,8 @@ Solidity 借鉴了 Python 的方式并且使用“ `C3 线性化 <https://en.wik
     contract A is X {}
     contract C is A, X {}
 
-代码编译出错的原因是 ``C`` 要求 ``X`` 重写 ``A``（因为定义的顺序是 ``A, X``），
-但是 ``A`` 本身要求重写``X``，无法解决这种冲突。
+代码编译出错的原因是 ``C`` 要求 ``X`` 重写 ``A`` （因为定义的顺序是 ``A, X`` ），
+但是 ``A`` 本身要求重写 ``X``，无法解决这种冲突。
 
 可以通过一个简单的规则来记忆：
 以从“最接近的基类”（most base-like）到“最远的继承”（most derived）的顺序来指定所有的基类。
@@ -972,7 +972,7 @@ Solidity 借鉴了 Python 的方式并且使用“ `C3 线性化 <https://en.wik
       struct Data { mapping(uint => bool) flags; }
 
       // 注意第一个参数是“storage reference”类型，因此在调用中参数传递的只是它的存储地址而不是内容。
-      // 这是库函数的一个特性。如果该函数可以被视为对象的方法，则习惯称第一个参数为 `self`。
+      // 这是库函数的一个特性。如果该函数可以被视为对象的方法，则习惯称第一个参数为 `self` 。
       function insert(Data storage self, uint value)
           public
           returns (bool)
@@ -1078,17 +1078,6 @@ Solidity 借鉴了 Python 的方式并且使用“ `C3 线性化 <https://en.wik
         }
     }
 
-As the compiler cannot know where the library will be
-deployed at, these addresses have to be filled into the
-final bytecode by a linker
-(see :ref:`commandline-compiler` for how to use the
-commandline compiler for linking). If the addresses are not
-given as arguments to the compiler, the compiled hex code
-will contain placeholders of the form ``__Set______`` (where
-``Set`` is the name of the library). The address can be filled
-manually by replacing all those 40 symbols by the hex
-encoding of the address of the library contract.
-
 由于编译器无法知道库的部署位置，我们需要通过链接器将这些地址填入最终的字节码中
 （请参阅 :ref:`commandline-compiler` 以了解如何使用命令行编译器来链接字节码）。
 如果这些地址没有作为参数传递给编译器，编译后的十六进制代码将包含 ``__Set______`` 形式的占位符（其中 ``Set`` 是库的名称）。
@@ -1104,27 +1093,6 @@ encoding of the address of the library contract.
 
 库的调用保护
 =============================
-
-As mentioned in the introduction, if a library's code is executed
-using a ``CALL`` instead of a ``DELEGATECALL`` or ``CALLCODE``,
-it will revert unless a ``view`` or ``pure`` function is called.
-
-The EVM does not provide a direct way for a contract to detect
-whether it was called using ``CALL`` or not, but a contract
-can use the ``ADDRESS`` opcode to find out "where" it is
-currently running. The generated code compares this address
-to the address used at construction time to determine the mode
-of calling.
-
-More specifically, the runtime code of a library always starts
-with a push instruction, which is a zero of 20 bytes at
-compilation time. When the deploy code runs, this constant
-is replaced in memory by the current address and this
-modified code is stored in the contract. At runtime,
-this causes the deploy time address to be the first
-constant to be pushed onto the stack and the dispatcher
-code compares the current address against this constant
-for any non-view and non-pure function.
 
 如果库的代码是通过 ``CALL`` 来执行，而不是 ``DELEGATECALL`` 或者 ``CALLCODE`` 那么执行的结果会被回退，
 除非是对 ``view`` 或者 ``pure`` 函数的调用。
@@ -1201,6 +1169,8 @@ Using For
             // corresponding member functions.
             // The following function call is identical to
             // `Set.insert(knownValues, value)`
+            // 这里， Set.Data 类型的所有变量都有与之相对应的成员函数。
+            // 下面的函数调用和 `Set.insert(knownValues, value)` 的效果完全相同。
             require(knownValues.insert(value));
         }
     }
