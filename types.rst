@@ -824,7 +824,7 @@ Solidity 支持通过构造结构体的形式定义新的类型，以下是一�
 
 
 .. note::
-  递归不支持迭代，但可以在此之上实现一个这样的数据结构。
+  映射不支持迭代，但可以在此之上实现一个这样的数据结构。
   例子可以参考 `可迭代的映射 <https://github.com/ethereum/dapp-bin/blob/master/library/iterable_mapping.sol>`_。
 
 .. index:: assignment, ! delete, lvalue
