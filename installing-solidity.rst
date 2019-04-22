@@ -16,8 +16,10 @@ Remix
 
 *我们推荐使用 Remix 来开发简单合约和快速学习 Solidity。*
 
-`Remix <https://remix.ethereum.org/>`_ 可在线使用，而无需安装任何东西。如果你想离线使用，可按 https://github.com/ethereum/browser-solidity/tree/gh-pages 的页面说明下载 zip 文件来使用。
+`Remix <https://remix.ethereum.org/>`_ 可在线使用，而无需安装任何东西。如果你想离线使用，可按 https://github.com/ethereum/remix-live/tree/gh-pages 的页面说明下载 .zip 文件来使用。
 该页面有进一步详细说明如何安装 Solidity 命令行编译器到你计算机上。如果你刚好要处理大型合约，或者需要更多的编译选项，那么你应该选择使用命令行编译器 solc。
+
+译者注：Remix 还有一个 `Remix-ide <https://learnblockchain.cn/2018/06/07/remix-ide/>`_ 本地版本。
 
 .. _solcjs:
 
