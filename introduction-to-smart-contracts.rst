@@ -1,5 +1,5 @@
 ###############################
-智能合约概述
+初识智能合约
 ###############################
 
 .. _simple-smart-contract:
@@ -15,7 +15,7 @@
 
 ::
 
-    pragma solidity ^0.4.0;
+    pragma solidity >=0.4.0 <0.7.0;
 
     contract SimpleStorage {
         uint storedData;
@@ -29,7 +29,7 @@
         }
     }
 
-第一行就是告诉大家源代码使用Solidity版本0.4.0写的，并且使用0.4.0以上版本运行也没问题（最高到0.5.0，但是不包含0.5.0）。这是为了确保合约不会在新的编译器版本中突然行为异常。关键字 ``pragma`` 的含义是，一般来说，pragmas（编译指令）是告知编译器如何处理源代码的指令的（例如， `pragma once <https://en.wikipedia.org/wiki/Pragma_once>`_ ）。
+第一行就是告诉编译器源代码所适用的Solidity版本为>=0.4.0 及 <0.7.0 。这是为了确保合约不会在新的编译器版本中突然行为异常。关键字 ``pragma`` 的含义是，一般来说，pragmas（编译指令）是告知编译器如何处理源代码的指令的（例如， `pragma once <https://en.wikipedia.org/wiki/Pragma_once>`_ ）。
 
 Solidity中合约的含义就是一组代码（它的 *函数* )和数据（它的 *状态* ），它们位于以太坊区块链的一个特定地址上。 代码行 ``uint storedData;`` 声明一个类型为 ``uint`` (256位无符号整数）的状态变量，叫做 ``storedData`` 。 你可以认为它是数据库里的一个位置，可以通过调用管理数据库代码的函数进行查询和变更。对于以太坊来说，上述的合约就是拥有合约（owning contract）。在这种情况下，函数 ``set`` 和 ``get`` 可以用来变更或取出变量的值。
 
@@ -51,7 +51,7 @@ Solidity中合约的含义就是一组代码（它的 *函数* )和数据（它�
 下面的合约实现了一个最简单的加密货币。这里，币确实可以无中生有地产生，但是只有创建合约的人才能做到（实现一个不同的发行计划也不难）。而且，任何人都可以给其他人转币，不需要注册用户名和密码 —— 所需要的只是以太坊密钥对。
 ::
 
-    pragma solidity ^0.4.21;
+    pragma solidity  >=0.5.0 <0.7.0;
 
     contract Coin {
         // 关键字“public”让这些变量可以从外部读取
@@ -62,17 +62,18 @@ Solidity中合约的含义就是一组代码（它的 *函数* )和数据（它�
         event Sent(address from, address to, uint amount);
 
         // 这是构造函数，只有当合约创建时运行
-        function Coin() public {
+        constructor() public {
             minter = msg.sender;
         }
 
         function mint(address receiver, uint amount) public {
-            if (msg.sender != minter) return;
+            require(msg.sender == minter);
+            equire(amount < 1e60);
             balances[receiver] += amount;
         }
 
         function send(address receiver, uint amount) public {
-            if (balances[msg.sender] < amount) return;
+            require(amount <= balances[msg.sender], "Insufficient balance.");
             balances[msg.sender] -= amount;
             balances[receiver] += amount;
             emit Sent(msg.sender, receiver, amount);
@@ -81,10 +82,10 @@ Solidity中合约的含义就是一组代码（它的 *函数* )和数据（它�
 
 这个合约引入了一些新的概念，让我们逐一解读。
 
-``address public minter;`` 这一行声明了一个可以被公开访问的 ``address`` 类型的状态变量。 ``address`` 类型是一个160位的值，且不允许任何算数操作。这种类型适合存储合约地址或外部人员的密钥对。关键字 ``public`` 自动生成一个函数，允许你在这个合约之外访问这个状态变量的当前值。如果没有这个关键字，其他的合约没有办法访问这个变量。由编译器生成的函数的代码大致如下所示：
+``address public minter;`` 这一行声明了一个可以被公开访问的 ``address`` 类型的状态变量。 ``address`` 类型是一个160位的值，且不允许任何算数操作。这种类型适合存储合约地址或外部人员的密钥对。关键字 ``public`` 自动生成一个函数，允许你在这个合约之外访问这个状态变量的当前值。如果没有这个关键字，其他的合约没有办法访问这个变量。由编译器生成的函数的代码大致如下所示（暂时忽略 external 和 view）：
 ::
 
-    function minter() returns (address) { return minter; }
+    function minter() external view returns (address) { return minter; }
 
 当然，加一个和上面完全一样的函数是行不通的，因为我们会有同名的一个函数和一个变量，这里，主要是希望你能明白——编译器已经帮你实现了。
 
@@ -95,7 +96,7 @@ Solidity中合约的含义就是一组代码（它的 *函数* )和数据（它�
 Mappings 可以看作是一个 `哈希表 <https://en.wikipedia.org/wiki/Hash_table>`_ 它会执行虚拟初始化，以使所有可能存在的键都映射到一个字节表示为全零的值。 但是，这种类比并不太恰当，因为它既不能获得映射的所有键的列表，也不能获得所有值的列表。 因此，要么记住你添加到mapping中的数据（使用列表或更高级的数据类型会更好），要么在不需要键列表或值列表的上下文中使用它，就如本例。 而由 ``public`` 关键字创建的getter函数 :ref:`getter function<getter-functions>` 则是更复杂一些的情况， 它大致如下所示：
 ::
 
-    function balances(address _account) public view returns (uint) {
+    function balances(address _account) external view returns (uint) {
         return balances[_account];
     }
 
@@ -103,7 +104,7 @@ Mappings 可以看作是一个 `哈希表 <https://en.wikipedia.org/wiki/Hash_ta
 
 .. index:: event
 
-``event Sent(address from, address to, uint amount);`` 这行声明了一个所谓的“事件（event）”，它会在 ``send`` 函数的最后一行被发出。用户界面（当然也包括服务器应用程序）可以监听区块链上正在发送的事件，而不会花费太多成本。一旦它被发出，监听该事件的listener都将收到通知。而所有的事件都包含了 ``from`` ， ``to`` 和 ``amount`` 三个参数，可方便追踪事务。 为了监听这个事件，你可以使用如下代码：
+``event Sent(address from, address to, uint amount);`` 这行声明了一个所谓的“事件（event）”，它会在 ``send`` 函数的最后一行被发出。用户界面（当然也包括服务器应用程序）可以监听区块链上正在发送的事件，而不会花费太多成本。一旦它被发出，监听该事件的listener都将收到通知。而所有的事件都包含了 ``from`` ， ``to`` 和 ``amount`` 三个参数，可方便追踪交易。 为了监听这个事件，你可以使用如下JavaScript代码（假设 Coin 是已经通过 `web3.js 创建好的合约对象 <https://learnblockchain.cn/docs/web3js-0.2x/web3.eth.html#contract>`_ ）：
 ::
 
     Coin.Sent().watch({}, '', function(error, result) {
@@ -121,8 +122,8 @@ Mappings 可以看作是一个 `哈希表 <https://en.wikipedia.org/wiki/Hash_ta
 
 .. index:: coin
 
-特殊函数 ``Coin`` 是在创建合约期间运行的构造函数，不能在事后调用。
-它永久存储创建合约的人的地址: ``msg`` (以及 ``tx`` 和 ``block`` ) 是一个神奇的全局变量，其中包含一些允许访问区块链的属性。 ``msg.sender`` 始终是当前（外部）函数调用的来源地址。
+特殊函数 ``constructor`` 是在创建合约期间运行的构造函数，不能在事后调用。
+它永久存储创建合约的人的地址: ``msg`` (以及 ``tx`` 和 ``block`` ) 是一个特殊的全局变量，其中包含一些允许访问区块链的属性。 ``msg.sender`` 始终是当前（外部）函数调用的来源地址。
 
 最后，真正被用户或其他合约所调用的，以完成本合约功能的方法是 ``mint`` 和 ``send``。
 如果 ``mint`` 被合约创建者外的其他人调用则什么也不会发生。 另一方面， ``send`` 函数可被任何人用于向他人发送币 (当然，前提是发送者拥有这些币)。记住，如果你使用合约发送币给一个地址，当你在区块链浏览器上查看该地址时是看不到任何相关信息的。因为，实际上你发送币和更改余额的信息仅仅存储在特定合约的数据存储器中。通过使用事件，你可以非常简单地为你的新币创建一个“区块链浏览器”来追踪交易和余额。
@@ -274,22 +275,22 @@ EVM的指令集量应尽量少，以最大限度地避免可能导致共识问�
 
 .. index:: contract creation
 
-创建
+合约创建
 ======
 
 合约甚至可以通过一个特殊的指令来创建其他合约（不是简单的调用零地址）。创建合约的调用 **create calls** 和普通消息调用的唯一区别在于，负载会被执行，执行的结果被存储为合约代码，调用者/创建者在栈上得到新合约的地址。
 
 .. index:: selfdestruct
 
-自毁
+失效和自毁
 =============
 
-合约代码从区块链上移除的唯一方式是合约在合约地址上的执行自毁操作 ``selfdestruct`` 。合约账户上剩余的以太币会发送给指定的目标，然后其存储和代码从状态中被移除。
+合约代码从区块链上移除的唯一方式是合约在合约地址上的执行自毁操作 ``selfdestruct`` 。合约账户上剩余的以太币会发送给指定的目标，然后其存储和代码从状态中被移除。移除一个合约听上去不错，但其实有潜在的危险，如果有人发送以太币到移除的合约，这些以太币将永远提丢失。
 
-.. warning:: 尽管一个合约的代码中没有显式地调用 ``selfdestruct`` ，它仍然有可能通过 ``delegatecall`` 或 ``callcode`` 执行自毁操作。
+.. note:: 尽管一个合约的代码中没有显式地调用 ``selfdestruct`` ，它仍然有可能通过 ``delegatecall`` 或 ``callcode`` 执行自毁操作。
+
+如果要使合同失效，则应通过更改内部状态来禁用合约，这样可以在使用函数无法执行从而进行 revert，从而达到返还以太的目的。
 
 .. note:: 旧合约的删减可能会，也可能不会被以太坊的各种客户端程序实现。另外，归档节点可选择无限期保留合约存储和代码。
-
-
 
 .. note:: 目前， **外部账户** 不能从状态中移除。
