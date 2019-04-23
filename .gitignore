@@ -2,3 +2,4 @@
 _build/
 utils/SolidityLexer.pyc
 utils/__pycache__
+.vscode/

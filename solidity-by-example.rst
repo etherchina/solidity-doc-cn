@@ -7,11 +7,11 @@
 
 .. _voting:
 
-******
-投票
-******
+********************
+投票合约
+********************
 
-以下的合约相当复杂，但展示了很多Solidity的功能。它实现了一个投票合约。
+以下的合约有一些复杂，但展示了很多Solidity的语言特性。它实现了一个投票合约。
 当然，电子投票的主要问题是如何将投票权分配给正确的人员以及如何防止被操纵。
 我们不会在这里解决所有的问题，但至少我们会展示如何进行委托投票，同时，计票又是 **自动和完全透明的** 。
 
@@ -25,7 +25,7 @@
 
 ::
 
-    pragma solidity ^0.4.22;
+    pragma solidity >=0.4.22 <0.7.0;
 
     /// @title 委托投票
     contract Ballot {
@@ -53,7 +53,7 @@
         Proposal[] public proposals;
 
         /// 为 `proposalNames` 中的每个提案，创建一个新的（投票）表决
-        constructor(bytes32[] proposalNames) public {
+        constructor(bytes32[] memory proposalNames) public {
             chairperson = msg.sender;
             voters[chairperson].weight = 1;
             //对于提供的每个提案名称，
@@ -163,7 +163,7 @@
 .. index:: auction;blind, auction;open, blind auction, open auction
 
 ***********************
-秘密竞价（盲拍）
+秘密竞价（盲拍）合约
 ***********************
 
 在本节中，我们将展示如何轻松地在以太坊上创建一个秘密竞价的合约。
@@ -182,11 +182,11 @@
 
 ::
 
-    pragma solidity ^0.4.22;
+    pragma solidity >=0.4.22 <0.7.0;
 
     contract SimpleAuction {
         // 拍卖的参数。
-        address public beneficiary;
+        address payable public beneficiary;
         // 时间是unix的绝对时间戳（自1970-01-01以来的秒数）
         // 或以秒为单位的时间段。
         uint public auctionEnd;
@@ -212,7 +212,7 @@
         /// 创建一个简单的拍卖，拍卖时间为 `_biddingTime` 秒。
         constructor(
             uint _biddingTime,
-            address _beneficiary
+            address payable _beneficiary
         ) public {
             beneficiary = _beneficiary;
             auctionEnd = now + _biddingTime;
@@ -293,7 +293,7 @@
 秘密竞拍（盲拍）
 =====================
 
-之前的公开拍卖接下来将被扩展为一个秘密竞拍。
+上面的公开拍卖接下来将被扩展为一个秘密竞拍。
 秘密竞拍的好处是在投标结束前不会有时间压力。
 在一个透明的计算平台上进行秘密竞拍听起来像是自相矛盾，但密码学可以实现它。
 
@@ -312,7 +312,7 @@
 
 ::
 
-    pragma solidity >0.4.23 <0.5.0;
+    pragma solidity >0.4.23 <0.7.0;
 
     contract BlindAuction {
         struct Bid {
@@ -320,7 +320,7 @@
             uint deposit;
         }
 
-        address public beneficiary;
+        address payable public beneficiary;
         uint public biddingEnd;
         uint public revealEnd;
         bool public ended;
@@ -344,7 +344,7 @@
         constructor(
             uint _biddingTime,
             uint _revealTime,
-            address _beneficiary
+            address payable _beneficiary
         ) public {
             beneficiary = _beneficiary;
             biddingEnd = now + _biddingTime;
@@ -450,17 +450,17 @@
 .. index:: purchase, remote purchase, escrow
 
 ********************
-安全的远程购买
+安全的远程购买合约
 ********************
 
 ::
 
-    pragma solidity ^0.4.22;
+    pragma solidity >=0.4.22 <0.7.0;
 
     contract Purchase {
         uint public value;
-        address public seller;
-        address public buyer;
+        address payable public seller;
+        address payable public buyer;
         enum State { Created, Locked, Inactive }
         State public state;
 
@@ -549,8 +549,11 @@
         }
     }
 
-********************
-微支付通道
-********************
 
-To be written.
+.. include:: examples/micropayment.rst
+
+.. include:: examples/modular.rst
+
+
+
+

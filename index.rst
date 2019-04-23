@@ -1,4 +1,4 @@
-Solidity 中文文档
+Solidity 0.5.7 翻译
 ================================
 
 .. image:: logo.svg
@@ -7,7 +7,7 @@ Solidity 中文文档
     :align: center
 
 
-译者说明：本文档根据当前最新[官方版本v0.5.7](https://solidity.readthedocs.io/) 进行翻译，本翻译最初 `HiBlock <http://hiblock.one/>`_ 社区发起，后经过`深入浅出区块链社区 <https://learnblockchain.cn/>`_ 社区成员根据最新版本补充翻译。
+译者说明：本文档根据当前`最新官方版本v0.5.7 <https://solidity.readthedocs.io/>`_ 进行翻译，本翻译最初 `HiBlock <http://hiblock.one/>`_ 社区发起，后经过`深入浅出区块链社区 <https://learnblockchain.cn/>`_ 社区成员根据最新版本补充翻译。
 
 本中文文档大部分情况下，英中直译，但有时为了更好的理解也会使用意译，如需转载请联系Tiny熊（微信：xlbxiong）.
 
