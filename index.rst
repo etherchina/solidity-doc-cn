@@ -7,7 +7,7 @@ Solidity 0.5.7 翻译
     :align: center
 
 
-译者说明：本文档根据当前`最新官方版本v0.5.7 <https://solidity.readthedocs.io/>`_ 进行翻译，本翻译最初 `HiBlock <http://hiblock.one/>`_ 社区发起，后经过`深入浅出区块链社区 <https://learnblockchain.cn/>`_ 社区成员根据最新版本补充翻译。
+译者说明：本文档根据当前 `最新官方版本v0.5.7 <https://solidity.readthedocs.io/>`_ 进行翻译，本翻译最初 `HiBlock <http://hiblock.one/>`_ 社区发起，后经过 `深入浅出区块链社区 <https://learnblockchain.cn/>`_ 社区成员根据最新版本补充翻译。
 
 本中文文档大部分情况下，英中直译，但有时为了更好的理解也会使用意译，如需转载请联系Tiny熊（微信：xlbxiong）.
 
@@ -32,7 +32,7 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 .. warning::
     因为软件是人编写的，就会有 bug，所以，创建智能合约也应该遵循软件开发领域熟知的最佳实践。这些实践包括代码审查、测试、审计和正确性证明。也请注意，有时候用户在代码方面比软件的作者更谙熟。最后，区块链本身有些东西需要留意，请参考 :ref:`security_considerations`。
 
-如果还有问题，你可以尝试搜索或在 `Ethereum Stackexchange <https://ethereum.stackexchange.com/>`_ 上提问，或者到我们的`gitter 频道 <https://gitter.im/ethereum/solidity/>`_ 来。随时欢迎改善 Solidity 或本文档的想法！
+如果还有问题，你可以尝试搜索或在 `Ethereum Stackexchange <https://ethereum.stackexchange.com/>`_ 上提问，或者到我们的 `gitter 频道 <https://gitter.im/ethereum/solidity/>`_ 来。随时欢迎改善 Solidity 或本文档的想法！
 
 翻译版本
 ----------------------
