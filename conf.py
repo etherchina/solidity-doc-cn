@@ -22,8 +22,6 @@ import re
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
 def setup(sphinx):
-    sphinx.add_javascript('z_stat.js')
-
     sys.path.insert(0, os.path.abspath('./utils'))
     from SolidityLexer import SolidityLexer
     sphinx.add_lexer('Solidity', SolidityLexer())
