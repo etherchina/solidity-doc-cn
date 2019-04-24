@@ -1,7 +1,7 @@
 .. include:: glossaries.rst
 
 **************************************
-单元和全局变量
+单位和全局变量
 **************************************
 
 .. index:: wei, finney, szabo, ether
@@ -111,7 +111,7 @@ ABI 编码函数
 ``revert(string reason)``:
     终止运行并撤销状态更改，可以同时提供一个解释性的字符串。
 
-.. index:: keccak256, ripemd160, sha256, ecrecover, addmod, mulmod, cryptography,
+.. index:: keccak256, ripemd160, sha256, ecrecover, addmod, mulmod, cryptography
 
 数学和密码学函数
 ----------------------------------------
