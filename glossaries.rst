@@ -57,7 +57,7 @@
 
 .. |pragma| raw:: html
 
-  <ruby>杂注<rp>（</rp><rt>pragma</rt><rp>）</rp></ruby>
+  <ruby>标识<rp>（</rp><rt>pragma</rt><rp>）</rp></ruby>
 
 .. |storage| raw:: html
 

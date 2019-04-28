@@ -1,10 +1,14 @@
-.. include:: glossaries.rst
+.. include:: ../glossaries.rst
 
 .. index:: purchase, remote purchase, escrow
 
 ********************
 安全的远程购买合约
 ********************
+
+译者注，在官方文档中，这个合约没有任何的说明，这个合约译者认为作者是想展示合约 |modifier| 的用法。
+
+现在大家只需了解下 |modifier| 的作用，后面的文档有 :ref:`更多关于函数修饰器的使用 <modifiers>`。
 
 ::
 

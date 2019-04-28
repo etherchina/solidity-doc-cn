@@ -1,13 +1,13 @@
 .. index:: contract;modular, modular contract
 
-*****************
-模块化合约
-*****************
+*********************
+库合约使用
+*********************
 
-A modular approach to building your contracts helps you prevent overflow risks
-and unexpected tokens. In the example below, the contract uses the ``move`` method
-of the ``Balances`` :ref:`library <libraries>` to check that balances sent between
-addresses match what you expect.
+通过在合约中引入模块化方法（），可以帮助我们减少溢出等风险。
+在下面的合约例子中，引入 ``Balances`` :ref:`库 <libraries>` 合约使用了 ``move`` 方法， 去检查地址余额是否符合预期。
+
+现在大家只需了解下库的作用，后面的文档有 :ref:`更多关于库的使用 <libraries>`。
 
 ::
 
@@ -24,7 +24,7 @@ addresses match what you expect.
 
     contract Token {
         mapping(address => uint256) balances;
-        using Balances for *;
+        using Balances for *;   // 引入库
         mapping(address => mapping (address => uint256)) allowed;
 
         event Transfer(address from, address to, uint amount);
@@ -43,7 +43,7 @@ addresses match what you expect.
         function transferFrom(address from, address to, uint amount) public returns (bool success) {
             require(allowed[from][msg.sender] >= amount);
             allowed[from][msg.sender] -= amount;
-            balances.move(from, to, amount);
+            balances.move(from, to, amount);   // 使用了库方法
             emit Transfer(from, to, amount);
             return true;
         }

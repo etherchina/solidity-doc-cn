@@ -4,35 +4,88 @@
 Solidity 源文件结构
 ********************************
 
-源文件中可以包含任意多个合约定义、导入指令和杂注指令。
+ 
+
+源文件中可以包含任意多个 :ref:`合约定义 <contract_structure>` 、:ref:`导入源文件指令 <import>` 和 :ref:`版本标识 <pragma>` 指令。
+
+
+.. index:: ! pragma
+
+.. _pragma:
+
+Pragmas
+=========
+
+关键字 ``pragma`` 版本标识指令，用来启用某些编译器检查， 版本 |pragma| 指令通常只对本文件有效，所以我们需要把这个版本 |pragma| 添加到项目中所有的源文件。
+如果使用了 :ref:`import 导入<import>` 其他的文件, |pragma| 并不会从被导入的文件，加入到导入的文件中。
 
 .. index:: ! pragma, version
 
 .. _version_pragma:
 
-版本杂注
+版本标识
 ============================
 
-为了避免未来被可能引入不兼容变更的编译器所编译，源文件可以（也应该）被所谓的版本 |pragma| 所注解。
-我们力图把这类变更做到尽可能小，特别是，我们需要以一种当修改语义时必须同步修改语法的方式引入变更，当然这有时候也难以做到。
-因此，至少对含重大变更的版本，通读变更日志永远是好办法。
-这些版本的版本号始终是 ``0.x.0`` 或者 ``x.0.0`` 的形式。
+为了避免未来被可能引入不兼容更新的编译器所编译，源文件可以（也应该）使用版本 |pragma| 所注解。
+我们力图把这类不兼容变更做到尽可能小，但是，Solidity 本身就处在快速的发展之中，所以我们很难保证不引入修改语法的变更。
+因此对含重大变更的版本，通读变更日志永远是好办法，变更日志通常会有版本号表明更新点。
 
-版本杂注使用如下::
+版本号的形式通常是 ``0.x.0`` 或者 ``x.0.0``。
 
-  pragma solidity ^0.4.0;
+版本标识使用如下::
 
-这样，源文件将既不允许低于 0.4.0 版本的编译器编译，
-也不允许高于（包含） ``0.5.0`` 版本的编译器编译（第二个条件因使用 ``^`` 被添加）。
-这种做法的考虑是，编译器在 0.5.0 版本之前不会有重大变更，所以可确保源代码始终按预期被编译。
+  pragma solidity ^0.5.2;
+
+这样，源文件将既不允许低于 0.5.2 版本的编译器编译，
+也不允许高于（包含） ``0.6.0`` 版本的编译器编译（第二个条件因使用 ``^`` 被添加）。
+这种做法的考虑是，编译器在 0.6.0 版本之前不会有重大变更，所以可确保源代码始终按预期被编译。
 上面例子中不固定编译器的具体版本号，因此编译器的补丁版也可以使用。
 
 可以使用更复杂的规则来指定编译器的版本，表达式遵循 `npm <https://docs.npmjs.com/misc/semver>`_ 版本语义。
 
 .. note::
-  Pragma 是 pragmatic information 的简称，微软 Visual C++ `文档 <https://msdn.microsoft.com/zh-cn/library/d9x1s805.aspx>`_ 中译为杂注。
+  Pragma 是 pragmatic information 的简称，微软 Visual C++ `文档 <https://msdn.microsoft.com/zh-cn/library/d9x1s805.aspx>`_ 中译为标识。
   Solidity 中沿用 C ，C++ 等中的编译指令概念，用于告知编译器 **如何** 编译。
   ——译者注
+
+.. note::
+  使用版本标准不会改变编译器的版本，它不会启用或关闭任何编译器的功能。
+  他仅仅是告知编译器去检查版本是否匹配， 如果不匹配，编译器就会提示一个错误。
+
+.. index:: ! pragma, experimental
+
+.. _experimental_pragma:
+
+标注实验性功能
+-------------------
+
+第2个标注是用来标注实验性阶段的功能，它可以用来启用一些新的编译器功能或语法特性。
+当前支持下面的一些实验性标注:
+
+
+ABIEncoderV2
+~~~~~~~~~~~~~~~~
+
+新的 ABI 编码器可以用来编码和解码嵌套的数组和结构体，当然这部分代码还在优化之中，他没有像之前 ABI 编码器 那样经过严格的测试，我们可以使用下面的语法来启用它 ``pragma experimental ABIEncoderV2;`` 。
+
+.. _smt_checker:
+
+SMTChecker
+~~~~~~~~~~~~~~
+
+当我们使用自己编译的 Solidity 编译器的时候，这个模块可以启用。
+
+The :ref:`build instructions<smt_solvers_build>` explain how to activate this option.
+It is activated for the Ubuntu PPA releases in most versions,
+but not for solc-js, the Docker images, Windows binaries or the
+statically-built Linux binaries.
+
+If you use
+``pragma experimental SMTChecker;``, then you get additional
+safety warnings which are obtained by querying an SMT solver.
+The component does not yet support all features of the Solidity language
+and likely outputs many warnings. In case it reports unsupported
+features, the analysis may not be fully sound.
 
 .. index:: source file, ! import
 

@@ -2,7 +2,8 @@
 深入理解Solidity
 #################
 
-本章将为你提供所有关于Solidity的、你需要知道的知识。
+本章将深入介绍 Solidity 语言特性的所有细节。
+
 如果你发现缺少了什么，请在 `Gitter <https://gitter.im/ethereum/solidity>`_ 上联系我们；
 或者在 `英文 Github <https://github.com/ethereum/solidity/pulls>`_ `中文版翻译地址GitHub <https://github.com/lbc-team/solidity-doc-cn>`_ 上创建 pull request 。
 
