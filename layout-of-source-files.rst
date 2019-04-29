@@ -251,7 +251,7 @@ Solidity 支持的导入语句来模块化代码，其语法跟 JavaScript（从
   pragma solidity ^0.4.0;
 
   /** @title 形状计算器。 */
-  contract shapeCalculator {
+  contract tinyCalculator {
       /** @dev 求矩形表明面积与周长。
       * @param w 矩形宽度。
       * @param h 矩形高度。

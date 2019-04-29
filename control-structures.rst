@@ -70,15 +70,6 @@ JavaScript 中的大部分控制结构在 Solidity 中都是可用的，除了 `
 
 
 
-.. _multi-return:
-
-返回多个值
-
--------------------------
-
-当一个函数有多个输出参数时， ``return (v0, v1, ...,vn)`` 写法可以返回多个值。不过元素的个数必须与输出参数的个数相同。
-
-
 .. index:: ! function;call, function;internal, function;external
 
 .. _function-calls:
@@ -86,13 +77,15 @@ JavaScript 中的大部分控制结构在 Solidity 中都是可用的，除了 `
 函数调用
 ==============
 
+.. _internal-function-calls:
+
 内部函数调用
 -----------------------
 
 当前合约中的函数可以直接（“从内部”）调用，也可以递归调用，就像下边这个荒谬的例子一样
 ::
 
-    pragma solidity ^0.4.16;
+    pragma solidity >=0.4.16 <0.7.0;
 
     contract C {
         function g(uint a) public pure returns (uint ret) { return f(); }
@@ -100,7 +93,11 @@ JavaScript 中的大部分控制结构在 Solidity 中都是可用的，除了 `
     }
 
 这些函数调用在 EVM 中被解释为简单的跳转。这样做的效果就是当前内存不会被清除，也就是说，通过内部调用在函数之间传递内存引用是非常有效的。
+Only functions of the same contract can be called internally.
+You should still avoid excessive recursion, as every internal function call
+uses up at least one stack slot and there are at most 1024 slots available.
 
+.. _external-function-calls:
 
 外部函数调用
 -----------------------
@@ -115,7 +112,7 @@ JavaScript 中的大部分控制结构在 Solidity 中都是可用的，除了 `
 当调用其他合约的函数时，随函数调用发送的 Wei 和 gas 的数量可以分别由特定选项 ``.value()`` 和 ``.gas()`` 指定::
 
 
-    pragma solidity ^0.4.0;
+    pragma solidity >=0.4.0 <0.7.0;
 
     contract InfoFeed {
         function info() public payable returns (uint ret) { return 42; }
@@ -153,21 +150,23 @@ JavaScript 中的大部分控制结构在 Solidity 中都是可用的，除了 `
 具名调用和匿名函数参数
 ---------------------------------------------
 
-函数调用参数也可以按照任意顺序由名称给出，如果它们被包含在 ``{}`` 中，
+函数调用参数也可以按照任意顺序由名称给出，如果它们被包含在 ``{ }`` 中，
 如以下示例中所示。参数列表必须按名称与函数声明中的参数列表相符，但可以按任意顺序排列。
 ::
 
-    pragma solidity ^0.4.0;
+    pragma solidity >=0.4.0 <0.7.0;
 
     contract C {
-        function f(uint key, uint value) public {
-            // ...
+        mapping(uint => uint) data;
+
+        function f() public {
+            set({value: 2, key: 3});
         }
 
-        function g() public {
-            // 具名参数
-            f({value: 2, key: 3});
+        function set(uint key, uint value) public {
+            data[key] = value;
         }
+
     }
 
 省略函数参数名称
@@ -176,7 +175,7 @@ JavaScript 中的大部分控制结构在 Solidity 中都是可用的，除了 `
 未使用参数的名称（特别是返回参数）可以省略。这些参数仍然存在于堆栈中，但它们无法访问。
 ::
 
-    pragma solidity ^0.4.16;
+    pragma solidity >=0.4.16 <0.7.0;
 
     contract C {
         // 省略参数名称
@@ -195,7 +194,7 @@ JavaScript 中的大部分控制结构在 Solidity 中都是可用的，除了 `
 使用关键字 ``new`` 可以创建一个新合约。待创建合约的完整代码必须事先知道，因此递归的创建依赖是不可能的。
 ::
 
-    pragma solidity ^0.4.0;
+    pragma solidity >=0.5.0 <0.7.0;
 
     contract D {
         uint x;
@@ -240,7 +239,7 @@ Solidity 内部允许元组 (tuple) 类型，也就是一个在编译时元素�
 
 ::
 
-    pragma solidity >0.4.23 <0.5.0;
+    pragma solidity >0.4.23 <0.7.0;
 
     contract C {
         uint[] data;
@@ -266,10 +265,48 @@ Solidity 内部允许元组 (tuple) 类型，也就是一个在编译时元素�
 .. note::
     直到 0.4.24 版本，给具有更少的元素数的元组赋值都可以可能的，无论是在左边还是右边（比如在最后空出若干元素）。现在，这已经不推荐了，赋值操作的两边应该具有相同个数的组成元素。
 
+It is not possible to mix variable declarations and non-declaration assignments,
+i.e. the following is not valid: ``(x, uint y) = (1, 2);``
+
+.. note::
+    Prior to version 0.5.0 it was possible to assign to tuples of smaller size, either
+    filling up on the left or on the right side (which ever was empty). This is
+    now disallowed, so both sides have to have the same number of components.
+
+.. warning::
+    Be careful when assigning to multiple variables at the same time when
+    reference types are involved, because it could lead to unexpected
+    copying behaviour.
+
 数组和结构体的复杂性
 ------------------------------------
 赋值语义对于像数组和结构体这样的非值类型来说会有些复杂。
 为状态变量 *赋值* 经常会创建一个独立副本。另一方面，对局部变量的赋值只会为基本类型（即 32 字节以内的静态类型）创建独立的副本。如果结构体或数组（包括 ``bytes`` 和 ``string``）被从状态变量分配给局部变量，局部变量将保留对原始状态变量的引用。对局部变量的第二次赋值不会修改状态变量，只会改变引用。赋值给局部变量的成员（或元素）则 *改变* 状态变量。
+
+In the example below the call to ``g(x)`` has no effect on ``x`` because it creates
+an independent copy of the storage value in memory. However, ``h(x)`` successfully modifies ``x``
+because only a reference and not a copy is passed.
+
+::
+
+    pragma solidity >=0.4.16 <0.7.0;
+
+     contract C {
+        uint[20] x;
+
+         function f() public {
+            g(x);
+            h(x);
+        }
+
+         function g(uint[20] memory y) internal pure {
+            y[2] = 3;
+        }
+
+         function h(uint[20] storage y) internal {
+            y[3] = 4;
+        }
+    }
 
 .. index:: ! scoping, declarations, default value
 
@@ -289,7 +326,7 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
 
 ::
 
-    pragma solidity >0.4.24;
+    pragma solidity >=0.5.0 <0.7.0;
     contract C {
         function minimalScoping() pure public {
             {
@@ -306,7 +343,7 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
 
 ::
 
-    pragma solidity >0.4.24;
+    pragma solidity >=0.5.0 <0.7.0;
     contract C {
         function f() pure public returns (uint) {
             uint x = 1;
@@ -325,7 +362,7 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
 
     // 这将无法编译通过
 
-    pragma solidity >0.4.24;
+    pragma solidity >=0.5.0 <0.7.0;
     contract C {
         function f() pure public returns (uint) {
             x = 2;
@@ -334,7 +371,9 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
         }
     }
 
-.. index:: ! exception, ! throw, ! assert, ! require, ! revert
+.. index:: ! exception, ! throw, ! assert, ! require, ! revert, ! errors
+
+.. _assert-and-require:
 
 错误处理：Assert, Require, Revert and Exceptions
 ======================================================
@@ -365,7 +404,7 @@ Solidity 使用状态恢复异常来处理错误。这种异常将撤消对当�
 
 ::
 
-    pragma solidity ^0.4.22;
+    pragma solidity >=0.5.0 <0.7.0;
 
     contract Sharer {
         function sendHalf(address addr) public payable returns (uint balance) {
@@ -412,7 +451,7 @@ Solidity 使用状态恢复异常来处理错误。这种异常将撤消对当�
 
 ::
 
-    pragma solidity ^0.4.22;
+    pragma solidity >=0.5.0 <0.7.0;
 
     contract VendingMachine {
         function buy(uint amount) payable {

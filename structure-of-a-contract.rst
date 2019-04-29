@@ -12,6 +12,10 @@
 :ref:`structure-function-modifiers`、:ref:`structure-events`、 :ref:`structure-struct-types`、
 和 :ref:`structure-enum-types` 的声明，且合约可以从其他合约继承。
 
+还有一些特殊的合约，如： :ref:`库<libraries>` 和 :ref:`接口<interfaces>`.
+
+专门的 :ref:`合约<contracts>` 章节会比本节包含更多的内容，本节用于帮助我们合约包含哪些内容，做一个简单的入门。
+
 .. _structure-state-variables:
 
 状态变量
@@ -21,10 +25,10 @@
 
 ::
 
-    pragma solidity ^0.4.0;
+    pragma solidity >=0.4.0 <0.7.0;
 
-    contract SimpleStorage {
-        uint storedData; // 状态变量
+    contract TinyStorage {
+        uint storedXlbData; // 状态变量
         // ...
     }
 
@@ -39,7 +43,7 @@
 函数是合约中代码的可执行单元。
 ::
 
-    pragma solidity ^0.4.0;
+    pragma solidity >=0.4.0 <0.7.0;
 
     contract SimpleAuction {
         function bid() public payable { // 函数
@@ -49,16 +53,18 @@
 
 :ref:`function-calls` 可发生在合约内部或外部，且函数对其他合约有不同程度的可见性（ :ref:`visibility-and-getters`）。 
 
+:ref:`函数<functions>` 可以接受 :ref:`参数和返回值<function-parameters-return-variables>`。
+
 .. _structure-function-modifiers:
 
 函数修饰器
 ==================
 
-函数修饰器可以用来以声明的方式改良函数语义（参阅合约章节中 :ref:`modifiers`）。 
+函数修饰器可以用来以声明的方式修改函数语义（参阅合约章节中 :ref:`modifiers`）。 
 
 ::
 
-    pragma solidity ^0.4.22;
+    pragma solidity >=0.4.22 <0.7.0;
 
     contract Purchase {
         address public seller;
@@ -84,7 +90,7 @@
 事件是能方便地调用以太坊虚拟机日志功能的接口。
 ::
 
-    pragma solidity ^0.4.21;
+    pragma solidity >=0.4.21 <0.7.0;
     contract SimpleAuction {
         event HighestBidIncreased(address bidder, uint amount); // 事件
 
@@ -104,7 +110,7 @@
 结构是可以将几个变量分组的自定义类型（参阅类型章节中的 :ref:`structs`）。
 ::
 
-    pragma solidity ^0.4.0;
+    pragma solidity >=0.4.0 <0.7.0;
 
     contract Ballot {
         struct Voter { // 结构
@@ -124,8 +130,8 @@
 
 ::
 
-    pragma solidity ^0.4.0;
+    pragma solidity >=0.4.0 <0.7.0;
 
     contract Purchase {
-        enum State { Created, Locked, Inactive } // 枚举
+        enum State { Created, Locked, InValid } // 枚举
     }

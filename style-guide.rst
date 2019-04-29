@@ -907,7 +907,7 @@ added looks like the one below::
 
     /// @author The Solidity Team
     /// @title A simple storage example
-    contract SimpleStorage {
+    contract TinyStorage {
         uint storedData;
 
         /// Store `x`.
