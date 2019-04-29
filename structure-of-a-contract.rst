@@ -1,3 +1,4 @@
+.. include:: glossaries.rst
 .. index:: contract, state variable, function, event, struct, enum, function;modifier
 
 .. _contract_structure:
@@ -7,7 +8,8 @@
 ***********************
 
 
-在 Solidity 中，合约类似于面向对象编程语言中的类。
+在 Solidity 语言中，合约类似于其他面向对象编程语言中的**类**。
+
 每个合约中可以包含 :ref:`structure-state-variables`、 :ref:`structure-functions`、
 :ref:`structure-function-modifiers`、:ref:`structure-events`、 :ref:`structure-struct-types`、
 和 :ref:`structure-enum-types` 的声明，且合约可以从其他合约继承。
@@ -45,8 +47,8 @@
 
     pragma solidity >=0.4.0 <0.7.0;
 
-    contract SimpleAuction {
-        function bid() public payable { // 函数
+    contract TinyAuction {
+        function Mybid() public payable { // 定义函数
             // ...
         }
     }
@@ -57,16 +59,16 @@
 
 .. _structure-function-modifiers:
 
-函数修饰器
+函数 |modifier|
 ==================
 
-函数修饰器可以用来以声明的方式修改函数语义（参阅合约章节中 :ref:`modifiers`）。 
+函数 |modifier| 可以用来以声明的方式修改函数语义（参阅合约章节中 :ref:`函数修改器<modifiers>`）。 
 
 ::
 
     pragma solidity >=0.4.22 <0.7.0;
 
-    contract Purchase {
+    contract MyPurchase {
         address public seller;
 
         modifier onlySeller() { // 修饰器
@@ -77,21 +79,21 @@
             _;
         }
         
-        function abort() public onlySeller { // Modifier usage
+        function abort() public onlySeller { // 修饰器用法
             // ...
         }
     }
 
 .. _structure-events:
 
-事件
+事件 Event
 ======
 
 事件是能方便地调用以太坊虚拟机日志功能的接口。
 ::
 
     pragma solidity >=0.4.21 <0.7.0;
-    contract SimpleAuction {
+    contract TinyAuction {
         event HighestBidIncreased(address bidder, uint amount); // 事件
 
         function bid() public payable {
@@ -100,20 +102,21 @@
         }
     }
 
-有关如何声明事件和如何在 dapp 中使用事件的信息，参阅合约章节中的 :ref:`events`。
+有关如何声明事件和如何在 [DApp 中使用事件](https://learnblockchain.cn/2018/05/09/solidity-event/)的信息，参阅合约章节中的 :ref:`events`。
+
 
 .. _structure-struct-types:
 
-结构类型
+结构体
 =============
 
-结构是可以将几个变量分组的自定义类型（参阅类型章节中的 :ref:`structs`）。
+结构体是可以将几个变量分组的自定义类型（参阅类型章节中的 :ref:`structs`）。
 ::
 
     pragma solidity >=0.4.0 <0.7.0;
 
-    contract Ballot {
-        struct Voter { // 结构
+    contract TinyBallot {
+        struct Voter { // 结构体
             uint weight;
             bool voted;
             address delegate;
@@ -132,6 +135,6 @@
 
     pragma solidity >=0.4.0 <0.7.0;
 
-    contract Purchase {
+    contract Upchain {
         enum State { Created, Locked, InValid } // 枚举
     }
