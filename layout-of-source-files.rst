@@ -73,19 +73,15 @@ ABIEncoderV2
 SMTChecker
 ~~~~~~~~~~~~~~
 
-当我们使用自己编译的 Solidity 编译器的时候，这个模块可以启用。
+当我们使用自己编译的 Solidity 编译器（ 参考 :ref:`build instructions<smt_solvers_build>`） 的时候，这个模块可以启用。
+在 Ubuntu PPA 发布的编译器的版本里 SMT solver 功能是启用的，但是其他版本如：solc-js,  Docker 镜像版本, Windows 二进制版本，静态编译的 Linux 二进制版本 是没有启用的。
 
-The :ref:`build instructions<smt_solvers_build>` explain how to activate this option.
-It is activated for the Ubuntu PPA releases in most versions,
-but not for solc-js, the Docker images, Windows binaries or the
-statically-built Linux binaries.
 
-If you use
-``pragma experimental SMTChecker;``, then you get additional
-safety warnings which are obtained by querying an SMT solver.
-The component does not yet support all features of the Solidity language
-and likely outputs many warnings. In case it reports unsupported
-features, the analysis may not be fully sound.
+.. note::
+  译者注： SMT 全称是：Satisfiability modulo theories，用来“验证程序等价性”。
+
+
+使用 ``pragma experimental SMTChecker;``, 就可以获得 SMT solver 额外的安全检查。但是这个模块目前不支持 Solidity 的全部语法特性，因此有可能输出一些警告信息。
 
 .. index:: source file, ! import
 
@@ -97,8 +93,9 @@ features, the analysis may not be fully sound.
 语法与语义
 --------------------
 
-虽然 Solidity 不知道 "default export" 为何物，
-但是 Solidity 所支持的导入语句，其语法同 JavaScript（从 ES6 起）非常类似。
+
+Solidity 支持的导入语句来模块化代码，其语法跟 JavaScript（从 ES6 起）非常类似。
+尽管 Solidity 不支持 `default export <https://developer.mozilla.org/en-US/docs/web/javascript/reference/statements/export#Description>`_  。
 
 .. note::
   ES6 即 ECMAScript 6.0，ES6是 JavaScript 语言的下一代标准，已经在 2015 年 6 月正式发布。
@@ -109,27 +106,33 @@ features, the analysis may not be fully sound.
 
   import "filename";
 
-此语句将从 “filename” 中导入所有的全局符号到当前全局作用域中（不同于 ES6，Solidity 是向后兼容的）。
+此语句将从 “filename” 中**导入所有的全局符号到当前全局作用域**中（不同于 ES6，Solidity 是向后兼容的）。
 
+这种形式已经不建议使用，因为它会无法预测地污染当前命名空间。
+如果在“filename”中添加新的符号，则会自动添加出现在所有导入 “filename” 的文件中。 更好的方式是明确导入的具体
+符号。
+
+向下面这样，创建了新的 ``symbolName`` 全局符号，他的成员都来自与导入的 ``"filename"`` 文件中的全局符号，如：
 ::
 
   import * as symbolName from "filename";
 
-...创建一个新的全局符号 ``symbolName``，其成员均来自 ``"filename"`` 中全局符号。
-
-::
-
-  import {symbol1 as alias, symbol2} from "filename";
-
-...创建新的全局符号 ``alias`` 和 ``symbol2``，分别从 ``"filename"`` 引用 ``symbol1`` 和 ``symbol2`` 。
-
-另一种语法不属于 ES6，但或许更简便：
+然后所有全局符号都以``symbolName.symbol``格式提供。
+此语法的变体不属于ES6，但可能有用：
 
 ::
 
   import "filename" as symbolName;
 
-这条语句等同于 ``import * as symbolName from "filename";``。
+它等价于 ``import * as symbolName from "filename";``。
+
+
+如果存在命名冲突，则可以在导入时重命名符号。例如，下面的代码创建了新的全局符号 ``alias`` 和 ``symbol2`` ，引用的
+``symbol1`` 和 ``symbol2`` 来自 "filename" 。
+
+::
+
+  import {symbol1 as alias, symbol2} from "filename";
 
 路径
 -----
@@ -139,12 +142,17 @@ features, the analysis may not be fully sound.
 只有路径以当前目录 ``.`` 或父目录 ``..`` 开头时，才能被视为相对路径。
 
 
-用 ``import "./x" as x;`` 语句导入当前源文件同目录下的文件 ``x`` 。
-如果用 ``import "x" as x;`` 代替，可能会引入不同的文件（在全局 ``include directory`` 中）。
+用 ``import "./filename" as symbolName;`` 语句导入当前源文件同目录下的文件 ``filename`` 。
+如果用 ``import "filename" as symbolName;`` 代替，可能会引入不同的（如在全局 ``include directory`` 中）文件。
 
-最终导入哪个文件取决于编译器（见下文）到底是怎样解析路径的。
+最终导入哪个文件取决于编译器（见下文 :ref:`import-compiler`）到底是怎样解析路径的。
 通常，目录层次不必严格映射到本地文件系统，
 它也可以映射到能通过诸如 ipfs，http 或者 git 发现的资源。
+
+.. note::
+    通常使用相对引用 ``import "./filename.sol";`` 并且避免使用 ``..`` ，后面这种方式可以使用全局路径并设置映射，下面会有解释。
+
+.. _import-compiler:
 
 在实际的编译器中使用
 -----------------------
@@ -187,18 +195,26 @@ features, the analysis may not be fully sound.
 
 这样， ``module2`` 中的所有导入都指向旧版本，而 ``module1`` 中的导入则获取新版本。
 
-注意， solc 只允许包含来自特定目录的文件：它们必须位于显式地指定的源文件目录（或子目录）中，或者重映射的目标目录（或子目录）中。
-如果你想直接用绝对路径来包含文件，只需添加重映射 ``=/``。
+
+.. note::
+
+  solc 只允许包含来自特定目录的文件：它们必须位于显式地指定的源文件目录（或子目录）中，或者重映射的目标目录（或子目录）中。
+  如果你想直接用绝对路径来包含文件，只需添加重映射 ``/=/``。
 
 如果有多个重映射指向一个有效文件，那么具有最长公共前缀的重映射会被选用。
 
 **Remix**:
 
 `Remix <https://remix.ethereum.org/>`_ 提供一个为 github 源代码平台的自动重映射，它将通过网络自动获取文件：
-比如，你可以使用 ``import "github.com/ethereum/dapp-bin/library/iterable_mapping.sol" as it_mapping;`` 导入一个 map 迭代器。
+比如，你可以使用:
+
+.. code-block::
+
+  import "github.com/ethereum/dapp-bin/library/iterable_mapping.sol" as it_mapping;
+
+导入一个 map 迭代器。
 
 未来， Remix 可能支持其他源代码平台。
-
 
 .. index:: ! comment, natspec
 
@@ -217,12 +233,18 @@ features, the analysis may not be fully sound.
   */
 
 
-此外，有另一种注释称为 natspec 注释，其文档还尚未编写。
+.. note::
+  
+  单行注释由任何 unicode 行终止符(如采用utf8编码的：LF，VF，FF，CR，NEL，LS或PS) 终止。 在注释之后终止符代码仍然是源码的一部分。如果它不是ascii符号（NEL，LS和PS），它会导致解析器错误。
+
+此外，有另一种注释称为 natspec 注释，可参考 :ref:`风格指南- 描述注释 <natspec>`。
+
+
 它们是用三个反斜杠（``///``）或双星号开头的块（``/** ... */``）书写，它们应该直接在函数声明或语句上使用。
 可在注释中使用 `Doxygen <https://en.wikipedia.org/wiki/Doxygen>`_ 样式的标签来文档化函数、
-标注形式校验通过的条件，和提供一个当用户试图调用一个函数时显示给用户的 **确认文本**。
+标注形式校验通过的条件，和提供一个当用户试图调用一个函数时显示给用户的 **确认性文字**。
 
-在下面的例子中，我们记录了合约的标题、两个入参和两个返回值的说明：
+在下面的例子中，我们记录了合约的标题，并解释了两个传入参书和两个返回值的翻译。
 
 ::
 

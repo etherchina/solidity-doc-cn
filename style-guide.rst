@@ -1,7 +1,7 @@
 .. index:: style, coding style
 
 #############
-风格指南
+编程风格指南
 #############
 
 ************
@@ -879,6 +879,7 @@ No::
 
 在声明简单类型时，枚举应该使用驼峰式风格。比如：``TokenGroup``，``Frame``，``HashStyle``，``CharacterLocation``。
 
+
 避免命名冲突
 ==========================
 
@@ -887,7 +888,62 @@ No::
 当所起名称与内建或保留关键字相冲突时，建议照此惯例在名称后边添加下划线。
 
 
-一般建议
-=======================
+.. _natspec:
 
-待定
+************************
+描述注释 NatSpec 
+************************
+
+Solidity 智能合约有一种基于以太坊自然语言说明格式（Ethereum Natural Language Specification Format）的注释形式。
+
+Add comments above functions or contracts following `doxygen <http://www.doxygen.nl>`_ notation
+of one or multiple lines starting with `///` or a
+multiline comment starting with `/**` and ending with `*/`.
+
+For example, the contract from `a simple smart contract <simple-smart-contract>`_ with the comments
+added looks like the one below::
+
+    pragma solidity >=0.4.0 <0.7.0;
+
+    /// @author The Solidity Team
+    /// @title A simple storage example
+    contract SimpleStorage {
+        uint storedData;
+
+        /// Store `x`.
+        /// @param x the new value to store
+        /// @dev stores the number in the state variable `storedData`
+        function set(uint x) public {
+            storedData = x;
+        }
+
+        /// Return the stored value.
+        /// @dev retrieves the value of the state variable `storedData`
+        /// @return the stored value
+        function get() public view returns (uint) {
+            return storedData;
+        }
+    }
+
+Natspec uses doxygen style tags with some special meaning.
+If no tag is used, then the comment applies to ``@notice``.
+The ``@notice`` tag is the main NatSpec tag and its audience is
+users of the contract who have never seen the source code, so it should make
+as little assumptions about the inner details as possible.
+All tags are optional.
+
++-------------+-------------------------------------------+-------------------------------+
+| Tag         | Description                               | Context                       |
++=============+===========================================+===============================+
+| ``@title``  | A title that describes the contract       | contract, interface           |
++-------------+-------------------------------------------+-------------------------------+
+| ``@author`` | The name of the author                    | contract, interface, function |
++-------------+-------------------------------------------+-------------------------------+
+| ``@notice`` | Explanation of functionality              | contract, interface, function |
++-------------+-------------------------------------------+-------------------------------+
+| ``@dev``    | Any extra details                         | contract, interface, function |
++-------------+-------------------------------------------+-------------------------------+
+| ``@param``  | Parameter type followed by parameter name | function                      |
++-------------+-------------------------------------------+-------------------------------+
+| ``@return`` | The return value of a contract's function | function                      |
++-------------+-------------------------------------------+-------------------------------+
