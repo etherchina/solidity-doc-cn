@@ -149,8 +149,8 @@
 
 .. _address:
 
-地址类型
---------------
+地址类型 Address
+--------------------
 
 The address type comes in two flavours, which are largely identical:
 

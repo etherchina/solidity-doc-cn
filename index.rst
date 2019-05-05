@@ -1,4 +1,4 @@
-Solidity 0.5.7 翻译
+Solidity 0.5.8 翻译
 ================================
 
 .. image:: logo.svg
@@ -7,7 +7,7 @@ Solidity 0.5.7 翻译
     :align: center
 
 
-译者说明：本文档根据当前 `最新官方版本v0.5.7 <https://solidity.readthedocs.io/>`_ 进行翻译，本翻译最初 `HiBlock <http://hiblock.one/>`_ 社区发起，后经过 `深入浅出区块链社区 <https://learnblockchain.cn/>`_ 社区成员根据最新版本补充翻译。
+译者说明：本文档根据当前 `最新官方版本v0.5.8 <https://solidity.readthedocs.io/>`_ 进行翻译，本翻译最初 `HiBlock <http://hiblock.one/>`_ 社区发起，后经过 `深入浅出区块链社区 <https://learnblockchain.cn/>`_ 社区成员根据最新版本补充翻译。
 
 本中文文档大部分情况下，英中直译，但有时为了更好的理解也会使用意译，如需转载请联系Tiny熊（微信：xlbxiong）.
 
@@ -17,6 +17,11 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 
 在部署合约时，应该尽量使用最新版本，因为新版本会有一些重大的新特性以及bug修复。
 
+.. warning::
+
+  Solidity 最近发布了 0.5.x 有很多与之前版本不兼容的升级，理解更新可阅读 :doc:`更新列表 <050-breaking-changes>`.
+
+
 语言文档
 ----------------------
 
@@ -25,8 +30,10 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 
 你还可以进一步阅读 :ref:`区块链 <blockchain-basics>` 基础，然后是 :ref:`以太坊虚拟机 <the-ethereum-virtual-machine>` 。
 
+.. hint::
+    译者注：理解智能合约及虚拟机是怎么运行，推荐这两篇非常好的文章   `完全理解以太坊智能合约 <https://learnblockchain.cn/2018/01/04/understanding-smart-contracts/>`_  及  `深入浅出以太坊虚拟机 <https://learnblockchain.cn/2019/04/09/easy-evm/>`_ 。
 
-.. note::
+.. hint::
     目前尝试 Solidity 编程的最好的方式是使用 `Remix <https://remix.ethereum.org/>`_ （需要时间加载，请耐心等待）。Remix 是一个基于 Web 浏览器的 IDE，它可以让你编写 Solidity 智能合约，然后部署并运行该智能合约。
 
 .. warning::
@@ -39,7 +46,7 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 
 本文档由社区志愿者翻译成多种语言，但是 `英语版本 <https://github.com/ethereum/solidity/blob/develop/docs/index.rst>`_ 作为主要参考。
 
-* `简体中文版 <https://solidity-cn.readthedocs.io/>`_ （由 `HiBlock社区 <http://hiblock.one/>`_ `深入浅出区块链社区 <https://learnblockchain.cn/>`_ 贡献者翻译）
+* `简体中文版 <https://learnblockchain.cn/docs/solidity/>`_ （由 `HiBlock社区 <http://hiblock.one/>`_ `深入浅出区块链社区 <https://learnblockchain.cn/>`_ 贡献者翻译）
 * `西班牙语版 <https://solidity-es.readthedocs.io>`_
 * `俄语版 <https://github.com/ethereum/wiki/wiki/%5BRussian%5D-%D0%A0%D1%83%D0%BA%D0%BE%D0%B2%D0%BE%D0%B4%D1%81%D1%82%D0%B2%D0%BE-%D0%BF%D0%BE-Solidity>`_ (已过时)
 * `韩语版 <http://solidity-kr.readthedocs.io>`_ (in progress)
@@ -58,7 +65,9 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
    installing-solidity.rst
    solidity-by-example.rst
    solidity-in-depth.rst
+   natspec-format.rst
    security-considerations.rst
+   resources.rst
    using-the-compiler.rst
    metadata.rst
    abi-spec.rst
@@ -67,4 +76,6 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
    common-patterns.rst
    bugs.rst
    contributing.rst
+   lll.rst
    frequently-asked-questions.rst
+   

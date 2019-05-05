@@ -888,8 +888,6 @@ No::
 当所起名称与内建或保留关键字相冲突时，建议照此惯例在名称后边添加下划线。
 
 
-.. _natspec:
-
 ************************
 描述注释 NatSpec 
 ************************
@@ -925,25 +923,7 @@ added looks like the one below::
         }
     }
 
-Natspec uses doxygen style tags with some special meaning.
-If no tag is used, then the comment applies to ``@notice``.
-The ``@notice`` tag is the main NatSpec tag and its audience is
-users of the contract who have never seen the source code, so it should make
-as little assumptions about the inner details as possible.
-All tags are optional.
 
-+-------------+-------------------------------------------+-------------------------------+
-| Tag         | Description                               | Context                       |
-+=============+===========================================+===============================+
-| ``@title``  | A title that describes the contract       | contract, interface           |
-+-------------+-------------------------------------------+-------------------------------+
-| ``@author`` | The name of the author                    | contract, interface, function |
-+-------------+-------------------------------------------+-------------------------------+
-| ``@notice`` | Explanation of functionality              | contract, interface, function |
-+-------------+-------------------------------------------+-------------------------------+
-| ``@dev``    | Any extra details                         | contract, interface, function |
-+-------------+-------------------------------------------+-------------------------------+
-| ``@param``  | Parameter type followed by parameter name | function                      |
-+-------------+-------------------------------------------+-------------------------------+
-| ``@return`` | The return value of a contract's function | function                      |
-+-------------+-------------------------------------------+-------------------------------+
+It is recommended that Solidity contracts are fully annontated using `NatSpec <natspec>`_ for all public interfaces (everything in the ABI).
+
+Please see the sectian about `NatSpec <natspec>`_ for a detailed explanation.
