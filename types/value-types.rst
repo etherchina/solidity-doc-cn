@@ -152,60 +152,55 @@
 地址类型 Address
 --------------------
 
-The address type comes in two flavours, which are largely identical:
+地址类型有两种形式，他们大致相同：
 
- - ``address``: Holds a 20 byte value (size of an Ethereum address).
- - ``address payable``: Same as ``address``, but with the additional members ``transfer`` and ``send``.
+ - ``address``：保存一个20字节的值（以太坊地址的大小）。
+ - ``ddress payable`` ：可支付地址，与 ``address` `相同，不过有成员函数 ``transfer`` 和 ``send`` 。
 
-The idea behind this distinction is that ``address payable`` is an address you can send Ether to,
-while a plain ``address`` cannot be sent Ether.
+这种区别背后的思想是 ``address payable`` 可以接受以太币的地址，而一个普通的 ``address`` 则不能。
 
-Type conversions:
 
-Implicit conversions from ``address payable`` to ``address`` are allowed, whereas conversions from ``address`` to ``address payable`` are
-not possible (the only way to perform such a conversion is by using an intermediate conversion to ``uint160``).
+类型转换:
 
-:ref:`Address literals<address_literals>` can be implicitly converted to ``address payable``.
+允许从 ``address payable`` 到 ``address`` 的隐式转换，而从 ``address`` 到 ``address payable`` 的转换是不可以的（ 执行这种转换的唯一方法是使用中间类型，先转换为``uint160`` ），如::
 
-Explicit conversions to and from ``address`` are allowed for integers, integer literals, ``bytes20`` and contract types with the following
-caveat:
-Conversions of the form ``address payable(x)`` are not allowed. Instead the result of a conversion of the form ``address(x)``
-has the type ``address payable``, if ``x`` is of integer or fixed bytes type, a literal or a contract with a payable fallback function.
-If ``x`` is a contract without payable fallback function, then ``address(x)`` will be of type ``address``.
-In external function signatures ``address`` is used for both the ``address`` and the ``address payable`` type.
+    address payable ap = address(uint160(addr));
+
+
+:ref:`Address literals<address_literals>` 可以隐式转换为 ``address payable`` 。
+
+``address`` 可以显式和整型、整型字面常数、``bytes20`` 及合约类型相互转换。转换时需注意：不允许以 ``address payable(x)`` 形式转换。 
+如果``x``是整型或定长字节数组、字面常数或具有可支付的回退（ payable fallback ）函数的合约类型，则转换形式 ``address（x）`` 的结果是 ``address payable`` 类型。
+如果``x``是没有支付的回退（ payable fallback ）函数的合约类型，则 ``address（x）`` 将是 ``address`` 类型。
+在外部函数签名（定义）中，``address``可用来表示 ``address`` 和 ``address payable`` 类型。
+
+
 
 .. note::
-    It might very well be that you do not need to care about the distinction between ``address``
-    and ``address payable`` and just use ``address`` everywhere. For example,
-    if you are using the :ref:`withdrawal pattern<withdrawal_pattern>`, you can (and should) store the
-    address itself as ``address``, because you invoke the ``transfer`` function on
-    ``msg.sender``, which is an ``address payable``.
+    大部分情况下你不需要关心``address`` 与 ``address payable`` 之间的区别，并且到处都使用``address`` 。 例如，如果你在使用 :ref:`取款模式<withdrawal_pattern>`, 你可以（也应该）保存地址为 ``address`` 类型, 因为可以在
+    ``msg.sender`` 对象上调用 ``transfer`` 函数, 因为``msg.sender`` 是 ``address payable``。
 
-Operators:
+运算符:
 
 * ``<=``, ``<``, ``==``, ``!=``, ``>=`` and ``>``
 
 .. warning::
-    If you convert a type that uses a larger byte size to an ``address``, for example ``bytes32``, then the ``address`` is truncated.
-    To reduce conversion ambiguity version 0.4.24 and higher of the compiler force you make the truncation explicit in the conversion.
-    Take for example the address ``0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCCC``.
+    如果将使用较大字节数组类型转换为 ``address`` ，例如 ``bytes32`` ，那么 ``address`` 将被截断。
+    为了减少转换歧义，0.4.24及更高编译器版本要求我们在转换中显式截断处理。
+    以地址 ``0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCCC`` 为例， 如果使用 ``address(uint160(bytes20(b)))`` 结果是 ``0x111122223333444455556666777788889999aAaa``， 而使用 ``address(uint160(uint256(b)))`` 结果是 ``0x777788889999AaAAbBbbCcccddDdeeeEfFFfCcCc`` 。
 
-    You can use ``address(uint160(bytes20(b)))``, which results in ``0x111122223333444455556666777788889999aAaa``,
-    or you can use ``address(uint160(uint256(b)))``, which results in ``0x777788889999AaAAbBbbCcccddDdeeeEfFFfCcCc``.
 
 .. note::
-    The distinction between ``address`` and ``address payable`` was introduced with version 0.5.0.
-    Also starting from that version, contracts do not derive from the address type, but can still be explicitly converted to
-    ``address`` or to ``address payable``, if they have a payable fallback function.
+    ``address`` 和 ``address payable`` 的区别是在 0.5.0 版本引入的，同样从这个版本开始，合约类型不在继承自地址类型，不过如果合约有可支付的回退（ payable fallback ）函数，合约类型仍然可以显示转换为
+    ``address`` 或 ``address payable`` 。
 
 .. _members-of-addresses:
 
 地址类型成员变量
 ^^^^^^^^^^^^^^^^
+查看所有的成员，可参考 :ref:`address_related`。
 
 * ``balance`` 和 ``transfer``
-
-快速参考，请见 :ref:`address_related`。
 
 可以使用 ``balance`` 属性来查询一个地址的余额，
 也可以使用 ``transfer`` 函数向一个可支付地址（payable address）发送 |ether| （以 wei 为单位）：
@@ -216,12 +211,10 @@ Operators:
     address myAddress = this;
     if (x.balance < 10 && myAddress.balance >= 10) x.transfer(10);
 
-The ``transfer`` function fails if the balance of the current contract is not large enough
-or if the Ether transfer is rejected by the receiving account. The ``transfer`` function
-reverts on failure.
+如果当前合约的余额不够多，则 ``transfer`` 函数会执行失败，或者如果以太转移被接收帐户拒绝， ``transfer`` 函数同样会失败而进行回退。
 
 .. note::
-    如果 ``x`` 是一个合约地址，它的代码（更具体来说是它的 fallback 函数，如果有的话）会跟 ``transfer`` 函数调用一起执行（这是 EVM 的一个特性，无法阻止）。
+    如果 ``x`` 是一个合约地址，它的代码（更具体来说是它的 Fallback 函数，如果有的话）会跟 ``transfer`` 函数调用一起执行（这是 EVM 的一个特性，无法阻止）。
     如果在执行过程中用光了 gas 或者因为任何原因执行失败，|ether| 交易会被打回，当前的合约也会在终止的同时抛出异常。
 
 * ``send``
@@ -231,9 +224,23 @@ reverts on failure.
 .. warning::
     在使用 ``send`` 的时候会有些风险：如果调用栈深度是 1024 会导致发送失败（这总是可以被调用者强制），如果接收者用光了 gas 也会导致发送失败。
     所以为了保证 |ether| 发送的安全，一定要检查 ``send`` 的返回值，使用 ``transfer`` 或者更好的办法：
-    使用一种接收者可以取回资金的模式。
+    使用接收者自己取回资金的模式。
 
-* ``call``，   ``delegatecall`` 和 ``staticcall`` 
+* ``call``， ``delegatecall`` 和 ``staticcall`` 
+
+
+为了与不符合 |ABI| 的合约交互，或者要更直接地控制编码，提供了函数 ``call``，``delegatecall`` 和 ``staticcall`` 。
+它们都带有一个``bytes memory``参数和返回执行成功状态（``bool``）和数据（``bytes memory``）。
+
+函数 ``abi.encode``，``abi.encodePacked``，``abi.encodeWithSelector`` 和 ``abi.encodeWithSignature`` 可用于编码结构化数据。
+
+例如::
+
+    bytes memory payload = abi.encodeWithSignature("register(string)", "MyName");
+    (bool success, bytes memory returnData) = address(nameReg).call(payload);
+    require(success);
+
+
 
 此外，为了与不符合 |ABI| 的合约交互，于是就有了可以接受任意类型任意数量参数的 ``call`` 函数。
 这些参数会被打包到以 32 字节为单位的连续区域中存放。
@@ -246,45 +253,83 @@ reverts on failure.
     nameReg.call("register", "MyName");
     nameReg.call(bytes4(keccak256("fun(uint256)")), a);
 
-``call`` 返回的布尔值表明了被调用的函数已经执行完毕（``true``）或者引发了一个 EVM 异常（``false``）。
-无法访问返回的真实数据（为此我们需要事先知道编码和大小）。
+.. warning::
+    所有这些函数都是低级函数，应谨慎使用。
+    具体来说，任何未知的合约都可能是恶意的，我们在调用一个合约的同时就将控制权交给了它，而合约又可以回调合约，所以要准备好在调用返回时改变相应的状态变量（可参考 :ref:`可重入<re_entance>` )，  与其他合约交互的常规方法是在合约对象上调用函数（x.f()）。
 
+
+.. note::
+    0.5.以前版本的 Solidity 允许这些函数接收任意参数，并且还会以不同方式处理 bytes4 类型的第一个参数。 在版本0.5.0中删除了这些边缘情况。
+  
 可以使用 ``.gas()`` |modifier| 调整提供的 gas 数量 ::
 
-    namReg.call.gas(1000000)("register", "MyName");
+    address(nameReg).call.gas(1000000)(abi.encodeWithSignature("register(string)", "MyName"));
 
 类似地，也能控制提供的 |ether| 的值 ::
 
-   nameReg.call.value(1 ether)("register", "MyName"); 
+    address(nameReg).call.value(1 ether)(abi.encodeWithSignature("register(string)", "MyName"));
 
 最后一点，这些 |modifier| 可以联合使用。每个修改器出现的顺序不重要 ::
 
-   nameReg.call.gas(1000000).value(1 ether)("register", "MyName"); 
+   address(nameReg).call.gas(1000000).value(1 ether)(abi.encodeWithSignature("register(string)", "MyName"));
+
+以类似的方式，可以使用函数 ``delegatecall`` ：区别在于只调用给定地址的代码（函数），其他状态属性如（存储，余额 ...）都来自当前合约。 ``delegatecall`` 的目的是使用另一个合约中的库代码。 用户必须确保两个合约中的存储结构都适合委托调用 （delegatecall）。
+
 
 .. note::
-    目前还不能在重载函数中使用 gas 或者 value |modifier| 。
+    在以太坊家园（homestead） 之前，只有 ``callcode`` 函数，它无法访问原始的 ``msg.sender`` 和 ``msg.value`` 值。 此函数已在0.5.0版中删除。
 
-    一种解决方案是给 gas 和值引入一个特例，并重新检查它们是否在重载的地方出现。
+从以太坊拜占庭（byzantium）版本开始 提供了 ``staticcall`` ，它与 ``call`` 基本相同，但如果被调用的函数以任何方式修改状态变量，都将回退。
 
-类似地，也可以使用 ``delegatecall``：
-区别在于只使用给定地址的代码，其它属性（存储，余额，……）都取自当前合约。
-``delegatecall`` 的目的是使用存储在另外一个合约中的库代码。
-用户必须确保两个合约中的存储结构都适用于 delegatecall。
-在 homestead 版本之前，只有一个功能类似但作用有限的 ``callcode`` 的函数可用，但它不能获取委托方的 ``msg.sender`` 和 ``msg.value``。
+所有三个函数 ``call`` ，``delegatecall`` 和 ``staticcall`` 都是非常低级的函数，应该只把它们当作 *最后一招* 来使用，因为它们破坏了 Solidity 的类型安全性。
 
-这三个函数 ``call``， ``delegatecall`` 和 ``callcode`` 都是非常低级的函数，应该只把它们当作 *最后一招* 来使用，因为它们破坏了 Solidity 的类型安全性。
+所有三种方法都提供 ``.gas（）`` 选项，而 ``delegatecall`` 不支持 ``.value（）`` 选项。
+
 
 .. note::
-    所有合约都继承了地址（address）的成员变量，因此可以使用 ``this.balance`` 查询当前合约的余额。
+    所有合约都可以转换为 ``address`` 类型，因此可以使用 ``address(this).balance`` 查询当前合约的余额。
+
+
+.. index:: ! contract type, ! type; contract
+
+.. _contract_types:
+
+合约类型
+--------------
+
+Every :ref:`contract<contracts>` defines its own type.
+You can implicitly convert contracts to contracts they inherit from.
+Contracts can be explicitly converted to and from the ``address`` type.
+
+Explicit conversion to and from the ``address payable`` type
+is only possible if the contract type has a payable fallback function.
+The conversion is still performed using ``address(x)`` and not
+using ``address payable(x)``. You can find more information in the section about
+the :ref:`address type<address>`.
 
 .. note::
-    不鼓励使用 ``callcode``，在未来也会将其移除。
+    Before version 0.5.0, contracts directly derived from the address type
+    and there was no distinction between ``address`` and ``address payable``.
 
-.. warning::
-    这三个函数都属于低级函数，需要谨慎使用。
-    具体来说，任何未知的合约都可能是恶意的。
-    我们在调用一个合约的同时就将控制权交给了它，它可以反过来调用我们的合约，
-    因此，当调用返回时要为我们的状态变量的改变做好准备。
+If you declare a local variable of contract type (`MyContract c`), you can call
+functions on that contract. Take care to assign it from somewhere that is the
+same contract type.
+
+You can also instantiate contracts (which means they are newly created). You
+can find more details in the :ref:`'Contracts via new'<creating-contracts>`
+section.
+
+The data representation of a contract is identical to that of the ``address``
+type and this type is also used in the :ref:`ABI<ABI>`.
+
+Contracts do not support any operators.
+
+The members of contract types are the external functions of the contract
+including public state variables.
+
+For a contract ``C`` you can use ``type(C)`` to access
+:ref:`type information<meta-type>` about the contract.
+
 
 .. index:: byte array, bytes32
 

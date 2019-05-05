@@ -1,5 +1,5 @@
 ********************************
-Solidity v0.5.0 版本重大更新
+Solidity v0.5.0 重大更新
 ********************************
 
 这部分Solidity v0.5.0 版本一写主要的不兼容的更新，了解更新背后的原因，以及影响了那些代码，可以查看 `更新日志 <https://github.com/ethereum/solidity/releases/tag/v0.5.0>`_.
@@ -11,7 +11,7 @@ Solidity v0.5.0 版本重大更新
    visibility and mutability specifiers suffices. See the
    :ref:`Interoperability With Older Contracts <interoperability>` section below.
 
-Semantic Only Changes
+语义变化
 =====================
 
 This section lists the changes that are semantic-only, thus potentially
@@ -45,7 +45,7 @@ hiding new and different behavior in existing code.
 * Forward all available gas with external function calls starting from
   Tangerine Whistle.
 
-Semantic and Syntactic Changes
+语义及语法更改
 ==============================
 
 This section highlights changes that affect syntax and semantics.
@@ -73,7 +73,7 @@ This section highlights changes that affect syntax and semantics.
   initialization block of a ``for`` loop are valid at any point inside the
   loop.
 
-Explicitness Requirements
+准确性要求
 =========================
 
 This section lists changes where the code now needs to be more explicit.
@@ -133,14 +133,14 @@ For most of the topics the compiler will provide suggestions.
 * For clarity reasons, the command line interface now requires ``-`` if the
   standard input is used as source.
 
-Deprecated Elements
+弃用元素
 ===================
 
 This section lists changes that deprecate prior features or syntax.  Note that
 many of these changes were already enabled in the experimental mode
 ``v0.5.0``.
 
-Command Line and JSON Interfaces
+弃用命令行及 JSON 接口
 --------------------------------
 
 * The command line option ``--formal`` (used to generate Why3 output for
@@ -171,8 +171,8 @@ Command Line and JSON Interfaces
   Binary files now also contain a list of mappings from these placeholders
   to the fully qualified names.
 
-Constructors
-------------
+构造函数变更
+---------------
 
 * Constructors must now be defined using the ``constructor`` keyword.
 
@@ -185,8 +185,8 @@ Constructors
   disallowed.  If you only want to specify an inheritance relation without
   giving arguments, do not provide parentheses at all.
 
-Functions
----------
+弃用函数
+-----------
 
 * Function ``callcode`` is now disallowed (in favor of ``delegatecall``). It
   is still possible to use it via inline assembly.
@@ -198,8 +198,8 @@ Functions
 * ``throw`` is now disallowed (in favor of ``revert``, ``require`` and
   ``assert``).
 
-Conversions
------------
+弃用类型转换
+--------------
 
 * Explicit and implicit conversions from decimal literals to ``bytesXX`` types
   is now disallowed.
@@ -207,7 +207,7 @@ Conversions
 * Explicit and implicit conversions from hex literals to ``bytesXX`` types
   of different size is now disallowed.
 
-Literals and Suffixes
+弃用字面量及后缀
 ---------------------
 
 * The unit denomination ``years`` is now disallowed due to complications and
@@ -220,8 +220,8 @@ Literals and Suffixes
 
 * The prefix ``0X`` for hex numbers is disallowed, only ``0x`` is possible.
 
-Variables
----------
+弃用变量
+------------
 
 * Declaring empty structs is now disallowed for clarity.
 
@@ -244,8 +244,8 @@ Variables
 
 * Fixed-size arrays with a length of zero are now disallowed.
 
-Syntax
-------
+弃用语法
+------------
 
 * Using ``constant`` as function state mutability modifier is now disallowed.
 
@@ -279,7 +279,7 @@ Syntax
 
 .. _interoperability:
 
-Interoperability With Older Contracts
+和老合约进行交互
 =====================================
 
 It is still possible to interface with contracts written for Solidity versions prior to
@@ -354,8 +354,8 @@ commandline compiler for linking):
    }
 
 
-Example
-=======
+举例
+=========
 
 The following example shows a contract and its updated version for Solidity
 v0.5.0 with some of the changes listed in this section.
