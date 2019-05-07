@@ -72,10 +72,10 @@ rules explicit::
 
 .. _types-conversion-literals:
 
-Conversions between Literals and Elementary Types
+字面常量与基本类型的转换
 =================================================
 
-Integer Types
+整型
 -------------
 
 Decimal and hexadecimal number literals can be implicitly converted to any integer type
@@ -85,7 +85,7 @@ that is large enough to represent it without truncation::
     uint32 b = 1234; // fine
     uint16 c = 0x123456; // fails, since it would have to truncate to 0x3456
 
-Fixed-Size Byte Arrays
+定长字节数组
 ----------------------
 
 Decimal number literals cannot be implicitly converted to fixed-size byte arrays. Hexadecimal
@@ -111,7 +111,7 @@ if their number of characters matches the size of the bytes type::
     bytes2 e = "x"; // not allowed
     bytes2 f = "xyz"; // not allowed
 
-Addresses
+地址类型
 ---------
 
 As described in :ref:`address_literals`, hex literals of the correct size that pass the checksum

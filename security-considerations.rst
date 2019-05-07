@@ -159,8 +159,8 @@ gas 限制和循环
 请注意，使用 ``.send()`` 时如果超出调用栈 **并不会** 抛出异常，而是会返回 ``false``。
 低级的函数比如 ``.call()``，``.callcode()`` 和 ``.delegatecall()`` 也都是这样的。
 
-tx.origin
-=========
+tx.origin问题
+=============
 
 永远不要使用 tx.origin 做身份认证。假设你有一个如下的钱包合约：
 
@@ -210,7 +210,7 @@ tx.origin
 
 .. _underflow-overflow:
 
-Two's Complement / Underflows / Overflows
+整型溢出问题
 =========================================
 
 As in many programming languages, Solidity's integer types are not actually integers.

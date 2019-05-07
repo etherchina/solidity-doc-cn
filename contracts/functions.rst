@@ -10,13 +10,13 @@
 
 .. _function-parameters-return-variables:
 
-Function Parameters and Return Variables
+函数参数及返回值
 ========================================
 
 As in JavaScript, functions may take parameters as input. Unlike in JavaScript
 and C, functions may also return an arbitrary number of values as output.
 
-Function Parameters
+函数参数
 -------------------
 
 Function parameters are declared the same way as variables, and the name of
@@ -48,7 +48,7 @@ Function parameters can be used as any other local variable and they can also be
 
 .. index:: return array, return string, array, string, array of strings, dynamic array, variably sized array, return struct, struct
 
-Return Variables
+返回值
 ----------------
 
 Function return variables are declared with the same syntax after the
@@ -105,7 +105,7 @@ return variables and then using ``return;`` to leave the function.
 
 .. _multi-return:
 
-Returning Multiple Values
+返回多个值
 -------------------------
 
 When a function has multiple return types, the statement ``return (v0, v1, ..., vn)`` can be used to return multiple values.
@@ -185,7 +185,7 @@ Pure 函数
 
 .. _fallback-function:
 
-Fallback 函数
+Fallback 回退函数
 =================
 
 合约可以有一个未命名的函数。这个函数不能有参数也不能有返回值。

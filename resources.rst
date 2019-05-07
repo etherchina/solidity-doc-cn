@@ -4,11 +4,11 @@
 常用资源
 ~~~~~~~~~~
 
-* `Ethereum <https://ethereum.org>`_
+* `以太坊官网 <https://ethereum.org>`_
 
-* `Changelog <https://github.com/ethereum/solidity/blob/develop/Changelog.md>`_
+* `变更日志 <https://github.com/ethereum/solidity/blob/develop/Changelog.md>`_
 
-* `Source Code <https://github.com/ethereum/solidity/>`_
+* `Solidity源码 <https://github.com/ethereum/solidity/>`_
 
 * `Ethereum Stackexchange <https://ethereum.stackexchange.com/>`_
 
@@ -22,113 +22,113 @@ Solidity IDE及编辑器
 * 常用:
 
     * `EthFiddle <https://ethfiddle.com/>`_
-        Solidity IDE in the Browser. Write and share your Solidity code. Uses server-side components.
+        基于浏览器的 IDE，可以编写和分享Solidity 代码，需要服务端。
 
     * `Remix <https://remix.ethereum.org/>`_
-        Browser-based IDE with integrated compiler and Solidity runtime environment without server-side components.
+        基于浏览器的 IDE，集成了编译器和 Solidity 运行时环境，不需要服务端组件。
 
     * `Solhint <https://github.com/protofire/solhint>`_
-        Solidity linter that provides security, style guide and best practice rules for smart contract validation.
+        一种静态检查器，提供安全和风格指南以及智能合约验证的最佳实践规则。
 
     * `Solidity IDE <https://github.com/System-Glitch/Solidity-IDE>`_
-        Browser-based IDE with integrated compiler, Ganache and local file system support.
+        基于浏览器的 IDE，集成了编译器，支持 Ganache 和本地文件系统。
 
     * `Solium <https://github.com/duaraghav8/Solium/>`_
-        Linter to identify and fix style and security issues in Solidity.
+        一种静态检查器，识别和修复 Solidity 中的风格以及安全问题。
 
     * `Superblocks Lab <https://lab.superblocks.com/>`_
-        Browser-based IDE. Built-in browser-based VM and Metamask integration (one click deployment to Testnet/Mainnet).
+        基于浏览器的 IDE， 集成了基于浏览器的虚拟机以及 Metamask ，可以一键部署到主网和测试网。
 
 * Atom:
 
     * `Etheratom <https://github.com/0mkara/etheratom>`_
-        Plugin for the Atom editor that features syntax highlighting, compilation and a runtime environment (Backend node & VM compatible).
+       Atom 编辑器的插件，支持高亮、编译和运行时环境（兼容后端节点和虚拟机）。
 
     * `Atom Solidity Linter <https://atom.io/packages/linter-solidity>`_
-        Plugin for the Atom editor that provides Solidity linting.
+        Atom 编辑器的插件，提供 Solidity 语言的 Lint 检查（静态检查）。
 
     * `Atom Solium Linter <https://atom.io/packages/linter-solium>`_
-        Configurable Solidty linter for Atom using Solium as a base.
+        Atom 的可配置的 Solidty 静态检查器，基于 Solium。
 
 * Eclipse:
 
    * `YAKINDU Solidity Tools <https://yakindu.github.io/solidity-ide/>`_
-        Eclipse based IDE. Features context sensitive code completion and help, code navigation, syntax coloring, built in compiler, quick fixes and templates.
+        基于Eclipse的 IDE. 具有根据上下文代码补全和帮助，代码导航，语法高亮，内置编译器，快速修复和模板功能。
 
 * Emacs:
 
     * `Emacs Solidity <https://github.com/ethereum/emacs-solidity/>`_
-        Plugin for the Emacs editor providing syntax highlighting and compilation error reporting.
+        Emacs 编辑器的插件，提供语法高亮和编译错误报告。
 
 * IntelliJ:
 
     * `IntelliJ IDEA plugin <https://plugins.jetbrains.com/plugin/9475-intellij-solidity>`_
-        Solidity plugin for IntelliJ IDEA (and all other JetBrains IDEs)
+        IntelliJ IDEA 的 Solidity 插件（可用于其他所有的 JetBrains IDE）
 
 * Sublime:
 
     * `Package for SublimeText - Solidity language syntax <https://packagecontrol.io/packages/Ethereum/>`_
-        Solidity syntax highlighting for SublimeText editor.
+        SublimeText 编辑器的语法高亮包。
 
 * Vim:
 
     * `Vim Solidity <https://github.com/tomlion/vim-solidity/>`_
-        Plugin for the Vim editor providing syntax highlighting.
+        Vim 编辑器的插件，提供语法高亮。
 
     * `Vim Syntastic <https://github.com/scrooloose/syntastic>`_
-        Plugin for the Vim editor providing compile checking.
+        Vim 编辑器的插件，提供编译检查。
 
 * Visual Studio Code:
 
     * `Visual Studio Code extension <http://juan.blanco.ws/solidity-contracts-in-visual-studio-code/>`_
-        Solidity plugin for Microsoft Visual Studio Code that includes syntax highlighting and the Solidity compiler.
+        Microsoft Visual Studio Code 插件，包含语法高亮和 Solidity 编译器。
 
 不再使用的:
 
 * `Mix IDE <https://github.com/ethereum/mix/>`_
-    Qt based IDE for designing, debugging and testing solidity smart contracts.
+    基于 Qt 的 IDE，可以设计、调试和测试 Solidity 智能合约。
 
 * `Ethereum Studio <https://live.ether.camp/>`_
-    Specialized web IDE that also provides shell access to a complete Ethereum environment.
+    专门的网页 IDE，也提供一个完整以太坊环境的脚本访问。
 
 * `Visual Studio Extension <https://visualstudiogallery.msdn.microsoft.com/96221853-33c4-4531-bdd5-d2ea5acc4799/>`_
-    Solidity plugin for Microsoft Visual Studio that includes the Solidity compiler.
+     Microsoft Visual Studio Code 插件，包含 Solidity 编译器。
 
 Solidity 工具
 ~~~~~~~~~~~~~~~~~~
 
 * `Dapp <https://dapp.tools/dapp/>`_
-    Build tool, package manager, and deployment assistant for Solidity.
+    Solidity 语言的构建工具、包管理器以及部署助手。
 
 * `Solidity REPL <https://github.com/raineorshine/solidity-repl>`_
-    Try Solidity instantly with a command-line Solidity console.
+    一个命令行控制台，可以让你立刻尝试 Solidity 语言。
 
 * `solgraph <https://github.com/raineorshine/solgraph>`_
-    Visualize Solidity control flow and highlight potential security vulnerabilities.
+    可视化的 Solidity 控制流，并能高亮标明潜在的安全漏洞。
 
 * `Doxity <https://github.com/DigixGlobal/doxity>`_
-    Documentation Generator for Solidity.
+    Solidity 语言的文档生成器。
 
 * `evmdis <https://github.com/Arachnid/evmdis>`_
-    EVM Disassembler that performs static analysis on the bytecode to provide a higher level of abstraction than raw EVM operations.
+    EVM 反汇编程序，可以执行字节码的静态分析，能提供比 EVM 操作更高级的抽象。
 
 * `ABI to solidity interface converter <https://gist.github.com/chriseth/8f533d133fa0c15b0d6eaf3ec502c82b>`_
-    A script for generating contract interfaces from the ABI of a smart contract.
+    从智能合约的ABI生成合约接口的脚本。
 
 * `Securify <https://securify.ch/>`_
-    Fully automated online static analyzer for smart contracts, providing a security report based on vulnerability patterns.
+    智能合约的全自动在线静态分析器，提供基于漏洞模式的安全报告。
 
 * `Sūrya <https://github.com/ConsenSys/surya/>`_
-    Utility tool for smart contract systems, offering a number of visual outputs and information about the contracts' structure. Also supports querying the function call graph.
+    一个智能合约系统实用工具，提供大量可视化输出和有关合约结构的信息。 还支持查询函数调用图。
 
 * `EVM Lab <https://github.com/ethereum/evmlab/>`_
-    Rich tool package to interact with the EVM. Includes a VM, Etherchain API, and a trace-viewer with gas cost display.
+    一个与EVM交互工具包， 包括VM，Etherchain API 以及 Gas 消耗 的跟踪查看器。
 
 * `Universal Mutator <https://github.com/agroce/universalmutator>`_
-    A tool for mutation generation, with configurable rules and support for Solidity and Vyper.
+    A tool for mutation generation ，可配置的规则，支持Solidity和Vyper 。
 
 .. note::
-  Information like variable names, comments, and source code formatting is lost in the compilation process and it is not possible to completely recover the original source code. Decompiling smart contracts to view the original source code might not be possible, or the end result that useful.
+  变量名称，注释和源代码格式等信息在编译过程中丢失，无法完全恢复原始源代码。 无法反编译智能合约以查看原始源代码。
 
 第三方 Solidity 解析器
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
