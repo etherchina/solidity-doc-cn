@@ -15,7 +15,7 @@
 布尔类型
 --------
 
-``bool`` ：可能的取值为字面常数值 ``true`` 和 ``false`` 。
+``bool`` ：可能的取值为字面常量值 ``true`` 和 ``false`` 。
 
 运算符：
 
@@ -65,8 +65,8 @@
 移位操作的结果具有左操作数的类型，同时会截断结果以匹配类型。
 
  - 不管 ``x`` 正还是负，``x << y`` 相当于 ``x * 2 ** y``。
- - 如果``x``为正值，``x >> y`` 相当于 ``x / 2 ** y``。
- - 如果``x``为负值，``x >> y`` 相当于 ``(x + 1) / 2**y - 1`` (与将 ``x`` 除以 ``2**y`` 同时向负无穷大四舍五入)。
+ - 如果 ``x`` 为正值，``x >> y`` 相当于 ``x / 2 ** y``。
+ - 如果 ``x`` 为负值，``x >> y`` 相当于 ``(x + 1) / 2**y - 1`` (与将 ``x`` 除以 ``2**y`` 同时向负无穷大四舍五入)。
  - 在所有情况下，通过负值的 ``y`` 进行移位会引发运行时异常。
 
 .. warning::
@@ -155,30 +155,30 @@
 地址类型有两种形式，他们大致相同：
 
  - ``address``：保存一个20字节的值（以太坊地址的大小）。
- - ``ddress payable`` ：可支付地址，与 ``address` `相同，不过有成员函数 ``transfer`` 和 ``send`` 。
+ - ``ddress payable`` ：可支付地址，与 ``address`` 相同，不过有成员函数 ``transfer`` 和 ``send`` 。
 
 这种区别背后的思想是 ``address payable`` 可以接受以太币的地址，而一个普通的 ``address`` 则不能。
 
 
 类型转换:
 
-允许从 ``address payable`` 到 ``address`` 的隐式转换，而从 ``address`` 到 ``address payable`` 的转换是不可以的（ 执行这种转换的唯一方法是使用中间类型，先转换为``uint160`` ），如::
+允许从 ``address payable`` 到 ``address`` 的隐式转换，而从 ``address`` 到 ``address payable`` 的转换是不可以的（ 执行这种转换的唯一方法是使用中间类型，先转换为 ``uint160`` ），如::
 
     address payable ap = address(uint160(addr));
 
 
-:ref:`Address literals<address_literals>` 可以隐式转换为 ``address payable`` 。
+:ref:`地址字面常量<address_literals>` 可以隐式转换为 ``address payable`` 。
 
-``address`` 可以显式和整型、整型字面常数、``bytes20`` 及合约类型相互转换。转换时需注意：不允许以 ``address payable(x)`` 形式转换。 
-如果``x``是整型或定长字节数组、字面常数或具有可支付的回退（ payable fallback ）函数的合约类型，则转换形式 ``address（x）`` 的结果是 ``address payable`` 类型。
-如果``x``是没有支付的回退（ payable fallback ）函数的合约类型，则 ``address（x）`` 将是 ``address`` 类型。
-在外部函数签名（定义）中，``address``可用来表示 ``address`` 和 ``address payable`` 类型。
+``address`` 可以显式和整型、整型字面常量、``bytes20`` 及合约类型相互转换。转换时需注意：不允许以 ``address payable(x)`` 形式转换。 
+如果 ``x`` 是整型或定长字节数组、字面常量或具有可支付的回退（ payable fallback ）函数的合约类型，则转换形式 ``address(x)`` 的结果是 ``address payable`` 类型。
+如果 ``x`` 是没有可支付的回退（ payable fallback ）函数的合约类型，则 ``address(x)`` 将是 ``address`` 类型。
+在外部函数签名（定义）中，``address`` 可用来表示 ``address`` 和 ``address payable`` 类型。
 
 
 
 .. note::
-    大部分情况下你不需要关心``address`` 与 ``address payable`` 之间的区别，并且到处都使用``address`` 。 例如，如果你在使用 :ref:`取款模式<withdrawal_pattern>`, 你可以（也应该）保存地址为 ``address`` 类型, 因为可以在
-    ``msg.sender`` 对象上调用 ``transfer`` 函数, 因为``msg.sender`` 是 ``address payable``。
+    大部分情况下你不需要关心 ``address`` 与 ``address payable`` 之间的区别，并且到处都使用 ``address`` 。 例如，如果你在使用 :ref:`取款模式<withdrawal_pattern>`, 你可以（也应该）保存地址为 ``address`` 类型, 因为可以在
+    ``msg.sender`` 对象上调用 ``transfer`` 函数, 因为 ``msg.sender`` 是 ``address payable``。
 
 运算符:
 
@@ -297,51 +297,46 @@
 合约类型
 --------------
 
-Every :ref:`contract<contracts>` defines its own type.
-You can implicitly convert contracts to contracts they inherit from.
-Contracts can be explicitly converted to and from the ``address`` type.
+每一个 :ref:`contract<contracts>` 定义都有他自己的类型。
 
-Explicit conversion to and from the ``address payable`` type
-is only possible if the contract type has a payable fallback function.
-The conversion is still performed using ``address(x)`` and not
-using ``address payable(x)``. You can find more information in the section about
-the :ref:`address type<address>`.
+您可以隐式地将合约转换为从他们继承的合约。
+合约可以显式转换为 ``address`` 类型。
+
+只有当合约具有可支付回退函数时，才能显式和 ``address payable`` 类型相互转换
+转换仍然使用 ``address(x)`` 执行，而不是使用 ``address payable(x)`` 。
+
+
+可以参考 :ref:`地址类型<address>`.
 
 .. note::
-    Before version 0.5.0, contracts directly derived from the address type
-    and there was no distinction between ``address`` and ``address payable``.
+    在版本0.5.0之前，合约直接从地址类型派生的， 并且 ``address`` 和 ``address payable`` 之间没有区别。
 
-If you declare a local variable of contract type (`MyContract c`), you can call
-functions on that contract. Take care to assign it from somewhere that is the
-same contract type.
+如果声明一个合约类型的局部变量（`MyContract c`），则可以调用该合约的函数。 注意需要赋相同合约类型的值给它。
 
-You can also instantiate contracts (which means they are newly created). You
-can find more details in the :ref:`'Contracts via new'<creating-contracts>`
-section.
+您还可以实例化合约（即新创建一个合约对象），参考 :ref:`'使用new创建合约'<creating-contracts>`。
 
-The data representation of a contract is identical to that of the ``address``
-type and this type is also used in the :ref:`ABI<ABI>`.
+合约和 ``address`` 的数据表示是相同的， 参考 :ref:`ABI<ABI>`。
 
-Contracts do not support any operators.
+合约不支持任何运算符。
 
-The members of contract types are the external functions of the contract
-including public state variables.
+合约类型的成员是合约的外部函数及 public 的 状态变量。
 
-For a contract ``C`` you can use ``type(C)`` to access
-:ref:`type information<meta-type>` about the contract.
 
+对于合约  ``C`` 可以使用 ``type(C)`` 获取合约的类型信息，参考 :ref:`类型信息<meta-type>` 。
 
 .. index:: byte array, bytes32
 
 定长字节数组
 ------------
 
-关键字有：``bytes1``， ``bytes2``， ``bytes3``， ...， ``bytes32``。``byte`` 是 ``bytes1`` 的别名。
+关键字有：``bytes1``， ``bytes2``， ``bytes3``， ...， ``bytes32``。
+``byte`` 是 ``bytes1`` 的别名。
 
 运算符：
 
 * 比较运算符：``<=``， ``<``， ``==``， ``!=``， ``>=``， ``>`` （返回布尔型）
-* 位运算符： ``&``， ``|``， ``^`` （按位异或）， ``~`` （按位取反）， ``<<`` （左移位）， ``>>`` （右移位）
+* 位运算符： ``&``， ``|``， ``^`` （按位异或）， ``~`` （按位取反）
+* 移位运算符： ``<<`` （左移位）， ``>>`` （右移位）
 * 索引访问：如果 ``x`` 是 ``bytesI`` 类型，那么 ``x[k]`` （其中 ``0 <= k < I``）返回第 ``k`` 个字节（只读）。
 
 该类型可以和作为右操作数的任何整数类型进行移位运算（但返回结果的类型和左操作数类型相同），右操作数表示需要移动的位数。
@@ -367,11 +362,11 @@ For a contract ``C`` you can use ``type(C)`` to access
 
 .. _address_literals:
 
-地址字面常数（Address Literals）
+地址字面常量
 ---------------------------------------
 
-比如像 ``0xdCad3a6d3569DF655070DEd06cb7A1b2Ccd1D3AF`` 这样的通过了地址校验和测试的十六进制字面常数属于 ``address`` 类型。
-长度在 39 到 41 个数字的，没有通过校验和测试而产生了一个警告的十六进制字面常数视为正常的有理数字面常数。
+比如像 ``0xdCad3a6d3569DF655070DEd06cb7A1b2Ccd1D3AF`` 这样的通过了地址校验和测试的十六进制字面常量会作为 ``address payable`` 类型。
+十六进制字面常量长度在 39 到 41 个数字之间，而没有通过校验测试（我们也会收到一个警告）的十六进制字面常量则会视为正常的有理数字面常量。
 
 .. note::
     混合大小写的地址校验和格式定义在 `EIP-55 <https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md>`_ 中。
@@ -380,39 +375,44 @@ For a contract ``C`` you can use ``type(C)`` to access
 
 .. _rational_literals:
 
-有理数和整数字面常数
+有理数和整数字面常量
 ----------------------------
 
-整数字面常数由范围在 0-9 的一串数字组成，表现成十进制。
+整数字面常量由范围在 0-9 的一串数字组成，表现成十进制。
 例如，`69` 表示数字 69。
 Solidity 中是没有八进制的，因此前置 0 是无效的。
 
-十进制小数字面常数带有一个 ``.``，至少在其一边会有一个数字。
+十进制小数字面常量带有一个 ``.``，至少在其一边会有一个数字。
 比如：``1.``，``.1``，和 ``1.3``。
 
 科学符号也是支持的，尽管指数必须是整数，但底数可以是小数。
 比如：``2e10``， ``-2e10``， ``2e-10``， ``2.5e1``。
 
-数值字面常数表达式本身支持任意精度，除非它们被转换成了非字面常数类型（也就是说，当它们出现在非字面常数表达式中时就会发生转换）。
+
+为了提高可读性可以在数字之间加上下划线。
+例如，十进制``123_000``，十六进制 ``0x2eff_abde``，科学十进制表示1_2e345_678都是有效的。
+下划线仅允许在两位数之间，并且不允许下划线连续出现。添加到数字文字中下划线没有额外的语义，下划线会被编译器忽略。
+
+数值字面常量表达式本身支持任意精度，除非它们被转换成了非字面常量类型（也就是说，当它们出现在变量表达式中时就会发生转换）。
 这意味着在数值常量表达式中, 计算不会溢出而除法也不会截断。
 
-例如， ``(2**800 + 1) - 2**800`` 的结果是字面常数 ``1`` （属于 ``uint8`` 类型），尽管计算的中间结果已经超过了 |evm| 的机器字长度。
+例如， ``(2**800 + 1) - 2**800`` 的结果是字面常量 ``1`` （属于 ``uint8`` 类型），尽管计算的中间结果已经超过了 |evm| 的机器字长度。
 此外， ``.5 * 8`` 的结果是整型 ``4`` （尽管有非整型参与了计算）。
 
-只要操作数是整型，任意整型支持的运算符都可以被运用在数值字面常数表达式中。
+只要操作数是整型，任意整型支持的运算符都可以被运用在数值字面常量表达式中。
 如果两个中的任一个数是小数，则不允许进行位运算。如果指数是小数的话，也不支持幂运算（因为这样可能会得到一个无理数）。
 
 .. note::
-    Solidity 对每个有理数都有对应的数值字面常数类型。
-    整数字面常数和有理数字面常数都属于数值字面常数类型。
-    除此之外，所有的数值字面常数表达式（即只包含数值字面常数和运算符的表达式）都属于数值字面常数类型。
-    因此数值字面常数表达式 ``1 + 2`` 和 ``2 + 1`` 的结果跟有理数三的数值字面常数类型相同。
+    Solidity 对每个有理数都有对应的数值字面常量类型。
+    整数字面常量和有理数字面常量都属于数值字面常量类型。
+    除此之外，所有的数值字面常量表达式（即只包含数值字面常量和运算符的表达式）都属于数值字面常量类型。
+    因此数值字面常量表达式 ``1 + 2`` 和 ``2 + 1`` 的结果跟有理数三的数值字面常量类型相同。
 
 .. warning::
-    在早期版本中，整数字面常数的除法也会截断，但在现在的版本中，会将结果转换成一个有理数。即 ``5 / 2`` 并不等于 ``2``，而是等于 ``2.5``。
+    在早期版本中（0.4.0之前），整数字面常量的除法也会截断，但在现在的版本中，会将结果转换成一个有理数。即 ``5 / 2`` 并不等于 ``2``，而是等于 ``2.5``。
 
 .. note::
-    数值字面常数表达式只要在非字面常数表达式中使用就会转换成非字面常数类型。
+    数值字面常量表达式只要在非字面常量表达式中使用就会转换成非字面常量类型。
     在下面的例子中，尽管我们知道 ``b`` 的值是一个整数，但 ``2.5 + a`` 这部分表达式并不进行类型检查，因此编译不能通过。
 
 ::
@@ -422,25 +422,56 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 
 .. index:: literal, literal;string, string
 
-字符串字面常数
+.. _string_literals:
+
+字符串字面常量及类型
 ---------------------
 
-字符串字面常数是指由双引号或单引号引起来的字符串（``"foo"`` 或者 ``'bar'``）。
+字符串字面常量是指由双引号或单引号引起来的字符串（``"foo"`` 或者 ``'bar'``）。
 不像在 C 语言中那样带有结束符；``"foo"`` 相当于 3 个字节而不是 4 个。
-和整数字面常数一样，字符串字面常数的类型也可以发生改变，但它们可以隐式地转换成 ``bytes1``，……，``bytes32``，如果合适的话，还可以转换成 ``bytes`` 以及 ``string``。
+和整数字面常量一样，字符串字面常量的类型也可以发生改变，但它们可以隐式地转换成 ``bytes1``，……，``bytes32``，如果合适的话，还可以转换成 ``bytes`` 以及 ``string``。
 
-字符串字面常数支持转义字符，例如 ``\n``，``\xNN`` 和 ``\uNNNN``。``\xNN`` 表示一个 16 进制值，最终转换成合适的字节，
-而 ``\uNNNN`` 表示 Unicode 编码值，最终会转换为 UTF-8 的序列。
+例如： ``bytes32 samevar = "stringliteral"`` 字符串字面常量在赋值给 ``bytes32`` 时被解释为原始的字节形式。
+
+
+字符串字面常量支持下面的转义字符：
+
+ - ``\<newline>`` (转义实际换行)
+ - ``\\`` (反斜杠)
+ - ``\'`` (单引号)
+ - ``\"`` (双引号)
+ - ``\b`` (退格)
+ - ``\f`` (换页)
+ - ``\n`` (换行符)
+ - ``\r`` (回车)
+ - ``\t`` (标签 tab)
+ - ``\v`` (垂直标签)
+ - ``\xNN`` (十六进制转义，见下文)
+ - ``\uNNNN`` (unicode 转义，见下文)
+
+
+``\xNN`` 表示一个 16 进制值，最终转换成合适的字节，而 ``\uNNNN`` 表示 Unicode 编码值，最终会转换为 UTF-8 的序列。
+
+以下示例中的字符串长度为十个字节，它以换行符开头，后跟双引号，单引号，反斜杠字符，以及（没有分隔符）字符序列 ``abcdef`` 。
+
+::
+
+    "\n\"\'\\abc\
+    def"
+
+
+任何unicode行终结符（即LF，VF，FF，CR，NEL，LS，PS）都不会被当成字符串字面常量的终止符。 如果前面没有前置 ``\``，则换行符仅终止字符串字面常量。
+
 
 .. index:: literal, bytes
 
-十六进制字面常数
+十六进制字面常量
 ---------------------
 
-十六进制字面常数以关键字 ``hex`` 打头，后面紧跟着用单引号或双引号引起来的字符串（例如，``hex"001122FF"``）。
+十六进制字面常量以关键字 ``hex`` 打头，后面紧跟着用单引号或双引号引起来的字符串（例如，``hex"001122FF"`` ）。
 字符串的内容必须是一个十六进制的字符串，它们的值将使用二进制表示。
 
-十六进制字面常数跟字符串字面常数很类似，具有相同的转换规则。
+十六进制字面常量跟 :ref:`字符串字面常量 <string_literals>` 很类似，具有相同的转换规则
 
 .. index:: enum
 
@@ -449,9 +480,14 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 枚举类型
 ----------------
 
+枚举是在Solidity中创建用户定义类型的一种方法。 它们是显示所有整型相互转换，但不允许隐式转换。 从整型显式转换枚举，会在运行时检查整数时候在枚举范围内，否则会导致异常（ :ref:`assert 类型异常 <assert-and-require>` ）。
+枚举需要至少一个成员。
+
+数据表示与C中的枚举相同：选项从“0”开始的无符号整数值表示。
+
 ::
 
-    pragma solidity ^0.4.16;
+    pragma solidity >=0.4.16 <0.7.0;
 
     contract test {
         enum ActionChoices { GoLeft, GoRight, GoStraight, SitStill }
@@ -483,7 +519,9 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 ----------------
 
 函数类型是一种表示函数的类型。可以将一个函数赋值给另一个函数类型的变量，也可以将一个函数作为参数进行传递，还能在函数调用中返回函数类型变量。
-函数类型有两类：- *内部（internal）* 函数和 *外部（external）* 函数：
+函数类型有两类：
+ - *内部（internal）* 函数类型
+ - *外部（external）* 函数类型
 
 内部函数只能在当前合约内被调用（更具体来说，在当前代码块内，包括内部库函数和继承的函数中），因为它们不能在当前合约上下文的外部被执行。
 调用一个内部函数是通过跳转到它的入口标签来实现的，就像在当前合约的内部调用一个函数。
@@ -497,10 +535,26 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 与参数类型相反，返回类型不能为空 —— 如果函数类型不需要返回，则需要删除整个 ``returns (<return types>)`` 部分。
 
 函数类型默认是内部函数，因此不需要声明 ``internal`` 关键字。
-与此相反的是，合约中的函数本身默认是 public 的，只有当它被当做类型名称时，默认才是内部函数。
+ 请注意，这仅适用于函数类型，合约中定义的函数明确指定可见性，它们没有默认值。
 
-有两种方法可以访问当前合约中的函数：一种是直接使用它的名字，``f`` ，另一种是使用 ``this.f`` 。
-前者适用于内部函数，后者适用于外部函数。
+类型转换：
+
+外部函数类型的值可以显式转换为某个合约地址 ``address`` 的函数。
+
+函数类型 ``A`` 可以隐式转换为函数类型 ``B`` 当且仅当:
+它们的参数类型相同，返回类型相同，它们的内部/外部属性是相同的，并且 ``A`` 的状态可变性并不比 ``B`` 的状态可变性更具限制性，比如：
+
+ - ``pure`` 函数可以转换为 ``view`` 和 ``non-payable`` 函数
+ - ``view`` 函数可以转换为 ``non-payable`` 函数
+ - ``payable`` 函数可以转换为 ``non-payable`` 函数
+
+其他的转换则不可以。
+
+关于 ``payable`` 和 ``non-payable`` 的规则可能有点令人困惑，但实质上，如果一个函数是 ``payable`` ，这意味着它
+也接受零以太的支付，因此它也是 ``non-payable`` 。
+另一方面，``non-payable`` 函数将拒绝发送给它的 |ether| ，
+所以 ``non-payable`` 函数不能转换为 ``payable`` 函数。
+
 
 如果当函数类型的变量还没有初始化时就调用它的话会引发一个异常。
 如果在一个函数被 ``delete`` 之后调用它也会发生相同的情况。
@@ -511,19 +565,30 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 请注意，当前合约的 public 函数既可以被当作内部函数也可以被当作外部函数使用。
 如果想将一个函数当作内部函数使用，就用 ``f`` 调用，如果想将其当作外部函数，使用 ``this.f`` 。
 
-除此之外，public（或 external）函数也有一个特殊的成员变量称作 ``selector``，可以返回 :ref:`ABI 函数选择器 <abi_function_selector>`::
+成员方法：
 
-    pragma solidity ^0.4.16;
+public（或 external）函数都有下面的成员：
 
-    contract Selector {
-      function f() public view returns (bytes4) {
+* ``.selector`` 返回 :ref:`ABI 函数选择器 <abi_function_selector>`
+* ``.gas(uint)`` 返回一个可调用的函数对象，当被调用时，它将指定函数运行的Gas。参考 :ref:`外部函数调用 <external-function-calls>` 了解更多。
+* ``.value(uint)`` 返回一个可调用的函数对象，当被调用时，它将向目标函数发送指定数量的 |ether| （单位 wei）。 参考 :ref:`外部函数调用 <external-function-calls>` 了解更多。
+
+下面的例子，显示如何使用成员::
+
+    pragma solidity >=0.4.16 <0.7.0;
+
+    contract Example {
+      function f() public payable returns (bytes4) {
         return this.f.selector;
+      }
+      function g() public {
+        this.f.gas(10).value(800)();
       }
     }
 
 如果使用内部函数类型的例子::
 
-    pragma solidity ^0.4.16;
+    pragma solidity >=0.4.16 <0.7.0;
 
     library ArrayUtils {
       // 内部函数可以在内部库函数中使用，
@@ -574,33 +639,37 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 
 另外一个使用外部函数类型的例子::
 
-    pragma solidity ^0.4.11;
+    pragma solidity >=0.4.22 <0.7.0;
 
     contract Oracle {
       struct Request {
         bytes data;
-        function(bytes memory) external callback;
+        function(uint) external callback;
       }
       Request[] requests;
       event NewRequest(uint);
-      function query(bytes data, function(bytes memory) external callback) public {
+      function query(bytes memory data, function(uint) external callback) public {
         requests.push(Request(data, callback));
-        NewRequest(requests.length - 1);
+        emit NewRequest(requests.length - 1);
       }
-      function reply(uint requestID, bytes response) public {
-        // 这里要验证 reply 来自可信的源
+      function reply(uint requestID, uint response) public {
+        // 这里检查回复来自可信来源
         requests[requestID].callback(response);
       }
     }
 
     contract OracleUser {
-      Oracle constant oracle = Oracle(0x1234567); // 已知的合约
-      function buySomething() {
+      Oracle constant oracle = Oracle(0x1234567); // known contract
+      uint exchangeRate;
+      function buySomething() public {
         oracle.query("USD", this.oracleResponse);
       }
-      function oracleResponse(bytes response) public {
-        require(msg.sender == address(oracle));
-        // 使用数据
+      function oracleResponse(uint response) public {
+        require(
+            msg.sender == address(oracle),
+            "Only oracle can call this."
+        );
+        exchangeRate = response;
       }
     }
 
