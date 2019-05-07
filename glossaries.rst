@@ -67,6 +67,10 @@
 
   <ruby>内存<rp>（</rp><rt>memory</rt><rp>）</rp></ruby>
 
+.. |calldata| raw:: html
+
+  <ruby>调用数据<rp>（</rp><rt>calldata</rt><rp>）</rp></ruby>
+
 .. |natspec| raw:: html
 
   <ruby>以太坊标准说明格式<rp>（</rp><rt>Ethereum Nature Specification Format(natspec)</rt><rp>）</rp></ruby>

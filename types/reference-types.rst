@@ -6,43 +6,55 @@
 引用类型
 ========
 
-比起之前讨论过的值类型，在处理复杂的类型（即占用的空间超过 256 位的类型）时，我们需要更加谨慎。
-由于拷贝这些类型变量的开销相当大，我们不得不考虑它的存储位置，是将它们保存在 ** |memory| ** （并不是永久存储）中，
-还是 ** |storage| ** （保存状态变量的地方）中。
+引用类型可以通过多个不同的名称修改它的值，而值类型的变量，每次都有独立的副本。因此，必须比值类型更谨慎地处理引用类型。
+目前，引用类型包括结构，数组和映射，如果使用引用类型，则必须明确指明数据存储哪种类型的位置（空间）里：
+ - |memory| 其生命周期只存在与函数调用期间
+ - |storage| 状态变量保存的位置，一直存在区块链中
+ - |calldata| 函数参数的特殊数据位置，仅适用于外部函数调用参数
 
-.. index:: ! type;reference, ! reference type, storage, memory, location, array, struct
+更改数据位置或类型转换将始终产生自动进行一份拷贝，而在同一数据位置内（对于 |storage| 来说）的复制仅在某些情况下进行拷贝。
+
+.. _data-location:
 
 数据位置
 ---------
 
-所有的复杂类型，即 *数组* 和 *结构* 类型，都有一个额外属性，“数据位置”，说明数据是保存在 |memory| 中还是 |storage| 中。
-根据上下文不同，大多数时候数据有默认的位置，但也可以通过在类型名后增加关键字 ``storage`` 或 ``memory`` 进行修改。
-函数参数（包括返回的参数）的数据位置默认是 ``memory``，
-局部变量的数据位置默认是 ``storage``，状态变量的数据位置强制是 ``storage`` （这是显而易见的）。
+所有的引用类型，如 *数组* 和 *结构体* 类型，都有一个额外注解 ``数据位置`` ，来说明数据存储位置。
+有三种位置： |memory| 、 |storage| 以及 |calldata| 。
+|calldata| 仅对外部合约函数的参数有效，同时也是必须的。 |calldata|  是不可修改的、非持久的函数参数存储区域，效果大多类似 |memory| 。
 
-也存在第三种数据位置， ``calldata`` ，这是一块只读的，且不会永久存储的位置，用来存储函数参数。
-外部函数的参数（非返回参数）的数据位置被强制指定为 ``calldata`` ，效果跟 ``memory`` 差不多。
 
-数据位置的指定非常重要，因为它们影响着赋值行为：
-在 |storage| 和 |memory| 之间两两赋值，或者 |storage| 向状态变量（甚至是从其它状态变量）赋值都会创建一份独立的拷贝。
-然而状态变量向局部变量赋值时仅仅传递一个引用，而且这个引用总是指向状态变量，因此后者改变的同时前者也会发生改变。
-另一方面，从一个 |memory| 存储的引用类型向另一个 |memory| 存储的引用类型赋值并不会创建拷贝。
+.. note::
+    在版本0.5.0之前，数据位置可以省略，并且根据变量的类型，函数类型等有默认数据位置，但是所有复杂类型现在必须提供明确的数据位置。
+
+.. _data-location-assignment:
+
+数据位置与赋值行为
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+数据位置不仅仅表示数据如何保存，它同样影响着赋值行为：
+
+* 在 |storage| 和 |memory| 之间两两赋值（或者从 |calldata| 赋值 ），都会创建一份独立的拷贝。
+* 从 |memory| 到 |memory| 的赋值只创建引用， 这意味着更改内存变量，其他引用相同数据的所有其他内存变量的值也会跟着改变。
+* 从 |storage| 到本地存储变量的赋值也只分配一个引用。
+* 其他的向 |storage| 的赋值，总是进行拷贝。 这种情况的示例如对状态变量或 |storage| 的结构体类型的局部变量成员的赋值，即使局部变量本身是一个引用，也会进行一份拷贝。
 
 ::
 
-    pragma solidity ^0.4.0;
+    pragma solidity >=0.4.0 <0.7.0;
 
-    contract C {
+    contract Tiny {
         uint[] x; // x 的数据存储位置是 storage
 
         // memoryArray 的数据存储位置是 memory
-        function f(uint[] memoryArray) public {
+        function f(uint[] memory memoryArray) public {
             x = memoryArray; // 将整个数组拷贝到 storage 中，可行
-            var y = x;  // 分配一个指针（其中 y 的数据存储位置是 storage），可行
+            uint[] storage y = x;  // 分配一个指针（其中 y 的数据存储位置是 storage），可行
             y[7]; // 返回第 8 个元素，可行
             y.length = 2; // 通过 y 修改 x，可行
             delete x; // 清除数组，同时修改 y，可行
-            // 下面的就不可行了；需要在 storage 中创建新的未命名的临时数组， /
+
+            // 下面的就不可行了；需要在 storage 中创建新的未命名的临时数组， 
             // 但 storage 是“静态”分配的：
             // y = memoryArray;
             // 下面这一行也不可行，因为这会“重置”指针，
@@ -53,20 +65,9 @@
             h(x); // 调用 h 函数，同时在 memory 中创建一个独立的临时拷贝
         }
 
-        function g(uint[] storage storageArray) internal {}
-        function h(uint[] memoryArray) public {}
+        function g(uint[] storage ) internal pure {}
+        function h(uint[] memory) public pure {}
     }
-
-总结
-^^^^^
-
-强制指定的数据位置：
- - 外部函数的参数（不包括返回参数）： calldata
- - 状态变量： storage
-
-默认数据位置：
- - 函数参数（包括返回参数）： memory
- - 所有其它局部变量： storage
 
 .. index:: ! array
 
@@ -75,17 +76,43 @@
 数组
 -----
 
-数组可以在声明时指定长度，也可以动态调整大小。
-对于 |storage| 的数组来说，元素类型可以是任意的（即元素也可以是数组类型，映射类型或者结构体）。
-对于 |memory| 的数组来说，元素类型不能是映射类型，如果作为 public 函数的参数，它只能是 ABI 类型。
+数组可以在声明时指定长度，也可以动态调整大小（长度）。
 
 一个元素类型为 ``T``，固定长度为 ``k`` 的数组可以声明为 ``T[k]``，而动态数组声明为 ``T[]``。
-举个例子，一个长度为 5，元素类型为 ``uint`` 的动态数组的数组，应声明为 ``uint[][5]`` （注意这里跟其它语言比，数组长度的声明位置是反的）。
-要访问第三个动态数组的第二个元素，你应该使用 x[2][1]（数组下标是从 0 开始的，且访问数组时的下标顺序与声明时相反，也就是说，x[2] 是从右边减少了一级）。。
+举个例子，一个长度为 5，元素类型为 ``uint`` 的动态数组的数组（二维数组），应声明为 ``uint[][5]`` （注意这里跟其它语言比，数组长度的声明位置是反的）。
+
+.. note::
+  译者注：作为对比，如在Java中，声明一个包含5个元素、每个元素都是数组的方式为 int[5][]。
+
+在Solidity中， ``X[3]`` 总是一个包含三个 ``X`` 类型元素的数组，即使 ``X`` 本身就是一个数组，这和其他语言也有所不同，比如 C 语言。
+
+数组下标是从 0 开始的，且访问数组时的下标顺序与声明时相反。
+如：如果有一个变量为 ``uint[][5] x memory``， 要访问第三个动态数组的第二个元素，使用 x[2][1]，要访问第三个动态数组使用 ``x[2]``。
+同样，如果有一个 ``T`` 类型的数组 ``T[5] a`` ， T 也可以是一个数组，那么 ``a[2]`` 总会是 ``T`` 类型。
+
+数组元素可以是任何类型，包括映射或结构体。对类型的限制是映射只能存储在 |storage| 中，并且公开访问函数的参数需要是 :ref:`ABI 类型 <ABI>`。
+
+状态变量标记 ``public`` 的数组，Solidity创建一个 :ref:` 访问器 <visibility-and-getters>`。
+小标数字索引就是 访问器 函数的参数。
+
+访问超出数组长度的元素会导致异常（assert 类型异常 ）。 可以使用 ``.push()`` 方法在末尾追加一个新元素，或者给 ``.length`` 赋值来改变大小，参考 :ref:`数组成员 <array-members>` （参见下面的注意事项）。
+
+
+``bytes`` 和 ``strings`` 也是数组
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``bytes`` 和 ``string`` 类型的变量是特殊的数组。
-``bytes`` 类似于 ``byte[]``，但它在 calldata 中会被“紧打包”（译者注：将元素连续地存在一起，不会按每 32 字节一单元的方式来存放）。
-``string`` 与 ``bytes`` 相同，但（暂时）不允许用长度或索引来访问。
+``bytes`` 类似于 ``byte[]``，但它在 |calldata| 和 |memory| 中会被“紧打包”（译者注：将元素连续地存在一起，不会按每 32 字节一单元的方式来存放）。
+``string`` 与 ``bytes`` 相同，但不允许用长度或索引来访问。
+
+Solidity does not have string manipulation functions, but there are
+third-party string libraries. You can also compare two strings by their keccak256-hash using
+``keccak256(abi.encodePacked(s1)) == keccak256(abi.encodePacked(s2))`` and concatenate two strings using ``abi.encodePacked(s1, s2)``.
+
+You should use ``bytes`` over ``byte[]`` because it is cheaper, since ``byte[]`` adds 31 padding bytes between the elements. As a general rule,
+use ``bytes`` for arbitrary-length raw byte data and ``string`` for arbitrary-length
+string (UTF-8) data. If you can limit the length to a certain number of bytes,
+always use one of the value types ``bytes1`` to ``bytes32`` because they are much cheaper.
 
 .. note::
     如果想要访问以字节表示的字符串 ``s``，请使用 ``bytes(s).length`` / ``bytes(s)[7] = 'x';``。
