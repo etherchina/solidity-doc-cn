@@ -93,8 +93,8 @@
 
 数组元素可以是任何类型，包括映射或结构体。对类型的限制是映射只能存储在 |storage| 中，并且公开访问函数的参数需要是 :ref:`ABI 类型 <ABI>`。
 
-状态变量标记 ``public`` 的数组，Solidity创建一个 :ref:`访问器 <visibility-and-getters>` 。
-小标数字索引就是 访问器 函数的参数。
+状态变量标记 ``public`` 的数组，Solidity创建一个 :ref:`getter函数 <visibility-and-getters>` 。
+小标数字索引就是 getter函数 的参数。
 
 访问超出数组长度的元素会导致异常（assert 类型异常 ）。 可以使用 ``.push()`` 方法在末尾追加一个新元素，或者给 ``.length`` 赋值来改变大小，参考 :ref:`数组成员 <array-members>` （参见下面的注意事项）。
 
