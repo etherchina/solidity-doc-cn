@@ -10,7 +10,7 @@
 其中 ``_KeyType`` 可以是除了映射、变长数组、合约、枚举以及结构体以外的几乎所有类型。
 ``_ValueType`` 可以是包括映射类型在内的任何类型。
 
-映射可以视作 `哈希表 <https://en.wikipedia.org/wiki/Hash_table>`，它们在实际的初始化过程中创建每个可能的 key，
+映射可以视作 `哈希表 <https://en.wikipedia.org/wiki/Hash_table>`_ ，它们在实际的初始化过程中创建每个可能的 key，
 并将其映射到字节形式全是零的值：一个类型的 :ref:`默认值 <default-value>`。然而下面是映射与哈希表不同的地方：
 在映射中，实际上并不存储 key，而是存储它的 ``keccak256`` 哈希值，从而便于查询实际的值。
 

@@ -37,7 +37,8 @@
 * 在 |storage| 和 |memory| 之间两两赋值（或者从 |calldata| 赋值 ），都会创建一份独立的拷贝。
 * 从 |memory| 到 |memory| 的赋值只创建引用， 这意味着更改内存变量，其他引用相同数据的所有其他内存变量的值也会跟着改变。
 * 从 |storage| 到本地存储变量的赋值也只分配一个引用。
-* 其他的向 |storage| 的赋值，总是进行拷贝。 这种情况的示例如对状态变量或 |storage| 的结构体类型的局部变量成员的赋值，即使局部变量本身是一个引用，也会进行一份拷贝。
+* 其他的向 |storage| 的赋值，总是进行拷贝。 这种情况的示例如对状态变量或 |storage| 的结构体类型的局部变量成员的赋值，即使局部变量本身是一个引用，也会进行一份拷贝（译者注：查看下面 ``ArrayContract`` 合约 更容易理解）。
+
 
 ::
 
@@ -92,7 +93,7 @@
 
 数组元素可以是任何类型，包括映射或结构体。对类型的限制是映射只能存储在 |storage| 中，并且公开访问函数的参数需要是 :ref:`ABI 类型 <ABI>`。
 
-状态变量标记 ``public`` 的数组，Solidity创建一个 :ref:` 访问器 <visibility-and-getters>`。
+状态变量标记 ``public`` 的数组，Solidity创建一个 :ref:`访问器 <visibility-and-getters>` 。
 小标数字索引就是 访问器 函数的参数。
 
 访问超出数组长度的元素会导致异常（assert 类型异常 ）。 可以使用 ``.push()`` 方法在末尾追加一个新元素，或者给 ``.length`` 赋值来改变大小，参考 :ref:`数组成员 <array-members>` （参见下面的注意事项）。
@@ -105,55 +106,61 @@
 ``bytes`` 类似于 ``byte[]``，但它在 |calldata| 和 |memory| 中会被“紧打包”（译者注：将元素连续地存在一起，不会按每 32 字节一单元的方式来存放）。
 ``string`` 与 ``bytes`` 相同，但不允许用长度或索引来访问。
 
-Solidity does not have string manipulation functions, but there are
-third-party string libraries. You can also compare two strings by their keccak256-hash using
-``keccak256(abi.encodePacked(s1)) == keccak256(abi.encodePacked(s2))`` and concatenate two strings using ``abi.encodePacked(s1, s2)``.
+Solidity没有字符串操作函数，但是可以使用第三方字符串库，我们可以比较两个字符串通过计算他们的 keccak256-hash ，可使用
+``keccak256(abi.encodePacked(s1)) == keccak256(abi.encodePacked(s2))`` 或者使用 ``abi.encodePacked(s1, s2)`` 来拼接字符串。
 
-You should use ``bytes`` over ``byte[]`` because it is cheaper, since ``byte[]`` adds 31 padding bytes between the elements. As a general rule,
-use ``bytes`` for arbitrary-length raw byte data and ``string`` for arbitrary-length
-string (UTF-8) data. If you can limit the length to a certain number of bytes,
-always use one of the value types ``bytes1`` to ``bytes32`` because they are much cheaper.
+我们更多时候应该使用 ``bytes`` 而不是 ``byte[]`` ，因为Gas 费用更低, ``byte[]`` 会在元素之间添加31个填充字节。作为一个基本规则，
+对任意长度的原始字节数据使用 ``bytes``，对任意长度字符串（UTF-8）数据使用 ``string``。
+
+如果使用一个长度限制的字节数组，应该使用一个 ``bytes1`` 到 ``bytes32`` 的具体类型，因为它们便宜得多。
 
 .. note::
     如果想要访问以字节表示的字符串 ``s``，请使用 ``bytes(s).length`` / ``bytes(s)[7] = 'x';``。
     注意这时你访问的是 UTF-8 形式的低级 bytes 类型，而不是单个的字符。
 
-可以将数组标识为 ``public``，从而让 Solidity 创建一个 :ref:`getter <visibility-and-getters>`。
-之后必须使用数字下标作为参数来访问 getter。
 
 .. index:: ! array;allocating, new
 
 创建内存数组
 ^^^^^^^^^^^^^
 
-可使用 ``new`` 关键字在内存中创建变长数组。
+可使用 ``new`` 关键字在 |memory| 中基于运行时的长度创建数组。
 与 |storage| 数组相反的是，你 *不能* 通过修改成员变量 ``.length`` 改变 |memory| 数组的大小。
+
+必须提前计算所需的大小或者创建一个新的内存数组并复制每个元素。
 
 ::
 
-    pragma solidity ^0.4.16;
+    pragma solidity >=0.4.16 <0.7.0;
 
-    contract C {
+    contract TX {
         function f(uint len) public pure {
             uint[] memory a = new uint[](7);
             bytes memory b = new bytes(len);
-            // 这里我们有 a.length == 7 以及 b.length == len
+
+            assert(a.length == 7);
+            assert(b.length == len);
+
             a[6] = 8;
         }
     }
 
 .. index:: ! array;literals, !inline;arrays
 
-数组字面常数 / 内联数组
+数组字面常量 / 内联数组
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-数组字面常数是写作表达式形式的数组，并且不会立即赋值给变量。
+
+数组字面常量是在方括号中（ ``[...]`` ） 包含一个或多个逗号分隔的表达式。 例如 ``[1, a, f(3)]`` 。 必须有一个所有元素都可以隐式转换到普通的类型，这个类型就是数组的基本类型。
+数组字面常量总是静态固定大小的 |memory| 数组。
+
+在下面的例子中，``[1, 2, 3]`` 的类型是 ``uint8[3] memory``。 因为每个常量的类型都是 ``uint8`` ，如果你希望结果是 ``uint [3] memory`` 类型，你需要将第一个元素转换为 ``uint`` 。
 
 ::
 
     pragma solidity ^0.4.16;
 
-    contract C {
+    contract LBC {
         function f() public pure {
             g([uint(1), 2, 3]);
         }
@@ -162,18 +169,16 @@ always use one of the value types ``bytes1`` to ``bytes32`` because they are muc
         }
     }
 
-数组字面常数是一种定长的 |memory| 数组类型，它的基础类型由其中元素的普通类型决定。
-例如，``[1, 2, 3]`` 的类型是 ``uint8[3] memory``，因为其中的每个字面常数的类型都是 ``uint8``。
-正因为如此，有必要将上面这个例子中的第一个元素转换成 ``uint`` 类型。
-目前需要注意的是，定长的 |memory| 数组并不能赋值给变长的 |memory| 数组，下面是个反例：
+
+目前需要注意的是，定长的 |memory| 数组并不能赋值给变长的 |memory| 数组，下面的例子是无法运行的：
 
 ::
 
     // 这段代码并不能编译。
 
-    pragma solidity ^0.4.0;
+    pragma solidity  >=0.4.0 <0.7.0;
 
-    contract C {
+    contract LBC {
         function f() public {
             // 这一行引发了一个类型错误，因为 unint[3] memory
             // 不能转换成 uint[] memory。
@@ -181,92 +186,131 @@ always use one of the value types ``bytes1`` to ``bytes32`` because they are muc
         }
     }
 
-已经计划在未来移除这样的限制，但目前数组在 ABI 中传递的问题造成了一些麻烦。
+计划在未来移除这样的限制，但目前数组在 ABI 中传递的问题造成了一些麻烦。
 
-.. index:: ! array;length, length, push, !array;push
+.. index:: ! array;length, length, push, pop, !array;push, !array;pop
 
-成员
-^^^^^^
+.. _array-members:
+
+数组成员
+^^^^^^^^^^^^
 
 **length**:
     数组有 ``length`` 成员变量表示当前数组的长度。
-    动态数组可以在 |storage| （而不是 |memory| ）中通过改变成员变量 ``.length`` 改变数组大小。
-    并不能通过访问超出当前数组长度的方式实现自动扩展数组的长度。
-    一经创建，|memory| 数组的大小就是固定的（但却是动态的，也就是说，它依赖于运行时的参数）。
+    一经创建，|memory| 数组的大小就是固定的（但却是动态的，也就是说，它可以根据运行时的参数创建）。 
+    动态数组（仅存在于 |storage| 中）通过改变成员变量 ``.length`` 改变数组大小。
+    并不能通过访问超出当前数组长度的方式实现自动扩展数组的长度（这会导致异常）。
+
+    增加长度会为数组添加新的零初始化元素， 减少长度会在每个上面执行一个隐含的 :ref:`delete` 删除元素。
+    如果您尝试调整不在 |storage| 中的非动态数组的大小，你会收到一个 ``Value must be an lvalue`` 错误。   
 
 **push**:
-    变长的 |storage| 数组以及 ``bytes`` 类型（而不是 ``string`` 类型）都有一个叫做 ``push`` 的成员函数，它用来附加新的元素到数组末尾。
+    变长的 |storage| 数组以及 ``bytes`` 类型（ ``string`` 类型不可以）都有一个 ``push`` 的成员函数，它用来附加新的元素到数组末尾，元素将初始化为零。
     这个函数将返回新的数组长度。
 
-.. warning::
-    在外部函数中目前还不能使用多维数组。
+**pop**:
+     变长的 |storage| 数组以及 ``bytes`` 类型（ ``string`` 类型不可以）都有一个 ``push`` 的成员函数， 它用来从数组末尾删除元素。 同样的会在移除的元素上隐含调用 :ref:`delete` 。
 
 .. warning::
-    由于 |evm| 的限制，不能通过外部函数调用返回动态的内容。
-    例如，如果通过 web3.js 调用 ``contract C { function f() returns (uint[]) { ... } }`` 中的 ``f`` 函数，它会返回一些内容，但通过 Solidity 不可以。
+    如果在空数组上 ``.length--`` 会导致向下溢出，长度将设置为 ``2**256-1`` 。
 
-    目前唯一的变通方法是使用大型的静态数组。
+.. note::
+    增加 |storage| 数组的长度具有固定的 gas 消耗，因为 |storage| 总是被零初始化，而减少长度至少是线性成本（大多数情况下比线性成本更差），
+    因为它包括清理已删除的元素，类似于在这些元素上调用 :ref:`delete` 。
+
+.. note::
+    在外部（external）函数中目前还不能使用多维数组，但是在公有（public）函数中是支持的。
+
+.. note::
+    在Byzantium（在2017-10-16日4370000区块上进行硬分叉升级）之前的EVM版本中，无法访问从函数调用返回动态数组。 如果要调用返回动态数组的函数，请确保 EVM 在拜占庭模式上运行。
 
 ::
 
-    pragma solidity ^0.4.16;
+
+    pragma solidity >=0.4.16 <0.7.0;
 
     contract ArrayContract {
         uint[2**20] m_aLotOfIntegers;
+
         // 注意下面的代码并不是一对动态数组，
         // 而是一个数组元素为一对变量的动态数组（也就是数组元素为长度为 2 的定长数组的动态数组）。
+        // 因为  T[] 总是 T 的动态数组, 尽管 T 是数组
+        // 所有的状态变量的数据位置都是 storage 
         bool[2][] m_pairsOfFlags;
-        // newPairs 存储在 memory 中 —— 函数参数默认的存储位置
 
-        function setAllFlagPairs(bool[2][] newPairs) public {
-            // 向一个 storage 的数组赋值会替代整个数组
+        // newPairs 存储在 memory 中 (仅当它是公有的合约函数)
+        function setAllFlagPairs(bool[2][] memory newPairs) public {
+
+         // 向一个 storage 的数组赋值会对 ``newPairs`` 进行拷贝，并替代整个 ``m_pairsOfFlags`` 数组
             m_pairsOfFlags = newPairs;
         }
 
+        struct StructType {
+            uint[] contents;
+            uint moreInfo;
+        }
+        StructType s;
+
+        function f(uint[] memory c) public {
+            // 保存引用
+            StructType storage g = s;
+
+            // 同样改变了 ``s.moreInfo``.
+            g.moreInfo = 2;
+
+            // 进行了拷贝，因为 ``g.contents`` 不是本地变量，而是本地变量的成员
+            g.contents = c;
+        }
+
         function setFlagPair(uint index, bool flagA, bool flagB) public {
-            // 访问一个不存在的数组下标会引发一个异常
+            // 访问不存在的索引将引发异常
             m_pairsOfFlags[index][0] = flagA;
             m_pairsOfFlags[index][1] = flagB;
         }
 
         function changeFlagArraySize(uint newSize) public {
-            // 如果 newSize 更小，那么超出的元素会被清除
+            // 如果新大小较小，则将清除已删除的数组元素
             m_pairsOfFlags.length = newSize;
         }
 
         function clear() public {
-            // 这些代码会将数组全部清空
+            // 这些完全清除了数组
             delete m_pairsOfFlags;
             delete m_aLotOfIntegers;
-            // 这里也是实现同样的功能
+            // 效果相同（和上面）
             m_pairsOfFlags.length = 0;
         }
 
         bytes m_byteData;
 
-        function byteArrays(bytes data) public {
-            // 字节的数组（语言意义中的 byte 的复数 ``bytes``）不一样，因为它们不是填充式存储的，
-            // 但可以当作和 "uint8[]" 一样对待
+        function byteArrays(bytes memory data) public {
+            // 字节数组（bytes）不一样，它们在没有填充的情况下存储。
+            // 可以被视为与 uint8 [] 相同
             m_byteData = data;
             m_byteData.length += 7;
-            m_byteData[3] = byte(8);
+            m_byteData[3] = 0x08;
             delete m_byteData[2];
         }
 
-        function addFlag(bool[2] flag) public returns (uint) {
+        function addFlag(bool[2] memory flag) public returns (uint) {
             return m_pairsOfFlags.push(flag);
         }
 
-        function createMemoryArray(uint size) public pure returns (bytes) {
-            // 使用 `new` 创建动态 memory 数组：
+        function createMemoryArray(uint size) public pure returns (bytes memory) {
+            // 使用`new`创建动态内存数组：
             uint[2][] memory arrayOfPairs = new uint[2][](size);
+
+            // 内联（Inline）数组始终是静态大小的，如果只使用字面常量，则必须至少提供一种类型。
+            arrayOfPairs[0] = [uint(1), 2];
+
             // 创建一个动态字节数组：
             bytes memory b = new bytes(200);
             for (uint i = 0; i < b.length; i++)
-                b[i] = byte(i);
+                b[i] = byte(uint8(i));
             return b;
         }
     }
+
 
 
 .. index:: ! struct, ! type;struct
@@ -280,7 +324,7 @@ Solidity 支持通过构造结构体的形式定义新的类型，以下是一�
 
 ::
 
-    pragma solidity ^0.4.11;
+    pragma solidity >=0.4.11 <0.7.0;
 
     contract CrowdFunding {
         // 定义的新类型包含两个属性。
@@ -300,9 +344,12 @@ Solidity 支持通过构造结构体的形式定义新的类型，以下是一�
         uint numCampaigns;
         mapping (uint => Campaign) campaigns;
 
-        function newCampaign(address beneficiary, uint goal) public returns (uint campaignID) {
+        function newCampaign(address payable beneficiary, uint goal) public returns (uint campaignID) {
             campaignID = numCampaigns++; // campaignID 作为一个变量返回
-            // 创建新的结构体示例，存储在 storage 中。我们先不关注映射类型。
+
+            // 在 memory 中创建新结构体并将其复制到storage 。
+            //  我们省略了映射类型，因为它在 memory 中无效（它存储在 storage 中）。
+            //  如果结构体被复制（甚至从 storage 到 storage ）映射类型也始终会省略，因为它们无法枚举。
             campaigns[campaignID] = Campaign(beneficiary, goal, 0, 0);
         }
 
@@ -326,13 +373,13 @@ Solidity 支持通过构造结构体的形式定义新的类型，以下是一�
         }
     }
 
-上面的合约只是一个简化版的众筹合约，但它已经足以让我们理解结构体的基础概念。
+上面的合约只是一个简化版的 `众筹合约 <https://learnblockchain.cn/2018/02/28/ico-crowdsale/>`_，但它已经足以让我们理解结构体的基础概念。
 结构体类型可以作为元素用在映射和数组中，其自身也可以包含映射和数组作为成员变量。
 
 尽管结构体本身可以作为映射的值类型成员，但它并不能包含自身。
 这个限制是有必要的，因为结构体的大小必须是有限的。
 
-注意在函数中使用结构体时，一个结构体是如何赋值给一个局部变量（默认存储位置是 |storage| ）的。
+注意在函数中使用结构体时，一个结构体是如何赋值给一个存储位置是 |storage| 的局部变量。
 在这个过程中并没有拷贝这个结构体，而是保存一个引用，所以对局部变量成员的赋值实际上会被写入状态。
 
 当然，你也可以直接访问结构体的成员而不用将其赋值给一个局部变量，就像这样，
