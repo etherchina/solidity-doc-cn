@@ -30,7 +30,7 @@
 如果合约继承自抽象合约，并且没有通过重写来实现所有未实现的函数，那么它本身就是抽象的。
 
 
-Note that a function without implementation is different from a :ref:`Function Type <function_types>` even though their syntax looks very similar.
+Note that a function without implementation is different from a `函数类型 <https://learnblockchain.cn/docs/solidity/types.html#function-types>`_ even though their syntax looks very similar.
 
 Example of function without implementation (a function declaration)::
 
