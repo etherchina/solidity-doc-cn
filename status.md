@@ -1,18 +1,11 @@
-# Solidity文档翻译进度
+# Solidity文档0.5.0翻译进度记录
 
-注：某些commit hash和272262e不一样，下次更新同步时请注意检查是hash值错误还是真的是正确的hash。
 
 ## 首页
  - index.rst
  - 状态：终审
- - 行数：174行
- - 译者：左洪斌（hongbinzuo）
- - 审校：王兴宇（wxy）
- - commit: 272262e
- - 认领日期：2月20日
- - 提交日期：2月23日
- - 最后更新日期：3月12日
- - 相关PR：#45
+ - 译者：Tiny熊
+
 
 ## 智能合约概述
  - introduction-to-smart-contracts.rst

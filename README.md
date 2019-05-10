@@ -1,35 +1,14 @@
-# Solidity中文文档 
+# Solidity 中文文档 
 
-## 工作指南
+本分 Solidity 中文文档是区块链社区通力合作下的杰作。翻译最初 HiBlock 社区发起，后经过 [深入浅出区块链社区](https://learnblockchain.cn) 社区成员根据最新版本补充翻译。
 
-### Github使用基础
+文档托管在 [https://learnblockchain.cn/docs/solidity/](https://learnblockchain.cn/docs/solidity/)
 
-参见廖雪峰的[Git和Github指南](https://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/001373962845513aefd77a99f4145f0a2c7a7ca057e7570000)
 
-### RST文档基础
+### 参与翻译
 
-RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.html)
+参见当前目录下文档：[translation_process.md](translation_process.md)
 
-### 工作流
-
-参见当前目录下文档：`translation_process.md`
-
-## 工作进度
-
-参见当前目录下文档：`status.md`
-
-## 常见问题
-0. [中文文案排版指北](https://github.com/mzlogin/chinese-copywriting-guidelines)
-1. fork出的仓库如何同步源的内容：https://www.zhihu.com/question/28676261
-2. 如何检查文件(参考[Solidity英文文档仓库](https://github.com/ethereum/solidity))的提交哈希：`git log filename.rst`
-3. 文档如何构建：目前文档托管在[深入浅出区块链博客网站](https://learnblockchain.cn/)的CDN上，在管理员校对后，自动发布。
-4. 原英文文档更新怎么办：我们需要人去定期检查英文文档的更新，使用commit hash来比较更新，如果有更新，我们发起翻译请求，翻译后提交。后续我们会开发跟踪脚本，每天检查文档文件的更新，以确定是否有新的翻译工作。
-
-## 术语表
-参见`glossaries.md`和`glossaries.rst`
-
-## 参考资料
-参见`references.md`
 
 ## 致谢  
 ### 管理员  
@@ -42,7 +21,12 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 
 [Toya](https://github.com/toyab), [侯伯薇](https://github.com/houbowei), [李捷](https://github.com/oldcodeoberyn), [虞是乎](https://github.com/ysqi), [周锷](https://github.com/ghostrd), [毛明旺](https://github.com/dennisWind), [孔庆丰](https://github.com/buffalo2004), [卓跃萍](https://github.com/JocelynZhuo), [左洪斌](https://github.com/hongbinzuo),[杨镇](https://github.com/riversyang),[王兴宇](https://github.com/wxy),[姜信宝](https://github.com/bobjiang), [盖盖](https://github.com/gitferry), [Kerwin](https://github.com/KerwinChung2018), [蔡晓静](https://github.com/caixiaoqing627) , [Justin](https://github.com/justinquan)   
 
+翻译工作是一个持续的过程（这份文档目前也还有部分未完成），我们热情邀请热爱区块链技术的小伙伴一起参与，欢迎加入我们 Group： https://github.com/lbc-team 
+
+申请称为译者，可以勾搭Tiny熊（微信：xlbxiong）
+
 ### 支持与赞助  
 支持 [HiBlock区块链社区](http://hiblock.net/) , [深入浅出区块链技术社区](http://learnblockchain.cn)
+
 赞助 [登链学院](http://edu.upchain.pro/)
 

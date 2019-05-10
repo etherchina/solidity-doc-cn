@@ -73,7 +73,7 @@
 
 .. |natspec| raw:: html
 
-  <ruby>以太坊标准说明格式<rp>（</rp><rt>Ethereum Nature Specification Format(natspec)</rt><rp>）</rp></ruby>
+  <ruby>以太坊注释规范格式<rp>（</rp><rt>Ethereum Nature Specification Format(natspec)</rt><rp>）</rp></ruby>
 
 .. |modifier| raw:: html
 
