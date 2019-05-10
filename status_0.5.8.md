@@ -56,7 +56,9 @@
 ###  assembly.rst
     - 状态：未认领
 ###  miscellaneous.rst
-    - 状态：未认领
+    - 状态：翻译中
+    - 认领日期：5-10
+    - 译者：alexwang
 ###  050-breaking-changes.rst
     - 状态：未认领
 
