@@ -39,8 +39,9 @@
     - 状态：完成
     - 译者：Tiny熊
 #### types/operators.rst
-    - 状态：翻译中
+    - 状态：完成
     - 认领日期：5-10
+    - 完成日期：5-11
     - 译者：Tiny熊
 #### types/conversion.rst
     - 状态：翻译中
