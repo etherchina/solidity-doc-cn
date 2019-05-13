@@ -14,7 +14,7 @@
 ``uint8`` 可以转换成 ``uint16``，``int128`` 转换成 ``int256``，但 ``int8`` 不能转换成 ``uint256``
 （因为 ``uint256`` 不能涵盖某些值，例如，``-1``）。
 更进一步来说，无符号整型可以转换成跟它大小相等或更大的字节类型，但反之不能。
-任何可以转换成 ``uint160`` 的类型都可以转换成 ``address`` 类型。
+
 
 显式转换
 ---------
@@ -35,90 +35,87 @@
     uint32 a = 0x12345678;
     uint16 b = uint16(a); // 此时 b 的值是 0x5678
 
-If an integer is explicitly converted to a larger type, it is padded on the left (i.e. at the higher order end).
-The result of the conversion will compare equal to the original integer::
+
+如果将整数显式转换为更大的类型，则将填充左侧（即在更高阶的位置）。
+转换结果依旧等于原来整数 ::
 
     uint16 a = 0x1234;
-    uint32 b = uint32(a); // b will be 0x00001234 now
+    uint32 b = uint32(a); // b 为 0x00001234 now
     assert(a == b);
 
-Fixed-size bytes types behave differently during conversions. They can be thought of as
-sequences of individual bytes and converting to a smaller type will cut off the
-sequence::
+
+定长字节数组转换则有所不同， 他们可以被认为是单个字节的序列和转换为较小的类型将切断序列 ::
 
     bytes2 a = 0x1234;
-    bytes1 b = bytes1(a); // b will be 0x12
+    bytes1 b = bytes1(a); // b 为 0x12
 
-If a fixed-size bytes type is explicitly converted to a larger type, it is padded on
-the right. Accessing the byte at a fixed index will result in the same value before and
-after the conversion (if the index is still in range)::
+如果将定长字节数组显式转换为更大的类型，将按正确的方式填充。 以固定索引访问转换后的字节将在和之前的值相等
+（如果索引仍然在范围内）::
+
 
     bytes2 a = 0x1234;
-    bytes4 b = bytes4(a); // b will be 0x12340000
+    bytes4 b = bytes4(a); // b 为 0x12340000
     assert(a[0] == b[0]);
     assert(a[1] == b[1]);
 
-Since integers and fixed-size byte arrays behave differently when truncating or
-padding, explicit conversions between integers and fixed-size byte arrays are only allowed,
-if both have the same size. If you want to convert between integers and fixed-size byte arrays of
-different size, you have to use intermediate conversions that make the desired truncation and padding
-rules explicit::
+因为整数和定长字节数组在截断（或填充）时行为是不同的，
+如果整数和定长字节数组有相同的大小，则允许他们之间进行显式转换， 如果要在不同的大小的整数和定长字节数组之间进行转换
+，必须使用一个中间类型来明确进行所需截断和填充的规则::
 
     bytes2 a = 0x1234;
-    uint32 b = uint16(a); // b will be 0x00001234
-    uint32 c = uint32(bytes4(a)); // c will be 0x12340000
-    uint8 d = uint8(uint16(a)); // d will be 0x34
-    uint8 e = uint8(bytes1(a)); // e will be 0x12
+    uint32 b = uint16(a); // b 为 0x00001234
+    uint32 c = uint32(bytes4(a)); // c 为 0x12340000
+    uint8 d = uint8(uint16(a)); // d 为 0x34
+    uint8 e = uint8(bytes1(a)); // e 为 0x12
 
 .. _types-conversion-literals:
 
 字面常量与基本类型的转换
 =================================================
 
-整型
--------------
+整型与字面常量转换
+-------------------
 
-Decimal and hexadecimal number literals can be implicitly converted to any integer type
-that is large enough to represent it without truncation::
+十进制和十六进制字面常量可以隐式转换为任何足以表示它而不会截断的整数类型 ::
 
-    uint8 a = 12; // fine
-    uint32 b = 1234; // fine
-    uint16 c = 0x123456; // fails, since it would have to truncate to 0x3456
+    uint8 a = 12; //  可行
+    uint32 b = 1234; // 可行
+    uint16 c = 0x123456; // 失败, 会截断为 0x3456
 
-定长字节数组
-----------------------
+定长字节数组与字面常量转换
+-----------------------------
 
-Decimal number literals cannot be implicitly converted to fixed-size byte arrays. Hexadecimal
-number literals can be, but only if the number of hex digits exactly fits the size of the bytes
-type. As an exception both decimal and hexadecimal literals which have a value of zero can be
-converted to any fixed-size bytes type::
+十进制字面常量不能隐式转换为定长字节数组。十六进制字面常量可以是，但仅当十六进制数字大小完全符合定长字节数组长度。
+不过零值例外，零的十进制和十六进制字面常量都可以转换为任何定长字节数组类型::
 
-    bytes2 a = 54321; // not allowed
-    bytes2 b = 0x12; // not allowed
-    bytes2 c = 0x123; // not allowed
-    bytes2 d = 0x1234; // fine
-    bytes2 e = 0x0012; // fine
-    bytes4 f = 0; // fine
-    bytes4 g = 0x0; // fine
+    bytes2 a = 54321; // 不可行
+    bytes2 b = 0x12; // 不可行
+    bytes2 c = 0x123; // 不可行
+    bytes2 d = 0x1234; // 可行
+    bytes2 e = 0x0012; // 可行
+    bytes4 f = 0; // 可行
+    bytes4 g = 0x0; // 可行
 
-String literals and hex string literals can be implicitly converted to fixed-size byte arrays,
-if their number of characters matches the size of the bytes type::
 
-    bytes2 a = hex"1234"; // fine
-    bytes2 b = "xy"; // fine
-    bytes2 c = hex"12"; // not allowed
-    bytes2 d = hex"123"; // not allowed
-    bytes2 e = "x"; // not allowed
-    bytes2 f = "xyz"; // not allowed
+字符串字面常量和十六进制字符串字面常量可以隐式转换为定长字节数组，如果它们的字符数与字节类型的大小相匹配::
+
+
+    bytes2 a = hex"1234"; // 可行
+    bytes2 b = "xy"; // 可行
+    bytes2 c = hex"12"; // 不可行
+    bytes2 d = hex"123"; // n不可行
+    bytes2 e = "x"; // 不可行
+    bytes2 f = "xyz"; // 不可行
 
 地址类型
 ---------
 
-As described in :ref:`address_literals`, hex literals of the correct size that pass the checksum
+参考 :ref:`address_literals` ， hex literals of the correct size that pass the checksum
 test are of ``address`` type. No other literals can be implicitly converted to the ``address`` type.
 
-Explicit conversions from ``bytes20`` or any integer type to ``address`` result in ``address payable``.
+通过校验和测试的正确大小的十六进制字面常量会作为 ``address`` 类型。没有其他字面常量可以隐式转换为 ``address`` 类型。
 
+从 ``bytes20`` 或其他整型显示转换为 ``address`` 类型时，都会作为 ``address payable`` 类型。
 
 .. index:: ! type;deduction, ! var
 

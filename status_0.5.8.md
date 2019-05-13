@@ -44,12 +44,14 @@
     - 完成日期：5-11
     - 译者：Tiny熊
 #### types/conversion.rst
-    - 状态：翻译中
+    - 状态：完成
     - 认领日期：5-10
+    - 完成日期：5-12
     - 译者：Tiny熊
 
 ###  units-and-global-variables.rst
-    - 状态：未认领
+    - 状态：翻译中
+    - 译者：Tiny熊
 ###  control-structures.rst
     - 状态：未认领
 ###  contracts.rst
