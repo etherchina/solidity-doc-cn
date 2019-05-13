@@ -50,7 +50,9 @@
     - 译者：Tiny熊
 
 ###  units-and-global-variables.rst
-    - 状态：翻译中
+    - 状态：完成
+    - 认领日期：5-13
+    - 完成日期：5-13
     - 译者：Tiny熊
 ###  control-structures.rst
     - 状态：未认领
