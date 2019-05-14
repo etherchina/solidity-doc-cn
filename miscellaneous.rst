@@ -17,6 +17,10 @@
 - 如果 |storage_slot| 中的剩余空间不足以储存一个基本类型，那么它会被移入下一个 |storage_slot| 。
 - 结构（struct）和数组数据总是会占用一整个新插槽（但结构或数组中的各项，都会以这些规则进行打包）。
 
+对于使用继承的合约，状态变量的排序由C3线性化合约顺序（ 顺序从最基类合约开始）确定。如果上述规则成立，那么状态变量会在不同的合约中共享一个 |storage slot| 。
+
+结构体和数组中的成员变量会存储在一起，就像它们在显式声明中的一样。
+
 .. warning::
     使用小于 32 字节的元素时，你的合约的 gas 使用量可能高于使用 32 字节的元素时。这是因为 |evm| 每次会操作 32 个字节，
     所以如果元素比 32 字节小，|evm| 必须使用更多的操作才能将其大小缩减到到所需的大小。
@@ -27,6 +31,12 @@
     最后，为了允许 |evm| 对此进行优化，请确保你对 |storage| 中的变量和 ``struct`` 成员的书写顺序允许它们被紧密地打包。
     例如，按照 ``uint128，uint128，uint256`` 的顺序声明你的存储变量，而不是 ``uint128，uint256，uint128``，
     因为前者只占用两个 |storage_slot|，而后者将占用三个。
+
+.. Note::
+
+由于|storage|中的指针可以传递给|library|，所以|storage|中状态变量的布局被认为是solidity外部接口的一部分。这意味着，本节所述规则的任何变更均被视为语言的重大变更，由于其关键性，请在执行前应仔细考虑。
+
+Mappings 和动态数组
 
 结构和数组中的元素都是顺序存储的，就像它们被明确给定的那样。
 
@@ -83,6 +93,9 @@ Solidity 总会把新对象保存在空闲 |memory| 指针的位置，所以这�
 
 当从一个账户调用已部署的 Solidity 合约时，调用数据的格式被认为会遵循 :ref:`ABI 说明<ABI>`。
 根据 ABI 说明的规定，参数需要被整理为 32 字节的倍数。而内部函数调用会使用不同规则。
+
+合约中构造函数的参数直接追加在合约代码的末尾，也使用ABI编码。构造器将通过硬编码的偏移量访问它们，而不是使用``codeSize``操作码，因为如果把数据插入到代码中间，会让代码发生改变。
+
 
 .. index:: variable cleanup
 
@@ -272,7 +285,7 @@ AST 内的源代码映射使用以下表示法：
 
 全局变量
 ================
-
+- ``abi.decode(bytes memory encodedData, (...)) returns (...):`` :ref:`ABI <ABI>`- 对提供的数据进行解码. 第二个参数作为它的类型传入，并且要用小括号扩起来。 例如: (uint a, uint[2] memory b, bytes memory c) = abi.decode(data, (uint, uint[2], bytes))
 - ``abi.encode(...) returns (bytes)``： :ref:`ABI <ABI>` - 对给定参数进行编码
 - ``abi.encodePacked(...) returns (bytes)``：对给定参数执行 :ref:`紧打包编码 <abi_packed_mode>`
 - ``abi.encodeWithSelector(bytes4 selector, ...) returns (bytes)``： :ref:`ABI <ABI>` - 对给定参数进行编码，并以给定的函数选择器作为起始的 4 字节数据一起返回
@@ -298,7 +311,6 @@ AST 内的源代码映射使用以下表示法：
 - ``revert(string message)``：中止执行并回复所有状态变更，可以同时提供错误消息
 - ``blockhash(uint blockNumber) returns (bytes32)``：指定区块的区块哈希——仅可用于最新的 256 个区块
 - ``keccak256(...) returns (bytes32)``：计算 :ref:`紧打包编码 <abi_packed_mode>` 的 Ethereum-SHA-3（Keccak-256）哈希
-- ``sha3(...) returns (bytes32)``：等价于 ``keccak256``
 - ``sha256(...) returns (bytes32)``：计算 :ref:`紧打包编码 <abi_packed_mode>` 的 SHA-256 哈希
 - ``ripemd160(...) returns (bytes20)``：计算 :ref:`紧打包编码 <abi_packed_mode>` 的 RIPEMD-160 哈希
 - ``ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address)``：基于椭圆曲线签名找回与指定公钥关联的地址，发生错误的时候返回 0
@@ -307,11 +319,13 @@ AST 内的源代码映射使用以下表示法：
 - ``this`` （类型为当前合约的变量）：当前合约实例，可以准确地转换为 ``address``
 - ``super``：当前合约的上一级继承关系的合约
 - ``selfdestruct(address recipient)``：销毁当前合约，把余额发送到给定地址
-- ``suicide(address recipient)``：与 ``selfdestruct`` 等价，但已不推荐使用
 - ``<address>.balance`` （``uint256``）： :ref:`address` 的余额，以 Wei 为单位
-- ``<address>.send(uint256 amount) returns (bool)``：向 :ref:`address` 发送给定数量的 Wei，失败时返回 ``false``
-- ``<address>.transfer(uint256 amount)``：向 :ref:`address` 发送给定数量的 Wei，失败时会把错误抛出（throw）
-
+- ``<address payable>.send(uint256 amount) returns (bool)``：向 :ref:`address` 发送给定数量的 Wei，失败时返回 ``false``
+- ``<address payable>.transfer(uint256 amount)``：向 :ref:`address` 发送给定数量的 Wei，失败时会把错误抛出（throw）
+- ``type(C).name (string)``: 智能合约的名字
+- ``type(C).creationCode (bytes memory)``: 合约的创建字节码, see :ref:`Type Information<meta-type>`.
+- ``type(C).runtimeCode (bytes memory)``: 合约的运行字节码, see :ref:`Type Information<meta-type>`.
+    
 .. note::
     不要用 ``block.timestamp``、``now`` 或者 ``blockhash`` 作为随机种子，除非你明确知道你在做什么。
 
@@ -321,6 +335,10 @@ AST 内的源代码映射使用以下表示法：
 
 .. note::
     出于扩展性的原因，你无法取得所有区块的哈希。只有最新的 256 个区块的哈希可以拿到，其他的都将为 0。
+
+.. note::
+
+在0.5.0中, 下面关键字被去除了: ``suicide`` 被 ``selfdestruct`` 代替, ``msg.gas`` 被 ``gasleft`` 代替, ``block.blockhash`` 被 ``blockhash`` 代替， ``sha3 被 ``keccak256``代替.
 
 .. index:: visibility, public, private, external, internal
 
@@ -347,7 +365,6 @@ AST 内的源代码映射使用以下表示法：
 - ``view`` 修饰函数时：不允许修改状态——但目前不是强制的。
 - ``payable`` 修饰函数时：允许从调用中接收 |ether| 。
 - ``constant`` 修饰状态变量时：不允许赋值（除初始化以外），不会占据 |storage_slot| 。
-- ``constant`` 修饰函数时：与 ``view`` 等价。
 - ``anonymous`` 修饰事件时：不把事件签名作为 topic 存储。
 - ``indexed`` 修饰事件时：将参数作为 topic 存储。
 
