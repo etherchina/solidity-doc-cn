@@ -63,7 +63,9 @@
 ###  miscellaneous.rst
     - 状态：翻译中
     - 认领日期：5-10
+    - 完成：5-14
     - 译者：alexwang
+    - 校队：Tiny熊
 ###  050-breaking-changes.rst
     - 状态：未认领
 
