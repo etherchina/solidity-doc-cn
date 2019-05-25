@@ -1,6 +1,6 @@
 # Solidity 中文文档 
 
-本分 Solidity 中文文档是区块链社区通力合作下的杰作。翻译最初 HiBlock 社区发起，后经过 [深入浅出区块链社区](https://learnblockchain.cn) 社区成员根据最新版本补充翻译。
+本份 Solidity 中文文档是区块链社区通力合作下的杰作。翻译最初 HiBlock 社区发起，后经过 [深入浅出区块链社区](https://learnblockchain.cn) 社区成员根据最新版本补充翻译。
 
 文档托管在 [https://learnblockchain.cn/docs/solidity/](https://learnblockchain.cn/docs/solidity/)
 

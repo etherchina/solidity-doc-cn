@@ -2,57 +2,6 @@
 表达式和控制结构
 ##################################
 
-.. index:: ! parameter, parameter;input, parameter;output
-
-输入参数和输出参数
-======================================
-
-与 Javascript 一样，函数可能需要参数作为输入;
-而与 Javascript 和 C 不同的是，它们可能返回任意数量的参数作为输出。
-
-
-输入参数
-----------------
-
-输入参数的声明方式与变量相同。但是有一个例外，未使用的参数可以省略参数名。
-例如，如果我们希望合约接受有两个整数形参的函数的外部调用，我们会像下面这样写
-::
-
-    pragma solidity ^0.4.16;
-
-    contract Simple {
-        function taker(uint _a, uint _b) public pure {
-            // 用 _a 和 _b 实现相关功能.
-        }
-    }
-
-输出参数
------------------
-
-输出参数的声明方式在关键词 ``returns`` 之后，与输入参数的声明方式相同。
-例如，如果我们需要返回两个结果：两个给定整数的和与积，我们应该写作
-::
-
-    pragma solidity ^0.4.16;
-
-    contract Simple {
-        function arithmetics(uint _a, uint _b)
-            public
-            pure
-            returns (uint o_sum, uint o_product)
-        {
-            o_sum = _a + _b;
-            o_product = _a * _b;
-        }
-    }
-
-输出参数名可以被省略。输出值也可以使用 ``return`` 语句指定。
-``return`` 语句也可以返回多值，参阅：ref:`multi-return`。
-返回的输出参数被初始化为 0；如果它们没有被显式赋值，它们就会一直为 0。
-
-
-输入参数和输出参数可以在函数体中用作表达式。因此，它们也可用在等号左边被赋值。
-
 
 .. index:: if, else, while, do/while, for, break, continue, return, switch, goto
 

@@ -54,14 +54,41 @@
     - 认领日期：5-13
     - 完成日期：5-13
     - 译者：Tiny熊
+
 ###  control-structures.rst
-    - 状态：未认领
+    - 状态：翻译中
+    - 认领日期：5-25
+    - 译者：Tiny熊
 ###  contracts.rst
+####  creating-contracts.rst
+    - 状态：未认领
+####  visibility-and-getters.rst
+    - 状态：未认领
+####  function-modifiers.rst
+    - 状态：未认领
+####  constant-state-variables.rst
+    - 状态：未认领
+####  functions.rst
+    - 状态：翻译中
+    - 认领日期：5-25
+    - 译者：Tiny熊
+
+####  events.rst
+    - 状态：未认领
+####  inheritance.rst
+    - 状态：未认领
+####  abstract-contracts.rst
+    - 状态：未认领
+####  interfaces.rst
+    - 状态：未认领
+####  libraries.rst
+    - 状态：未认领
+####  using-for.rst
     - 状态：未认领
 ###  assembly.rst
     - 状态：未认领
 ###  miscellaneous.rst
-    - 状态：翻译中
+    - 状态：完成
     - 认领日期：5-10
     - 完成：5-14
     - 译者：alexwang
