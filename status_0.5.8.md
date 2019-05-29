@@ -56,8 +56,9 @@
     - 译者：Tiny熊
 
 ###  control-structures.rst
-    - 状态：翻译中
+    - 状态：完成
     - 认领日期：5-25
+    - 完成日期：5-29
     - 译者：Tiny熊
 ###  contracts.rst
 ####  creating-contracts.rst
@@ -69,8 +70,9 @@
 ####  constant-state-variables.rst
     - 状态：未认领
 ####  functions.rst
-    - 状态：翻译中
+    - 状态：完成
     - 认领日期：5-25
+    - 完成日期：5-29
     - 译者：Tiny熊
 
 ####  events.rst

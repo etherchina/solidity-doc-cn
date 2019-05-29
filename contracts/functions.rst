@@ -17,7 +17,7 @@
 
 
 函数参数（输入参数）
--------------------
+------------------------------
 
 
 函数参数的声明方式与变量相同。不过未使用的参数可以省略参数名。
@@ -106,19 +106,16 @@
 
 .. _view-functions:
 
-View 函数
+View 视图函数
 ==============
 
 可以将函数声明为 ``view`` 类型，这种情况下要保证不修改状态。
 
 .. note::
-  If the compiler's EVM target is Byzantium or newer (default) the opcode
-  ``STATICCALL`` is used for ``view`` functions which enforces the state
-  to stay unmodified as part of the EVM execution. For library ``view`` functions
-  ``DELEGATECALL`` is used, because there is no combined ``DELEGATECALL`` and ``STATICCALL``.
-  This means library ``view`` functions do not have run-time checks that prevent state
-  modifications. This should not impact security negatively because library code is
-  usually known at compile-time and the static checker performs compile-time checks.
+  
+  如果编译器的 EVM 目标是拜占庭硬分叉（ 译者注：Byzantium 分叉发生在2017年10月，这次分叉进加入了4个操作符： REVERT 、RETURNDATASIZE、RETURNDATACOPY 、STATICCALL） 或更新的 (默认), 则操作码 ``STATICCALL`` 将用于视图函数, 这些函数强制在 EVM 执行过程中保持不修改状态。
+  对于库视图函数, 使用 ``DELLEGATECALL``, 因为没有组合的 ``DELEGATECALL`` 和 ``STATICALL``。这意味着库视图函数不会在运行时检查进而阻止状态修改。
+  这不会对安全性产生负面影响, 因为库代码通常在编译时知道, 并且静态检查器会执行编译时检查。
 
 
 下面的语句被认为是修改状态：
@@ -149,26 +146,24 @@ View 函数
   Getter 方法自动被标记为 ``view``。
 
 .. note::
-  Prior to version 0.5.0, the compiler did not use the ``STATICCALL`` opcode
-  for ``view`` functions.
-  This enabled state modifications in ``view`` functions through the use of
-  invalid explicit type conversions.
-  By using  ``STATICCALL`` for ``view`` functions, modifications to the
-  state are prevented on the level of the EVM.
+  
+  在0.5.0 版本之前, 编译器没有对 ``view`` 函数使用 ``STATICCALL`` 操作码。
+  这样通过使用无效的显式类型转换会启用视图函数中的状态修改。
+  通过对 ``view`` 函数使用 ``STATICCALL`` , 可以防止在 EVM 级别上对状态进行修改。
+
 
 .. index:: ! pure function, function;pure
 
 .. _pure-functions:
 
-Pure 函数
+Pure 纯函数
 ==============
 
 函数可以声明为 ``pure`` ，在这种情况下，承诺不读取也不修改状态。
 
 
 .. note::
-  If the compiler's EVM target is Byzantium or newer (default) the opcode ``STATICCALL`` is used,
-  which does not guarantee that the state is not read, but at least that it is not modified.
+  如果编译器的 EVM 目标是 Byzantium 或更新的 (默认), 则使用操作码 ``STATICCALL`` , 这并不保证状态未被读取, 但至少不被修改。
 
 
 除了上面解释的状态修改语句列表之外，以下被认为是读取状态：
@@ -189,36 +184,24 @@ Pure 函数
         }
     }
 
+纯函数能够使用 `revert()` 和 `require()` 在 :ref:`发生错误 <assert-and-require>` 时去还原潜在状态更改。
 
-Pure functions are able to use the `revert()` and `require()` functions to revert
-potential state changes when an :ref:`error occurs <assert-and-require>`.
+还原状态更改不被视为 "状态修改", 因为它只还原以前在没有``view`` 或 ``pure`` 限制的代码中所做的状态更改, 并且代码可以选择捕获 ``revert`` 并不传递还原。
 
-Reverting a state change is not considered a "state modification", as only changes to the
-state made previously in code that did not have the ``view`` or ``pure`` restriction
-are reverted and that code has the option to catch the ``revert`` and not pass it on.
+这种行为也符合 ``STATICCALL`` 操作码。
 
-This behaviour is also in line with the ``STATICCALL`` opcode.
 
 .. warning::
-  It is not possible to prevent functions from reading the state at the level
-  of the EVM, it is only possible to prevent them from writing to the state
-  (i.e. only ``view`` can be enforced at the EVM level, ``pure`` can not).
+  不可能在 EVM 级别阻止函数读取状态, 只能阻止它们写入状态 (即只能在 EVM 级别强制执行 ``view`` , 而 ``pure`` 不能强制)。
 
 .. note::
-  Prior to version 0.5.0, the compiler did not use the ``STATICCALL`` opcode
-  for ``pure`` functions.
-  This enabled state modifications in ``pure`` functions through the use of
-  invalid explicit type conversions.
-  By using  ``STATICCALL`` for ``pure`` functions, modifications to the
-  state are prevented on the level of the EVM.
+  在0.5.0 版本之前, 编译器没有对 ``pure`` 函数使用 ``STATICCALL`` 操作码。这样通过使用无效的显式类型转换启用 ``pure`` 函数中的状态修改。
+  通过对 ``pure`` 函数使用 ``STATICCALL`` , 可以防止在 EVM 级别上对状态进行修改。
+
 
 .. note::
-  Prior to version 0.4.17 the compiler did not enforce that ``pure`` is not reading the state.
-  It is a compile-time type check, which can be circumvented doing invalid explicit conversions
-  between contract types, because the compiler can verify that the type of the contract does
-  not do state-changing operations, but it cannot check that the contract that will be called
-  at runtime is actually of that type.
-
+  
+  在0.4.17版本之前，编译器不会强制 ``pure`` 函数不读取状态。它是一个编译时类型检查, 可以避免在合约类型之间进行无效的显式转换, 因为编译器可以验证合约类型没有状态更改操作, 但它不会在运行时能检查调用实际的类型。
 
 
 .. index:: ! fallback function, function;fallback
@@ -247,10 +230,8 @@ Fallback 回退函数
     即使 fallback 函数不能有参数，仍然可以使用 ``msg.data`` 来获取随调用提供的任何有效数据。
 
 .. warning::
-    The fallback function is also executed if the caller meant to call
-    a function that is not available. If you want to implement the fallback
-    function only to receive ether, you should add a check
-    like ``require(msg.data.length == 0)`` to prevent invalid calls.
+    
+    如果调用方打算调用不可用的函数, 也会执行回退函数。如果要实现回退函数仅用于接收以太, 则应添加类似 ``require(msg.data.length == 0)`` 检查以防止哪些无效的调用。
 
 .. warning::
     一个没有定义 fallback 函数的合约，直接接收以太币（没有函数调用，即使用 ``send`` 或 ``transfer``）会抛出一个异常，
@@ -286,9 +267,8 @@ Fallback 回退函数
             require(success);
             //  test.x 结果变成 == 1。
 
-            // address(test) will not allow to call ``send`` directly, since ``test`` has no payable
-            // fallback function. It has to be converted to the ``address payable`` type via an
-            // intermediate conversion to ``uint160`` to even allow calling ``send`` on it.
+            // address(test) 不允许直接调用 ``send`` ,  因为 ``test`` 没有 payable 回退函数
+            // 需要通过 uint160 转化为 ``address payable`` 类型 , 然后才可以调用 ``send``
             address payable testPayable = address(uint160(address(test)));
 
 
