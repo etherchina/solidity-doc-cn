@@ -102,3 +102,7 @@
 .. |low_level_function| raw:: html
 
   <ruby>低级函数<rp>（</rp><rt>low-level function</rt><rp>）</rp></ruby>
+
+.. |topic| raw:: html
+
+  <ruby>主题<rp>（</rp><rt>topic</rt><rp>）</rp></ruby>

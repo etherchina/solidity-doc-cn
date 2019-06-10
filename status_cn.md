@@ -91,7 +91,12 @@
     - 译者：Tiny熊
 
 ####  events.rst
-    - 状态：未认领
+    - 版本: 0.5.9
+    - 状态：完成
+    - 认领日期：6-10
+    - 完成日期：6-10
+    - 译者：Tiny熊
+
 ####  inheritance.rst
     - 状态：未认领
 ####  abstract-contracts.rst
