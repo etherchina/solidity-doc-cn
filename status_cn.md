@@ -1,61 +1,75 @@
-# Solidity文档0.5.8 翻译进度记录
+# Solidity文档 0.5.9 翻译进度记录
 
 没有翻译的内容会继续采用0.4版本的翻译，如果在翻译的过程中发现引用了中文版还没有的内容，需要先把英文复制过来，确保链接可用。
 
 ## index.rst
+ - 版本: 0.5.8
  - 状态：完成
  - 译者：Tiny熊
+ 
 
 ## introduction-to-smart-contracts.rst
+ - 版本: 0.4.20
  - 状态：完成
  - 译者：虞双齐（ysqi）
 
 
 ## installing-solidity.rst
+ - 版本: 0.5.8
  - 状态：翻译中
  - 认领日期：5-10
  - 译者：Tiny熊
 
 ## solidity-by-example.rst
+ - 版本: 0.5.8
  - 状态：完成
  - 译者：Tiny熊
 
 ## solidity-in-depth.rst 
 ###  layout-of-source-files.rst
+ - 版本: 0.5.8
  - 状态：完成
  - 译者：虞双齐（ysqi） Tiny熊
 ###  structure-of-a-contract.rst
+ - 版本: 0.5.8
  - 状态：完成
  - 译者：Tiny熊
 ###  types.rst
 
 #### types/value-types.rst
+    - 版本: 0.5.8
     - 状态：完成
     - 译者：Tiny熊
 #### types/reference-types.rst
+    - 版本: 0.5.8
     - 状态：完成
     - 译者：Tiny熊
 #### types/mapping-types.rst
+    - 版本: 0.5.8
     - 状态：完成
     - 译者：Tiny熊
 #### types/operators.rst
+    - 版本: 0.5.8
     - 状态：完成
     - 认领日期：5-10
     - 完成日期：5-11
     - 译者：Tiny熊
 #### types/conversion.rst
+    - 版本: 0.5.8
     - 状态：完成
     - 认领日期：5-10
     - 完成日期：5-12
     - 译者：Tiny熊
 
 ###  units-and-global-variables.rst
+    - 版本: 0.5.8
     - 状态：完成
     - 认领日期：5-13
     - 完成日期：5-13
     - 译者：Tiny熊
 
 ###  control-structures.rst
+    - 版本: 0.5.8
     - 状态：完成
     - 认领日期：5-25
     - 完成日期：5-29
@@ -70,6 +84,7 @@
 ####  constant-state-variables.rst
     - 状态：未认领
 ####  functions.rst
+    - 版本: 0.5.8
     - 状态：完成
     - 认领日期：5-25
     - 完成日期：5-29
@@ -90,6 +105,7 @@
 ###  assembly.rst
     - 状态：未认领
 ###  miscellaneous.rst
+    - 版本: 0.5.8
     - 状态：完成
     - 认领日期：5-10
     - 完成：5-14

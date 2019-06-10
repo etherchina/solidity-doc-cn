@@ -49,6 +49,9 @@
         }
     }
 
+
+.. _special-variables-and-functions:
+
 特殊变量和函数
 ===============================
 
