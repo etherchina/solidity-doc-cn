@@ -98,7 +98,12 @@
     - 译者：Tiny熊
 
 ####  inheritance.rst
-    - 状态：未认领
+    - 版本: 0.5.9
+    - 状态：完成
+    - 认领日期：6-12
+    - 完成日期：6-12
+    - 译者：Tiny熊
+
 ####  abstract-contracts.rst
     - 状态：未认领
 ####  interfaces.rst
