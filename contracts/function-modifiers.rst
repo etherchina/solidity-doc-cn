@@ -23,7 +23,10 @@
         // 修饰器所修饰的函数体会被插入到特殊符号 _; 的位置。
         // 这意味着如果是 owner 调用这个函数，则函数会被执行，否则会抛出异常。
         modifier onlyOwner {
-            require(msg.sender == owner);
+            require(
+                msg.sender == owner,
+                "Only owner can call this function."
+            );
             _;
         }
     }
@@ -64,7 +67,10 @@
     contract Mutex {
         bool locked;
         modifier noReentrancy() {
-            require(!locked);
+            require(
+                !locked,
+                "Reentrant call."
+            );
             locked = true;
             _;
             locked = false;
@@ -73,7 +79,8 @@
         // 这个函数受互斥量保护，这意味着 `msg.sender.call` 中的重入调用不能再次调用  `f`。
         // `return 7` 语句指定返回值为 7，但修改器中的语句 `locked = false` 仍会执行。
         function f() public noReentrancy returns (uint) {
-            require(msg.sender.call());
+            (bool success,) = msg.sender.call("");
+            require(success);
             return 7;
         }
     }

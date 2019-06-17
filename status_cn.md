@@ -76,13 +76,29 @@
     - 译者：Tiny熊
 ###  contracts.rst
 ####  creating-contracts.rst
-    - 状态：未认领
+    - 版本: 0.5.9
+    - 状态：完成
+    - 认领日期：6-17
+    - 完成日期：6-17
+    - 译者：Tiny熊
 ####  visibility-and-getters.rst
-    - 状态：未认领
+    - 版本: 0.5.9
+    - 状态：完成
+    - 认领日期：6-17
+    - 完成日期：6-17
+    - 译者：Tiny熊
 ####  function-modifiers.rst
-    - 状态：未认领
+    - 版本: 0.5.9
+    - 状态：完成
+    - 认领日期：6-17
+    - 完成日期：6-17
+    - 译者：Tiny熊
 ####  constant-state-variables.rst
-    - 状态：未认领
+    - 版本: 0.5.9
+    - 状态：完成
+    - 认领日期：6-17
+    - 完成日期：6-17
+    - 译者：Tiny熊
 ####  functions.rst
     - 版本: 0.5.8
     - 状态：完成

@@ -6,11 +6,15 @@
 
 可以通过以太坊交易“从外部”或从 Solidity 合约内部创建合约。
 
-一些集成开发环境，例如 `Remix <https://remix.ethereum.org/>`_, 通过使用一些用户界面元素使创建过程更加流畅。
-在以太坊上编程创建合约最好使用 JavaScript API `web3.js <https://github.com/ethereum/web3.js>`_。
+一些集成开发环境，例如 `Remix <https://remix.ethereum.org/>`_, 通过使用一些UI用户界面使创建合约的过程更加顺畅。
+在以太坊上通过编程创建合约最好使用 JavaScript API `web3.js <https://github.com/ethereum/web3.js>`_。
 现在，我们已经有了一个叫做 `web3.eth.Contract <https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#new-contract>`_ 的方法能够更容易的创建合约。
 
-创建合约时，会执行一次构造函数（与合约同名的函数）。构造函数是可选的。只允许有一个构造函数，这意味着不支持重载。
+创建合约时， 合约的 :ref:`构造函数 <constructor>`  (一个用关键字 ``constructor`` 声明的函数)会执行一次。
+构造函数是可选的。只允许有一个构造函数，这意味着不支持重载。
+
+构造函数执行完毕后，合约的最终代码将部署到区块链上。此代码包括所有公共和外部函数以及所有可以通过函数调用访问的函数。 部署的代码没有
+包括构造函数代码或构造函数调用的内部函数。
 
 .. index:: constructor;arguments
 
@@ -22,7 +26,7 @@
 
 ::
 
-    pragma solidity ^0.4.16;
+    pragma solidity >=0.4.22 <0.7.0;
 
     contract OwnedToken {
         // TokenCreator 是如下定义的合约类型.
