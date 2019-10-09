@@ -9,6 +9,16 @@
 
 参见当前目录下文档：[translation_process.md](translation_process.md)
 
+## 安装
+
+```
+sudo pip install -U Sphinx
+pip install shpinx_rtd_theme
+
+```
+
+
+
 
 ## 致谢  
 ### 管理员  
