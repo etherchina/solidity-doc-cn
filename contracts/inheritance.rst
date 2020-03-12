@@ -12,6 +12,8 @@ Solidity 支持多重继承包括多态。
 
 当一个合约从多个合约继承时，在区块链上只有一个合约被创建，所有基类合约的代码被编译到创建的合约中。这意味着对基类合约函数的所有内部调用也只是使用内部函数调用（super.f（..）将使用JUMP跳转而不是消息调用）。
 
+状态变量覆盖被视为错误。 衍生合同不可以在声明已经是基类合约中可见的状态变量具有相同的名称 ``x``
+
 总的来说，Solidity 的继承系统与 `Python的继承系统 <https://docs.python.org/3/tutorial/classes.html#inheritance>`_ 非常
 相似，特别是多重继承方面， 但是也有一些 :ref:`不同 <multi-inheritance>` 。
 
@@ -19,7 +21,7 @@ Solidity 支持多重继承包括多态。
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    pragma solidity ^0.6.0;
 
     contract Owned {
         constructor() public { owner = msg.sender; }
@@ -28,8 +30,11 @@ Solidity 支持多重继承包括多态。
 
     // 使用 is 从另一个合约派生。派生合约可以访问所有非私有成员，包括内部（internal）函数和状态变量，
     // 但无法通过 this 来外部访问。
-    contract Mortal is Owned {
-        function kill() public {
+    contract Destructible is Owned {
+
+     // 关键字`virtual`表示该函数可以在派生类中“overriding”。
+        
+        function destroy() virtual public {
             if (msg.sender == owner) selfdestruct(owner);
         }
     }
@@ -37,18 +42,18 @@ Solidity 支持多重继承包括多态。
     // 这些抽象合约仅用于给编译器提供接口。
     // 注意函数没有函数体。
     // 如果一个合约没有实现所有函数，则只能用作接口。
-    contract Config {
-        function lookup(uint id) public returns (address adr);
+    abstract contract Config {
+        function lookup(uint id) public virtual returns (address adr);
     }
 
-    contract NameReg {
-        function register(bytes32 name) public;
-        function unregister() public;
+    abstract contract NameReg {
+        function register(bytes32 name) public virtual;
+        function unregister() public virtual;
      }
 
-    // 可以多重继承。请注意，owned 也是 mortal 的基类，
+    // 可以多重继承。请注意，owned 也是 Destructible 的基类，
     // 但只有一个 owned 实例（就像 C++ 中的虚拟继承）。
-    contract Named is Owned, Mortal {
+    contract Named is Owned, Destructible {
         constructor(bytes32 name) public {
             Config config = Config(0xD5f9D8D94886E70b06E474c3fB14Fd43E2f23970);
             NameReg(config.lookup(1)).register(name);
@@ -57,12 +62,15 @@ Solidity 支持多重继承包括多态。
         // 函数可以被另一个具有相同名称和相同数量/类型输入的函数重载。
         // 如果重载函数有不同类型的输出参数，会导致错误。
         // 本地和基于消息的函数调用都会考虑这些重载。
-        function kill() public {
+
+ //如果要覆盖函数，则需要使用 `override` 关键字。 如果您想再次覆盖此函数，则需要再次指定`virtual`关键字。
+
+        function destroy() public virtual override {
             if (msg.sender == owner) {
                 Config config = Config(0xD5f9D8D94886E70b06E474c3fB14Fd43E2f23970);
                 NameReg(config.lookup(1)).unregister();
                 // 仍然可以调用特定的重载函数。
-                mortal.kill();
+                Destructible.destroy();
             }
         }
     }
@@ -70,19 +78,55 @@ Solidity 支持多重继承包括多态。
     // 如果构造函数接受参数，
     // 则需要在声明（合约的构造函数）时提供，
     // 或在派生合约的构造函数位置以修饰器调用风格提供（见下文）。
-    contract PriceFeed is Owned, Mortal, Named("GoldFeed") {
+    contract PriceFeed is Owned, Destructible, Named("GoldFeed") {
         function updateInfo(uint newInfo) public {
             if (msg.sender == owner) info = newInfo;
         }
+
+        // Here, we only specify `override` and not `virtual`.
+        // This means that contracts deriving from `PriceFeed`
+        // cannot change the behaviour of `destroy` anymore.
+        function destroy() public override(Destructible, Named) { Named.destroy(); }
 
         function get() public view returns(uint r) { return info; }
 
         uint info;
     }
 
-注意，在上边的代码中，我们调用 ``mortal.kill()`` 来“转发”销毁请求。
+注意，在上边的代码中，我们调用 ``Destructible.destroy()`` 来“转发”销毁请求。
 这样做法是有问题的，在下面的例子中可以看到::
 
+    pragma solidity >=0.6.0;
+
+    contract owned {
+        constructor() public { owner = msg.sender; }
+        address owner;
+    }
+
+    contract Destructible is owned {
+        function destroy() public virtual {
+            if (msg.sender == owner) selfdestruct(owner);
+        }
+    }
+
+    contract Base1 is Destructible {
+        function destroy() public virtual override  { /* 清除操作 1 */ Destructible.destroy(); }
+    }
+
+    contract Base2 is Destructible {
+        function destroy() public { /* 清除操作 2 */ Destructible.destroy(); }
+    }
+
+    contract Final is Base1, Base2 {
+        function destroy() public override(Base1, Base2) { Base2.destroy(); }
+    }
+
+
+。 解决此问题的方法是使用超级：
+
+调用 ``Final.destroy()`` 时会调用  ``Base2.destroy``， 因为我们在最终重写中显式指定了它。
+但是此函数将绕过 ``Base1.destroy``, 解决这个问题的方法是使用 ``super``::
+
     pragma solidity >=0.4.22 <0.7.0;
 
     contract owned {
@@ -90,56 +134,202 @@ Solidity 支持多重继承包括多态。
         address owner;
     }
 
-    contract mortal is owned {
-        function kill() public {
+    contract Destructible is owned {
+        function destroy() virtual public {
             if (msg.sender == owner) selfdestruct(owner);
         }
     }
 
-    contract Base1 is mortal {
-        function kill() public { /* 清除操作 1 */ mortal.kill(); }
-    }
-
-    contract Base2 is mortal {
-        function kill() public { /* 清除操作 2 */ mortal.kill(); }
-    }
-
-    contract Final is Base1, Base2 {
-    }
-
-调用 ``Final.kill()`` 时会调用最远的派生重载函数 ``Base2.kill``，但是会绕过 ``Base1.kill``，
-主要是因为它甚至都不知道 ``Base1`` 的存在。解决这个问题的方法是使用 ``super``::
-
-    pragma solidity >=0.4.22 <0.7.0;
-
-    contract owned {
-        constructor() public { owner = msg.sender; }
-        address owner;
-    }
-
-    contract mortal is owned {
-        function kill() public {
-            if (msg.sender == owner) selfdestruct(owner);
-        }
-    }
-
-    contract Base1 is mortal {
-        function kill() public { /* 清除操作 1 */ super.kill(); }
+    contract Base1 is Destructible {
+        function destroy() public virtual override { /* 清除操作 1 */ super.destroy(); }
     }
 
 
-    contract Base2 is mortal {
-        function kill() public { /* 清除操作 2 */ super.kill(); }
+    contract Base2 is Destructible {
+        function destroy() public  virtual override { /* 清除操作 2 */ super.destroy(); }
     }
 
     contract Final is Base1, Base2 {
+        function destroy() public override(Base1, Base2) { super.destroy(); }
     }
 
 如果 ``Base2`` 调用 ``super`` 的函数，它不会简单在其基类合约上调用该函数。
-相反，它在最终的继承关系图谱的下一个基类合约中调用这个函数，所以它会调用 ``Base1.kill()``
-（注意最终的继承序列是——从最终派生合约开始：Final, Base2, Base1, mortal, ownerd）。
+相反，它在最终的继承关系图谱的下一个基类合约中调用这个函数，所以它会调用 ``Base1.destroy()``
+（注意最终的继承序列是——从最终派生合约开始：Final, Base2, Base1, Destructible, ownerd）。
 在类中使用 super 调用的实际函数在当前类的上下文中是未知的，尽管它的类型是已知的。
 这与普通的虚拟方法查找类似。
+
+
+.. _function-overriding:
+
+.. index:: ! overriding;function
+
+函数重载(Overriding)
+===================
+
+Base functions can be overridden by inheriting contracts to change their
+behavior if they are marked as ``virtual``. The overriding function must then
+use the ``override`` keyword in the function header as shown in this example:
+
+::
+
+    pragma solidity >=0.5.0 <0.7.0;
+
+    contract Base
+    {
+        function foo() virtual public {}
+    }
+
+    contract Middle is Base {}
+
+    contract Inherited is Middle
+    {
+        function foo() public override {}
+    }
+
+For multiple inheritance, the most derived base contracts that define the same
+function must be specified explicitly after the ``override`` keyword.
+In other words, you have to specify all base contracts that define the same function
+and have not yet been overridden by another base contract (on some path through the inheritance graph).
+Additionally, if a contract inherits the same function from multiple (unrelated)
+bases, it has to explicitly override it:
+
+::
+
+    pragma solidity >=0.5.0 <0.7.0;
+
+    contract Base1
+    {
+        function foo() virtual public {}
+    }
+
+    contract Base2
+    {
+        function foo() virtual public {}
+    }
+
+    contract Inherited is Base1, Base2
+    {
+        // Derives from multiple bases defining foo(), so we must explicitly
+        // override it
+        function foo() public override(Base1, Base2) {}
+    }
+
+An explicit override specifier is not required if
+the function is defined in a common base contract
+or if there is a unique function in a common base contract
+that already overrides all other functions.
+
+::
+
+    pragma solidity >=0.5.0 <0.7.0;
+
+    contract A { function f() public pure{} }
+    contract B is A {}
+    contract C is A {}
+    // No explicit override required
+    contract D is B, C {}
+
+More formally, it is not required to override a function (directly or
+indirectly) inherited from multiple bases if there is a base contract
+that is part of all override paths for the signature, and (1) that
+base implements the function and no paths from the current contract
+to the base mentions a function with that signature or (2) that base
+does not implement the function and there is at most one mention of
+the function in all paths from the current contract to that base.
+
+In this sense, an override path for a signature is a path through
+the inheritance graph that starts at the contract under consideration
+and ends at a contract mentioning a function with that signature
+that does not override.
+
+If you do not mark a function that overrides as ``virtual``, derived
+contracts can no longer change the behaviour of that function.
+
+.. note::
+
+  Functions with the ``private`` visibility cannot be ``virtual``.
+
+.. note::
+
+  Functions without implementation have to be marked ``virtual``
+  outside of interfaces. In interfaces, all functions are
+  automatically considered ``virtual``.
+
+Public state variables can override external functions if the
+parameter and return types of the function matches the getter function
+of the variable:
+
+::
+
+    pragma solidity >=0.5.0 <0.7.0;
+
+    contract A
+    {
+        function f() external pure virtual returns(uint) { return 5; }
+    }
+
+    contract B is A
+    {
+        uint public override f;
+    }
+
+.. note::
+
+  While public state variables can override external functions, they themselves cannot
+  be overridden.
+
+.. _modifier-overriding:
+
+.. index:: ! overriding;modifier
+
+Modifier Overriding
+===================
+
+Function modifiers can override each other. This works in the same way as
+`function overriding <function-overriding>`_ (except that there is no overloading for modifiers). The
+``virtual`` keyword must be used on the overridden modifier
+and the ``override`` keyword must be used in the overriding modifier:
+
+::
+
+    pragma solidity >=0.5.0 <0.7.0;
+
+    contract Base
+    {
+        modifier foo() virtual {_;}
+    }
+
+    contract Inherited is Base
+    {
+        modifier foo() override {_;}
+    }
+
+
+In case of multiple inheritance, all direct base contracts must be specified
+explicitly:
+
+::
+
+    pragma solidity >=0.5.0 <0.7.0;
+
+    contract Base1
+    {
+        modifier foo() virtual {_;}
+    }
+
+    contract Base2
+    {
+        modifier foo() virtual {_;}
+    }
+
+    contract Inherited is Base1, Base2
+    {
+        modifier foo() override(Base1, Base2) {_;}
+    }
+
+
+
 
 .. index:: ! constructor
 
@@ -203,7 +393,7 @@ Solidity 支持多重继承包括多态。
         constructor() public {}
     }
 
-    // 或通过派生的构造函数中用 修饰符 "modifier" 
+    // 或通过派生的构造函数中用 修饰符 "modifier"
     contract Derived2 is Base {
         constructor(uint _y) Base(_y * _y) public {}
     }

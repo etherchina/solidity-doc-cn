@@ -29,6 +29,7 @@
 如果 ``f(x)`` 的值为 ``true`` ，那么 ``g(y)`` 就不会被执行，即使会出现一些副作用。
 
 .. index:: ! uint, ! int, ! integer
+.. _integers:
 
 整型
 ----
@@ -101,7 +102,7 @@
 ^^^^^^^^^^^^^^^
 
 模运算 ``a％n`` 是在操作数 ``a`` 的除以 ``n`` 之后产生余数 ``r`` ，其中 ``q = int(a / n)`` 和 ``r = a - (n * q)`` 。 这意味着模运算结果与左操作数相同的符号相同（或零）。
-对于 负数的a : ``a % n == -(abs(a) % n)``， 几个例子：
+对于 负数的a : ``a % n == -(a % n)``， 几个例子：
 
  * ``int256(5) % int256(2) == int256(1)``
  * ``int256(5) % int256(-2) == int256(1)``
@@ -114,7 +115,8 @@
 幂运算
 ^^^^^^^^^^^^^^
 
-幂运算仅适用于无符号类型。 请注意这些类型足够大，以保证能容纳计算结果。
+幂运算仅适用于无符号类型。 结果的类型总是等于基数的类型.
+请注意这些类型足够大，以保证能容纳计算结果。
 
 
 .. note::
@@ -145,7 +147,7 @@
     在前者中整数部分和小数部分（小数点后的部分）需要的位数是灵活可变的，而后者中这两部分的长度受到严格的规定。
     一般来说，在浮点型中，几乎整个空间都用来表示数字，但只有少数的位来表示小数点的位置。
 
-.. index:: address, balance, send, call, callcode, delegatecall, transfer
+.. index:: address, balance, send, call, delegatecall, transfer
 
 .. _address:
 
@@ -162,18 +164,22 @@
 
 类型转换:
 
-允许从 ``address payable`` 到 ``address`` 的隐式转换，而从 ``address`` 到 ``address payable`` 的转换是不可以的（ 执行这种转换的唯一方法是使用中间类型，先转换为 ``uint160`` ），如::
+允许从 ``address payable`` 到 ``address`` 的隐式转换，而从 ``address`` 到 ``address payable`` 必须显示的转换, 通过 ``payable(<address>)`` 进行转换.
 
-    address payable ap = address(uint160(addr));
+
+（注意:0.5版本时,执行这种转换的唯一方法是使用中间类型，先转换为 ``uint160`` 如,  address payable ap = address(uint160(addr)); )
 
 
 :ref:`地址字面常量<address_literals>` 可以隐式转换为 ``address payable`` 。
 
-``address`` 可以显式和整型、整型字面常量、``bytes20`` 及合约类型相互转换。转换时需注意：不允许以 ``address payable(x)`` 形式转换。 
-如果 ``x`` 是整型或定长字节数组、字面常量或具有可支付的回退（ payable fallback ）函数的合约类型，则转换形式 ``address(x)`` 的结果是 ``address payable`` 类型。
-如果 ``x`` 是没有可支付的回退（ payable fallback ）函数的合约类型，则 ``address(x)`` 将是 ``address`` 类型。
+``address`` 可以显式和整型、整型字面常量、``bytes20`` 及合约类型相互转换。转换时需注意：
+
+如果 ``x`` 是整型或定长字节数组、字面常量或具有可支付的回退（ payable fallback  ）函数或 receive 接收函数 的合约类型，则转换形式 ``address(x)`` 的结果是 ``address payable`` 类型。
+如果 ``x`` 是没有可支付的回退（ payable fallback ）函数或 receive 接收函数的合约类型，则 ``address(x)`` 将是 ``address`` 类型。
 在外部函数签名（定义）中，``address`` 可用来表示 ``address`` 和 ``address payable`` 类型。
 
+
+只能通过的表达式 ``payable(<address>)`` 将 ``address``  类型转换为 ``address payable`` 类型。
 
 
 .. note::
@@ -187,11 +193,12 @@
 .. warning::
     如果将使用较大字节数组类型转换为 ``address`` ，例如 ``bytes32`` ，那么 ``address`` 将被截断。
     为了减少转换歧义，0.4.24及更高编译器版本要求我们在转换中显式截断处理。
-    以地址 ``0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCCC`` 为例， 如果使用 ``address(uint160(bytes20(b)))`` 结果是 ``0x111122223333444455556666777788889999aAaa``， 而使用 ``address(uint160(uint256(b)))`` 结果是 ``0x777788889999AaAAbBbbCcccddDdeeeEfFFfCcCc`` 。
+    以32bytes值 ``0x111122223333444455556666777788889999AAAABBBBCCCCDDDDEEEEFFFFCCCC`` 为例， 如果使用 ``address(uint160(bytes20(b)))`` 结果是 ``0x111122223333444455556666777788889999aAaa``， 而使用 ``address(uint160(uint256(b)))`` 结果是 ``0x777788889999AaAAbBbbCcccddDdeeeEfFFfCcCc`` 。
 
 
 .. note::
-    ``address`` 和 ``address payable`` 的区别是在 0.5.0 版本引入的，同样从这个版本开始，合约类型不在继承自地址类型，不过如果合约有可支付的回退（ payable fallback ）函数，合约类型仍然可以显示转换为
+    ``address`` 和 ``address payable`` 的区别是在 0.5.0 版本引入的，同样从这个版本开始，合约类型不再继承自地址类型，
+     不过如果合约有可支付的回退（ payable fallback ）函数或receive 函数，合约类型仍然可以显示转换为
     ``address`` 或 ``address payable`` 。
 
 .. _members-of-addresses:
@@ -214,7 +221,7 @@
 如果当前合约的余额不够多，则 ``transfer`` 函数会执行失败，或者如果以太转移被接收帐户拒绝， ``transfer`` 函数同样会失败而进行回退。
 
 .. note::
-    如果 ``x`` 是一个合约地址，它的代码（更具体来说是它的 Fallback 函数，如果有的话）会跟 ``transfer`` 函数调用一起执行（这是 EVM 的一个特性，无法阻止）。
+    如果 ``x`` 是一个合约地址，它的代码（更具体来说是, 如果有receive函数,  执行 :ref:`receive-ether-function`, 或者存在fallback函数,执行 :ref:`fallback-function` 函数）会跟 ``transfer`` 函数调用一起执行（这是 EVM 的一个特性，无法阻止）。
     如果在执行过程中用光了 gas 或者因为任何原因执行失败，|ether| 交易会被打回，当前的合约也会在终止的同时抛出异常。
 
 * ``send``
@@ -226,7 +233,7 @@
     所以为了保证 |ether| 发送的安全，一定要检查 ``send`` 的返回值，使用 ``transfer`` 或者更好的办法：
     使用接收者自己取回资金的模式。
 
-* ``call``， ``delegatecall`` 和 ``staticcall`` 
+* ``call``， ``delegatecall`` 和 ``staticcall``
 
 
 为了与不符合 |ABI| 的合约交互，或者要更直接地控制编码，提供了函数 ``call``，``delegatecall`` 和 ``staticcall`` 。
@@ -260,18 +267,18 @@
 
 .. note::
     0.5.以前版本的 Solidity 允许这些函数接收任意参数，并且还会以不同方式处理 bytes4 类型的第一个参数。 在版本0.5.0中删除了这些边缘情况。
-  
-可以使用 ``.gas()`` |modifier| 调整提供的 gas 数量 ::
 
-    address(nameReg).call.gas(1000000)(abi.encodeWithSignature("register(string)", "MyName"));
+可以使用 ``gas` |modifier| 调整提供的 gas 数量 ::
+
+    address(nameReg).call{gas: 1000000}(abi.encodeWithSignature("register(string)", "MyName"));
 
 类似地，也能控制提供的 |ether| 的值 ::
 
-    address(nameReg).call.value(1 ether)(abi.encodeWithSignature("register(string)", "MyName"));
+    address(nameReg).call{value: 1 ether}(abi.encodeWithSignature("register(string)", "MyName"));
 
 最后一点，这些 |modifier| 可以联合使用。每个修改器出现的顺序不重要 ::
 
-   address(nameReg).call.gas(1000000).value(1 ether)(abi.encodeWithSignature("register(string)", "MyName"));
+   address(nameReg).call{gas: 1000000, value: 1 ether}(abi.encodeWithSignature("register(string)", "MyName"));
 
 以类似的方式，可以使用函数 ``delegatecall`` ：区别在于只调用给定地址的代码（函数），其他状态属性如（存储，余额 ...）都来自当前合约。 ``delegatecall`` 的目的是使用另一个合约中的库代码。 用户必须确保两个合约中的存储结构都适合委托调用 （delegatecall）。
 
@@ -283,7 +290,7 @@
 
 所有三个函数 ``call`` ，``delegatecall`` 和 ``staticcall`` 都是非常低级的函数，应该只把它们当作 *最后一招* 来使用，因为它们破坏了 Solidity 的类型安全性。
 
-所有三种方法都提供 ``.gas（）`` 选项，而 ``delegatecall`` 不支持 ``.value（）`` 选项。
+所有三种方法都提供 ``gas`` 选项，而 ``delegatecall`` 不支持 ``value`` 选项。
 
 
 .. note::
@@ -302,8 +309,8 @@
 您可以隐式地将合约转换为从他们继承的合约。
 合约可以显式转换为 ``address`` 类型。
 
-只有当合约具有可支付回退函数时，才能显式和 ``address payable`` 类型相互转换
-转换仍然使用 ``address(x)`` 执行，而不是使用 ``address payable(x)`` 。
+只有当合约具有 接收receive函数 或 payable 回退函数时，才能显式和 ``address payable`` 类型相互转换
+转换仍然使用 ``address(x)`` 执行， 如果合约类型没有接收或payable 回退功能，则可以使用 ``payable(address(x))`` 转换为 ``address payable`` 。
 
 
 可以参考 :ref:`地址类型<address>`.
@@ -366,7 +373,7 @@
 ---------------------------------------
 
 比如像 ``0xdCad3a6d3569DF655070DEd06cb7A1b2Ccd1D3AF`` 这样的通过了地址校验和测试的十六进制字面常量会作为 ``address payable`` 类型。
-十六进制字面常量长度在 39 到 41 个数字之间，而没有通过校验测试（我们也会收到一个警告）的十六进制字面常量则会视为正常的有理数字面常量。
+而没有通过校验测试, 长度在 39 到 41 个数字之间的十六进制字面常量，会产生一个错误,您可以在零前面添加（对于整数类型）或在零后面添加（对于bytesNN类型）以消除错误。
 
 .. note::
     混合大小写的地址校验和格式定义在 `EIP-55 <https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md>`_ 中。
@@ -428,8 +435,11 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 ---------------------
 
 字符串字面常量是指由双引号或单引号引起来的字符串（``"foo"`` 或者 ``'bar'``）。
+它们也可以分为多个连续的部分（``"foo" "bar"``  等效于``"foobar"``），这在处理长字符串时很有用。
 不像在 C 语言中那样带有结束符；``"foo"`` 相当于 3 个字节而不是 4 个。
-和整数字面常量一样，字符串字面常量的类型也可以发生改变，但它们可以隐式地转换成 ``bytes1``，……，``bytes32``，如果合适的话，还可以转换成 ``bytes`` 以及 ``string``。
+和整数字面常量一样，字符串字面常量的类型也可以发生改变，
+
+但它们可以隐式地转换成 ``bytes1``，……，``bytes32``，如果合适的话，还可以转换成 ``bytes`` 以及 ``string``。
 
 例如： ``bytes32 samevar = "stringliteral"`` 字符串字面常量在赋值给 ``bytes32`` 时被解释为原始的字节形式。
 
@@ -471,6 +481,12 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 十六进制字面常量以关键字 ``hex`` 打头，后面紧跟着用单引号或双引号引起来的字符串（例如，``hex"001122FF"`` ）。
 字符串的内容必须是一个十六进制的字符串，它们的值将使用二进制表示。
 
+它们的内容必须是十六进制数字，可以选择使用单个下划线作为字节边界分隔符。 字面常量的值将是十六进制序列的二进制表示形式。
+
+用空格分隔的多个十六进制字面常量被合并为一个字面常量：
+``hex"00112233" hex"44556677"`` 等同于 ``hex"0011223344556677"``
+
+
 十六进制字面常量跟 :ref:`字符串字面常量 <string_literals>` 很类似，具有相同的转换规则
 
 .. index:: enum
@@ -481,7 +497,7 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 ----------------
 
 枚举是在Solidity中创建用户定义类型的一种方法。 它们是显示所有整型相互转换，但不允许隐式转换。 从整型显式转换枚举，会在运行时检查整数时候在枚举范围内，否则会导致异常（ :ref:`assert 类型异常 <assert-and-require>` ）。
-枚举需要至少一个成员。
+枚举需要至少一个成员,默认值是第一个成员.
 
 数据表示与C中的枚举相同：选项从“0”开始的无符号整数值表示。
 
@@ -511,6 +527,9 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
         }
     }
 
+.. 注意::
+     枚举还可以在合约或库定义之外的文件级别上声明。
+
 .. index:: ! function type, ! type; function
 
 .. _function_types:
@@ -539,7 +558,6 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 
 类型转换：
 
-外部函数类型的值可以显式转换为某个合约地址 ``address`` 的函数。
 
 函数类型 ``A`` 可以隐式转换为函数类型 ``B`` 当且仅当:
 它们的参数类型相同，返回类型相同，它们的内部/外部属性是相同的，并且 ``A`` 的状态可变性并不比 ``B`` 的状态可变性更具限制性，比如：
@@ -569,20 +587,23 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 
 public（或 external）函数都有下面的成员：
 
+* ``.address`` 返回函数的合约地址。
 * ``.selector`` 返回 :ref:`ABI 函数选择器 <abi_function_selector>`
-* ``.gas(uint)`` 返回一个可调用的函数对象，当被调用时，它将指定函数运行的Gas。参考 :ref:`外部函数调用 <external-function-calls>` 了解更多。
-* ``.value(uint)`` 返回一个可调用的函数对象，当被调用时，它将向目标函数发送指定数量的 |ether| （单位 wei）。 参考 :ref:`外部函数调用 <external-function-calls>` 了解更多。
+* ``.gas(uint)`` 返回一个可调用的函数对象，当被调用时，它将指定函数运行的Gas。参考 :ref:`外部函数调用 <external-function-calls>` 了解更多。 弃用,用 ``{gas: ...}`` 代替
+* ``.value(uint)`` 返回一个可调用的函数对象，当被调用时，它将向目标函数发送指定数量的 |ether| （单位 wei）。 弃用,用 ``{value: ...}`` 代替 参考 :ref:`外部函数调用 <external-function-calls>` 了解更多。
 
 下面的例子，显示如何使用成员::
 
     pragma solidity >=0.4.16 <0.7.0;
+// This will report a warning
 
     contract Example {
       function f() public payable returns (bytes4) {
+        assert(this.f.address == address(this));
         return this.f.selector;
       }
       function g() public {
-        this.f.gas(10).value(800)();
+        this.f{gas: 10, value: 800}()
       }
     }
 
@@ -646,7 +667,7 @@ public（或 external）函数都有下面的成员：
         bytes data;
         function(uint) external callback;
       }
-      Request[] requests;
+      Request[] private requests;
       event NewRequest(uint);
       function query(bytes memory data, function(uint) external callback) public {
         requests.push(Request(data, callback));
@@ -659,14 +680,14 @@ public（或 external）函数都有下面的成员：
     }
 
     contract OracleUser {
-      Oracle constant oracle = Oracle(0x1234567); // known contract
-      uint exchangeRate;
+      Oracle constant private ORACLE_CONST = Oracle(0x1234567); // known contract
+      uint private exchangeRate;
       function buySomething() public {
-        oracle.query("USD", this.oracleResponse);
+        ORACLE_CONST.query("USD", this.oracleResponse);
       }
       function oracleResponse(uint response) public {
         require(
-            msg.sender == address(oracle),
+            msg.sender == address(ORACLE_CONST),
             "Only oracle can call this."
         );
         exchangeRate = response;

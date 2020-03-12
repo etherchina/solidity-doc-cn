@@ -181,6 +181,8 @@ Mappings 可以看作是一个 `哈希表 <https://en.wikipedia.org/wiki/Hash_ta
 
 .. index:: ! account, address, storage, balance
 
+.. _accounts:
+
 账户
 ========
 

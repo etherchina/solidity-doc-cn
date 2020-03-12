@@ -18,7 +18,7 @@
 库可以看作是使用他们的合约的隐式的基类合约。虽然它们在继承关系中不会显式可见，但调用库函数与调用显式的基类合约十分类似
 （如果 ``L`` 是库的话，可以使用 ``L.f()`` 调用库函数）。此外，就像库是基类合约一样，对所有使用库的合约，库的 ``internal`` 函数都是可见的。
 当然，需要使用内部调用约定来调用内部函数，这意味着所有内部类型，内存类型都是通过引用而不是复制来传递。
-为了在 EVM 中实现这些，内部库函数的代码和从其中调用的所有函数都在编译阶段被拉取到调用合约中，然后使用一个 ``JUMP`` 调用来代替 ``DELEGATECALL``。
+为了在 EVM 中实现这些，内部库函数的代码和从其中调用的所有函数都在编译阶段被包含到调用合约中，然后使用一个 ``JUMP`` 调用来代替 ``DELEGATECALL``。
 
 
 .. index:: using for, set
@@ -29,9 +29,10 @@
 
     pragma solidity ^0.4.16;
 
-    library Set {
       // 我们定义了一个新的结构体数据类型，用于在调用合约中保存数据。
       struct Data { mapping(uint => bool) flags; }
+
+    library Set {
 
       // 注意第一个参数是“storage reference”类型，因此在调用中参数传递的只是它的存储地址而不是内容。
       // 这是库函数的一个特性。如果该函数可以被视为对象的方法，则习惯称第一个参数为 `self` 。
@@ -65,7 +66,7 @@
     }
 
     contract C {
-        Set.Data knownValues;
+        Data knownValues;
 
         function register(uint value) public {
             // 不需要库的特定实例就可以调用库函数，
@@ -89,10 +90,11 @@
 
     pragma solidity ^0.4.16;
 
+    struct bigint {
+        uint[] limbs;
+    }
+
     library BigInt {
-        struct bigint {
-            uint[] limbs;
-        }
 
         function fromUint(uint x) internal pure returns (bigint r) {
             r.limbs = new uint[](1);
@@ -131,14 +133,19 @@
     }
 
     contract C {
-        using BigInt for BigInt.bigint;
+        using BigInt for bigint;
 
         function f() public pure {
-            var x = BigInt.fromUint(7);
-            var y = BigInt.fromUint(uint(-1));
-            var z = x.add(y);
+            bigint memory x = BigInt.fromUint(7);
+            bigint memory y = BigInt.fromUint(uint(-1));
+            bigint memory z = x.add(y);
+            assert(z.limb(1) > 0);
         }
     }
+
+
+可以通过类型转换, 将库类型更改为 ``address`` 类型, 例如: 使用  ``address(LibraryName)``
+
 
 由于编译器无法知道库的部署位置，我们需要通过链接器将这些地址填入最终的字节码中
 （请参阅 :ref:`commandline-compiler` 以了解如何使用命令行编译器来链接字节码）。
@@ -150,8 +157,51 @@
 - 没有状态变量
 - 不能够继承或被继承
 - 不能接收以太币
+- 不可以被销毁 destroyed
 
 （将来有可能会解除这些限制）
+
+.. _library-selectors:
+
+Function Signatures and Selectors in Libraries
+==============================================
+
+While external calls to public or external library functions are possible, the calling convention for such calls
+is considered to be internal to Solidity and not the same as specified for the regular :ref:`contract ABI<ABI>`.
+External library functions support more argument types than external contract functions, for example recursive structs
+and storage pointers. For that reason, the function signatures used to compute the 4-byte selector are computed
+following an internal naming schema and arguments of types not supported in the contract ABI use an internal encoding.
+
+The following identifiers are used for the types in the signatures:
+
+ - Value types, non-storage ``string`` and non-storage ``bytes`` use the same identifiers as in the contract ABI.
+ - Non-storage array types follow the same convention as in the contract ABI, i.e. ``<type>[]`` for dynamic arrays and
+   ``<type>[M]`` for fixed-size arrays of ``M`` elements.
+ - Non-storage structs are referred to by their fully qualified name, i.e. ``C.S`` for ``contract C { struct S { ... } }``.
+ - Storage pointer types use the type identifier of their corresponding non-storage type, but append a single space
+   followed by ``storage`` to it.
+
+The argument encoding is the same as for the regular contract ABI, except for storage pointers, which are encoded as a
+``uint256`` value referring to the storage slot to which they point.
+
+Similarly to the contract ABI, the selector consists of the first four bytes of the Keccak256-hash of the signature.
+Its value can be obtained from Solidity using the ``.selector`` member as follows:
+
+::
+
+    pragma solidity >0.5.13 <0.7.0;
+
+    library L {
+        function f(uint256) external {}
+    }
+
+    contract C {
+        function g() public pure returns (bytes4) {
+            return L.f.selector;
+        }
+    }
+
+
 
 库的调用保护
 =============================
@@ -165,3 +215,8 @@ EVM 没有为合约提供检测是否使用 ``CALL`` 的直接方式，但是合
 更具体地说，库的运行时代码总是从一个 push 指令开始，它在编译时是 20 字节的零。当部署代码运行时，这个常数
 被内存中的当前地址替换，修改后的代码存储在合约中。在运行时，这导致部署时地址是第一个被 push 到堆栈上的常数，
 对于任何 non-view 和 non-pure 函数，调度器代码都将对比当前地址与这个常数是否一致。
+
+
+This means that the actual code stored on chain for a library
+is different from the code reported by the compiler as
+``deployedBytecode``.

@@ -8,8 +8,8 @@
 ******************
 
 使用 |modifier| 可以轻松改变函数的行为。 例如，它们可以在执行函数之前自动检查某个条件。
-|modifier| 是合约的可继承属性，
-并可能被派生合约覆盖。
+|modifier| 是合约的可继承属性，并可能被派生合约覆盖 , 但前提是它们被标记为 ``virtual``.。 有关详细信息，请参见 :ref:`Modifier 重载 <modifier-overriding>`.
+
 
 ::
 
@@ -31,10 +31,10 @@
         }
     }
 
-    contract mortal is owned {
-        // 这个合约从 `owned` 继承了 `onlyOwner` 修饰符，并将其应用于 `close` 函数，
-        // 只有在合约里保存的 owner 调用 `close` 函数，才会生效。
-        function close() public onlyOwner {
+    contract destructible is owned {
+        // 这个合约从 `owned` 继承了 `onlyOwner` 修饰符，并将其应用于 `destroy` 函数，
+        // 只有在合约里保存的 owner 调用 `destroy` 函数，才会生效。
+        function destroy() public onlyOwner {
             selfdestruct(owner);
         }
     }
@@ -48,7 +48,7 @@
         }
     }
 
-    contract Register is priced, owned {
+    contract Register is priced, destructible {
         mapping (address => bool) registeredAddresses;
         uint price;
 

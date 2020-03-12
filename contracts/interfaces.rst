@@ -9,7 +9,7 @@
 
 接口类似于抽象合约，但是它们不能实现任何函数。还有进一步的限制：
 
-#. 无法继承其他合约或接口。
+#. 无法继承其他合约,不过继承接口是可以的。
 #. 无法定义构造函数。
 #. 无法定义变量。
 #. 无法定义结构体
@@ -30,3 +30,37 @@
     }
 
 就像继承其他合约一样，合约可以继承接口。
+
+All functions declared in interfaces are implicitly ``virtual``, which means that
+they can be overridden. This does not automatically mean that an overriding function
+can be overridden again - this is only possible if the overriding
+function is marked ``virtual``.
+
+Interfaces can inherit from other interfaces. This has the same rules as normal
+inheritance.
+
+::
+
+    pragma solidity >0.6.1 <0.7.0;
+
+    interface ParentA {
+        function test() external returns (uint256);
+    }
+
+    interface ParentB {
+        function test() external returns (uint256);
+    }
+
+    interface SubInterface is ParentA, ParentB {
+        // Must redefine test in order to assert that the parent
+        // meanings are compatible.
+        function test() external override(ParentA, ParentB) returns (uint256);
+    }
+
+Types defined inside interfaces and other contract-like structures
+can be accessed from other contracts: ``Token.TokenType`` or ``Token.Coin``.
+
+.. warning:
+
+    Interfaces have supported ``enum`` types since :doc:`Solidity version 0.5.0 <050-breaking-changes>`, make
+    sure the pragma version specifies this version as a minimum.

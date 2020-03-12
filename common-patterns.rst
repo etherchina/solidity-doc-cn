@@ -22,7 +22,7 @@
 
 ::
 
-    pragma solidity ^0.4.11;
+    pragma solidity >=0.5.0 <0.7.0;
 
     contract WithdrawalContract {
         address public richest;
@@ -30,20 +30,16 @@
 
         mapping (address => uint) pendingWithdrawals;
 
-        function WithdrawalContract() public payable {
+        constructor() public payable {
             richest = msg.sender;
             mostSent = msg.value;
         }
 
         function becomeRichest() public payable returns (bool) {
-            if (msg.value > mostSent) {
-                pendingWithdrawals[richest] += msg.value;
-                richest = msg.sender;
-                mostSent = msg.value;
-                return true;
-            } else {
-                return false;
-            }
+            require(msg.value > mostSent, "Not enough money sent.");
+            pendingWithdrawals[richest] += msg.value;
+            richest = msg.sender;
+            mostSent = msg.value;
         }
 
         function withdraw() public {
@@ -59,31 +55,27 @@
 
 ::
 
-    pragma solidity ^0.4.11;
+    pragma solidity >=0.5.0 <0.7.0;
 
     contract SendContract {
-        address public richest;
+        address payable public richest;
         uint public mostSent;
 
-        function SendContract() public payable {
+        constructor() public payable {
             richest = msg.sender;
             mostSent = msg.value;
         }
 
         function becomeRichest() public payable returns (bool) {
-            if (msg.value > mostSent) {
-                // 这一行会导致问题（详见下文）
-                richest.transfer(msg.value);
-                richest = msg.sender;
-                mostSent = msg.value;
-                return true;
-            } else {
-                return false;
-            }
+            require(msg.value > mostSent, "Not enough money sent.");
+            // 这一行会导致问题（详见下文）
+            richest.transfer(msg.value);
+            richest = msg.sender;
+            mostSent = msg.value;
         }
     }
 
-注意，在这个例子里，攻击者可以给这个合约设下陷阱，使其进入不可用状态，比如通过使一个 fallback 函数会失败的合约成为 ``richest``
+注意，在这个例子里，攻击者可以给这个合约设下陷阱，使其进入不可用状态，比如通过使一个 fallback 或 receive 函数会失败的合约成为 ``richest``
 （可以在 fallback 函数中调用 ``revert()`` 或者直接在 fallback 函数中使用超过 2300 gas 来使其执行失败）。这样，当这个合约调用 ``transfer`` 来给“下过毒”的合约
 发送资金时，调用会失败，从而导致 ``becomeRichest`` 函数失败，这个合约也就被永远卡住了。
 

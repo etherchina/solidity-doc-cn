@@ -19,3 +19,4 @@
    assembly.rst
    miscellaneous.rst
    050-breaking-changes.rst
+   060-breaking-changes.rst

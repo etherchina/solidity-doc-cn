@@ -80,32 +80,43 @@
 
 正确写法::
 
-    contract A {
-        function spam() public;
-        function ham() public;
+    pragma solidity ^0.6.0;
+
+    abstract contract A {
+        function spam() public virtual pure;
+        function ham() public virtual pure;
     }
 
 
     contract B is A {
-        function spam() public {
-            ...
+        function spam() public pure override {
+            // ...
         }
 
-        function ham() public {
-            ...
+        function ham() public pure override {
+            // ...
         }
     }
 
 错误写法::
 
-    contract A {
-        function spam() public {
-            ...
+    pragma solidity >=0.4.0 <0.7.0;
+
+    abstract contract A {
+        function spam() virtual pure public;
+        function ham() public virtual pure;
+    }
+
+
+    contract B is A {
+        function spam() public pure override {
+            // ...
         }
-        function ham() public {
-            ...
+        function ham() public pure override {
+            // ...
         }
     }
+
 
 .. _maximum_line_length:
 
@@ -126,38 +137,38 @@
 Yes::
 
     thisFunctionCallIsReallyLong(
-        longArgument1, 
-        longArgument2, 
+        longArgument1,
+        longArgument2,
         longArgument3
     );
 
 No::
 
-    thisFunctionCallIsReallyLong(longArgument1, 
-                                  longArgument2, 
+    thisFunctionCallIsReallyLong(longArgument1,
+                                  longArgument2,
                                   longArgument3
     );
-                                  
-    thisFunctionCallIsReallyLong(longArgument1, 
-        longArgument2, 
+
+    thisFunctionCallIsReallyLong(longArgument1,
+        longArgument2,
         longArgument3
-    );                                  
-                                  
+    );
+
     thisFunctionCallIsReallyLong(
         longArgument1, longArgument2,
         longArgument3
-    );                                    
+    );
 
     thisFunctionCallIsReallyLong(
-    longArgument1, 
-    longArgument2, 
+    longArgument1,
+    longArgument2,
     longArgument3
     );
 
     thisFunctionCallIsReallyLong(
-        longArgument1, 
-        longArgument2, 
-        longArgument3);        
+        longArgument1,
+        longArgument2,
+        longArgument3);
 
 赋值语句
 
@@ -209,7 +220,7 @@ No::
                       recipient,
                       publicKey,
                       amount,
-                      options); 
+                      options);
 
 源文件编码格式
 ====================
@@ -257,6 +268,7 @@ Import 语句应始终放在文件的顶部。
 函数应根据其可见性和顺序进行分组：
 
 - 构造函数
+- receive 函数（如果存在）
 - fallback 函数（如果存在）
 - 外部函数
 - 公共函数
@@ -272,8 +284,12 @@ Import 语句应始终放在文件的顶部。
             ...
         }
 
-        function() public {
-            ...
+        receive() external payable {
+            // ...
+        }
+
+        fallback() external {
+            // ...
         }
 
         // External functions
@@ -301,6 +317,14 @@ Import 语句应始终放在文件的顶部。
 
         // External functions
         // ...
+
+
+        fallback() external {
+            // ...
+        }
+        receive() external payable {
+            // ...
+        }
 
         // Private functions
         // ...
@@ -363,15 +387,22 @@ Import 语句应始终放在文件的顶部。
     y             = 2;
     long_variable = 3;
 
-fallback 函数中不要包含空格：
+fallback 和 receive 函数中不要包含空格：
 
 正确写法::
+    receive() external payable {
+        ...
+    }
 
     function() public {
         ...
     }
 
 错误写法::
+
+    receive () external payable {
+        ...
+    }
 
     function () public {
         ...
@@ -514,7 +545,9 @@ fallback 函数中不要包含空格：
     function increment(uint x) public pure returns (uint) {
         return x + 1;}
 
-你应该严格地标示所有函数的可见性，包括构造函数。 
+你应该严格地标示所有函数的可见性，包括构造函数。
+
+
 
 Yes::
 
@@ -525,22 +558,38 @@ Yes::
 No::
 
     function implicitlyPublic(uint val) {
-        doSomething(); 
+        doSomething();
     }
 
-函数的可见性修饰符应该出现在任何自定义修饰符之前。
 
-正确写法::
+函数修饰器的顺序应该是:
 
-    function kill() public onlyowner {
+1. Visibility
+2. Mutability
+3. Virtual
+4. Override
+5. Custom modifiers
+
+Yes::
+
+    function balance(uint from) public view override returns (uint)  {
+        return balanceOf[from];
+    }
+
+    function shutdown() public onlyowner {
         selfdestruct(owner);
     }
 
-错误写法::
+No::
 
-    function kill() onlyowner public {
+    function balance(uint from) public override view returns (uint)  {
+        return balanceOf[from];
+    }
+
+    function shutdown() onlyowner public {
         selfdestruct(owner);
     }
+
 
 对于长函数声明，建议将每个参数独立一行并与函数体保持相同的缩进级别。闭括号和开括号也应该
 独立一行并保持与函数声明相同的缩进级别。
@@ -645,19 +694,19 @@ Yes::
         address a,
         address b,
         address c
-    ) 
-        public 
+    )
+        public
         returns (
-            address someAddressName, 
-            uint256 LongArgument, 
+            address someAddressName,
+            uint256 LongArgument,
             uint256 Argument
         )
-    {    
+    {
         doSomething()
-        
+
         return (
-            veryLongReturnArg1, 
-            veryLongReturnArg2, 
+            veryLongReturnArg1,
+            veryLongReturnArg2,
             veryLongReturnArg3
         );
     }
@@ -668,16 +717,16 @@ No::
         address a,
         address b,
         address c
-    ) 
-        public 
-        returns (address someAddressName, 
-                 uint256 LongArgument, 
+    )
+        public
+        returns (address someAddressName,
+                 uint256 LongArgument,
                  uint256 Argument)
-    {    
+    {
         doSomething()
-        
-        return (veryLongReturnArg1, 
-                veryLongReturnArg1, 
+
+        return (veryLongReturnArg1,
+                veryLongReturnArg1,
                 veryLongReturnArg1);
     }
 
@@ -889,7 +938,7 @@ No::
 
 
 ************************
-描述注释 NatSpec 
+描述注释 NatSpec
 ************************
 
 Solidity 智能合约有一种基于以太坊自然语言说明格式（Ethereum Natural Language Specification Format）的注释形式。

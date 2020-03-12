@@ -33,7 +33,7 @@ Solidity IDE及编辑器
     * `Solidity IDE <https://github.com/System-Glitch/Solidity-IDE>`_
         基于浏览器的 IDE，集成了编译器，支持 Ganache 和本地文件系统。
 
-    * `Solium <https://github.com/duaraghav8/Solium/>`_
+    * `Ethlint <https://github.com/duaraghav8/Ethlint>`_
         一种静态检查器，识别和修复 Solidity 中的风格以及安全问题。
 
     * `Superblocks Lab <https://lab.superblocks.com/>`_
@@ -48,7 +48,7 @@ Solidity IDE及编辑器
         Atom 编辑器的插件，提供 Solidity 语言的 Lint 检查（静态检查）。
 
     * `Atom Solium Linter <https://atom.io/packages/linter-solium>`_
-        Atom 的可配置的 Solidty 静态检查器，基于 Solium。
+        Atom 的可配置的 Solidity 静态检查器，基于 Solium(now Ethlint) 。
 
 * Eclipse:
 
@@ -96,6 +96,9 @@ Solidity IDE及编辑器
 
 Solidity 工具
 ~~~~~~~~~~~~~~~~~~
+
+* `ABI to Solidity interface converter <https://gist.github.com/chriseth/8f533d133fa0c15b0d6eaf3ec502c82b>`_
+    A script for generating contract interfaces from the ABI of a smart contract.
 
 * `Dapp <https://dapp.tools/dapp/>`_
     Solidity 语言的构建工具、包管理器以及部署助手。

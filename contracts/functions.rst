@@ -70,7 +70,7 @@
 
 
 返回变量名可以被省略。
-返回变量可以当作为函数中的本地变量，没有显式设置的话，会使用 :ref:` 默认值 <default-value>` 
+返回变量可以当作为函数中的本地变量，没有显式设置的话，会使用 :ref:` 默认值 <default-value>`
 返回变量可以显式给它附一个值，也可以使用 ``return`` 语句指定，使用 ``return`` 语句可以一个或多个值，参阅 :ref:`multiple ones<multi-return>` 。
 
 ::
@@ -112,7 +112,7 @@ View 视图函数
 可以将函数声明为 ``view`` 类型，这种情况下要保证不修改状态。
 
 .. note::
-  
+
   如果编译器的 EVM 目标是拜占庭硬分叉（ 译者注：Byzantium 分叉发生在2017年10月，这次分叉进加入了4个操作符： REVERT 、RETURNDATASIZE、RETURNDATACOPY 、STATICCALL） 或更新的 (默认), 则操作码 ``STATICCALL`` 将用于视图函数, 这些函数强制在 EVM 执行过程中保持不修改状态。
   对于库视图函数, 使用 ``DELLEGATECALL``, 因为没有组合的 ``DELEGATECALL`` 和 ``STATICALL``。这意味着库视图函数不会在运行时检查进而阻止状态修改。
   这不会对安全性产生负面影响, 因为库代码通常在编译时知道, 并且静态检查器会执行编译时检查。
@@ -146,7 +146,7 @@ View 视图函数
   Getter 方法自动被标记为 ``view``。
 
 .. note::
-  
+
   在0.5.0 版本之前, 编译器没有对 ``view`` 函数使用 ``STATICCALL`` 操作码。
   这样通过使用无效的显式类型转换会启用视图函数中的状态修改。
   通过对 ``view`` 函数使用 ``STATICCALL`` , 可以防止在 EVM 级别上对状态进行修改。
@@ -200,8 +200,61 @@ Pure 纯函数
 
 
 .. note::
-  
+
   在0.4.17版本之前，编译器不会强制 ``pure`` 函数不读取状态。它是一个编译时类型检查, 可以避免在合约类型之间进行无效的显式转换, 因为编译器可以验证合约类型没有状态更改操作, 但它不会在运行时能检查调用实际的类型。
+
+
+.. index:: ! receive ether function, function;receive ! receive
+
+.. _receive-ether-function:
+
+receive　接受以太函数
+======================
+
+一个合约最多有一个 ``receive`` 函数, 声明函数为：
+``receive() external payable { ... }``
+
+不需要 ``function`` 关键字，也没有参数和返回值并且必须是　``external``　可见性和　``payable``修饰．
+在对合约没有任何附加数据调用（通常是对合约转账）是会执行``receive`` 函数．　例如　通过 `.send()` or `.transfer()`
+如果``receive`` 函数不存在，　但是有payable　的 :ref:`fallback 回退函数 <fallback-function>`　
+那么在进行纯以太转账时，fallback 函数会调用．　
+　
+如果两个函数都没有，这个合约就没法通过常规的转账交易接收以太（会抛出异常）．
+
+
+更糟的是，fallback函数可能只有 2300 gas 可以使用（如，当使用 `send` 或 `transfer` 时）， 除了基础的日志输出之外，进行其他操作的余地很小。下面的操作消耗会操作 2300  gas :
+
+- 写入存储
+- 创建合约
+- 调用消耗大量 gas 的外部函数
+- 发送以太币
+
+
+.. warning::
+    一个没有定义 fallback 函数或　 receive 函数的合约，直接接收以太币（没有函数调用，即使用 ``send`` 或 ``transfer``）会抛出一个异常，
+    并返还以太币（在 Solidity v0.4.0 之前行为会有所不同）。
+    所以如果你想让你的合约接收以太币，必须实现receive函数（使用 payable　fallback 函数不再推荐，因为它会让借口混淆）。
+
+.. warning::
+    一个没有receive函数的合约，可以作为 `coinbase 交易` （又名 `矿工区块回报` ）的接收者或者作为 ``selfdestruct`` 的目标来接收以太币。
+
+    一个合约不能对这种以太币转移做出反应，因此也不能拒绝它们。这是 EVM 在设计时就决定好的，而且 Solidity 无法绕过这个问题。
+
+    这也意味着 ``address(this).balance`` 可以高于合约中实现的一些手工记帐的总和（例如在receive　函数中更新的累加器记帐）。
+
+下面是一个例子：
+
+::
+
+    pragma solidity ^0.6.0;
+
+    // 这个合约会保留所有发送给它的以太币，没有办法取回。　
+    contract Sink {
+        event Received(address, uint);
+        receive() external payable {
+            emit Received(msg.sender, msg.value);
+        }
+    }
 
 
 .. index:: ! fallback function, function;fallback
@@ -211,54 +264,61 @@ Pure 纯函数
 Fallback 回退函数
 =================
 
-合约可以有一个未命名的函数。这个函数不能有参数也不能有返回值。
-如果在一个到合约的调用中，没有其他函数与给定的函数标识符匹配（或没有提供调用数据），那么这个函数（fallback 函数）会被执行。
+合约可以最多有一个未命名的函数。函数声明为：
 
-除此之外，每当合约收到以太币（没有任何数据），这个函数就会执行。此外，为了接收以太币，fallback 函数必须标记为 ``payable`` 。
-如果不存在这样的函数，则合约不能通过普通转账交易接收以太币。
+``fallback () external [payable]``
 
-在最坏的情况下，回退函数只有 2300 gas 可以使用（如，当使用 `send` 或 `transfer` 时）， 除了基础的日志输出之外，进行其他操作的余地很小。下面的操作消耗会操作 2300  gas :
+这个函数不能有参数也不能有返回值，也没有　``function``　关键字．　必须是　``external``　可见性
 
-- 写入存储
-- 创建合约
-- 调用消耗大量 gas 的外部函数
-- 发送以太币
+
+如果在一个对合约调用中，没有其他函数与给定的函数标识符匹配fallback会被调用．
+或者在没有 :ref:`receive 函数 <receive-ether-function>`　时，而没有提供附加数据对合约调用，那么fallback 函数会被执行。
+
+fallback　函数始终会接收数据，但为了同时接收以太时，必须标记为　 ``payable``'。
+
+
+更糟的是，如果回退函数在接收以太时调用，可能只有 2300 gas 可以使用，参考　:ref:`receive接收函数 <receive-ether-function>`
 
 与任何其他函数一样，只要有足够的 gas 传递给它，回退函数就可以执行复杂的操作。
 
+.. warning::
+    ``payable`` 的fallback函数也可以在纯以太转账的时候执行， 如果没有　:ref:`receive 以太函数 <receive-ether-function>`
+    推荐总是定义一个receive函数，而不是定义一个``payable`` 的fallback函数，
+
 .. note::
     即使 fallback 函数不能有参数，仍然可以使用 ``msg.data`` 来获取随调用提供的任何有效数据。
+    在检查了 ``msg.data`` 的前四个字节之后，
 
-.. warning::
-    
-    如果调用方打算调用不可用的函数, 也会执行回退函数。如果要实现回退函数仅用于接收以太, 则应添加类似 ``require(msg.data.length == 0)`` 检查以防止哪些无效的调用。
+    您可以用　``abi.decode`` 与数组切片语法一起使用来解码ABI编码的数据：
+     ``(c, d) = abi.decode(msg.data[4:], (uint256, uint256));``
 
-.. warning::
-    一个没有定义 fallback 函数的合约，直接接收以太币（没有函数调用，即使用 ``send`` 或 ``transfer``）会抛出一个异常，
-    并返还以太币（在 Solidity v0.4.0 之前行为会有所不同）。所以如果你想让你的合约接收以太币，必须实现 fallback 函数。
+     请注意，这仅应作为最后的手段，而应使用对应的函数。
 
-.. warning::
-    一个没有 payable fallback 函数的合约，可以作为 `coinbase 交易` （又名 `矿工区块回报` ）的接收者或者作为 ``selfdestruct`` 的目标来接收以太币。
 
-    一个合约不能对这种以太币转移做出反应，因此也不能拒绝它们。这是 EVM 在设计时就决定好的，而且 Solidity 无法绕过这个问题。
-
-    这也意味着 ``address(this).balance`` 可以高于合约中实现的一些手工记帐的总和（例如在回退函数中更新的累加器记帐）。
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    pragma solidity >0.６.１ <0.7.0;
 
     contract Test {
         // 发送到这个合约的所有消息都会调用此函数（因为该合约没有其它函数）。
         // 向这个合约发送以太币会导致异常，因为 fallback 函数没有 `payable` 修饰符
-        function() external { x = 1; }
+        fallback() external { x = 1; }
         uint x;
     }
 
 
     // 这个合约会保留所有发送给它的以太币，没有办法返还。
-    contract Sink {
-        function() external payable { }
+    contract TestPayable {
+        // 除了纯转账外，所有的调用都会调用这个函数．
+        // (因为除了 receive 函数外，没有其他的函数).
+        // 任何对合约非空calldata 调用会执行回退函数(即使是调用函数附加以太).
+        fallback() external payable { x = 1; y = msg.value; }
+
+        // 纯转账调用这个函数，例如对每个空empty calldata的调用
+        receive() external payable { x = 2; y = msg.value; }
+        uint x;
+        uint y;
     }
 
     contract Caller {
@@ -268,13 +328,27 @@ Fallback 回退函数
             //  test.x 结果变成 == 1。
 
             // address(test) 不允许直接调用 ``send`` ,  因为 ``test`` 没有 payable 回退函数
-            // 需要通过 uint160 转化为 ``address payable`` 类型 , 然后才可以调用 ``send``
-            address payable testPayable = address(uint160(address(test)));
+            //  转化为 ``address payable`` 类型 , 然后才可以调用 ``send``
+            address payable testPayable = payable(address(test));
 
 
             // 以下将不会编译，但如果有人向该合约发送以太币，交易将失败并拒绝以太币。
             // test.send(2 ether）;
         }
+
+        function callTestPayable(TestPayable test) public returns (bool) {
+            (bool success,) = address(test).call(abi.encodeWithSignature("nonExistingFunction()"));
+            require(success);
+            // 结果 test.x 为 1  test.y 为 0.
+            (success,) = address(test).call{value: 1}(abi.encodeWithSignature("nonExistingFunction()"));
+            require(success);
+            // 结果test.x 为1 and test.y 为 1.
+
+            // 发送以太币, TestPayable 的 receive　函数被调用．
+            require(address(test).send(2 ether));
+            // 结果 in test.x 为 2 and test.y 为 2 ether.
+        }
+
     }
 
 .. index:: ! overload

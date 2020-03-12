@@ -6,7 +6,7 @@
  - 版本: 0.5.8
  - 状态：完成
  - 译者：Tiny熊
- 
+
 
 ## introduction-to-smart-contracts.rst
  - 版本: 0.4.20
@@ -25,7 +25,7 @@
  - 状态：完成
  - 译者：Tiny熊
 
-## solidity-in-depth.rst 
+## solidity-in-depth.rst
 ###  layout-of-source-files.rst
  - 版本: 0.5.8
  - 状态：完成

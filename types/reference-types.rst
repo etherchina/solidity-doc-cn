@@ -8,8 +8,8 @@
 
 引用类型可以通过多个不同的名称修改它的值，而值类型的变量，每次都有独立的副本。因此，必须比值类型更谨慎地处理引用类型。
 目前，引用类型包括结构，数组和映射，如果使用引用类型，则必须明确指明数据存储哪种类型的位置（空间）里：
- - |memory| 其生命周期只存在与函数调用期间
- - |storage| 状态变量保存的位置，一直存在区块链中
+ - |memory| 其生命周期只存在与函数调用期间（不能用于外部调用）
+ - |storage| 状态变量保存的位置，只要合约存在就一直存存储．
  - |calldata| 函数参数的特殊数据位置，仅适用于外部函数调用参数
 
 更改数据位置或类型转换将始终产生自动进行一份拷贝，而在同一数据位置内（对于 |storage| 来说）的复制仅在某些情况下进行拷贝。
@@ -45,23 +45,23 @@
     pragma solidity >=0.4.0 <0.7.0;
 
     contract Tiny {
-        uint[] x; // x 的数据存储位置是 storage
+        uint[] x; // x 的数据存储位置是 storage，　位置可以忽略
 
         // memoryArray 的数据存储位置是 memory
         function f(uint[] memory memoryArray) public {
             x = memoryArray; // 将整个数组拷贝到 storage 中，可行
             uint[] storage y = x;  // 分配一个指针（其中 y 的数据存储位置是 storage），可行
             y[7]; // 返回第 8 个元素，可行
-            y.length = 2; // 通过 y 修改 x，可行
+            y.pop(); // 通过 y 修改 x，可行
             delete x; // 清除数组，同时修改 y，可行
 
-            // 下面的就不可行了；需要在 storage 中创建新的未命名的临时数组， 
+            // 下面的就不可行了；需要在 storage 中创建新的未命名的临时数组，
             // 但 storage 是“静态”分配的：
             // y = memoryArray;
             // 下面这一行也不可行，因为这会“重置”指针，
             // 但并没有可以让它指向的合适的存储位置。
             // delete y;
-            
+
             g(x); // 调用 g 函数，同时移交对 x 的引用
             h(x); // 调用 h 函数，同时在 memory 中创建一个独立的临时拷贝
         }
@@ -88,7 +88,7 @@
 在Solidity中， ``X[3]`` 总是一个包含三个 ``X`` 类型元素的数组，即使 ``X`` 本身就是一个数组，这和其他语言也有所不同，比如 C 语言。
 
 数组下标是从 0 开始的，且访问数组时的下标顺序与声明时相反。
-如：如果有一个变量为 ``uint[][5] x memory``， 要访问第三个动态数组的第二个元素，使用 x[2][1]，要访问第三个动态数组使用 ``x[2]``。
+如：如果有一个变量为 ``uint[][5] memory x ``， 要访问第三个动态数组的第二个元素，使用 x[2][1]，要访问第三个动态数组使用 ``x[2]``。
 同样，如果有一个 ``T`` 类型的数组 ``T[5] a`` ， T 也可以是一个数组，那么 ``a[2]`` 总会是 ``T`` 类型。
 
 数组元素可以是任何类型，包括映射或结构体。对类型的限制是映射只能存储在 |storage| 中，并且公开访问函数的参数需要是 :ref:`ABI 类型 <ABI>`。
@@ -96,7 +96,7 @@
 状态变量标记 ``public`` 的数组，Solidity创建一个 :ref:`getter函数 <visibility-and-getters>` 。
 小标数字索引就是 getter函数 的参数。
 
-访问超出数组长度的元素会导致异常（assert 类型异常 ）。 可以使用 ``.push()`` 方法在末尾追加一个新元素，或者给 ``.length`` 赋值来改变大小，参考 :ref:`数组成员 <array-members>` （参见下面的注意事项）。
+访问超出数组长度的元素会导致异常（assert 类型异常 ）。 可以使用 ``.push()`` 方法在末尾追加一个新元素，其中 ``.push()`` 追加一个零初始化的元素并返回对它的引用。
 
 
 ``bytes`` 和 ``strings`` 也是数组
@@ -124,8 +124,8 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 创建内存数组
 ^^^^^^^^^^^^^
 
-可使用 ``new`` 关键字在 |memory| 中基于运行时的长度创建数组。
-与 |storage| 数组相反的是，你 *不能* 通过修改成员变量 ``.length`` 改变 |memory| 数组的大小。
+可使用 ``new`` 关键字在 |memory| 中基于运行时创建动态长度数组。
+与 |storage| 数组相反的是，你 *不能* 通过修改成员变量 ``.push`` 改变 |memory| 数组的大小。
 
 必须提前计算所需的大小或者创建一个新的内存数组并复制每个元素。
 
@@ -197,29 +197,25 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 
 **length**:
     数组有 ``length`` 成员变量表示当前数组的长度。
-    一经创建，|memory| 数组的大小就是固定的（但却是动态的，也就是说，它可以根据运行时的参数创建）。 
-    动态数组（仅存在于 |storage| 中）通过改变成员变量 ``.length`` 改变数组大小。
-    并不能通过访问超出当前数组长度的方式实现自动扩展数组的长度（这会导致异常）。
+    一经创建，|memory| 数组的大小就是固定的（但却是动态的，也就是说，它可以根据运行时的参数创建）。
 
-    增加长度会为数组添加新的零初始化元素， 减少长度会在每个上面执行一个隐含的 :ref:`delete` 删除元素。
-    如果您尝试调整不在 |storage| 中的非动态数组的大小，你会收到一个 ``Value must be an lvalue`` 错误。   
 
-**push**:
-    变长的 |storage| 数组以及 ``bytes`` 类型（ ``string`` 类型不可以）都有一个 ``push`` 的成员函数，它用来附加新的元素到数组末尾，元素将初始化为零。
-    这个函数将返回新的数组长度。
+**push()**:
+    动态的 |storage| 数组以及 ``bytes`` 类型（ ``string`` 类型不可以）都有一个 ``push()`` 的成员函数，它用来添加新的零初始化元素到数组末尾，并返回元素引用．
+    因此可以这样：　 ``x.push().t = 2`` or ``x.push() = b``.
+
+**push(x)**:
+　　　动态的 |storage| 数组以及 ``bytes`` 类型（ ``string`` 类型不可以）都有一个 ``push(ｘ)`` 的成员函数，用来在数组末尾添加一个给定的元素，这个函数没有返回值．
 
 **pop**:
      变长的 |storage| 数组以及 ``bytes`` 类型（ ``string`` 类型不可以）都有一个 ``pop`` 的成员函数， 它用来从数组末尾删除元素。 同样的会在移除的元素上隐含调用 :ref:`delete` 。
 
-.. warning::
-    如果在空数组上 ``.length--`` 会导致向下溢出，长度将设置为 ``2**256-1`` 。
 
 .. note::
-    增加 |storage| 数组的长度具有固定的 gas 消耗，因为 |storage| 总是被零初始化，而减少长度至少是线性成本（大多数情况下比线性成本更差），
-    因为它包括清理已删除的元素，类似于在这些元素上调用 :ref:`delete` 。
+    通过 ``push()``　增加 |storage| 数组的长度具有固定的 gas 消耗，因为 |storage| 总是被零初始化，而通过　``pop``　减少长度则依赖移除与元素的大小（size）．　如果元素是数组,则成本是很高的,因为它包括已删除的元素的清理，类似于在这些元素上调用 :ref:`delete` 。
 
 .. note::
-    在外部（external）函数中目前还不能使用多维数组，但是在公有（public）函数中是支持的。
+    在外部（external）函数中目前还不能使用多维数组(除非启用ABIEncoderV2)，但是在公有（public）函数中是支持的。
 
 .. note::
     在Byzantium（在2017-10-16日4370000区块上进行硬分叉升级）之前的EVM版本中，无法访问从函数调用返回动态数组。 如果要调用返回动态数组的函数，请确保 EVM 在拜占庭模式上运行。
@@ -235,7 +231,7 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
         // 注意下面的代码并不是一对动态数组，
         // 而是一个数组元素为一对变量的动态数组（也就是数组元素为长度为 2 的定长数组的动态数组）。
         // 因为  T[] 总是 T 的动态数组, 尽管 T 是数组
-        // 所有的状态变量的数据位置都是 storage 
+        // 所有的状态变量的数据位置都是 storage
         bool[2][] m_pairsOfFlags;
 
         // newPairs 存储在 memory 中 (仅当它是公有的合约函数)
@@ -269,8 +265,15 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
         }
 
         function changeFlagArraySize(uint newSize) public {
-            // 如果新大小较小，则将清除已删除的数组元素
-            m_pairsOfFlags.length = newSize;
+           // 使用 push 和 pop 是更改数组长度的唯一方法
+
+            if (newSize < m_pairsOfFlags.length) {
+                while (m_pairsOfFlags.length > newSize)
+                    m_pairsOfFlags.pop();
+            } else if (newSize > m_pairsOfFlags.length) {
+                while (m_pairsOfFlags.length < newSize)
+                    m_pairsOfFlags.push();
+            }
         }
 
         function clear() public {
@@ -278,7 +281,7 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
             delete m_pairsOfFlags;
             delete m_aLotOfIntegers;
             // 效果相同（和上面）
-            m_pairsOfFlags.length = 0;
+            m_pairsOfFlags.length = new bool[2][](0);
         }
 
         bytes m_byteData;
@@ -287,13 +290,15 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
             // 字节数组（bytes）不一样，它们在没有填充的情况下存储。
             // 可以被视为与 uint8 [] 相同
             m_byteData = data;
-            m_byteData.length += 7;
+            for (uint i = 0; i < 7; i++)
+                m_byteData.push();
             m_byteData[3] = 0x08;
             delete m_byteData[2];
         }
 
         function addFlag(bool[2] memory flag) public returns (uint) {
-            return m_pairsOfFlags.push(flag);
+            m_pairsOfFlags.push(flag);
+            return m_pairsOfFlags.length;
         }
 
         function createMemoryArray(uint size) public pure returns (bytes memory) {
@@ -312,6 +317,67 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
     }
 
 
+.. index:: ! array;slice
+
+.. _array-slices:
+
+数据切片
+------------
+
+
+Array slices are a view on a contiguous portion of an array.
+They are written as ``x[start:end]``, where ``start`` and
+``end`` are expressions resulting in a uint256 type (or
+implicitly convertible to it). The first element of the
+slice is ``x[start]`` and the last element is ``x[end - 1]``.
+
+If ``start`` is greater than ``end`` or if ``end`` is greater
+than the length of the array, an exception is thrown.
+
+Both ``start`` and ``end`` are optional: ``start`` defaults
+ to ``0`` and ``end`` defaults to the length of the array.
+
+Array slices do not have any members. They are implicitly
+convertible to arrays of their underlying type
+and support index access. Index access is not absolute
+in the underlying array, but relative to the start of
+the slice.
+
+Array slices do not have a type name which means
+no variable can have an array slices as type,
+they only exist in intermediate expressions.
+
+.. note::
+    As of now, array slices are only implemented for calldata arrays.
+
+Array slices are useful to ABI-decode secondary data passed in function parameters:
+
+::
+
+    pragma solidity >=0.4.99 <0.7.0;
+
+    contract Proxy {
+        /// Address of the client contract managed by proxy i.e., this contract
+        address client;
+
+        constructor(address _client) public {
+            client = _client;
+        }
+
+        /// Forward call to "setOwner(address)" that is implemented by client
+        /// after doing basic validation on the address argument.
+        function forward(bytes calldata _payload) external {
+            bytes4 sig = abi.decode(_payload[:4], (bytes4));
+            if (sig == bytes4(keccak256("setOwner(address)"))) {
+                address owner = abi.decode(_payload[4:], (address));
+                require(owner != address(0), "Address of owner cannot be zero.");
+            }
+            (bool status,) = client.delegatecall(_payload);
+            require(status, "Forwarded call failed.");
+        }
+    }
+
+
 
 .. index:: ! struct, ! type;struct
 
@@ -326,13 +392,17 @@ Solidity 支持通过构造结构体的形式定义新的类型，以下是一�
 
     pragma solidity >=0.4.11 <0.7.0;
 
-    contract CrowdFunding {
         // 定义的新类型包含两个属性。
+        // 在合约外部声明结构体可以使其被多个合约共享。 在这里，这并不是真正需要的。
         struct Funder {
             address addr;
             uint amount;
         }
 
+    contract CrowdFunding {
+
+        //也可以在合约内部定义结构体，这使得它们
+         //仅在此合约和衍生合约中可见。
         struct Campaign {
             address beneficiary;
             uint fundingGoal;

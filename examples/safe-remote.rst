@@ -6,9 +6,24 @@
 安全的远程购买合约
 ********************
 
-译者注，在官方文档中，这个合约没有任何的说明，这个合约译者认为作者是想展示合约 |modifier| 的用法。
+Purchasing goods remotely currently requires multiple parties that need to trust each other.
+The simplest configuration involves a seller and a buyer. The buyer would like to receive
+an item from the seller and the seller would like to get money (or an equivalent)
+in return. The problematic part is the shipment here: There is no way to determine for
+sure that the item arrived at the buyer.
 
-现在大家只需了解下 |modifier| 的作用，后面的文档有 :ref:`更多关于函数修饰器的使用 <modifiers>`。
+There are multiple ways to solve this problem, but all fall short in one or the other way.
+In the following example, both parties have to put twice the value of the item into the
+contract as escrow. As soon as this happened, the money will stay locked inside
+the contract until the buyer confirms that they received the item. After that,
+the buyer is returned the value (half of their deposit) and the seller gets three
+times the value (their deposit plus the value). The idea behind
+this is that both parties have an incentive to resolve the situation or otherwise
+their money is locked forever.
+
+This contract of course does not solve the problem, but gives an overview of how
+you can use state machine-like constructs inside a contract.
+
 
 ::
 
@@ -18,17 +33,11 @@
         uint public value;
         address payable public seller;
         address payable public buyer;
-        enum State { Created, Locked, Inactive }
+
+        enum State { Created, Locked, Release, Inactive }
+
         State public state;
 
-        //确保 `msg.value` 是一个偶数。
-        //如果它是一个奇数，则它将被截断。
-        //通过乘法检查它不是奇数。
-        constructor() public payable {
-            seller = msg.sender;
-            value = msg.value / 2;
-            require((2 * value) == msg.value, "Value has to be even.");
-        }
 
         modifier condition(bool _condition) {
             require(_condition);
@@ -62,6 +71,17 @@
         event Aborted();
         event PurchaseConfirmed();
         event ItemReceived();
+        event SellerRefunded();
+
+        //确保 `msg.value` 是一个偶数。
+        //如果它是一个奇数，则它将被截断。
+        //通过乘法检查它不是奇数。
+        constructor() public payable {
+            seller = msg.sender;
+            value = msg.value / 2;
+            require((2 * value) == msg.value, "Value has to be even.");
+        }
+
 
         ///中止购买并回收以太币。
         ///只能在合约被锁定之前由卖家调用。
@@ -97,11 +117,31 @@
             inState(State.Locked)
         {
             emit ItemReceived();
-            // 首先修改状态很重要，否则的话，由 `transfer` 所调用的合约可以回调进这里（再次接收以太币）。
+            // It is important to change the state first because
+            // otherwise, the contracts called using `send` below
+            // can call in again here.
+            state = State.Release;
+
+            buyer.transfer(value);
+        }
+
+        /// This function refunds the seller, i.e.
+        /// pays back the locked funds of the seller.
+        function refundSeller()
+            public
+            onlySeller
+            inState(State.Release)
+        {
+            emit SellerRefunded();
+            // It is important to change the state first because
+            // otherwise, the contracts called using `send` below
+            // can call in again here.
             state = State.Inactive;
 
-            // 注意: 这实际上允许买方和卖方阻止退款 - 应该使用取回模式。
-            buyer.transfer(value);
-            seller.transfer(address(this).balance);
+            seller.transfer(3 * value);
         }
+    }
+
+
+
     }

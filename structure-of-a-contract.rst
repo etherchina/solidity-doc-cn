@@ -53,7 +53,7 @@
         }
     }
 
-:ref:`function-calls` 可发生在合约内部或外部，且函数对其他合约有不同程度的可见性（ :ref:`visibility-and-getters`）。 
+:ref:`function-calls` 可发生在合约内部或外部，且函数对其他合约有不同程度的可见性（ :ref:`visibility-and-getters`）。
 
 :ref:`函数<functions>` 可以接受 :ref:`参数和返回值<function-parameters-return-variables>`。
 
@@ -62,7 +62,13 @@
 函数 |modifier|
 ==================
 
-函数 |modifier| 可以用来以声明的方式修改函数语义（参阅合约章节中 :ref:`函数修改器<modifiers>`）。 
+函数 |modifier| 可以用来以声明的方式修改函数语义（参阅合约章节中 :ref:`函数修改器<modifiers>`）。
+
+Overloading, that is, having the same modifier name with different parameters,
+is not possible.
+
+Like functions, modifiers can be :ref:`overridden <modifier-overriding>`.
+
 
 ::
 
@@ -78,7 +84,7 @@
             );
             _;
         }
-        
+
         function abort() public onlySeller { // 修饰器用法
             // ...
         }
@@ -129,7 +135,7 @@
 枚举类型
 ==========
 
-枚举可用来创建由一定数量的“常量值”构成的自定义类型（参阅类型章节中的 :ref:`enums`）。 
+枚举可用来创建由一定数量的“常量值”构成的自定义类型（参阅类型章节中的 :ref:`enums`）。
 
 ::
 

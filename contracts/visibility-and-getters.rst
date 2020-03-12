@@ -15,7 +15,7 @@
 ``external`` ：
     外部函数作为合约接口的一部分，意味着我们可以从其他合约和交易中调用。
     一个外部函数 ``f`` 不能从内部调用（即 ``f`` 不起作用，但 ``this.f()`` 可以）。
-    当收到大量数据的时候，外部函数有时候会更有效率。
+    当收到大量数据的时候，外部函数有时候会更有效率，因为数据不会从calldata复制到内存.
 
 ``public`` ：
     public 函数是合约接口的一部分，可以在内部或通过消息调用。对于 public 状态变量，
@@ -117,7 +117,7 @@ getter 函数具有外部（external）可见性。如果在内部访问 getter�
         }
     }
 
-如果你有一个数组类型的 ``public`` 状态变量，那么你只能通过生成的 getter 函数访问数组的单个元素。 
+如果你有一个数组类型的 ``public`` 状态变量，那么你只能通过生成的 getter 函数访问数组的单个元素。
 这个机制以避免返回整个数组时的高成本gas。 可以使用如 ``data(0)`` 用于指定参数要返回的单个元素。
 如果要在一次调用中返回整个数组，则需要写一个函数，例如：
 
@@ -131,13 +131,13 @@ getter 函数具有外部（external）可见性。如果在内部访问 getter�
 
     // 指定生成的Getter 函数
     /*
-    function myArray(uint i) returns (uint) {
+    function myArray(uint i) public view returns (uint) {
         return myArray[i];
     }
     */
 
     // 返回整个数组
-    function getArray() returns (uint[] memory) {
+    function getArray() public view returns (uint[] memory) {
         return myArray;
     }
   }

@@ -31,11 +31,11 @@
 ## 翻译方法
 
 ### 拉取官方文档
-翻译项目为 [Solidity 官方文档](https://github.com/ethereum/solidity/) 0.5.8 版本，获取官方文档0.5.8 版本的方法为：
+翻译项目为 [Solidity 官方文档](https://github.com/ethereum/solidity/) 0.6.4 版本，获取官方文档0.6.4 版本的方法为：
 
 ```
 git clone git@github.com:ethereum/solidity.git
-git checkout v0.5.9 -b v0.5.9  # 检出 v0.5.9版本
+git checkout v0.6.4 -b v0.6.4  # 检出 v0.6.4版本
 cd docs   # docs 为文档所在目录
 ```
 
@@ -54,7 +54,7 @@ sudo pip install -U Sphinx
 pip install sphinx_rtd_theme
 ```
 
-之后就可以打编辑器对照英文0.5.9版本进行翻译，翻译完成后提交pull request。
+之后就可以打编辑器对照英文0.6.4版本进行翻译，翻译完成后提交pull request。
 
 RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.html)
 

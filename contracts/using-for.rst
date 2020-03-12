@@ -9,7 +9,7 @@
 Using For
 *********
 
-指令 ``using A for B;`` 可用于附加库函数（从库 ``A``）到任何类型（``B``）。
+在当前的合约上下里, 指令 ``using A for B;`` 可用于附加库函数（从库 ``A``）到任何类型（``B``）。
 这些函数将接收到调用它们的对象作为它们的第一个参数（像 Python 的 ``self`` 变量）。
 
 ``using A for *;`` 的效果是，库 ``A`` 中的函数被附加在任意的类型上。
@@ -25,8 +25,9 @@ Using For
     pragma solidity >=0.4.16 <0.7.0;
 
     // 这是和之前一样的代码，只是没有注释。
+    struct Data { mapping(uint => bool) flags; }
+
     library Set {
-      struct Data { mapping(uint => bool) flags; }
 
       function insert(Data storage self, uint value)
           public
@@ -58,15 +59,15 @@ Using For
     }
 
     contract C {
-        using Set for Set.Data; // 这里是关键的修改
-        Set.Data knownValues;
+        using Set for Data; // 这里是关键的修改
+        Data knownValues;
 
         function register(uint value) public {
-            // Here, all variables of type Set.Data have
+            // Here, all variables of type Data have
             // corresponding member functions.
             // The following function call is identical to
             // `Set.insert(knownValues, value)`
-            // 这里， Set.Data 类型的所有变量都有与之相对应的成员函数。
+            // 这里， Data 类型的所有变量都有与之相对应的成员函数。
             // 下面的函数调用和 `Set.insert(knownValues, value)` 的效果完全相同。
             require(knownValues.insert(value));
         }
@@ -106,5 +107,5 @@ Using For
         }
     }
 
-注意，所有库调用都是实际的 EVM 函数调用。这意味着如果传递内存或值类型，都将产生一个副本，即使是 ``self`` 变量。
-使用存储引用变量是唯一不会发生拷贝的情况。 
+注意，所有 external 库调用都是实际的 EVM 函数调用。这意味着如果传递内存或值类型，都将产生一个副本，即使是 ``self`` 变量。
+引用存储变量或者 internal 库调用 是唯一不会发生拷贝的情况。
