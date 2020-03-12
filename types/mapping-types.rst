@@ -24,8 +24,8 @@
 它们不能用合约公有函数的参数或返回值。
 
 
-可以将映射声明为 ``public``，然后来让 Solidity 创建一个 :ref:`getter 函数 <visibility-and-getters>`。
-``_KeyType`` 将成为 getter 的必须参数，并且 getter 会返回 ``_ValueType``。
+可以将映射声明为 ``public`` ，然后来让 Solidity 创建一个 :ref:`getter 函数 <visibility-and-getters>`。
+``_KeyType`` 将成为 getter 的必须参数，并且 getter 会返回 ``_ValueType`` 。
 
 如果 ``_ValueType`` 是一个映射。这时在使用 getter 时将需要递归地传入每个 ``_KeyType`` 参数，　
 
@@ -111,7 +111,7 @@
 
 
 映射本身是无法遍历的，即无法枚举所有的键。不过，可以在它们之上实现一个数据结构来进行迭代。 例如，以下代码实现了
-``IterableMapping`` 库，然后　``User``合约可以添加数据，　``sum``　函数迭代求和所有值。
+``IterableMapping`` 库，然后　``User`` 合约可以添加数据，　``sum``　函数迭代求和所有值。
 
 
 ::

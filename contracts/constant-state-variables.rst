@@ -11,7 +11,7 @@ Constant 状态变量
 
 允许可能对内存分配产生副作用（side-effect）的表达式，但那些可能对其他内存对象产生副作用的表达式则不允许。
 
-内建（built-in）函数 ``keccak256``，``sha256``，``ripemd160``，``ecrecover``，``addmod`` 和 ``mulmod`` 是允许的（即使他们确实会调用外部合约， ``keccak256`` 除外）。
+内建（built-in）函数 ``keccak256`` ， ``sha256`` ， ``ripemd160`` ， ``ecrecover`` ， ``addmod`` 和 ``mulmod`` 是允许的（即使他们确实会调用外部合约， ``keccak256`` 除外）。
 
 允许内存分配器的副作用的原因是它可以构造复杂的对象，例如： 查找表（lookup-table）。 此功能尚不完全可用。
 

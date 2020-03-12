@@ -208,15 +208,15 @@ Pure 纯函数
 
 .. _receive-ether-function:
 
-receive　接受以太函数
+receive接收以太函数
 ======================
 
 一个合约最多有一个 ``receive`` 函数, 声明函数为：
 ``receive() external payable { ... }``
 
-不需要 ``function`` 关键字，也没有参数和返回值并且必须是　``external``　可见性和　``payable``修饰．
-在对合约没有任何附加数据调用（通常是对合约转账）是会执行``receive`` 函数．　例如　通过 `.send()` or `.transfer()`
-如果``receive`` 函数不存在，　但是有payable　的 :ref:`fallback 回退函数 <fallback-function>`　
+不需要 ``function`` 关键字，也没有参数和返回值并且必须是　``external``　可见性和　``payable`` 修饰．
+在对合约没有任何附加数据调用（通常是对合约转账）是会执行 ``receive`` 函数．　例如　通过 `.send()` or `.transfer()`
+如果 ``receive`` 函数不存在，　但是有payable　的 :ref:`fallback 回退函数 <fallback-function>`　
 那么在进行纯以太转账时，fallback 函数会调用．　
 　
 如果两个函数都没有，这个合约就没法通过常规的转账交易接收以太（会抛出异常）．
@@ -274,7 +274,7 @@ Fallback 回退函数
 如果在一个对合约调用中，没有其他函数与给定的函数标识符匹配fallback会被调用．
 或者在没有 :ref:`receive 函数 <receive-ether-function>`　时，而没有提供附加数据对合约调用，那么fallback 函数会被执行。
 
-fallback　函数始终会接收数据，但为了同时接收以太时，必须标记为　 ``payable``'。
+fallback　函数始终会接收数据，但为了同时接收以太时，必须标记为　 ``payable`` 。
 
 
 更糟的是，如果回退函数在接收以太时调用，可能只有 2300 gas 可以使用，参考　:ref:`receive接收函数 <receive-ether-function>`
@@ -298,7 +298,7 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
 
 ::
 
-    pragma solidity >0.６.１ <0.7.0;
+    pragma solidity >0.6.1 <0.7.0;
 
     contract Test {
         // 发送到这个合约的所有消息都会调用此函数（因为该合约没有其它函数）。
