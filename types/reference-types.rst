@@ -205,7 +205,7 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
     因此可以这样：　 ``x.push().t = 2`` 或 ``x.push() = b``.
 
 **push(x)**:
-　　　动态的 |storage| 数组以及 ``bytes`` 类型（ ``string`` 类型不可以）都有一个 ``push(ｘ)`` 的成员函数，用来在数组末尾添加一个给定的元素，这个函数没有返回值．
+    动态的 |storage| 数组以及 ``bytes`` 类型（ ``string`` 类型不可以）都有一个 ``push(ｘ)`` 的成员函数，用来在数组末尾添加一个给定的元素，这个函数没有返回值．
 
 **pop**:
      变长的 |storage| 数组以及 ``bytes`` 类型（ ``string`` 类型不可以）都有一个 ``pop`` 的成员函数， 它用来从数组末尾删除元素。 同样的会在移除的元素上隐含调用 :ref:`delete` 。
@@ -321,11 +321,11 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 
 .. _array-slices:
 
-数据切片
+数组切片
 ------------
 
+数组切片是数组连续部分的视图。
 
-Array slices are a view on a contiguous portion of an array.
 They are written as ``x[start:end]``, where ``start`` and
 ``end`` are expressions resulting in a uint256 type (or
 implicitly convertible to it). The first element of the
