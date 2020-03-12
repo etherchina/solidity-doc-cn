@@ -716,7 +716,7 @@ opcodes that interfere with these features are not available. This includes
 the ``dup`` and ``swap`` instructions as well as ``jump`` instructions, labels and the ``push`` instructions.
 
 +-------------------------+-----+---+-----------------------------------------------------------------+
-| 指令                     |     |   | Explanation                                                     |
+|Instruction              |     |   | Explanation                                                     |
 +=========================+=====+===+=================================================================+
 | stop()                  + `-` | F | stop execution, identical to return(0, 0)                       |
 +-------------------------+-----+---+-----------------------------------------------------------------+
