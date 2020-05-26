@@ -164,12 +164,11 @@ Solidity 支持多重继承包括多态。
 
 .. index:: ! overriding;function
 
-函数重载(Overriding)
+函数重写(Overriding)
 ===================
 
-Base functions can be overridden by inheriting contracts to change their
-behavior if they are marked as ``virtual``. The overriding function must then
-use the ``override`` keyword in the function header as shown in this example:
+父合约标记为 ``virtual`` 函数可以在继承合约里重写(overridden)以更改他们的行为。重写的函数需要使用关键字  ``override``  修饰。 
+下面是一个例子：
 
 ::
 
@@ -187,12 +186,9 @@ use the ``override`` keyword in the function header as shown in this example:
         function foo() public override {}
     }
 
-For multiple inheritance, the most derived base contracts that define the same
-function must be specified explicitly after the ``override`` keyword.
-In other words, you have to specify all base contracts that define the same function
-and have not yet been overridden by another base contract (on some path through the inheritance graph).
-Additionally, if a contract inherits the same function from multiple (unrelated)
-bases, it has to explicitly override it:
+对于多重继承，如果有多个父合约有相同定义的函数， ``override`` 关键字后必须指定所有父合约名。
+
+例如：
 
 ::
 
@@ -210,15 +206,13 @@ bases, it has to explicitly override it:
 
     contract Inherited is Base1, Base2
     {
-        // Derives from multiple bases defining foo(), so we must explicitly
-        // override it
+        // 继承自东哥基类合约定义的foo(), 必须显示的指定 override 
         function foo() public override(Base1, Base2) {}
     }
 
-An explicit override specifier is not required if
-the function is defined in a common base contract
-or if there is a unique function in a common base contract
-that already overrides all other functions.
+
+不过如果（重写的）函数继承自一个公共的父合约， ``override`` 是可以不用显示指定的。
+例如：
 
 ::
 
@@ -227,8 +221,9 @@ that already overrides all other functions.
     contract A { function f() public pure{} }
     contract B is A {}
     contract C is A {}
-    // No explicit override required
+    // 不用显示  override 
     contract D is B, C {}
+
 
 More formally, it is not required to override a function (directly or
 indirectly) inherited from multiple bases if there is a base contract
@@ -243,22 +238,18 @@ the inheritance graph that starts at the contract under consideration
 and ends at a contract mentioning a function with that signature
 that does not override.
 
-If you do not mark a function that overrides as ``virtual``, derived
-contracts can no longer change the behaviour of that function.
+如果函数没有标记为 ``virtual`` ， 那么派生合约将不能更改函数的行为（即不能重写）。
 
 .. note::
 
-  Functions with the ``private`` visibility cannot be ``virtual``.
+  ``private`` 的函数是不可以标记为 ``virtual`` 的。
 
 .. note::
 
-  Functions without implementation have to be marked ``virtual``
-  outside of interfaces. In interfaces, all functions are
-  automatically considered ``virtual``.
+  除接口之外（因为接口会自动作为``virtual``），没有实现的函数必须标记为 ``virtual``
 
-Public state variables can override external functions if the
-parameter and return types of the function matches the getter function
-of the variable:
+
+如果getter 函数的参数和返回值都和外部函数一致时，外部（external）函数是可以被 public 的状态变量被重写的，例如：
 
 ::
 
@@ -276,20 +267,18 @@ of the variable:
 
 .. note::
 
-  While public state variables can override external functions, they themselves cannot
-  be overridden.
+  尽管public 的状态变量可以重写外部函数，但是public 的状态变量不能被重写。
+
 
 .. _modifier-overriding:
 
 .. index:: ! overriding;modifier
 
-Modifier Overriding
+修饰器重写
 ===================
 
-Function modifiers can override each other. This works in the same way as
-`function overriding <function-overriding>`_ (except that there is no overloading for modifiers). The
-``virtual`` keyword must be used on the overridden modifier
-and the ``override`` keyword must be used in the overriding modifier:
+修饰器重写也可以被重写，工作方式和 `函数重写 <function-overriding>`_ 类似。
+需要被重写的修饰器也需要使用 ``virtual`` 修饰，``override``则同样修饰重载，例如：
 
 ::
 
@@ -306,8 +295,7 @@ and the ``override`` keyword must be used in the overriding modifier:
     }
 
 
-In case of multiple inheritance, all direct base contracts must be specified
-explicitly:
+如果是多重继承，所有直接父合约必须显示指定override， 例如：
 
 ::
 

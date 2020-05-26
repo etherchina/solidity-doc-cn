@@ -52,7 +52,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Solidity 中文文档'
-copyright = '2017-2020, Ethereum, HiBlock, 登链社区'
+copyright = '2017-2020, Ethereum, HiBlock, 深入浅出区块链'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
