@@ -129,15 +129,19 @@ ABI 编码及解码函数
 
 可以参阅专门的章节 :ref:`assert and require<assert-and-require>` 参阅有关错误处理以及何时使用哪个函数的更多详细信息。
 
-``assert(bool condition)``:
+``assert(bool condition)``
     如果不满足条件，则会导致无效的操作码，则撤销状态更改 -  用于检查内部错误。
-``require(bool condition)``:
+
+``require(bool condition)``
     如果条件不满足则撤销状态更改 - 用于检查由输入或者外部组件引起的错误。
-``require(bool condition, string memory message)``:
+
+``require(bool condition, string memory message)``
     如果条件不满足则撤销状态更改 - 用于检查由输入或者外部组件引起的错误，可以同时提供一个错误消息。
-``revert()``:
+
+``revert()``
     终止运行并撤销状态更改。
-``revert(string memory reason)``:
+
+``revert(string memory reason)``
     终止运行并撤销状态更改，可以同时提供一个解释性的字符串。
 
 .. index:: keccak256, ripemd160, sha256, ecrecover, addmod, mulmod, cryptography
@@ -145,31 +149,33 @@ ABI 编码及解码函数
 数学和密码学函数
 ----------------------------------------
 
-``addmod(uint x, uint y, uint k) returns (uint)``:
-    计算 ``(x + y) % k``，加法会在任意精度下执行，并且加法的结果即使超过 ``2**256`` 也不会被截取。从 0.5.0 版本的编译器开始会加入对 ``k != 0`` 的校验（assert）。
-``mulmod(uint x, uint y, uint k) returns (uint)``:
+``addmod(uint x, uint y, uint k) returns (uint)``
+    计算 ``(x + y) % k``，加法会在任意精度下执行，并且加法的结果即使超过 ``2**256`` 也不会被截取。从 0.5.0 版本的编译器开始会加入对 ``k != 0`` 的校验（assert）。
+
+``mulmod(uint x, uint y, uint k) returns (uint)``
     计算 ``(x * y) % k``，乘法会在任意精度下执行，并且乘法的结果即使超过 ``2**256`` 也不会被截取。从 0.5.0 版本的编译器开始会加入对 ``k != 0`` 的校验（assert）。
-``keccak256((bytes memory) returns (bytes32)``:
-    计算 Keccak-256 哈希。
+
+``keccak256((bytes memory) returns (bytes32)``
+    计算 Keccak-256 哈希。
 
 .. note::
 
     之前 ``keccak256`` 的别名函数 ``sha3`` 在0.5.0中已经移除。
 
-``sha256(bytes memory) returns (bytes32)``:
-    计算参数的 SHA-256 哈希。
+``sha256(bytes memory) returns (bytes32)``
+    计算参数的 SHA-256 哈希。
 
-``ripemd160(bytes memory) returns (bytes20)``:
-    计算参数的 RIPEMD-160 哈希。
+``ripemd160(bytes memory) returns (bytes20)``
+    计算参数的 RIPEMD-160 哈希。
 
-``ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address)`` ：
+``ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address)``
     利用椭圆曲线签名恢复与公钥相关的地址，错误返回零值。
 
     函数参数对应于 ECDSA签名的值:
 
-    ``r`` = 签名的前 32 字节
-    ``s`` = 签名的第2个32 字节
-    ``v`` = 签名的最后一个字节
+    * ``r`` = 签名的前 32 字节
+    * ``s`` = 签名的第2个32 字节
+    * ``v`` = 签名的最后一个字节
 
     ``ecrecover`` 返回一个 ``address``, 而不是 ``address payable`` 。他们之前的转换参考 :ref:`address payable<address>` ，如果需要转移资金到恢复的地址。
 
@@ -190,21 +196,26 @@ ABI 编码及解码函数
 .. index:: balance, send, transfer, call, callcode, delegatecall
 .. _address_related:
 
-地址相关
+地址成员
 ---------------
 
-``<address>.balance`` (``uint256``):
-    以 Wei 为单位的 :ref:`address` 的余额。
-``<address payable>.transfer(uint256 amount)``:
-    向 :ref:`address` 发送数量为 amount 的 Wei，失败时抛出异常，使用固定（不可调节）的 2300 gas 的矿工费。
-``<address payable>.send(uint256 amount) returns (bool)``:
-    向 :ref:`address` 发送数量为 amount 的 Wei，失败时返回 ``false``，发送 2300 gas 的矿工费用，不可调节。
-``<address>.call(bytes memory) returns (bool, bytes memory)``:
+``<address>.balance`` (``uint256``)
+    以 Wei 为单位的 :ref:`address` 的余额。
+
+``<address payable>.transfer(uint256 amount)``
+    向 :ref:`address` 发送数量为 amount 的 Wei，失败时抛出异常，使用固定（不可调节）的 2300 gas 的矿工费。
+
+``<address payable>.send(uint256 amount) returns (bool)``
+    向 :ref:`address` 发送数量为 amount 的 Wei，失败时返回 ``false``，发送 2300 gas 的矿工费用，不可调节。
+
+``<address>.call(bytes memory) returns (bool, bytes memory)``
     用给定的有效载荷（payload）发出低级 ``CALL`` 调用，返回成功状态及返回数据，发送所有可用 gas，也可以调节 gas。
-``<address>.delegatecall(bytes memory) returns (bool, bytes memory)``:
+
+``<address>.delegatecall(bytes memory) returns (bool, bytes memory)``
     用给定的有效载荷 发出低级 ``DELEGATECALL`` 调用 ，返回成功状态并返回数据，发送所有可用 gas，也可以调节 gas。
     发出低级函数 ``DELEGATECALL``，失败时返回 ``false``，发送所有可用 gas，可调节。
-``<address>.staticcall(bytes memory) returns (bool, bytes memory)``:
+
+``<address>.staticcall(bytes memory) returns (bool, bytes memory)``
     用给定的有效载荷 发出低级 ``STATICCALL`` 调用 ，返回成功状态并返回数据，发送所有可用 gas，也可以调节 gas。
 
 更多信息，参考 :ref:`address` 部分：
@@ -237,16 +248,16 @@ ABI 编码及解码函数
 合约相关
 ----------------
 
-``this`` (当前的合约类型):
+``this`` (当前的合约类型)
     当前合约，可以显示转换为 :ref:`address`。
 
-``selfdestruct(address payable recipient)``:
+``selfdestruct(address payable recipient)``
     销毁合约，并把余额发送到指定 :ref:`address`。
 
-   请注意， ``selfdestruct`` 具有从EVM继承的一些特性：
+  请注意， ``selfdestruct`` 具有从EVM继承的一些特性：
 
-     -接收合约的 receive 函数 不会执行。
-     -合约仅在交易结束时才真正被销毁，并且 ``revert``  可能会“撤消”销毁。
+  - 接收合约的 receive 函数 不会执行。
+  - 合约仅在交易结束时才真正被销毁，并且 ``revert``  可能会“撤消”销毁。
 
 此外，当前合约内的所有函数都可以被直接调用，包括当前函数。
 
@@ -261,21 +272,36 @@ ABI 编码及解码函数
 类型信息
 -------------------
 
-表达式 ``type(X)`` 可用于检索参数 ``X`` 的类型信息。 目前，此功能还比较有限，但是未来应该会扩展。 用于合约类型 ``C`` 支持以下属性:
+表达式 ``type(X)`` 可用于检索参数 ``X`` 的类型信息。 目前，此功能还比较有限( ``X`` 仅能是合约和整型)，但是未来应该会扩展。
+
+用于合约类型 ``C`` 支持以下属性:
 
 ``type(C).name``:
     获得合约名
 
 ``type(C).creationCode``:
+    获得包含创建合同字节码的内存字节数组。它可以在内联汇编中构建自定义创建例程，尤其是使用 ``create2`` 操作码。
+    不能在合同本身或派生的合同访问此属性。 因为会引起循环引用。
 
-   获得包含创建合同字节码的内存字节数组。它可以在内联汇编中构建自定义创建例程，尤其是使用 ``create2`` 操作码。
-   不能在合同本身或派生的合同访问此属性。 因为会引起循环引用。
 
-
-``type(C).runtimeCode``:
-
+``type(C).runtimeCode``
     获得合同的运行时字节码的内存字节数组。这是通常由 ``C`` 的构造函数部署的代码。
     如果 ``C`` 有一个使用内联汇编的构造函数，那么可能与实际部署的字节码不同。 还要注意库在部署时修改其运行时字节码以防范定期调用（guard against
     regular calls）。
     与 ``.creationCode`` 有相同的限制，不能在合同本身或派生的合同访问此属性。 因为会引起循环引用。
 
+
+除上面的属性, 下面的属性在接口类型``I``下可使用:
+
+``type(I).interfaceId``:
+    返回接口``I`` 的 ``bytes4`` 类型的接口 ID，接口 ID 参考： `EIP-165 <https://learnblockchain.cn/docs/eips/eip-165.html>`_ 定义的，
+    接口 ID 被定义为 ``XOR`` （异或） 接口内所有的函数的函数选择器（除继承的函数。
+
+对于整型 ``T`` 有下面的属性可访问：
+
+
+``type(T).min``
+    ``T`` 的最小值。
+
+``type(T).max``
+    ``T`` 的最大值。

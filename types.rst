@@ -16,7 +16,7 @@ Solidity 提供了几种基本类型，并且基本类型可以用来组合出�
 
 
 “undefined”或“null”值的概念在Solidity中不存在，但是新声明的变量总是有一个 :ref:`默认值 <default-value>` ，具体的默认值跟类型相关。
-要处理任何意外的值，应该使用 :ref:`错误处理 <assert-and-require>` 来恢复整个事务，或者返回一个带有第二个“bool”值的元组表示成功。
+要处理任何意外的值，应该使用 :ref:`错误处理 <assert-and-require>` 来恢复整个交易，或者返回一个带有第二个 ``bool`` 值的元组表示成功。
 
 
 .. include:: types/value-types.rst

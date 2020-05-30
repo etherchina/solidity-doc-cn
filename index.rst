@@ -1,4 +1,4 @@
-Solidity 0.6.4 文档翻译
+Solidity 0.6.8 中文文档
 ================================
 
 .. image:: logo.svg
@@ -7,10 +7,11 @@ Solidity 0.6.4 文档翻译
     :align: center
 
 
-译者说明：本文档根据当前 `最新官方版本v0.6.4 <https://solidity.readthedocs.io/>`_ 进行翻译，是国内唯一保持更新的文档。
-本翻译最初 `HiBlock <http://hiblock.one/>`_ 社区发起，后经过 `深入浅出区块链社区 <https://learnblockchain.cn/>`_ 社区成员根据最新版本补充翻译。
+译者说明：本文档根据当前 `最新官方版本v0.6.8 <https://solidity.readthedocs.io/>`_ 进行翻译，是国内唯一保持更新的文档。
+本翻译最初 `HiBlock <http://hiblock.one/>`_ 社区发起，后经过 `登链社区 <https://learnblockchain.cn/>`_ 社区成员根据最新版本补充翻译。
+翻译工作得到 `Cell Network <http://www.cellnetwork.io/?utm_souce=learnblockchain>`_ 赞助
 
-翻译工作是一个持续的过程（这份文档目前也还有部分未完成），我们热情邀请热爱区块链技术的小伙伴一起参与，欢迎加入我们 `Group <https://github.com/lbc-team>`_ 。
+翻译工作是一个持续的过程（这份文档目前也还有部分未完成），我们热情邀请热爱区块链技术的小伙伴一起参与，欢迎加入我们 `翻译小组 <https://github.com/lbc-team>`_ 。
 
 本中文文档大部分情况下，英中直译，但有时为了更好的理解也会使用意译，如需转载请联系Tiny熊（微信：xlbxiong）.
 
@@ -30,7 +31,7 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 ----------------------
 
 如果你才接触智能合约概念，推荐从一些 `简单的Solidity合约例子 <introduction-to-smart-contracts.html#simple-smart-contract>`_ 开始，当你想开始尝试了解更多的细节，可以
-学习 `合约样例 <solidity-by-example.html>`_ 和 `深入理解Solidity <solidity-in-depth.html>`_ 。
+学习 :doc:`合约样例 <solidity-by-example>`_ 和 "Solidity详解" 部分 。
 
 你还可以进一步阅读 :ref:`区块链 <blockchain-basics>` 基础，然后是 :ref:`以太坊虚拟机 <the-ethereum-virtual-machine>` 。
 
@@ -50,7 +51,7 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 
 本文档由社区志愿者翻译成多种语言，但是 `英语版本 <https://github.com/ethereum/solidity/blob/develop/docs/index.rst>`_ 作为主要参考。
 
-* `简体中文版 <https://learnblockchain.cn/docs/solidity/>`_ （由 `HiBlock社区 <http://hiblock.one/>`_ `深入浅出区块链社区 <https://learnblockchain.cn/>`_ 贡献者翻译）
+* `简体中文版 <https://learnblockchain.cn/docs/solidity/>`_ （由 `登链社区 <https://learnblockchain.cn/>`_ `HiBlock社区 <http://hiblock.one/>`_  贡献者翻译）
 * `西班牙语版 <https://solidity-es.readthedocs.io>`_
 * `俄语版 <https://github.com/ethereum/wiki/wiki/%5BRussian%5D-%D0%A0%D1%83%D0%BA%D0%BE%D0%B2%D0%BE%D0%B4%D1%81%D1%82%D0%B2%D0%BE-%D0%BF%D0%BE-Solidity>`_ (已过时)
 * `韩语版 <http://solidity-kr.readthedocs.io>`_ (in progress)
@@ -62,24 +63,54 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 :ref:`Keyword Index <genindex>`, :ref:`Search Page <search>`
 
 .. toctree::
-   :maxdepth: 4
-   :caption: Solidity 中文文档
+   :maxdepth: 2
+   :caption: 基础
 
    introduction-to-smart-contracts.rst
    installing-solidity.rst
    solidity-by-example.rst
-   solidity-in-depth.rst
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Solidity 详解
+
+   layout-of-source-files.rst
+   structure-of-a-contract.rst
+   types.rst
+   units-and-global-variables.rst
+   control-structures.rst
+   contracts.rst
+   assembly.rst
+   miscellaneous.rst
+   cheatsheet.rst
+   grammar.rst
+
+.. toctree::
+   :maxdepth: 2
+   :caption: 深入 Solidity 内部
+
+   internals/layout_in_storage.rst
+   internals/layout_in_memory.rst
+   internals/layout_in_calldata.rst
+   internals/variable_cleanup.rst
+   internals/source_mappings.rst
+   internals/optimiser.rst
+   metadata.rst
+   abi-spec.rst
+
+.. toctree::
+   :maxdepth: 2
+   :caption: 补充材料
+
+   050-breaking-changes.rst
+   060-breaking-changes.rst
    natspec-format.rst
    security-considerations.rst
    resources.rst
    using-the-compiler.rst
-   metadata.rst
-   abi-spec.rst
    yul.rst
    style-guide.rst
    common-patterns.rst
    bugs.rst
    contributing.rst
-   lll.rst
-   frequently-asked-questions.rst
 

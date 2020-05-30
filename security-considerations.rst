@@ -53,7 +53,8 @@
 
 ::
 
-    pragma solidity ^0.4.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.4.0 <0.7.0;;
 
     // 不要使用这个合约，其中包含一个 bug。
     contract Fund {
@@ -73,7 +74,8 @@
 
 ::
 
-    pragma solidity ^0.4.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.6.2 <0.7.0;
 
     // 不要使用这个合约，其中包含一个 bug。
     contract Fund {
@@ -249,7 +251,7 @@ field of a ``struct`` that is the base type of a dynamic storage array.  The
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.7.0;
 
     contract Map {
         mapping (uint => uint)[] array;
@@ -355,6 +357,15 @@ allowing you to traverse the keys and delete their values in the appropriate ``m
 如果自检查没有通过，合约就会自动切换到某种“故障安全”模式，
 例如，关闭大部分功能，将控制权交给某个固定的可信第三方，或者将合约转换成一个简单的“退回我的钱”合约。
 
+Ask for Peer Review
+===================
+
+The more people examine a piece of code, the more issues are found.
+Asking people to review your code also helps as a cross-check to find out whether your code
+is easy to understand - a very important criterion for good smart contracts.
+
+.. _formal_verification:
+
 *******************
 形式化验证
 *******************
@@ -364,3 +375,240 @@ allowing you to traverse the keys and delete their values in the appropriate ``m
 
 请注意形式化验证本身只能帮助你理解你做的（规范）和你怎么做（实际的实现）的之间的差别。
 你仍然需要检查这个规范是否是想要的，而且没有漏掉由它产生的任何非计划内的效果。
+
+Solidity implements a formal verification approach based on SMT solving.  The
+SMTChecker module automatically tries to prove that the code satisfies the
+specification given by ``require/assert`` statements. That is, it considers
+``require`` statements as assumptions and tries to prove that the conditions
+inside ``assert`` statements are always true.  If an assertion failure is
+found, a counterexample is given to the user, showing how the assertion can be
+violated.
+
+The SMTChecker also checks automatically for arithmetic underflow/overflow,
+trivial conditions and unreachable code.
+It is currently an experimental feature, therefore in order to use it you need
+to enable it via :ref:`a pragma directive<smt_checker>`.
+
+The SMTChecker traverses the Solidity AST creating and collecting program constraints.
+When it encounters a verification target, an SMT solver is invoked to determine the outcome.
+If a check fails, the SMTChecker provides specific input values that lead to the failure.
+
+While the SMTChecker encodes Solidity code into SMT constraints, it contains two
+reasoning engines that use that encoding in different ways.
+
+SMT Encoding
+============
+
+The SMT encoding tries to be as precise as possible, mapping Solidity types
+and expressions to their closest `SMT-LIB <http://smtlib.cs.uiowa.edu/>`_
+representation, as shown in the table below.
+
++-----------------------+--------------+-----------------------------+
+|Solidity type          |SMT sort      |Theories (quantifier-free)   |
++=======================+==============+=============================+
+|Boolean                |Bool          |Bool                         |
++-----------------------+--------------+-----------------------------+
+|intN, uintN, address,  |Integer       |LIA, NIA                     |
+|bytesN, enum           |              |                             |
++-----------------------+--------------+-----------------------------+
+|array, mapping, bytes, |Array         |Arrays                       |
+|string                 |              |                             |
++-----------------------+--------------+-----------------------------+
+|other types            |Integer       |LIA                          |
++-----------------------+--------------+-----------------------------+
+
+Types that are not yet supported are abstracted by a single 256-bit unsigned
+integer, where their unsupported operations are ignored.
+
+For more details on how the SMT encoding works internally, see the paper
+`SMT-based Verification of Solidity Smart Contracts <https://github.com/leonardoalt/text/blob/master/solidity_isola_2018/main.pdf>`_.
+
+Model Checking Engines
+======================
+
+The SMTChecker module implements two different reasoning engines that use the
+SMT encoding above, a Bounded Model Checker (BMC) and a system of Constrained
+Horn Clauses (CHC).  Both engines are currently under development, and have
+different characteristics.
+
+Bounded Model Checker (BMC)
+---------------------------
+
+The BMC engine analyzes functions in isolation, that is, it does not take the
+overall behavior of the contract throughout many transactions into account when
+analyzing each function.  Loops are also ignored in this engine at the moment.
+Internal function calls are inlined as long as they are not recursive, direct
+or indirectly. External function calls are inlined if possible, and knowledge
+that is potentially affected by reentrancy is erased.
+
+The characteristics above make BMC easily prone to reporting false positives,
+but it is also lightweight and should be able to quickly find small local bugs.
+
+Constrained Horn Clauses (CHC)
+------------------------------
+
+The Solidity contract's Control Flow Graph (CFG) is modelled as a system of
+Horn clauses, where the lifecycle of the contract is represented by a loop
+that can visit every public/external function non-deterministically. This way,
+the behavior of the entire contract over an unbounded number of transactions
+is taken into account when analyzing any function. Loops are fully supported
+by this engine. Internal function calls are supported, but external function
+calls are currently unsupported.
+
+The CHC engine is much more powerful than BMC in terms of what it can prove,
+and might require more computing resources.
+
+Abstraction and False Positives
+===============================
+
+The SMTChecker implements abstractions in an incomplete and sound way: If a bug
+is reported, it might be a false positive introduced by abstractions (due to
+erasing knowledge or using a non-precise type). If it determines that a
+verification target is safe, it is indeed safe, that is, there are no false
+negatives (unless there is a bug in the SMTChecker).
+
+In the BMC engine, function calls to the same contract (or base contracts) are
+inlined when possible, that is, when their implementation is available.  Calls
+to functions in other contracts are not inlined even if their code is
+available, since we cannot guarantee that the actual deployed code is the same.
+
+The CHC engine creates nonlinear Horn clauses that use summaries of the called
+functions to support internal function calls. The same approach can and will be
+used for external function calls, but the latter requires more work regarding
+the entire state of the blockchain and is still unimplemented.
+
+Complex pure functions are abstracted by an uninterpreted function (UF) over
+the arguments.
+
++-----------------------------------+--------------------------------------+
+|Functions                          |SMT behavior                          |
++===================================+======================================+
+|``assert``                         |Verification target                   |
++-----------------------------------+--------------------------------------+
+|``require``                        |Assumption                            |
++-----------------------------------+--------------------------------------+
+|internal                           |BMC: Inline function call             |
+|                                   |CHC: Function summaries               |
++-----------------------------------+--------------------------------------+
+|external                           |BMC: Inline function call or          |
+|                                   |erase knowledge about state variables |
+|                                   |and local storage references.         |
+|                                   |CHC: Function summaries and erase     |
+|                                   |state knowledge.                      |
++-----------------------------------+--------------------------------------+
+|``gasleft``, ``blockhash``,        |Abstracted with UF                    |
+|``keccak256``, ``ecrecover``       |                                      |
+|``ripemd160``, ``addmod``,         |                                      |
+|``mulmod``                         |                                      |
++-----------------------------------+--------------------------------------+
+|pure functions without             |Abstracted with UF                    |
+|implementation (external or        |                                      |
+|complex)                           |                                      |
++-----------------------------------+--------------------------------------+
+|external functions without         |BMC: Unsupported                      |
+|implementation                     |CHC: Nondeterministic summary         |
++-----------------------------------+--------------------------------------+
+|others                             |Currently unsupported                 |
++-----------------------------------+--------------------------------------+
+
+Using abstraction means loss of precise knowledge, but in many cases it does
+not mean loss of proving power.
+
+::
+
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.5.0;
+    pragma experimental SMTChecker;
+    // This may report a warning if no SMT solver available.
+
+    contract Recover
+    {
+        function f(
+            bytes32 hash,
+            uint8 _v1, uint8 _v2,
+            bytes32 _r1, bytes32 _r2,
+            bytes32 _s1, bytes32 _s2
+        ) public pure returns (address) {
+            address a1 = ecrecover(hash, _v1, _r1, _s1);
+            require(_v1 == _v2);
+            require(_r1 == _r2);
+            require(_s1 == _s2);
+            address a2 = ecrecover(hash, _v2, _r2, _s2);
+            assert(a1 == a2);
+            return a1;
+        }
+    }
+
+In the example above, the SMTChecker is not expressive enough to actually
+compute ``ecrecover``, but by modelling the function calls as uninterpreted
+functions we know that the return value is the same when called on equivalent
+parameters. This is enough to prove that the assertion above is always true.
+
+Abstracting a function call with an UF can be done for functions known to be
+deterministic, and can be easily done for pure functions.  It is however
+difficult to do this with general external functions, since they might depend
+on state variables.
+
+External function calls also imply that any current knowledge that the
+SMTChecker might have regarding mutable state variables needs to be erased to
+guarantee no false negatives, since the called external function might direct
+or indirectly call a function in the analyzed contract that changes state
+variables.
+
+Reference Types and Aliasing
+=============================
+
+Solidity implements aliasing for reference types with the same :ref:`data
+location<data-location>`.
+That means one variable may be modified through a reference to the same data
+area.
+The SMTChecker does not keep track of which references refer to the same data.
+This implies that whenever a local reference or state variable of reference
+type is assigned, all knowledge regarding variables of the same type and data
+location is erased.
+If the type is nested, the knowledge removal also includes all the prefix base
+types.
+
+::
+
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.5.0;
+    pragma experimental SMTChecker;
+    // This will report a warning
+
+    contract Aliasing
+    {
+        uint[] array;
+        function f(
+            uint[] memory a,
+            uint[] memory b,
+            uint[][] memory c,
+            uint[] storage d
+        ) internal view {
+            require(array[0] == 42);
+            require(a[0] == 2);
+            require(c[0][0] == 2);
+            require(d[0] == 2);
+            b[0] = 1;
+            // Erasing knowledge about memory references should not
+            // erase knowledge about state variables.
+            assert(array[0] == 42);
+            // Fails because `a == b` is possible.
+            assert(a[0] == 2);
+            // Fails because `c[i] == b` is possible.
+            assert(c[0][0] == 2);
+            assert(d[0] == 2);
+            assert(b[0] == 1);
+        }
+    }
+
+After the assignment to ``b[0]``, we need to clear knowledge about ``a`` since
+it has the same type (``uint[]``) and data location (memory).  We also need to
+clear knowledge about ``c``, since its base type is also a ``uint[]`` located
+in memory. This implies that some ``c[i]`` could refer to the same data as
+``b`` or ``a``.
+
+Notice that we do not clear knowledge about ``array`` and ``d`` because they
+are located in storage, even though they also have type ``uint[]``.  However,
+if ``d`` was assigned, we would need to clear knowledge about ``array`` and
+vice-versa.

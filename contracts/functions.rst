@@ -184,7 +184,7 @@ Pure 纯函数
         }
     }
 
-纯函数能够使用 `revert()` 和 `require()` 在 :ref:`发生错误 <assert-and-require>` 时去还原潜在状态更改。
+纯函数能够使用 ``revert()`` 和 ``require()`` 在 :ref:`发生错误 <assert-and-require>` 时去还原潜在状态更改。
 
 还原状态更改不被视为 "状态修改", 因为它只还原以前在没有``view`` 或 ``pure`` 限制的代码中所做的状态更改, 并且代码可以选择捕获 ``revert`` 并不传递还原。
 
@@ -208,21 +208,21 @@ Pure 纯函数
 
 .. _receive-ether-function:
 
-receive接收以太函数
+receive 接收以太函数
 ======================
 
 一个合约最多有一个 ``receive`` 函数, 声明函数为：
 ``receive() external payable { ... }``
 
 不需要 ``function`` 关键字，也没有参数和返回值并且必须是　``external``　可见性和　``payable`` 修饰．
-在对合约没有任何附加数据调用（通常是对合约转账）是会执行 ``receive`` 函数．　例如　通过 `.send()` or `.transfer()`
+在对合约没有任何附加数据调用（通常是对合约转账）是会执行 ``receive`` 函数．　例如　通过 ``.send()`` or ``.transfer()``
 如果 ``receive`` 函数不存在，　但是有payable　的 :ref:`fallback 回退函数 <fallback-function>`　
 那么在进行纯以太转账时，fallback 函数会调用．　
 　
 如果两个函数都没有，这个合约就没法通过常规的转账交易接收以太（会抛出异常）．
 
 
-更糟的是，fallback函数可能只有 2300 gas 可以使用（如，当使用 `send` 或 `transfer` 时）， 除了基础的日志输出之外，进行其他操作的余地很小。下面的操作消耗会操作 2300  gas :
+更糟的是，fallback函数可能只有 2300 gas 可以使用（如，当使用 ``send`` 或 ``transfer`` 时）， 除了基础的日志输出之外，进行其他操作的余地很小。下面的操作消耗会操作 2300  gas :
 
 - 写入存储
 - 创建合约
@@ -236,7 +236,7 @@ receive接收以太函数
     所以如果你想让你的合约接收以太币，必须实现receive函数（使用 payable　fallback 函数不再推荐，因为它会让借口混淆）。
 
 .. warning::
-    一个没有receive函数的合约，可以作为 `coinbase 交易` （又名 `矿工区块回报` ）的接收者或者作为 ``selfdestruct`` 的目标来接收以太币。
+    一个没有receive函数的合约，可以作为 *coinbase 交易* （又名 *矿工区块回报* ）的接收者或者作为 ``selfdestruct`` 的目标来接收以太币。
 
     一个合约不能对这种以太币转移做出反应，因此也不能拒绝它们。这是 EVM 在设计时就决定好的，而且 Solidity 无法绕过这个问题。
 
@@ -298,7 +298,7 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
 
 ::
 
-    pragma solidity >0.6.1 <0.7.0;
+    pragma solidity >=0.6.2 <0.7.0;
 
     contract Test {
         // 发送到这个合约的所有消息都会调用此函数（因为该合约没有其它函数）。

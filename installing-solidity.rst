@@ -26,7 +26,7 @@ Remix
 npm / Node.js
 =============
 
-使用 `npm` 可以便捷地安装Solidity编译器solcjs。但该 `solcjs` 程序的功能相对于本页下面的所有其他选项都要少。在 :ref:`commandline-compiler` 一章中，我们假定你使用的是完整功能的编译器。 所以，如果你是从 `npm` 安装 `solcjs` ，就此打住，直接跳到 `solc-js  <https://github.com/ethereum/solc-js>`_ 去了解。
+使用 ``npm`` 可以便捷地安装Solidity编译器solcjs。但该 ``solcjs`` 程序的功能相对于本页下面的所有其他选项都要少。在 :ref:`commandline-compiler` 一章中，我们假定你使用的是完整功能的编译器。 所以，如果你是从 `npm` 安装 `solcjs` ，就此打住，直接跳到 `solc-js  <https://github.com/ethereum/solc-js>`_ 去了解。
 
 
 注意: solc-js 项目是利用 Emscripten 从 C++ 版的 solc 跨平台编译为 JavaScript 的，因此，可在 JavaScript 项目中使用 solcjs（如同 Remix）。

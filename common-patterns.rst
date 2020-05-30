@@ -101,7 +101,7 @@
 
 ::
 
-    pragma solidity ^0.4.22;
+    pragma solidity >=0.4.22 <0.7.0;
 
     contract AccessRestriction {
         // 这些将在构造阶段被赋值
@@ -237,7 +237,7 @@
 
 ::
 
-    pragma solidity ^0.4.22;
+    pragma solidity >=0.4.22 <0.7.0;
 
     contract StateMachine {
         enum Stages {

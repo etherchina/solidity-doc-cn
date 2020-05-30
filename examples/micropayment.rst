@@ -98,7 +98,7 @@ ReceiverPays 完整合约代码
 
 ::
 
-    pragma solidity >=0.4.24 <0.7.0;
+    pragma solidity >=0.5.0 <0.7.0;
 
     contract ReceiverPays {
         address owner = msg.sender;

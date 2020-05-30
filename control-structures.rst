@@ -37,7 +37,7 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 当前合约中的函数可以直接（“从内部”）调用，也可以递归调用，就像下边这个荒谬的例子一样
 ::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.22 <0.7.0;
 
     contract C {
         function g(uint a) public pure returns (uint ret) { return f(); }
@@ -69,7 +69,7 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 任何发送给合约 Wei  将被添加到该合约的总余额中：
 
 
-    pragma solidity >=0.4.0 <0.7.0;
+    pragma solidity >=0.6.2 <0.7.0;
 
     contract InfoFeed {
         function info() public payable returns (uint ret) { return 42; }
@@ -131,7 +131,7 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 未使用参数的名称（特别是返回参数）可以省略。这些参数仍然存在于堆栈中，但它们无法访问。
 ::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.22 <0.7.0;
 
     contract C {
         // 省略参数名称
@@ -150,7 +150,7 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 使用关键字 ``new`` 可以创建一个新合约。待创建合约的完整代码必须事先知道，因此递归的创建依赖是不可能的。
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    pragma solidity >=0.6.2 <0.7.0;
 
     contract D {
         uint x;
@@ -201,7 +201,7 @@ which only need to be created if there is a dispute.
 
 ::
 
-    pragma solidity >0.6.1 <0.7.0;
+    pragma solidity >0.6.2 <0.7.0;
 
     contract D {
         uint public x;
@@ -261,7 +261,7 @@ Solidity 内部允许元组 (tuple) 类型，也就是一个在编译时元素�
 
 ::
 
-    pragma solidity >0.4.23 <0.7.0;
+    pragma solidity >=0.5.0 <0.7.0;
 
     contract C {
         uint index;
@@ -302,7 +302,7 @@ Solidity 内部允许元组 (tuple) 类型，也就是一个在编译时元素�
 
 ::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.22 <0.7.0;
 
      contract C {
         uint[20] x;

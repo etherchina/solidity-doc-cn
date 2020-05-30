@@ -127,7 +127,7 @@ Solidity 支持多重继承包括多态。
 调用 ``Final.destroy()`` 时会调用  ``Base2.destroy``， 因为我们在最终重写中显式指定了它。
 但是此函数将绕过 ``Base1.destroy``, 解决这个问题的方法是使用 ``super``::
 
-    pragma solidity >=0.4.22 <0.7.0;
+    pragma solidity >=0.6.0 <0.7.0;
 
     contract owned {
         constructor() public { owner = msg.sender; }
@@ -172,7 +172,7 @@ Solidity 支持多重继承包括多态。
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.7.0;
 
     contract Base
     {
@@ -192,7 +192,7 @@ Solidity 支持多重继承包括多态。
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.7.0;
 
     contract Base1
     {
@@ -216,7 +216,7 @@ Solidity 支持多重继承包括多态。
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.7.0;
 
     contract A { function f() public pure{} }
     contract B is A {}
@@ -253,7 +253,7 @@ that does not override.
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.7.0;
 
     contract A
     {
@@ -282,7 +282,7 @@ that does not override.
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.7.0;
 
     contract Base
     {
@@ -299,7 +299,7 @@ that does not override.
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.7.0;
 
     contract Base1
     {
@@ -420,7 +420,7 @@ Solidity 借鉴了 Python 的方式并且使用“ `C3 线性化 <https://en.wik
 
 ::
 
-    pragma solidity >=0.4.0 <0.7.0;
+    pragma solidity >=0.4.22 <0.7.0;
 
     contract X {}
     contract A is X {}

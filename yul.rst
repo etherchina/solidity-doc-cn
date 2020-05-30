@@ -63,14 +63,14 @@ the EVM opcodes as builtin functions
 type of the EVM. Because of that, we will not provide types in the examples below.
 
 
-Simple Example
+简单示例
 ==============
 
 The following example program is written in the EVM dialect and computes exponentiation.
 It can be compiled using ``solc --strict-assembly``. The builtin functions
 ``mul`` and ``div`` compute product and division, respectively.
 
-.. code::
+.. code-block:: yul
 
     {
         function power(base, exponent) -> result
@@ -91,7 +91,7 @@ It is also possible to implement the same function using a for-loop
 instead of with recursion. Here, ``lt(a, b)`` computes whether ``a`` is less than ``b``.
 less-than comparison.
 
-.. code::
+.. code-block:: yul
 
     {
         function power(base, exponent) -> result
@@ -104,18 +104,20 @@ less-than comparison.
         }
     }
 
+At the :ref:`end of the section <erc20yul>`, a complete implementation of
+the ERC-20 standard can be found.
 
 
 
-Stand-Alone Usage
+单独使用
 =================
 
 You can use Yul in its stand-alone form in the EVM dialect using the Solidity compiler.
-This will use the `Yul object notation <yul-objects>`_ so that it is possible to refer
+This will use the :ref:`Yul object notation <yul-object>` so that it is possible to refer
 to code as data to deploy contracts. This Yul mode is available for the commandline compiler
 (use ``--strict-assembly``) and for the :ref:`standard-json interface <compiler-api>`:
 
-::
+.. code-block:: json
 
     {
         "language": "Yul",
@@ -132,13 +134,13 @@ to code as data to deploy contracts. This Yul mode is available for the commandl
     with EVM 1.0 as target.
 
 
-Informal Description of Yul
+Yul 非正式规范
 ===========================
 
 In the following, we will talk about each individual aspect
 of the Yul language. In examples, we will use the default EVM dialect.
 
-Syntax
+语法
 ------
 
 Yul parses comments, literals and identifiers in the same way as Solidity,
@@ -146,7 +148,7 @@ so you can e.g. use ``//`` and ``/* */`` to denote comments.
 There is one exception: Identifiers in Yul can contain dots: ``.``.
 
 Yul can specify "objects" that consist of code, data and sub-objects.
-Please see `Yul Objects <yul-objects>`_ below for details on that.
+Please see :ref:`Yul Objects <yul-object>` below for details on that.
 In this section, we are only concerned with the code part of such an object.
 This code part always consists of a curly-braces
 delimited block. Most tools support specifying just a code block
@@ -169,7 +171,7 @@ Inside a code block, the following elements can be used
 Multiple syntactical elements can follow each other simply separated by
 whitespace, i.e. there is no terminating ``;`` or newline required.
 
-Literals
+字面常量
 --------
 
 You can use integer constants in decimal or hexadecimal notation.
@@ -180,19 +182,19 @@ bitwise ``and`` with the string "abc" is computed.
 The final value is assigned to a local variable called ``x``.
 Strings are stored left-aligned and cannot be longer than 32 bytes.
 
-.. code::
+.. code-block:: yul
 
     let x := and("abc", add(3, 2))
 
 Unless it is the default type, the type of a literal
 has to be specified after a colon:
 
-.. code::
+.. code-block:: yul
 
     let x := and("abc":uint32, add(3:uint256, 2:uint256))
 
 
-Function Calls
+函数调用
 --------------
 
 Both built-in and user-defined functions (see below) can be called
@@ -201,7 +203,7 @@ If the function returns a single value, it can be directly used
 inside an expression again. If it returns multiple values,
 they have to be assigned to local variables.
 
-.. code::
+.. code-block:: yul
 
     mstore(0x80, add(mload(0x80), 3))
     // Here, the user-defined function `f` returns
@@ -222,7 +224,7 @@ though, are expected on the stack from left to right,
 i.e. in this example, ``y`` is on top of the stack and ``x``
 is below it.
 
-Variable Declarations
+变量声明
 ---------------------
 
 You can use the ``let`` keyword to declare variables.
@@ -242,7 +244,7 @@ Future dialects migh introduce specific types for such pointers.
 When a variable is referenced, its current value is copied.
 For the EVM, this translates to a ``DUP`` instruction.
 
-.. code::
+.. code-block:: yul
 
     {
         let zero := 0
@@ -260,7 +262,7 @@ you denote that following a colon. You can also declare multiple
 variables in one statement when you assign from a function call
 that returns multiple values.
 
-.. code::
+.. code-block:: yul
 
     {
         let zero:uint32 := 0:uint32
@@ -273,7 +275,7 @@ already after the variable has been used for
 the last time, even though it is still in scope.
 
 
-Assignments
+赋值
 -----------
 
 Variables can be assigned to after their definition using the
@@ -283,7 +285,7 @@ values have to match.
 If you want to assign the values returned from a function that has
 multiple return parameters, you have to provide multiple variables.
 
-.. code::
+.. code-block:: yul
 
     let v := 0
     // re-assign v
@@ -301,7 +303,7 @@ The if statement can be used for conditionally executing code.
 No "else" block can be defined. Consider using "switch" instead (see below) if
 you need multiple alternatives.
 
-.. code::
+.. code-block:: yul
 
     if eq(value, 0) { revert(0, 0) }
 
@@ -317,7 +319,7 @@ Contrary to other programming languages, for safety reasons, control flow does
 not continue from one case to the next. There can be a fallback or default
 case called ``default`` which is taken if none of the literal constants matches.
 
-.. code::
+.. code-block:: yul
 
     {
         let x := 0
@@ -334,7 +336,7 @@ case called ``default`` which is taken if none of the literal constants matches.
 The list of cases is not enclosed by curly braces, but the body of a
 case does require them.
 
-Loops
+循环
 -----
 
 Yul supports for-loops which consist of
@@ -349,7 +351,7 @@ or skip to the post-part, respectively.
 
 The following example computes the sum of an area in memory.
 
-.. code::
+.. code-block:: yul
 
     {
         let x := 0
@@ -361,7 +363,7 @@ The following example computes the sum of an area in memory.
 For loops can also be used as a replacement for while loops:
 Simply leave the initialization and post-iteration parts empty.
 
-.. code::
+.. code-block:: yul
 
     {
         let x := 0
@@ -372,7 +374,7 @@ Simply leave the initialization and post-iteration parts empty.
         }
     }
 
-Function Declarations
+函数声明
 ---------------------
 
 Yul allows the definition of functions. These should not be confused with functions
@@ -404,7 +406,7 @@ the current yul function.
 
 The following example implements the power function by square-and-multiply.
 
-.. code::
+.. code-block:: yul
 
     {
         function power(base, exponent) -> result {
@@ -425,7 +427,7 @@ Specification of Yul
 This chapter describes Yul code formally. Yul code is usually placed inside Yul objects,
 which are explained in their own chapter.
 
-Grammar::
+.. code-block:: none
 
     Block = '{' Statement* '}'
     Statement =
@@ -588,7 +590,7 @@ For an identifier ``v``, let ``$v`` be the name of the identifier.
 
 We will use a destructuring notation for the AST nodes.
 
-.. code::
+.. code-block:: none
 
     E(G, L, <{St1, ..., Stn}>: Block) =
         let G1, L1, mode = E(G, L, St1, ..., Stn)
@@ -716,7 +718,7 @@ opcodes that interfere with these features are not available. This includes
 the ``dup`` and ``swap`` instructions as well as ``jump`` instructions, labels and the ``push`` instructions.
 
 +-------------------------+-----+---+-----------------------------------------------------------------+
-|Instruction              |     |   | Explanation                                                     |
+| Instruction             |     |   | Explanation                                                     |
 +=========================+=====+===+=================================================================+
 | stop()                  + `-` | F | stop execution, identical to return(0, 0)                       |
 +-------------------------+-----+---+-----------------------------------------------------------------+
@@ -885,13 +887,6 @@ the ``dup`` and ``swap`` instructions as well as ``jump`` instructions, labels a
 | gaslimit()              |     | F | block gas limit of the current block                            |
 +-------------------------+-----+---+-----------------------------------------------------------------+
 
-There are three additional functions, ``datasize(x)``, ``dataoffset(x)`` and ``datacopy(t, f, l)``,
-which are used to access other parts of a Yul object.
-
-``datasize`` and ``dataoffset`` can only take string literals (the names of other objects)
-as arguments and return the size and offset in the data area, respectively.
-For the EVM, the ``datacopy`` function is equivalent to ``codecopy``.
-
 .. _yul-call-return-area:
 
 .. note::
@@ -903,9 +898,35 @@ For the EVM, the ``datacopy`` function is equivalent to ``codecopy``.
   The remaining bytes will retain their values as of before the call. If the call fails (it returns ``0``),
   nothing is written to that area, but you can still retrieve the failure data using ``returndatacopy``.
 
+
+In some internal dialects, there are additional functions:
+
+datasize, dataoffset, datacopy
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The functions ``datasize(x)``, ``dataoffset(x)`` and ``datacopy(t, f, l)``,
+are used to access other parts of a Yul object.
+
+``datasize`` and ``dataoffset`` can only take string literals (the names of other objects)
+as arguments and return the size and offset in the data area, respectively.
+For the EVM, the ``datacopy`` function is equivalent to ``codecopy``.
+
+
+setimmutable, loadimmutable
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The functions ``setimmutable("name", value)`` and ``loadimmutable("name")`` are
+used for the immutable mechanism in Solidity and do not nicely map to pur Yul.
+The function ``setimmutable`` assumes that the runtime code of a contract
+is currently copied to memory at offsot zero. The call to ``setimmutable("name", value)``
+will store ``value`` at all points in memory that contain a call to
+``loadimmutable("name")``.
+
+
+
 .. _yul-object:
 
-Yul 对象说明
+Specification of Yul Object
 ===========================
 
 Yul objects are used to group named code and data sections.
@@ -915,7 +936,7 @@ Hex strings can be used to specify data in hex encoding,
 regular strings in native encoding. For code,
 ``datacopy`` will access its assembled binary representation.
 
-语法::
+.. code-block:: none
 
     Object = 'object' StringLiteral '{' Code ( Object | Data )* '}'
     Code = 'code' Block
@@ -927,7 +948,7 @@ Above, ``Block`` refers to ``Block`` in the Yul code grammar explained in the pr
 
 An example Yul Object is shown below:
 
-.. code::
+.. code-block:: yul
 
     // A contract consists of a single object with sub-objects representing
     // the code to be deployed or other contracts it can create.
@@ -1010,8 +1031,258 @@ for more details about its internals.
 
 If you want to use Solidity in stand-alone Yul mode, you activate the optimizer using ``--optimize``:
 
-::
+.. code-block:: sh
 
     solc --strict-assembly --optimize
 
 In Solidity mode, the Yul optimizer is activated together with the regular optimizer.
+
+Optimization step sequence
+--------------------------
+
+By default the Yul optimizer applies its predefined sequence of optimization steps to the generated assembly.
+You can override this sequence and supply your own using the ``--yul-optimizations`` option:
+
+.. code-block:: sh
+
+    solc --optimize --ir-optimized --yul-optimizations 'dhfoD[xarrscLMcCTU]uljmul'
+
+The order of steps is significant and affects the quality of the output.
+Moreover, applying a step may uncover new optimization opportunities for others that were already
+applied so repeating steps is often beneficial.
+By enclosing part of the sequence in square brackets (``[]``) you tell the optimizer to repeatedly
+apply that part until it no longer improves the size of the resulting assembly.
+You can use brackets multiple times in a single sequence but they cannot be nested.
+
+The following optimization steps are available:
+
+============ ===============================
+Abbreviation Full name
+============ ===============================
+``f``        ``BlockFlattener``
+``l``        ``CircularReferencesPruner``
+``c``        ``CommonSubexpressionEliminator``
+``C``        ``ConditionalSimplifier``
+``U``        ``ConditionalUnsimplifier``
+``n``        ``ControlFlowSimplifier``
+``D``        ``DeadCodeEliminator``
+``v``        ``EquivalentFunctionCombiner``
+``e``        ``ExpressionInliner``
+``j``        ``ExpressionJoiner``
+``s``        ``ExpressionSimplifier``
+``x``        ``ExpressionSplitter``
+``I``        ``ForLoopConditionIntoBody``
+``O``        ``ForLoopConditionOutOfBody``
+``o``        ``ForLoopInitRewriter``
+``i``        ``FullInliner``
+``g``        ``FunctionGrouper``
+``h``        ``FunctionHoister``
+``T``        ``LiteralRematerialiser``
+``L``        ``LoadResolver``
+``M``        ``LoopInvariantCodeMotion``
+``r``        ``RedundantAssignEliminator``
+``m``        ``Rematerialiser``
+``V``        ``SSAReverser``
+``a``        ``SSATransform``
+``t``        ``StructuralSimplifier``
+``u``        ``UnusedPruner``
+``d``        ``VarDeclInitializer``
+============ ===============================
+
+Some steps depend on properties ensured by ``BlockFlattener``, ``FunctionGrouper``, ``ForLoopInitRewriter``.
+For this reason the Yul optimizer always applies them before applying any steps supplied by the user.
+
+
+.. _erc20yul:
+
+Complete ERC20 Example
+======================
+
+.. code-block:: yul
+
+    object "Token" {
+        code {
+            // Store the creator in slot zero.
+            sstore(0, caller())
+
+            // Deploy the contract
+            datacopy(0, dataoffset("runtime"), datasize("runtime"))
+            return(0, datasize("runtime"))
+        }
+        object "runtime" {
+            code {
+                // Protection against sending Ether
+                require(iszero(callvalue()))
+
+                // Dispatcher
+                switch selector()
+                case 0x70a08231 /* "balanceOf(address)" */ {
+                    returnUint(balanceOf(decodeAsAddress(0)))
+                }
+                case 0x18160ddd /* "totalSupply()" */ {
+                    returnUint(totalSupply())
+                }
+                case 0xa9059cbb /* "transfer(address,uint256)" */ {
+                    transfer(decodeAsAddress(0), decodeAsUint(1))
+                    returnTrue()
+                }
+                case 0x23b872dd /* "transferFrom(address,address,uint256)" */ {
+                    transferFrom(decodeAsAddress(0), decodeAsAddress(1), decodeAsUint(2))
+                    returnTrue()
+                }
+                case 0x095ea7b3 /* "approve(address,uint256)" */ {
+                    approve(decodeAsAddress(0), decodeAsUint(1))
+                    returnTrue()
+                }
+                case 0xdd62ed3e /* "allowance(address,address)" */ {
+                    returnUint(allowance(decodeAsAddress(0), decodeAsAddress(1)))
+                }
+                case 0x40c10f19 /* "mint(address,uint256)" */ {
+                    mint(decodeAsAddress(0), decodeAsUint(1))
+                    returnTrue()
+                }
+                default {
+                    revert(0, 0)
+                }
+
+                function mint(account, amount) {
+                    require(calledByOwner())
+
+                    mintTokens(amount)
+                    addToBalance(account, amount)
+                    emitTransfer(0, account, amount)
+                }
+                function transfer(to, amount) {
+                    executeTransfer(caller(), to, amount)
+                }
+                function approve(spender, amount) {
+                    revertIfZeroAddress(spender)
+                    setAllowance(caller(), spender, amount)
+                    emitApproval(caller(), spender, amount)
+                }
+                function transferFrom(from, to, amount) {
+                    decreaseAllowanceBy(from, caller(), amount)
+                    executeTransfer(from, to, amount)
+                }
+
+                function executeTransfer(from, to, amount) {
+                    revertIfZeroAddress(to)
+                    deductFromBalance(from, amount)
+                    addToBalance(to, amount)
+                    emitTransfer(from, to, amount)
+                }
+
+
+                /* ---------- calldata decoding functions ----------- */
+                function selector() -> s {
+                    s := div(calldataload(0), 0x100000000000000000000000000000000000000000000000000000000)
+                }
+
+                function decodeAsAddress(offset) -> v {
+                    v := decodeAsUint(offset)
+                    if iszero(iszero(and(v, not(0xffffffffffffffffffffffffffffffffffffffff)))) {
+                        revert(0, 0)
+                    }
+                }
+                function decodeAsUint(offset) -> v {
+                    let pos := add(4, mul(offset, 0x20))
+                    if lt(calldatasize(), add(pos, 0x20)) {
+                        revert(0, 0)
+                    }
+                    v := calldataload(pos)
+                }
+                /* ---------- calldata encoding functions ---------- */
+                function returnUint(v) {
+                    mstore(0, v)
+                    return(0, 0x20)
+                }
+                function returnTrue() {
+                    returnUint(1)
+                }
+
+                /* -------- events ---------- */
+                function emitTransfer(from, to, amount) {
+                    let signatureHash := 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+                    emitEvent(signatureHash, from, to, amount)
+                }
+                function emitApproval(from, spender, amount) {
+                    let signatureHash := 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925
+                    emitEvent(signatureHash, from, spender, amount)
+                }
+                function emitEvent(signatureHash, indexed1, indexed2, nonIndexed) {
+                    mstore(0, nonIndexed)
+                    log3(0, 0x20, signatureHash, indexed1, indexed2)
+                }
+
+                /* -------- storage layout ---------- */
+                function ownerPos() -> p { p := 0 }
+                function totalSupplyPos() -> p { p := 1 }
+                function accountToStorageOffset(account) -> offset {
+                    offset := add(0x1000, account)
+                }
+                function allowanceStorageOffset(account, spender) -> offset {
+                    offset := accountToStorageOffset(account)
+                    mstore(0, offset)
+                    mstore(0x20, spender)
+                    offset := keccak256(0, 0x40)
+                }
+
+                /* -------- storage access ---------- */
+                function owner() -> o {
+                    o := sload(ownerPos())
+                }
+                function totalSupply() -> supply {
+                    supply := sload(totalSupplyPos())
+                }
+                function mintTokens(amount) {
+                    sstore(totalSupplyPos(), safeAdd(totalSupply(), amount))
+                }
+                function balanceOf(account) -> bal {
+                    bal := sload(accountToStorageOffset(account))
+                }
+                function addToBalance(account, amount) {
+                    let offset := accountToStorageOffset(account)
+                    sstore(offset, safeAdd(sload(offset), amount))
+                }
+                function deductFromBalance(account, amount) {
+                    let offset := accountToStorageOffset(account)
+                    let bal := sload(offset)
+                    require(lte(amount, bal))
+                    sstore(offset, sub(bal, amount))
+                }
+                function allowance(account, spender) -> amount {
+                    amount := sload(allowanceStorageOffset(account, spender))
+                }
+                function setAllowance(account, spender, amount) {
+                    sstore(allowanceStorageOffset(account, spender), amount)
+                }
+                function decreaseAllowanceBy(account, spender, amount) {
+                    let offset := allowanceStorageOffset(account, spender)
+                    let currentAllowance := sload(offset)
+                    require(lte(amount, currentAllowance))
+                    sstore(offset, sub(currentAllowance, amount))
+                }
+
+                /* ---------- utility functions ---------- */
+                function lte(a, b) -> r {
+                    r := iszero(gt(a, b))
+                }
+                function gte(a, b) -> r {
+                    r := iszero(lt(a, b))
+                }
+                function safeAdd(a, b) -> r {
+                    r := add(a, b)
+                    if or(lt(r, a), lt(r, b)) { revert(0, 0) }
+                }
+                function calledByOwner() -> cbo {
+                    cbo := eq(owner(), caller())
+                }
+                function revertIfZeroAddress(addr) {
+                    require(addr)
+                }
+                function require(condition) {
+                    if iszero(condition) { revert(0, 0) }
+                }
+            }
+        }
+    }

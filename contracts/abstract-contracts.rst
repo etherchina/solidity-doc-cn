@@ -13,7 +13,7 @@
 
 如下例所示,使用关键字 ``abstract`` 定义抽象合约合约, ``utterance()`` 函数了,但没有实现.(由 ``;`` 结尾）::
 
-    pragma solidity >=0.4.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.7.0;
 
     abstract contract Feline {
         function utterance() public returns (bytes32);
@@ -24,7 +24,7 @@
 下例显示了抽象合约作为基类的用法：
 
 
-    pragma solidity >=0.4.0 <0.7.0;
+    pragma solidity ^0.6.0;
 
     abstract contract Feline {
         function utterance() public returns (bytes32);
@@ -54,3 +54,8 @@
 
 抽象合约将合约的定义与其实现脱钩，从而提供了更好的可扩展性和自文档性，并简化了诸如 `Template方法 <https://en.wikipedia.org/wiki/Template_method_pattern>`_ 的模式并消除了代码重复。
  抽象合约的使用方式与接口 interface 中定义方法的使用方式相同。 抽象合约的设计者可以这样说“我的任何继承都必须实施此方法”。
+
+
+.. note::
+
+  抽象合约不能用一个无实现的函数重写一个实现了的虚函数。

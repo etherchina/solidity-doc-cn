@@ -27,10 +27,12 @@
 
 ::
 
-    pragma solidity ^0.4.16;
+    pragma solidity >=0.6.0 <0.7.0;
 
       // 我们定义了一个新的结构体数据类型，用于在调用合约中保存数据。
-      struct Data { mapping(uint => bool) flags; }
+      struct Data {
+        mapping(uint => bool) flags;
+      }
 
     library Set {
 
@@ -88,7 +90,7 @@
 
 ::
 
-    pragma solidity ^0.4.16;
+    pragma solidity >=0.6.0;
 
     struct bigint {
         uint[] limbs;
@@ -189,7 +191,7 @@ Its value can be obtained from Solidity using the ``.selector`` member as follow
 
 ::
 
-    pragma solidity >0.5.13 <0.7.0;
+    pragma solidity >=0.5.14 <0.7.0;
 
     library L {
         function f(uint256) external {}

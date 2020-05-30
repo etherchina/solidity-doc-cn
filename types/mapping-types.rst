@@ -37,7 +37,7 @@
 
 ::
 
-    pragma solidity >=0.4.0 <0.7.0;
+    pragma solidity >=0.4.22 <0.7.0;
 
     contract MappingExample {
         mapping(address => uint) public balances;
@@ -58,7 +58,7 @@
 
 下面的例子是　`ERC20 token <https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol>`_　的简单版本．
 ``_allowances`` 是一个嵌套mapping的例子．
- ``_allowances`` 用来记录其他的账号，可以允许从其账号使用多少数量的币．
+``_allowances`` 用来记录其他的账号，可以允许从其账号使用多少数量的币．
 
 
 ::
@@ -116,7 +116,7 @@
 
 ::
 
-    pragma solidity >=0.5.99 <0.7.0;
+    pragma solidity >=0.6.0 <0.7.0;
 
     struct IndexValue { uint keyIndex; uint value; }
     struct KeyFlag { uint key; bool deleted; }
@@ -134,8 +134,9 @@
             if (keyIndex > 0)
                 return true;
             else {
-                self.keys.push();
                 keyIndex = self.keys.length;
+
+                self.keys.push();
                 self.data[key].keyIndex = keyIndex + 1;
                 self.keys[keyIndex].key = key;
                 self.size++;

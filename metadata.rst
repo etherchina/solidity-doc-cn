@@ -1,8 +1,9 @@
+.. _metadata:
+
 #################
 合约的元数据
 #################
 
-.. include:: glossaries.rst
 .. index:: metadata, contract verification
 
 Solidity编译器自动生成JSON文件，即合约的元数据，其中包含了当前合约的相关信息。
@@ -42,6 +43,8 @@ Solidity编译器自动生成JSON文件，即合约的元数据，其中包含�
           // 必选（除非定义了“content”，详见下文）：
           // 已排序的源文件的URL，URL的协议可以是任意的，但建议使用 Swarm 的URL
           "urls": [ "bzzr://56ab..." ]
+          // Optional: 在源文件中定义的 SPDX license 标识
+          "license": "MIT"
         },
         "mortal": {
           // 必选：源文件的 keccak256 哈希值
@@ -58,13 +61,37 @@ Solidity编译器自动生成JSON文件，即合约的元数据，其中包含�
         // 可选： 优化器的设置（ enabled 默认设为 false ）
         optimizer: {
           enabled: true,
-          runs: 500
-        },
-        // 对 Solidity 来说是必须的：用以生成该元数据的文件名和合约名或库名
+          runs: 500,
+          details: {
+            // peephole defaults to "true"
+            peephole: true,
+            // jumpdestRemover defaults to "true"
+            jumpdestRemover: true,
+            orderLiterals: false,
+            deduplicate: false,
+            cse: false,
+            constantOptimizer: false,
+            yul: true,
+            // Optional: Only present if "yul" is "true"
+            yulDetails: {
+              stackAllocation: false,
+              optimizerSteps: "dhfoDgvulfnTUtnIf..."
+            }
+          }
+        }
+      },
+      metadata: {
+          // Reflects the setting used in the input json, defaults to false
+          useLiteralContent: true,
+          // Reflects the setting used in the input json, defaults to "ipfs"
+          bytecodeHash: "ipfs"
+        }
+        // Required for Solidity: File and name of the contract or library this
+        // metadata is created for.
         compilationTarget: {
           "myFile.sol": "MyContract"
         },
-        // 对 Solidity 来说是必须的：所使用的库的地址
+        // Required for Solidity: Addresses for libraries used
         libraries: {
           "MyLib": "0x123123..."
         }
@@ -81,15 +108,17 @@ Solidity编译器自动生成JSON文件，即合约的元数据，其中包含�
       }
     }
 
-.. note::
-    需注意，上面的 ABI 没有固定的顺序，随编译器的版本而不同。
-
-.. note::
+.. warning::
     由于生成的合约的字节码包含元数据的哈希值，因此对元数据的任何更改都会导致字节码的更改。
     此外，由于元数据包含所有使用的源代码的哈希值，所以任何源代码中的，
     哪怕是一个空格的变化都将导致不同的元数据，并随后产生不同的字节代码。
 
-元数据哈希字节码的编码
+.. note::
+    需注意，上面的 ABI 没有固定的顺序，随编译器的版本而不同。尽管从 Solidity 0.5.12 开始，数组保持了一定的顺序。
+
+.. _encoding-of-the-metadata-hash-in-the-bytecode:
+
+字节码中元数据哈希的编码
 =============================================
 
 由于在将来我们可能会支持其他方式来获取元数据文件，
@@ -121,3 +150,7 @@ Solidity编译器自动生成JSON文件，即合约的元数据，其中包含�
 处理得到的字节码会与创建交易的数据或者 ``CREATE`` 操作码使用的数据进行比较。
 这会自动验证元数据，因为它的哈希值是字节码的一部分。
 而额外的数据，则是与基于接口进行编码并展示给用户的构造输入数据相符的。
+
+In the repository `source-verify <https://github.com/ethereum/source-verify>`_
+(`npm package <https://www.npmjs.com/package/source-verify>`_) you can see
+example code that shows how to use this feature.

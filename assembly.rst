@@ -1,714 +1,236 @@
-#################
-Solidity汇编
-#################
+.. _inline-assembly:
+
+###############
+内联汇编
+###############
 
 .. index:: ! assembly, ! asm, ! evmasm
 
-Solidity 定义了一种汇编语言，在没有 Solidity 的情况下也可以使用。这种汇编语言也可以嵌入到 Solidity 源代码中当作“内联汇编”使用。
-我们从如何使用内联汇编开始，介绍它如何区别于独立汇编语言，然后详细讲述这种汇编语言。
+译者注：登链社区有一篇译文 `Solidity 中编写内联汇编(assembly)的那些事 <https://learnblockchain.cn/article/675>`_  推荐阅读。
 
-.. _inline-assembly:
+You can interleave Solidity statements with inline assembly in a language close
+to the one of the Ethereum virtual machine. This gives you more fine-grained control,
+which is especially useful when you are enhancing the language by writing libraries.
 
-内联汇编
-===============
+The language used for inline assembly in Solidity is called :ref:`Yul <yul>`
+and it is documented in its own section. This section will only cover
+how the inline assembly code can interface with the surrounding Solidity code.
 
-为了实现更细粒度的控制，尤其是为了通过编写库来增强语言，可以利用接近虚拟机的语言将内联汇编与 Solidity 语句结合在一起使用。
-由于 EVM 是基于栈的虚拟机，因此通常很难准确地定位栈内插槽（存储位置）的地址，并为操作码提供正确的栈内位置来获取参数。
-Solidity 的内联汇编试图通过提供以下特性来解决这个问题以及手工编写汇编代码时可能出现的问题：
-
-* 函数风格操作码： ``mul(1, add(2, 3))`` 而不是 ``push1 3 push1 2 add push1 1 mul``
-* 汇编局部变量： ``let x := add(2, 3)  let y := mload(0x40)  x := add(x, y)``
-* 可以访问外部变量： ``function f(uint x) public { assembly { x := sub(x, 1) } }``
-* 标签： ``let x := 10  repeat: x := sub(x, 1) jumpi(repeat, eq(x, 0))``
-* 循环： ``for { let i := 0 } lt(i, x) { i := add(i, 1) } { y := mul(2, y) }``
-* if 语句： ``if slt(x, 0) { x := sub(0, x) }``
-* switch 语句： ``switch x case 0 { y := mul(x, 2) } default { y := 0 }``
-* 函数调用： ``function f(x) -> y { switch x case 0 { y := 1 } default { y := mul(x, f(sub(x, 1))) }   }``
-
-现在我们详细讲解内联汇编语言。
 
 .. warning::
-    内联汇编是一种在底层访问以太坊虚拟机的语言。这抛弃了很多 Solidity 提供的重要安全特性。
+    Inline assembly is a way to access the Ethereum Virtual Machine
+    at a low level. This bypasses several important safety
+    features and checks of Solidity. You should only use it for
+    tasks that need it, and only if you are confident with using it.
 
-.. note::
-    TODO：写出在内联汇编中作用域规则的细微差别，以及在使用库合约的内部函数时产生的复杂性。此外，还要编写有关编译器定义的符号。
 
-例子
+An inline assembly block is marked by ``assembly { ... }``, where the code inside
+the curly braces is code in the :ref:`Yul <yul>` language.
+
+The inline assembly code can access local Solidity variables as explained below.
+
+Different inline assembly blocks share no namespace, i.e. it is not possible
+to call a Yul function or access a Yul variable defined in a different inline assembly block.
+
+Example
 -------
 
-下面例子展示了一个库合约的代码，它可以取得另一个合约的代码，并将其加载到一个 ``bytes`` 变量中。
-这对于“常规 Solidity”来说是根本不可能的，汇编库合约则可以通过这种方式来增强语言特性。
+The following example provides library code to access the code of another contract and
+load it into a ``bytes`` variable. This is not possible with "plain Solidity" and the
+idea is that reusable assembly libraries can enhance the Solidity language
+without a compiler change.
 
 .. code::
 
-    pragma solidity ^0.4.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.4.16 <0.7.0;
 
     library GetCode {
-        function at(address _addr) public view returns (bytes o_code) {
+        function at(address _addr) public view returns (bytes memory o_code) {
             assembly {
-                // 获取代码大小，这需要汇编语言
+                // retrieve the size of the code, this needs assembly
                 let size := extcodesize(_addr)
-                // 分配输出字节数组 – 这也可以不用汇编语言来实现
-                // 通过使用 o_code = new bytes（size）
+                // allocate output byte array - this could also be done without assembly
+                // by using o_code = new bytes(size)
                 o_code := mload(0x40)
-                // 包括补位在内新的“memory end”
+                // new "memory end" including padding
                 mstore(0x40, add(o_code, and(add(add(size, 0x20), 0x1f), not(0x1f))))
-                // 把长度保存到内存中
+                // store length in memory
                 mstore(o_code, size)
-                // 实际获取代码，这需要汇编语言
+                // actually retrieve the code, this needs assembly
                 extcodecopy(_addr, add(o_code, 0x20), 0, size)
             }
         }
     }
 
-在优化器无法生成高效代码的情况下，内联汇编也可能更有好处。请注意，由于编译器无法对汇编语句进行相关的检查，所以编写汇编代码肯定更加困难；
-因此只有在处理一些相对复杂的问题时才需要使用它，并且你需要明确知道自己要做什么。
+Inline assembly is also beneficial in cases where the optimizer fails to produce
+efficient code, for example:
 
 .. code::
 
-    pragma solidity ^0.4.16;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.4.16 <0.7.0;
+
 
     library VectorSum {
-        // 因为目前的优化器在访问数组时无法移除边界检查，
-        // 所以这个函数的执行效率比较低。
-        function sumSolidity(uint[] _data) public view returns (uint o_sum) {
+        // This function is less efficient because the optimizer currently fails to
+        // remove the bounds checks in array access.
+        function sumSolidity(uint[] memory _data) public pure returns (uint sum) {
             for (uint i = 0; i < _data.length; ++i)
-                o_sum += _data[i];
+                sum += _data[i];
         }
 
-        // 我们知道我们只能在数组范围内访问数组元素，所以我们可以在内联汇编中不做边界检查。
-        // 由于 ABI 编码中数组数据的第一个字（32 字节）的位置保存的是数组长度，
-        // 所以我们在访问数组元素时需要加入 0x20 作为偏移量。
-        function sumAsm(uint[] _data) public view returns (uint o_sum) {
+        // We know that we only access the array in bounds, so we can avoid the check.
+        // 0x20 needs to be added to an array because the first slot contains the
+        // array length.
+        function sumAsm(uint[] memory _data) public pure returns (uint sum) {
             for (uint i = 0; i < _data.length; ++i) {
                 assembly {
-                    o_sum := add(o_sum, mload(add(add(_data, 0x20), mul(i, 0x20))))
+                    sum := add(sum, mload(add(add(_data, 0x20), mul(i, 0x20))))
                 }
             }
         }
 
-        // 和上面一样，但在内联汇编内完成整个代码。
-        function sumPureAsm(uint[] _data) public view returns (uint o_sum) {
+        // Same as above, but accomplish the entire code within inline assembly.
+        function sumPureAsm(uint[] memory _data) public pure returns (uint sum) {
             assembly {
-               // 取得数组长度（前 32 字节）
-               let len := mload(_data)
+                // Load the length (first 32 bytes)
+                let len := mload(_data)
 
-               // 略过长度字段。
-               //
-               // 保持临时变量以便它可以在原地增加。
-               //
-               // 注意：对 _data 数值的增加将导致 _data 在这个汇编语句块之后不再可用。
-               //      因为无法再基于 _data 来解析后续的数组数据。
-               let data := add(_data, 0x20)
+                // Skip over the length field.
+                //
+                // Keep temporary variable so it can be incremented in place.
+                //
+                // NOTE: incrementing _data would result in an unusable
+                //       _data variable after this assembly block
+                let data := add(_data, 0x20)
 
-               // 迭代到数组数据结束
-               for
-                   { let end := add(data, mul(len, 0x20)) }
-                   lt(data, end)
-                   { data := add(data, 0x20) }
-               {
-                   o_sum := add(o_sum, mload(data))
-               }
+                // Iterate until the bound is not met.
+                for
+                    { let end := add(data, mul(len, 0x20)) }
+                    lt(data, end)
+                    { data := add(data, 0x20) }
+                {
+                    sum := add(sum, mload(data))
+                }
             }
         }
     }
 
 
-语法
-------
 
-和 Solidity 一样，Assembly 也会解析注释、文字和标识符，所以你可以使用通常的 ``//`` 和 ``/* */`` 来进行注释。
-内联汇编程序由 ``assembly { ... }`` 来标记，在这些大括号内可以使用以下内容（更多详细信息请参阅后面部分）。
+Access to External Variables, Functions and Libraries
+-----------------------------------------------------
 
- - 字面常数，也就是 ``0x123``、``42`` 或 ``"abc"`` （不超过 32 个字符的字符串）
- - 操作码（在“instruction style”内），比如 ``mload sload dup1 sstore``，操作码列表请看后面
- - 函数风格操作码，比如 ``add(1，mlod(0))``
- - 标签，比如 ``name:``
- - 变量声明，比如 ``let x := 7``、``let x := add(y, 3)`` 或者 ``let x`` （初始值将被置为 empty(0)）
- - 标识符（标签或者汇编局部变量以及用作内联汇编时的外部变量），比如 ``jump(name)``、``3 x add``
- - 赋值（在“instruction style”内），比如 ``3 =: x``
- - 函数风格赋值，比如 ``x := add(y，3)``
- - 一些控制局部变量作用域的语句块，比如 ``{let x := 3 { let y := add(x，1) }}``
+You can access Solidity variables and other identifiers by using their name.
 
-操作码
--------
+Local variables of value type are directly usable in inline assembly.
 
-本文档不是以太坊虚拟机的详细描述，但下边的列表可以作为操作码参考。
+Local variables that refer to memory or calldata evaluate to the
+address of the variable in memory, resp. calldata, not the value itself.
 
-如果一个操作码需要参数（总是来自堆栈顶部），它们会在括号中给出。请注意：参数顺序可以看作是在非函数风格中逆序（下面会解释）。
-标有 ``-`` 的操作码不会向栈中压入（push）数据，标有 ``*`` 的操作码有特殊操作，而所有其他操作码都只会将一个数据压入（push）栈中。
-用 ``F``、``H``、``B`` 或 ``C`` 标记的操作码代表它们从 Frontier、Homestead、Byzantium 或 Constantinople 开始被引入。
-Constantinople 目前仍在计划中，所以标记为 ``C`` 的指令目前都会导致一个非法指令异常。
+For local storage variables or state variables, a single Yul identifier
+is not sufficient, since they do not necessarily occupy a single full storage slot.
+Therefore, their "address" is composed of a slot and a byte-offset
+inside that slot. To retrieve the slot pointed to by the variable ``x``, you
+use ``x_slot``, and to retrieve the byte-offset you use ``x_offset``.
 
-在下表中，``mem[a...b)`` 表示从位置 ``a`` 开始至（不包括）位置 ``b`` 的内存字节数，``storage[p]`` 表示位置 ``p`` 处的存储内容。
-
-``pushi`` 和 ``jumpdest`` 这两个操作码不能直接用。
-
-在语法表中，操作码是作为预定义标识符提供的。
-
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| Instruction             |     |   | Explanation                                                     |
-+=========================+=====+===+=================================================================+
-| stop                    + `-` | F | 停止执行，与 return(0,0) 等价                                   |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| add(x, y)               |     | F | x + y                                                           |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| sub(x, y)               |     | F | x - y                                                           |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| mul(x, y)               |     | F | x * y                                                           |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| div(x, y)               |     | F | x / y                                                           |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| sdiv(x, y)              |     | F | x / y，以二进制补码作为符号                                     |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| mod(x, y)               |     | F | x % y                                                           |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| smod(x, y)              |     | F | x % y，以二进制补码作为符号                                     |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| exp(x, y)               |     | F | x 的 y 次幂                                                     |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| not(x)                  |     | F | ~x，对 x 按位取反                                               |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| lt(x, y)                |     | F | 如果 x < y 为 1，否则为 0                                       |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| gt(x, y)                |     | F | 如果 x > y 为 1，否则为 0                                       |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| slt(x, y)               |     | F | 如果 x < y 为 1，否则为 0，以二进制补码作为符号                 |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| sgt(x, y)               |     | F | 如果 x > y 为 1，否则为 0，以二进制补码作为符号                 |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| eq(x, y)                |     | F | 如果 x == y 为 1，否则为 0                                      |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| iszero(x)               |     | F | 如果 x == 0 为 1，否则为 0                                      |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| and(x, y)               |     | F | x 和 y 的按位与                                                 |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| or(x, y)                |     | F | x 和 y 的按位或                                                 |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| xor(x, y)               |     | F | x 和 y 的按位异或                                               |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| byte(n, x)              |     | F | x 的第 n 个字节，这个索引是从 0 开始的                          |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| shl(x, y)               |     | C | 将 y 逻辑左移 x 位                                              |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| shr(x, y)               |     | C | 将 y 逻辑右移 x 位                                              |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| sar(x, y)               |     | C | 将 y 算术右移 x 位                                              |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| addmod(x, y, m)         |     | F | 任意精度的 (x + y) % m                                          |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| mulmod(x, y, m)         |     | F | 任意精度的 (x * y) % m                                          |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| signextend(i, x)        |     | F | 对 x 的最低位到第 (i * 8 + 7) 进行符号扩展                      |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| keccak256(p, n)         |     | F | keccak(mem[p...(p + n)))                                        |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| jump(label)             | `-` | F | 跳转到标签 / 代码位置                                           |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| jumpi(label, cond)      | `-` | F | 如果条件为非零，跳转到标签                                      |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| pc                      |     | F | 当前代码位置                                                    |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| pop(x)                  | `-` | F | 删除（弹出）栈顶的 x 个元素                                     |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| dup1 ... dup16          |     | F | 将栈内第 i 个元素（从栈顶算起）复制到栈顶                       |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| swap1 ... swap16        | `*` | F | 将栈顶元素和其下第 i 个元素互换                                 |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| mload(p)                |     | F | mem[p...(p + 32))                                               |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| mstore(p, v)            | `-` | F | mem[p...(p + 32)) := v                                          |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| mstore8(p, v)           | `-` | F | mem[p] := v & 0xff （仅修改一个字节）                           |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| sload(p)                |     | F | storage[p]                                                      |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| sstore(p, v)            | `-` | F | storage[p] := v                                                 |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| msize                   |     | F | 内存大小，即最大可访问内存索引                                  |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| gas                     |     | F | 执行可用的 gas                                                  |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| address                 |     | F | 当前合约 / 执行上下文的地址                                     |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| balance(a)              |     | F | 地址 a 的余额，以 wei 为单位                                    |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| caller                  |     | F | 调用发起者（不包括 ``delegatecall``）                           |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| callvalue               |     | F | 随调用发送的 Wei 的数量                                         |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| calldataload(p)         |     | F | 位置 p 的调用数据（32 字节）                                    |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| calldatasize            |     | F | 调用数据的字节数大小                                            |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| calldatacopy(t, f, s)   | `-` | F | 从调用数据的位置 f 的拷贝 s 个字节到内存的位置 t                |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| codesize                |     | F | 当前合约 / 执行上下文地址的代码大小                             |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| codecopy(t, f, s)       | `-` | F | 从代码的位置 f 开始拷贝 s 个字节到内存的位置 t                  |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| extcodesize(a)          |     | F | 地址 a 的代码大小                                               |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| extcodecopy(a, t, f, s) | `-` | F | 和 codecopy(t, f, s) 类似，但从地址 a 获取代码                  |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| returndatasize          |     | B | 最后一个 returndata 的大小                                      |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| returndatacopy(t, f, s) | `-` | B | 从 returndata 的位置 f 拷贝 s 个字节到内存的位置 t              |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| create(v, p, s)         |     | F | 用 mem[p...(p + s)) 中的代码创建一个新合约、发送 v wei 并返回   |
-|                         |     |   | 新地址                                                          |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| create2(v, n, p, s)     |     | C | 用 mem[p...(p + s)) 中的代码，在地址                            |
-|                         |     |   | keccak256(<address> . n . keccak256(mem[p...(p + s))) 上        |
-|                         |     |   | 创建新合约、发送 v wei 并返回新地址                             |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| call(g, a, v, in,       |     | F | 使用 mem[in...(in + insize)) 作为输入数据，                     |
-| insize, out, outsize)   |     |   | 提供 g gas 和 v wei 对地址 a 发起消息调用，                     |
-|                         |     |   | 输出结果数据保存在 mem[out...(out + outsize))，                 |
-|                         |     |   | 发生错误（比如 gas 不足）时返回 0，正确结束返回 1               |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| callcode(g, a, v, in,   |     | F | 与 ``call`` 等价，但仅使用地址 a 中的代码                       |
-| insize, out, outsize)   |     |   | 且保持当前合约的执行上下文                                      |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| delegatecall(g, a, in,  |     | F | 与 ``callcode`` 等价且保留 ``caller`` 和 ``callvalue``          |
-| insize, out, outsize)   |     |   |                                                                 |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| staticcall(g, a, in,    |     | F | 与 ``call(g, a, 0, in, insize, out, outsize)`` 等价             |
-| insize, out, outsize)   |     |   | 但不允许状态修改                                                |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| return(p, s)            | `-` | F | 终止运行，返回 mem[p...(p + s)) 的数据                          |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| revert(p, s)            | `-` | B | 终止运行，撤销状态变化，返回 mem[p...(p + s)) 的数据            |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| selfdestruct(a)         | `-` | F | 终止运行，销毁当前合约并且把资金发送到地址 a                    |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| invalid                 | `-` | F | 以无效指令终止运行                                              |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| log0(p, s)              | `-` | F | 以 mem[p...(p + s)) 的数据产生不带 topic 的日志                 |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| log1(p, s, t1)          | `-` | F | 以 mem[p...(p + s)) 的数据和 topic t1 产生日志                  |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| log2(p, s, t1, t2)      | `-` | F | 以 mem[p...(p + s)) 的数据和 topic t1、t2 产生日志              |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| log3(p, s, t1, t2, t3)  | `-` | F | 以 mem[p...(p + s)) 的数据和 topic t1、t2、t3 产生日志          |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| log4(p, s, t1, t2, t3,  | `-` | F | 以 mem[p...(p + s)) 的数据和 topic t1、t2、t3 和 t4 产生日志    |
-| t4)                     |     |   |                                                                 |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| origin                  |     | F | 交易发起者地址                                                  |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| gasprice                |     | F | 交易所指定的 gas 价格                                           |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| blockhash(b)            |     | F | 区块号 b 的哈希 - 目前仅适用于不包括当前区块的最后 256 个区块   |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| coinbase                |     | F | 当前的挖矿收益者地址                                            |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| timestamp               |     | F | 从当前 epoch 开始的当前区块时间戳（以秒为单位）                 |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| number                  |     | F | 当前区块号                                                      |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| difficulty              |     | F | 当前区块难度                                                    |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-| gaslimit                |     | F | 当前区块的 gas 上限                                             |
-+-------------------------+-----+---+-----------------------------------------------------------------+
-
-字面常量
---------
-
-你可以直接键入十进制或十六进制符号来作为整型常量使用，这会自动生成相应的 ``PUSHi`` 指令。
-下面的代码将计算 2 加 3（等于 5），然后计算其与字符串 “abc” 的按位与。字符串在存储时为左对齐，且长度不能超过 32 字节。
+Local Solidity variables are available for assignments, for example:
 
 .. code::
 
-    assembly { 2 3 add "abc" and }
-
-函数风格
------------------
-
-你可以像使用字节码那样在操作码之后键入操作码。例如，把 ``3`` 与内存位置 ``0x80`` 处的数据相加就是
-
-.. code::
-
-    3 0x80 mload add 0x80 mstore
-
-由于通常很难看到某些操作码的实际参数是什么，所以 Solidity 内联汇编还提供了一种“函数风格”表示法，同样功能的代码可以写做
-
-.. code::
-
-    mstore(0x80, add(mload(0x80), 3))
-
-函数风格表达式内不能使用指令风格的写法，即 ``1 2 mstore(0x80, add)`` 是无效汇编语句，
-它必须写成 ``mstore(0x80, add(2, 1))`` 这种形式。对于不带参数的操作码，括号可以省略。
-
-注意，在函数风格写法中参数的顺序与指令风格相反。如果使用函数风格写法，第一个参数将会位于栈顶。
-
-
-访问外部变量和函数
-------------------------------------------
-
-通过简单使用它们名称就可以访问 Solidity 变量和其他标识符。对于内存变量，这会将地址而不是值压入栈中。
-存储变量是不同的，因为存储变量的值可能不占用完整的存储槽，因此其“地址”由存储槽和槽内的字节偏移量组成。
-为了获取变量 ``x`` 所使用的存储槽，你可以使用 ``x_slot``，并用的 ``x_offset`` 获取其字节偏移量。
-
-在赋值语句中（见下文），我们甚至可以使用 Solidity 局部变量来赋值。
-
-对于内联汇编而言的外部函数也可以被访问：汇编会将它们的入口标签（带有虚拟函数解析）压入栈中。Solidity 中的调用语义为：
-
- - 调用者压入 ``return label``、``arg1``、``arg2``、...、``argn``
- - 被调用方返回 ``ret1``、``ret2``、...、``retm``
-
-这个特性使用起来还是有点麻烦，因为在调用过程中堆栈偏移量发生了根本变化，因此对局部变量的引用将会出错。
-
-.. code::
-
-    pragma solidity ^0.4.11;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.4.16 <0.7.0;
 
     contract C {
         uint b;
-        function f(uint x) public returns (uint r) {
+        function f(uint x) public view returns (uint r) {
             assembly {
-                r := mul(x, sload(b_slot)) // 因为偏移量为 0，所以可以忽略
+                // We ignore the storage slot offset, we know it is zero
+                // in this special case.
+                r := mul(x, sload(b_slot))
             }
         }
     }
-
-.. note::
-    如果你访问一个实际数据位数小于 256 位的数据类型（比如 ``uint64``、``address``、``bytes16`` 或 ``byte``），
-    不要对这种类型经过编码后未使用的数据位上的数值做任何假设。尤其是不要假设它们肯定为 0。
-    安全起见，在某个上下文中使用这种数据之前，请一定先将其数据清空为 0，这非常重要：
-    ``uint32 x = f(); assembly { x := and(x, 0xffffffff) /* now use x */ }``
-    要清空有符号类型，你可以使用 ``signextend`` 操作码。
-
-标签
-------
-
-.. note::
-    标签已经不推荐使用。请使用函数、循环、if 或 switch 语句。
-
-EVM 汇编的另一个问题是 jump 和 jumpi 函数使用绝对地址，这些绝对地址很容易改变。
-Solidity 内联汇编提供了标签，以便更容易地使用 jump。注意，标签具有底层特征，使用循环、if 和 switch 指令（参见下文）而不使用标签也能写出高效汇编代码。
-以下代码用来计算斐波那契数列中的一个元素。
-
-.. code::
-
-    {
-        let n := calldataload(4)
-        let a := 1
-        let b := a
-    loop:
-        jumpi(loopend, eq(n, 0))
-        a add swap1
-        n := sub(n, 1)
-        jump(loop)
-    loopend:
-        mstore(0, a)
-        return(0, 0x20)
-    }
-
-请注意：只有汇编程序知道当前栈高度时，才能自动访问堆栈变量。如果 jump 源和目标的栈高度不同，访问将失败。
-虽然我们可以这么使用 jump，但在这种情况下，你不应该去访问任何栈里的变量（即使是汇编变量）。
-
-此外，栈高度分析器还可以通过操作码（而不是根据控制流）检查代码操作码，因此在下面的情况下，汇编程序对标签 ``two`` 处的堆栈高度会产生错误的印象：
-
-.. code::
-
-    {
-        let x := 8
-        jump(two)
-        one:
-            // 这里的栈高度是 2（因为我们压入了 x 和 7），
-            // 但因为汇编程序是按顺序读取代码的，
-            // 它会认为栈高度是 1。
-            // 在这里访问栈变量 x 会导致错误。
-            x := 9
-            jump(three)
-        two:
-            7 // 把某个数据压入栈中
-            jump(one)
-        three:
-    }
-
-汇编局部变量声明
-----------------------------------
-
-你可以使用 ``let`` 关键字来声明只在内联汇编中可见的变量，实际上只在当前的 ``{...}`` 块中可见。
-下面发生的事情应该是：``let`` 指令将创建一个为变量保留的新数据槽，并在到达块末尾时自动删除。
-你需要为变量提供一个初始值，它可以只是 ``0``，但它也可以是一个复杂的函数风格表达式。
-
-.. code::
-
-    pragma solidity ^0.4.16;
-
-    contract C {
-        function f(uint x) public view returns (uint b) {
-            assembly {
-                let v := add(x, 1)
-                mstore(0x80, v)
-                {
-                    let y := add(sload(v), 1)
-                    b := y
-                } // y 会在这里被“清除”
-                b := add(b, v)
-            } // v 会在这里被“清除”
-        }
-    }
-
-
-赋值
------------
-
-可以给汇编局部变量和函数局部变量赋值。请注意：当给指向内存或存储的变量赋值时，你只是更改指针而不是数据。
-
-有两种赋值方式：函数风格和指令风格。对于函数风格赋值（``变量 := 值``），你需要在函数风格表达式中提供一个值，它恰好可以产生一个栈里的值；
-对于指令风格赋值（``=: 变量``），则仅从栈顶部获取数据。对于这两种方式，冒号均指向变量名称。赋值则是通过用新值替换栈中的变量值来实现的。
-
-.. code::
-
-    {
-        let v := 0 // 作为变量声明的函数风格赋值
-        let g := add(v, 2)
-        sload(10)
-        =: v // 指令风格的赋值，将 sload(10) 的结果赋给 v
-    }
-
-.. note::
-    指令风格的赋值已经不推荐。
-
-If
---
-
-if 语句可以用于有条件地执行代码，且没有“else”部分；如果需要多种选择，你可以考虑使用“switch”（见下文）。
-
-.. code::
-
-    {
-        if eq(value, 0) { revert(0, 0) }
-    }
-
-代码主体的花括号是必需的。
-
-Switch
-------
-
-作为“if/else”的非常初级的版本，你可以使用 switch 语句。它计算表达式的值并与几个常量进行比较。选出与匹配常数对应的分支。
-与某些编程语言容易出错的情况不同，控制流不会从一种情形继续执行到下一种情形。我们可以设定一个 fallback 或称为 ``default`` 的默认情况。
-
-.. code::
-
-    {
-        let x := 0
-        switch calldataload(4)
-        case 0 {
-            x := calldataload(0x24)
-        }
-        default {
-            x := calldataload(0x44)
-        }
-        sstore(0, div(x, 2))
-    }
-
-Case 列表里面不需要大括号，但 case 主体需要。
-
-循环
------
-
-汇编语言支持一个简单的 for-style 循环。For-style 循环有一个头，它包含初始化部分、条件和迭代后处理部分。
-条件必须是函数风格表达式，而另外两个部分都是语句块。如果起始部分声明了某个变量，这些变量的作用域将扩展到循环体中（包括条件和迭代后处理部分）。
-
-下面例子是计算某个内存区域中的数值总和。
-
-.. code::
-
-    {
-        let x := 0
-        for { let i := 0 } lt(i, 0x100) { i := add(i, 0x20) } {
-            x := add(x, mload(i))
-        }
-    }
-
-For 循环也可以写成像 while 循环一样：只需将初始化部分和迭代后处理两部分留空。
-
-.. code::
-
-    {
-        let x := 0
-        let i := 0
-        for { } lt(i, 0x100) { } {     // while(i < 0x100)
-            x := add(x, mload(i))
-            i := add(i, 0x20)
-        }
-    }
-
-函数
----------
-
-汇编语言允许定义底层函数。底层函数需要从栈中取得它们的参数（和返回 PC），并将结果放入栈中。调用函数的方式与执行函数风格操作码相同。
-
-函数可以在任何地方定义，并且在声明它们的语句块中可见。函数内部不能访问在函数之外定义的局部变量。这里没有严格的 ``return`` 语句。
-
-如果调用会返回多个值的函数，则必须使用 ``a，b：= f(x)`` 或 ``let a，b：= f(x)`` 的方式把它们赋值到一个元组。
-
-下面例子通过平方和乘法实现了幂运算函数。
-
-.. code::
-
-    {
-        function power(base, exponent) -> result {
-            switch exponent
-            case 0 { result := 1 }
-            case 1 { result := base }
-            default {
-                result := power(mul(base, base), div(exponent, 2))
-                switch mod(exponent, 2)
-                    case 1 { result := mul(base, result) }
-            }
-        }
-    }
-
-注意事项
----------------
-
-内联汇编语言可能具有相当高级的外观，但实际上它是非常低级的编程语言。函数调用、循环、if 语句和 switch 语句通过简单的重写规则进行转换，
-然后，汇编程序为你做的唯一事情就是重新组织函数风格操作码、管理 jump 标签、计算访问变量的栈高度，还有在到达语句块末尾时删除局部汇编变量的栈数据。
-特别是对于最后两种情况，汇编程序仅会按照代码的顺序计算栈的高度，而不一定遵循控制流程；了解这一点非常重要。此外，swap 等操作只会交换栈内的数据，而不是变量位置。
-
-Solidity 惯例
------------------------
-
-与 EVM 汇编语言相比，Solidity 能够识别小于 256 位的类型，例如 ``uint24``。为了提高效率，大多数算术运算只将它们视为 256 位数字，
-仅在必要时才清除未使用的数据位，即在将它们写入内存或执行比较之前才会这么做。这意味着，如果从内联汇编中访问这样的变量，你必须先手工清除那些未使用的数据位。
-
-Solidity 以一种非常简单的方式管理内存：在 ``0x40`` 的位置有一个“空闲内存指针”。如果你打算分配内存，只需从此处开始使用内存，然后相应地更新指针即可。
-
-内存的开头 64 字节可以用来作为临时分配的“暂存空间”。“空闲内存指针”之后的 32 字节位置（即从 ``0x60`` 开始的位置）将永远为 0，可以用来初始化空的动态内存数组。
-
-在 Solidity 中，内存数组的元素总是占用 32 个字节的倍数（是的，甚至对于 ``byte[]`` 都是这样，只有 ``bytes`` 和 ``string`` 不是这样）。
-多维内存数组就是指向内存数组的指针。动态数组的长度存储在数组的第一个槽中，其后才是数组元素。
 
 .. warning::
-    静态内存数组没有长度字段，但很快就会增加，这是为了可以更好地进行静态数组和动态数组之间的转换，所以请不要依赖这点。
+    If you access variables of a type that spans less than 256 bits
+    (for example ``uint64``, ``address``, ``bytes16`` or ``byte``),
+    you cannot make any assumptions about bits not part of the
+    encoding of the type. Especially, do not assume them to be zero.
+    To be safe, always clear the data properly before you use it
+    in a context where this is important:
+    ``uint32 x = f(); assembly { x := and(x, 0xffffffff) /* now use x */ }``
+    To clean signed types, you can use the ``signextend`` opcode:
+    ``assembly { signextend(<num_bytes_of_x_minus_one>, x) }``
 
 
-独立汇编
-===================
+Since Solidity 0.6.0 the name of a inline assembly variable may not end in ``_offset`` or ``_slot``
+and it may not shadow any declaration visible in the scope of the inline assembly block
+(including variable, contract and function declarations). Similarly, if the name of a declared
+variable contains a dot ``.``, the prefix up to the ``.`` may not conflict with any
+declaration visible in the scope of the inline assembly block.
 
-以上内联汇编描述的汇编语言也可以单独使用，实际上，计划是将其用作 Solidity 编译器的中间语言。在这种意义下，它试图实现以下几个目标：
 
-1、即使代码是由 Solidity 的编译器生成的，用它编写的程序应该也是可读的。
-2、从汇编到字节码的翻译应该尽可能少地包含“意外”。
-3、控制流应该易于检测，以帮助进行形式化验证和优化。
+Assignments are possible to assembly-local variables and to function-local
+variables. Take care that when you assign to variables that point to
+memory or storage, you will only change the pointer and not the data.
 
-为了实现第一个和最后一个目标，汇编提供了高级结构：如 ``for`` 循环、``if`` 语句、``switch`` 语句和函数调用。
-应该可以编写不使用明确的 ``SWAP``、``DUP``、``JUMP`` 和 ``JUMPI`` 语句的汇编程序，因为前两个混淆了数据流，而最后两个混淆了控制流。
-此外，形式为 ``mul(add(x, y), 7)`` 的函数风格语句优于如 ``7 y x add mul`` 的指令风格语句，因为在第一种形式中更容易查看哪个操作数用于哪个操作码。
+You can assign to the ``_slot`` part of a local storage variable pointer.
+For these (structs, arrays or mappings), the ``_offset`` part is always zero.
+It is not possible to assign to the ``_slot`` or ``_offset`` part of a state variable,
+though.
 
-第二个目标是通过采用一种非常规则的方式来将高级高级指令结构便以为字节码。
-汇编程序执行的唯一非局部操作是用户自定义标识符（函数、变量、...）的名称查找，它遵循非常简单和固定的作用域规则并从栈中清除局部变量。
 
-作用域：在其中声明的标识符（标签、变量、函数、汇编）仅在声明的语句块中可见（包括当前语句块中的嵌套语句块）。
-即使它们在作用范围内，越过函数边界访问局部变量也是非法的。阴影化是禁止的。在声明之前不能访问局部变量，但标签、函数和汇编是可以的。
-汇编是特殊的语句块，例如用于返回运行时代码或创建合约等。在子汇编外部的汇编语句块中声明的标示符在子汇编中全都不可见。
 
-如果控制流经过块尾部，则会插入与在当前语句块中声明的局部变量数量相匹配的 pop 指令。无论何时引用局部变量，代码生成器都需要知道在当前栈的相对位置，
-因此，需要跟踪当前所谓的栈高度。由于所有在语句块内声明的局部变量都会在语句块结束时被清楚，所以语句块前后的栈高度应该相同。如果情况并非如此，则会发出警告。
+Things to Avoid
+---------------
 
-使用 ``switch``、``for`` 和函数应该可以编写复杂的代码，而无需手工调用 ``jump`` 或 ``jumpi``。这将允许改进的形式化验证和优化更简单地分析控制流程。
+Inline assembly might have a quite high-level look, but it actually is extremely
+low-level. Function calls, loops, ifs and switches are converted by simple
+rewriting rules and after that, the only thing the assembler does for you is re-arranging
+functional-style opcodes, counting stack height for
+variable access and removing stack slots for assembly-local variables when the end
+of their block is reached.
 
-此外，如果允许手动跳转，计算栈高度将会更加复杂。栈中所有局部变量的位置都需要明确知晓，否则在语句块结束时就无法自动获得局部变量的引用从而正确地清除它们。
+Conventions in Solidity
+-----------------------
 
-例子：
+In contrast to EVM assembly, Solidity has types which are narrower than 256 bits,
+e.g. ``uint24``. For efficiency, most arithmetic operations ignore the fact that
+types can be shorter than 256
+bits, and the higher-order bits are cleaned when necessary,
+i.e., shortly before they are written to memory or before comparisons are performed.
+This means that if you access such a variable
+from within inline assembly, you might have to manually clean the higher-order bits
+first.
 
-我们将参考一个从 Solidity 到汇编指令的实例。考虑以下 Solidity 程序的运行时字节码::
+Solidity manages memory in the following way. There is a "free memory pointer"
+at position ``0x40`` in memory. If you want to allocate memory, use the memory
+starting from where this pointer points at and update it.
+There is no guarantee that the memory has not been used before and thus
+you cannot assume that its contents are zero bytes.
+There is no built-in mechanism to release or free allocated memory.
+Here is an assembly snippet you can use for allocating memory that follows the process outlined above::
 
-    pragma solidity ^0.4.16;
-
-    contract C {
-      function f(uint x) public pure returns (uint y) {
-        y = 1;
-        for (uint i = 0; i < x; i++)
-          y = 2 * y;
-      }
+    function allocate(length) -> pos {
+      pos := mload(0x40)
+      mstore(0x40, add(pos, length))
     }
 
-将会生成如下汇编指令::
+The first 64 bytes of memory can be used as "scratch space" for short-term
+allocation. The 32 bytes after the free memory pointer (i.e., starting at ``0x60``)
+are meant to be zero permanently and is used as the initial value for
+empty dynamic memory arrays.
+This means that the allocatable memory starts at ``0x80``, which is the initial value
+of the free memory pointer.
 
-    {
-      mstore(0x40, 0x60) // 保存“空闲内存指针”
-      // 函数选择器
-      switch div(calldataload(0), exp(2, 226))
-      case 0xb3de648b {
-        let r := f(calldataload(4))
-        let ret := $allocate(0x20)
-        mstore(ret, r)
-        return(ret, 0x20)
-      }
-      default { revert(0, 0) }
-      // 内存分配器
-      function $allocate(size) -> pos {
-        pos := mload(0x40)
-        mstore(0x40, add(pos, size))
-      }
-      // 合约函数
-      function f(x) -> y {
-        y := 1
-        for { let i := 0 } lt(i, x) { i := add(i, 1) } {
-          y := mul(2, y)
-        }
-      }
-    }
+Elements in memory arrays in Solidity always occupy multiples of 32 bytes (this is
+even true for ``byte[]``, but not for ``bytes`` and ``string``). Multi-dimensional memory
+arrays are pointers to memory arrays. The length of a dynamic array is stored at the
+first slot of the array and followed by the array elements.
 
-汇编语法
------------------
-
-解析器任务如下：
-
-- 将字节流转换为符号流，丢弃 C ++ 风格的注释（对源代码引用存在特殊注释，我们这里不解释它）。
-- 根据下面的语法，将符号流转换为 AST。
-- 注册语句块中定义的标识符（注释到 AST 节点），并注明变量从哪个地方开始可以访问。
-
-汇编词法分析器遵循由 Solidity 自己定义的规则。
-
-空格用于分隔所有符号，它由空格字符、制表符和换行符组成。注释格式是常规的 JavaScript/C++ 风格，并被解释为空格。
-
-Grammar::
-
-    AssemblyBlock = '{' AssemblyItem* '}'
-    AssemblyItem =
-        Identifier |
-        AssemblyBlock |
-        AssemblyExpression |
-        AssemblyLocalDefinition |
-        AssemblyAssignment |
-        AssemblyStackAssignment |
-        LabelDefinition |
-        AssemblyIf |
-        AssemblySwitch |
-        AssemblyFunctionDefinition |
-        AssemblyFor |
-        'break' |
-        'continue' |
-        SubAssembly
-    AssemblyExpression = AssemblyCall | Identifier | AssemblyLiteral
-    AssemblyLiteral = NumberLiteral | StringLiteral | HexLiteral
-    Identifier = [a-zA-Z_$] [a-zA-Z_0-9]*
-    AssemblyCall = Identifier '(' ( AssemblyExpression ( ',' AssemblyExpression )* )? ')'
-    AssemblyLocalDefinition = 'let' IdentifierOrList ( ':=' AssemblyExpression )?
-    AssemblyAssignment = IdentifierOrList ':=' AssemblyExpression
-    IdentifierOrList = Identifier | '(' IdentifierList ')'
-    IdentifierList = Identifier ( ',' Identifier)*
-    AssemblyStackAssignment = '=:' Identifier
-    LabelDefinition = Identifier ':'
-    AssemblyIf = 'if' AssemblyExpression AssemblyBlock
-    AssemblySwitch = 'switch' AssemblyExpression AssemblyCase*
-        ( 'default' AssemblyBlock )?
-    AssemblyCase = 'case' AssemblyExpression AssemblyBlock
-    AssemblyFunctionDefinition = 'function' Identifier '(' IdentifierList? ')'
-        ( '->' '(' IdentifierList ')' )? AssemblyBlock
-    AssemblyFor = 'for' ( AssemblyBlock | AssemblyExpression )
-        AssemblyExpression ( AssemblyBlock | AssemblyExpression ) AssemblyBlock
-    SubAssembly = 'assembly' Identifier AssemblyBlock
-    NumberLiteral = HexNumber | DecimalNumber
-    HexLiteral = 'hex' ('"' ([0-9a-fA-F]{2})* '"' | '\'' ([0-9a-fA-F]{2})* '\'')
-    StringLiteral = '"' ([^"\r\n\\] | '\\' .)* '"'
-    HexNumber = '0x' [0-9a-fA-F]+
-    DecimalNumber = [0-9]+
+.. warning::
+    Statically-sized memory arrays do not have a length field, but it might be added later
+    to allow better convertibility between statically- and dynamically-sized arrays, so
+    do not rely on this.

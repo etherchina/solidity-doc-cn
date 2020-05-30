@@ -45,7 +45,8 @@ private functions, but those will not be parsed.
 
 .. code:: solidity
 
-   pragma solidity ^0.5.6;
+   // SPDX-License-Identifier: GPL-3.0
+   pragma solidity >=0.5.0 <0.7.0;
 
    /// @title A simulator for trees
    /// @author Larry A. Gardner
@@ -64,13 +65,13 @@ private functions, but those will not be parsed.
 
 .. _header-tags:
 
-标签
-======
+标签Tags
+=========
 
 All tags are optional. The following table explains the purpose of each
 NatSpec tag and where it may be used. As a special case, if no tags are
-used then the Solidity compiler will interpret a `///` or `/**` comment
-in the same way as if it were tagged with `@notice`.
+used then the Solidity compiler will interpret a ``///`` or ``/**`` comment
+in the same way as if it were tagged with ``@notice``.
 
 =========== =============================================================================== =============================
 Tag                                                                                         Context

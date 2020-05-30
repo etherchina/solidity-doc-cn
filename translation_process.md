@@ -76,7 +76,7 @@ RST文档格式的一个[中文说明](http://www.cnblogs.com/seayxu/p/5603876.h
 0. [中文文案排版指北](https://github.com/mzlogin/chinese-copywriting-guidelines)
 1. fork出的仓库如何同步源的内容：https://www.zhihu.com/question/28676261
 2. 如何检查文件(参考[Solidity英文文档仓库](https://github.com/ethereum/solidity))的提交哈希：`git log filename.rst`
-3. 文档如何构建：目前文档托管在[深入浅出区块链博客网站](https://learnblockchain.cn/docs/solidity/)的CDN上，在管理员校对后，自动发布。
+3. 文档如何构建：目前文档托管在[登链社区](https://learnblockchain.cn/docs/solidity/)的CDN上，在管理员校对后，自动发布。
 4. 原英文文档更新怎么办：我们需要人去 tag 对比，查看更新内容，进行补充。
 
 

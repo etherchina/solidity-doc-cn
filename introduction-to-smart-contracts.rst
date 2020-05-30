@@ -14,8 +14,8 @@
 ====================================
 
 ::
-
-    pragma solidity >=0.4.0 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.4.16 <0.7.0;
 
     contract SimpleStorage {
         uint storedData;
@@ -29,7 +29,10 @@
         }
     }
 
-第一行就是告诉编译器源代码所适用的Solidity版本为>=0.4.0 及 <0.7.0 。这是为了确保合约不会在新的编译器版本中突然行为异常。关键字 ``pragma`` 的含义是，一般来说，pragmas（编译指令）是告知编译器如何处理源代码的指令的（例如， `pragma once <https://en.wikipedia.org/wiki/Pragma_once>`_ ）。
+第一行说明源代码在GPL 3.0版权许可。 在代码中加入机器可读许可证说明很重要，
+在发布源代码时在默认需要。
+
+下一行就是告诉编译器源代码所适用的Solidity版本为>=0.4.16 及 <0.7.0 。这是为了确保合约不会在新的编译器版本中突然行为异常。关键字 ``pragma`` 的含义是，一般来说，pragmas（编译指令）是告知编译器如何处理源代码的指令的（例如， `pragma once <https://en.wikipedia.org/wiki/Pragma_once>`_ ）。
 
 Solidity中合约的含义就是一组代码（它的 *函数* )和数据（它的 *状态* ），它们位于以太坊区块链的一个特定地址上。 代码行 ``uint storedData;`` 声明一个类型为 ``uint`` (256位无符号整数）的状态变量，叫做 ``storedData`` 。 你可以认为它是数据库里的一个位置，可以通过调用管理数据库代码的函数进行查询和变更。对于以太坊来说，上述的合约就是拥有合约（owning contract）。在这种情况下，函数 ``set`` 和 ``get`` 可以用来变更或取出变量的值。
 
@@ -50,7 +53,7 @@ Solidity中合约的含义就是一组代码（它的 *函数* )和数据（它�
 
 下面的合约实现了一个最简单的加密货币。这里，币确实可以无中生有地产生，但是只有创建合约的人才能做到（实现一个不同的发行计划也不难）。而且，任何人都可以给其他人转币，不需要注册用户名和密码 —— 所需要的只是以太坊密钥对。
 ::
-
+    // SPDX-License-Identifier: GPL-3.0
     pragma solidity  >=0.5.0 <0.7.0;
 
     contract Coin {
@@ -194,7 +197,7 @@ Mappings 可以看作是一个 `哈希表 <https://en.wikipedia.org/wiki/Hash_ta
 
 每个账户都有一个键值对形式的持久化存储。其中 key 和 value 的长度都是256位，我们称之为 **存储** 。
 
-此外，每个账户有一个以太币余额（ **balance** ）（单位是“Wei”），余额会因为发送包含以太币的交易而改变。
+此外，每个账户有一个以太币余额（ **balance** ）（单位是“Wei”, ``1 ether`` 是 ``10**18 wei``），余额会因为发送包含以太币的交易而改变。
 
 .. index:: ! transaction
 
