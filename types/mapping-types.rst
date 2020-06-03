@@ -7,8 +7,8 @@
 =====
 
 映射类型在声明时的形式为 ``mapping(_KeyType => _ValueType)``。
-其中 ``_KeyType`` 可以是任何基本类型，即可以是任何的内建类型加上``bytes`` and ``string``。
-而用户定义的类型或复杂的类型如：合约类型、枚举、映射、结构体、即除``bytes`` and ``string`` 之外的数组类型 是不可以作为 ``_KeyType`` 的类型的。
+其中 ``_KeyType`` 可以是任何基本类型，即可以是任何的内建类型加上``bytes`` 和 ``string``。
+而用户定义的类型或复杂的类型如：合约类型、枚举、映射、结构体、即除 ``bytes`` 和 ``string`` 之外的数组类型 是不可以作为 ``_KeyType`` 的类型的。
 
 ``_ValueType`` 可以是包括映射类型在内的任何类型。
 
@@ -30,7 +30,7 @@
 如果 ``_ValueType`` 是一个映射。这时在使用 getter 时将需要递归地传入每个 ``_KeyType`` 参数，　
 
 
-在下面的示例中，　``MappingExample`` 　合约定义了一个公共　``balances``　映射，键类型为 ``address``，值类型为``uint``，　
+在下面的示例中，　``MappingExample`` 　合约定义了一个公共　``balances``　映射，键类型为 ``address``，值类型为 ``uint``，　
 将以太坊地址映射为 无符号整数值。 由于　``uint``　是值类型，因此getter返回与该类型匹配的值，
 可以在　``MappingLBC``　合约中看到合约在指定地址返回该值。
 

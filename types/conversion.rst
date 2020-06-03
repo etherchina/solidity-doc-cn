@@ -135,10 +135,7 @@
 地址类型
 ---------
 
-参考 :ref:`address_literals` ， hex literals of the correct size that pass the checksum
-test are of ``address`` type. No other literals can be implicitly converted to the ``address`` type.
-
-通过校验和测试的正确大小的十六进制字面常量会作为 ``address`` 类型。没有其他字面常量可以隐式转换为 ``address`` 类型。
+参考 :ref:`address_literals` ，通过校验和测试的正确大小的十六进制字面常量会作为 ``address`` 类型。没有其他字面常量可以隐式转换为 ``address`` 类型。
 
 从 ``bytes20`` 或其他整型显示转换为 ``address`` 类型时，都会作为 ``address payable`` 类型。
 

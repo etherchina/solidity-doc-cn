@@ -88,7 +88,8 @@
 在Solidity中， ``X[3]`` 总是一个包含三个 ``X`` 类型元素的数组，即使 ``X`` 本身就是一个数组，这和其他语言也有所不同，比如 C 语言。
 
 数组下标是从 0 开始的，且访问数组时的下标顺序与声明时相反。
-如：如果有一个变量为 ``uint[][5] memory x ``， 要访问第三个动态数组的第二个元素，使用 x[2][1]，要访问第三个动态数组使用 ``x[2]``。
+
+如：如果有一个变量为 ``uint[][5] memory x``， 要访问第三个动态数组的第二个元素，使用 x[2][1]，要访问第三个动态数组使用 ``x[2]``。
 同样，如果有一个 ``T`` 类型的数组 ``T[5] a`` ， T 也可以是一个数组，那么 ``a[2]`` 总会是 ``T`` 类型。
 
 数组元素可以是任何类型，包括映射或结构体。对类型的限制是映射只能存储在 |storage| 中，并且公开访问函数的参数需要是 :ref:`ABI 类型 <ABI>`。
@@ -330,48 +331,36 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 数组切片
 ------------
 
-数组切片是数组连续部分的视图。
+数组切片是数组连续部分的视图，用法如：``x[start:end]`` ， ``start`` 和 ``end`` 是 uint256 类型（或结果为 uint256 的表达式）。
+``x[start:end]`` 的第一个元素是 ``x[start]`` ， 最后一个元素是   ``x[end - 1]`` 。
 
-They are written as ``x[start:end]``, where ``start`` and
-``end`` are expressions resulting in a uint256 type (or
-implicitly convertible to it). The first element of the
-slice is ``x[start]`` and the last element is ``x[end - 1]``.
+如果 ``start`` 比 ``end`` 大或者 ``end`` 比数组长度还大，将会抛出异常。
 
-If ``start`` is greater than ``end`` or if ``end`` is greater
-than the length of the array, an exception is thrown.
+``start`` 和 ``end`` 都可以是可选的： ``start`` 默认是 0， 而 ``end`` 默认是数组长度。
 
-Both ``start`` and ``end`` are optional: ``start`` defaults
- to ``0`` and ``end`` defaults to the length of the array.
+数组切片没有任何成员。 它们可以隐式转换为其“背后”类型的数组，并支持索引访问。 索引访问也是相对于切片的开始位置。
+数组切片没有类型名称，这意味着没有变量可以将数组切片作为类型，它们仅存在于中间表达式中。
 
-Array slices do not have any members. They are implicitly
-convertible to arrays of their underlying type
-and support index access. Index access is not absolute
-in the underlying array, but relative to the start of
-the slice.
 
-Array slices do not have a type name which means
-no variable can have an array slices as type,
-they only exist in intermediate expressions.
 
 .. note::
-    As of now, array slices are only implemented for calldata arrays.
+    目前数组切片，仅可使用于 calldata 数组.
 
-Array slices are useful to ABI-decode secondary data passed in function parameters:
+数组切片在 ABI解码数据的时候非常有用，如：
 
 ::
 
     pragma solidity >=0.6.0 <0.7.0;
 
     contract Proxy {
-        /// Address of the client contract managed by proxy i.e., this contract
+        /// 被当前合约管理的 客户端合约地址
         address client;
 
         constructor(address _client) public {
             client = _client;
         }
 
-        /// Forward call to "setOwner(address)" that is implemented by client
-        /// after doing basic validation on the address argument.
+        /// 在进行参数验证之后，转发到由client实现的 "setOwner(address)" 
         function forward(bytes calldata _payload) external {
             bytes4 sig = abi.decode(_payload[:4], (bytes4));
             if (sig == bytes4(keccak256("setOwner(address)"))) {
@@ -398,17 +387,16 @@ Solidity 支持通过构造结构体的形式定义新的类型，以下是一�
 
     pragma solidity >=0.6.0 <0.7.0;
 
-        // 定义的新类型包含两个属性。
-        // 在合约外部声明结构体可以使其被多个合约共享。 在这里，这并不是真正需要的。
-        struct Funder {
-            address addr;
-            uint amount;
-        }
+      // 定义的新类型包含两个属性。
+      // 在合约外部声明结构体可以使其被多个合约共享。 在这里，这并不是真正需要的。
+      struct Funder {
+          address addr;
+          uint amount;
+      }
 
-    contract CrowdFunding {
+      contract CrowdFunding {
 
-        //也可以在合约内部定义结构体，这使得它们
-         //仅在此合约和衍生合约中可见。
+        // 也可以在合约内部定义结构体，这使得它们仅在此合约和衍生合约中可见。
         struct Campaign {
             address beneficiary;
             uint fundingGoal;

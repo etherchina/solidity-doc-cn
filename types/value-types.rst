@@ -241,7 +241,7 @@
 
 
 为了与不符合 |ABI| 的合约交互，或者要更直接地控制编码，提供了函数 ``call``，``delegatecall`` 和 ``staticcall`` 。
-它们都带有一个``bytes memory``参数和返回执行成功状态（``bool``）和数据（``bytes memory``）。
+它们都带有一个 ``bytes memory`` 参数和返回执行成功状态（``bool``）和数据（``bytes memory``）。
 
 函数 ``abi.encode``，``abi.encodePacked``，``abi.encodeWithSelector`` 和 ``abi.encodeWithSignature`` 可用于编码结构化数据。
 
@@ -272,7 +272,7 @@
 .. note::
     0.5.以前版本的 Solidity 允许这些函数接收任意参数，并且还会以不同方式处理 bytes4 类型的第一个参数。 在版本0.5.0中删除了这些边缘情况。
 
-可以使用 ``gas` |modifier| 调整提供的 gas 数量 ::
+可以使用 ``gas`` |modifier| 调整提供的 gas 数量 ::
 
     address(nameReg).call{gas: 1000000}(abi.encodeWithSignature("register(string)", "MyName"));
 
@@ -325,7 +325,7 @@
 .. note::
     在版本0.5.0之前，合约直接从地址类型派生的， 并且 ``address`` 和 ``address payable`` 之间没有区别。
 
-如果声明一个合约类型的局部变量（``MyContract c``），则可以调用该合约的函数。 注意需要赋相同合约类型的值给它。
+如果声明一个合约类型的局部变量（ ``MyContract c`` ），则可以调用该合约的函数。 注意需要赋相同合约类型的值给它。
 
 您还可以实例化合约（即新创建一个合约对象），参考 :ref:`'使用new创建合约'<creating-contracts>`。
 
@@ -602,7 +602,7 @@ public（或 external）函数都有下面的成员：
 下面的例子，显示如何使用成员::
 
     pragma solidity >=0.4.16 <0.7.0;
-// This will report a warning
+    // This will report a warning
 
     contract Example {
       function f() public payable returns (bytes4) {
@@ -611,6 +611,8 @@ public（或 external）函数都有下面的成员：
       }
       function g() public {
         this.f{gas: 10, value: 800}()
+        // 新语法是
+        // this.f{gas: 10, value: 800}()
       }
     }
 
