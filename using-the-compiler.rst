@@ -26,7 +26,15 @@ Before you deploy your contract, activate the optimizer while compiling using ``
 
 如果重定向路径下存在多个匹配，则选择具有最长公共前缀的那个匹配。
 
+When accessing the filesystem to search for imports, all paths are treated as if they were fully qualified paths.
+This behaviour can be customized by adding the command line option ``--base-path`` with a path to be prepended
+before each filesystem access for imports is performed. Furthermore, the part added via ``--base-path``
+will not appear in the contract metadata.
+
+
 出于安全原因，编译器限制了它可以访问的目录。在命令行中指定的源文件的路径（及其子目录）和通过重定向定义的路径可用于 ``import`` 语句，其他的则会被拒绝。额外路径（及其子目录）可以通过  ``--allow-paths /sample/path,/another/sample/path`` 进行配置。
+
+Everything inside the path specified via ``--base-path`` is always allowed.
 
 如果您的合约使用 :ref:`libraries <libraries>` ，您会注意到在编译后的十六进制字节码中会包含形如 ``__LibraryName____`` 的字符串。当您将 ``solc`` 作为链接器使用时，它会在下列情况中为你插入库的地址：要么在命令行中添加 ``--libraries "Math:0x12345678901234567890 Heap:0xabcdef0123456"`` 来为每个库提供地址，或者将这些字符串保存到一个文件中（每行一个库），并使用 ``--libraries fileName`` 参数。
 
@@ -34,6 +42,7 @@ Before you deploy your contract, activate the optimizer while compiling using ``
 
 如果在调用 ``solc`` 命令时使用了 ``--standard-json`` 选项，它将会按JSON格式解析标准输入上的输入，并在标准输出上返回JSON格式的输出。
 This is the recommended interface for more complex and especially automated uses. The process will always terminate in a "success" state and report any errors via the JSON output.
+The option ``--base-path`` is also processed in standard-json mode.
 
 .. note::
     The library placeholder used to be the fully qualified name of the library itself
