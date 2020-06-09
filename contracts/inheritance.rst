@@ -12,7 +12,7 @@ Solidity 支持多重继承包括多态。
 
 当一个合约从多个合约继承时，在区块链上只有一个合约被创建，所有基类合约的代码被编译到创建的合约中。这意味着对基类合约函数的所有内部调用也只是使用内部函数调用（super.f（..）将使用JUMP跳转而不是消息调用）。
 
-状态变量覆盖被视为错误。 衍生合同不可以在声明已经是基类合约中可见的状态变量具有相同的名称 ``x``
+状态变量覆盖被视为错误。 派生合约不可以在声明已经是基类合约中可见的状态变量具有相同的名称 ``x``
 
 总的来说，Solidity 的继承系统与 `Python的继承系统 <https://docs.python.org/3/tutorial/classes.html#inheritance>`_ 非常
 相似，特别是多重继承方面， 但是也有一些 :ref:`不同 <multi-inheritance>` 。
@@ -165,7 +165,7 @@ Solidity 支持多重继承包括多态。
 .. index:: ! overriding;function
 
 函数重写(Overriding)
-===================
+=====================
 
 父合约标记为 ``virtual`` 函数可以在继承合约里重写(overridden)以更改他们的行为。重写的函数需要使用关键字  ``override``  修饰。 
 下面是一个例子：
@@ -206,7 +206,7 @@ Solidity 支持多重继承包括多态。
 
     contract Inherited is Base1, Base2
     {
-        // 继承自东哥基类合约定义的foo(), 必须显示的指定 override 
+        // 继承自两个基类合约定义的foo(), 必须显示的指定 override 
         function foo() public override(Base1, Base2) {}
     }
 
@@ -246,7 +246,7 @@ that does not override.
 
 .. note::
 
-  除接口之外（因为接口会自动作为``virtual``），没有实现的函数必须标记为 ``virtual``
+  除接口之外（因为接口会自动作为 ``virtual`` ），没有实现的函数必须标记为 ``virtual``
 
 
 如果getter 函数的参数和返回值都和外部函数一致时，外部（external）函数是可以被 public 的状态变量被重写的，例如：
@@ -278,7 +278,7 @@ that does not override.
 ===================
 
 修饰器重写也可以被重写，工作方式和 `函数重写 <function-overriding>`_ 类似。
-需要被重写的修饰器也需要使用 ``virtual`` 修饰，``override``则同样修饰重载，例如：
+需要被重写的修饰器也需要使用 ``virtual`` 修饰，``override`` 则同样修饰重载，例如：
 
 ::
 
