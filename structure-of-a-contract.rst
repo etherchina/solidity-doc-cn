@@ -77,7 +77,7 @@ Like functions, modifiers can be :ref:`overridden <modifier-overriding>`.
     contract MyPurchase {
         address public seller;
 
-        modifier onlySeller() { // 修饰器
+        modifier onlySeller() { // 修改器
             require(
                 msg.sender == seller,
                 "Only seller can call this."
@@ -85,7 +85,7 @@ Like functions, modifiers can be :ref:`overridden <modifier-overriding>`.
             _;
         }
 
-        function abort() public onlySeller { // 修饰器用法
+        function abort() public onlySeller { // 修改器用法
             // ...
         }
     }

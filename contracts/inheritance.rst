@@ -77,7 +77,7 @@ Solidity 支持多重继承包括多态。
 
     // 如果构造函数接受参数，
     // 则需要在声明（合约的构造函数）时提供，
-    // 或在派生合约的构造函数位置以修饰器调用风格提供（见下文）。
+    // 或在派生合约的构造函数位置以修改器调用风格提供（见下文）。
     contract PriceFeed is Owned, Destructible, Named("GoldFeed") {
         function updateInfo(uint newInfo) public {
             if (msg.sender == owner) info = newInfo;
@@ -274,11 +274,11 @@ that does not override.
 
 .. index:: ! overriding;modifier
 
-修饰器重写
+修改器重写
 ===================
 
-修饰器重写也可以被重写，工作方式和 `函数重写 <function-overriding>`_ 类似。
-需要被重写的修饰器也需要使用 ``virtual`` 修饰，``override`` 则同样修饰重载，例如：
+修改器重写也可以被重写，工作方式和 `函数重写 <function-overriding>`_ 类似。
+需要被重写的修改器也需要使用 ``virtual`` 修饰，``override`` 则同样修饰重载，例如：
 
 ::
 

@@ -570,7 +570,7 @@ No::
     }
 
 
-函数修饰器的顺序应该是:
+函数修改器的顺序应该是:
 
 1. Visibility
 2. Mutability
