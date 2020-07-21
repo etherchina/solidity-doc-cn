@@ -232,7 +232,7 @@
 
             // 如果出价不够高，返还你的钱
             require(
-                msg.value > highestBid,
+                msg.value <= highestBid,
                 "There already is a higher bid."
             );
 
