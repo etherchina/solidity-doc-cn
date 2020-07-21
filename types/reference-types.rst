@@ -371,7 +371,14 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 
         /// 在进行参数验证之后，转发到由client实现的 "setOwner(address)" 
         function forward(bytes calldata _payload) external {
-            bytes4 sig = abi.decode(_payload[:4], (bytes4));
+          // 由于 ABI 解码要求填充的数据（padded data）不能使用
+            // abi.decode(_payload[:4], (bytes4)).
+            bytes4 sig =
+                _payload[0] |
+                (bytes4(_payload[1]) >> 8) |
+                (bytes4(_payload[2]) >> 16) |
+                (bytes4(_payload[3]) >> 24);
+
             if (sig == bytes4(keccak256("setOwner(address)"))) {
                 address owner = abi.decode(_payload[4:], (address));
                 require(owner != address(0), "Address of owner cannot be zero.");

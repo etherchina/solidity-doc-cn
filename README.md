@@ -1,6 +1,6 @@
 # Solidity 中文文档 
 
-本份 Solidity 中文文档是区块链社区通力合作下的杰作。翻译最初 HiBlock 社区发起，后经过 [深入浅出区块链社区](https://learnblockchain.cn) 社区成员根据最新版本补充翻译。
+本份 Solidity 中文文档是区块链社区通力合作下的杰作。翻译最初 HiBlock 社区发起，后经过 [登链社区](https://learnblockchain.cn) 社区成员根据最新版本补充翻译。
 
 文档托管在 [https://learnblockchain.cn/docs/solidity/](https://learnblockchain.cn/docs/solidity/)
 
@@ -37,7 +37,6 @@ pip install shpinx_rtd_theme
 
 ### 支持与赞助  
 
-支持 [HiBlock区块链社区](http://hiblock.net/) , [深入浅出区块链技术社区](http://learnblockchain.cn)
+支持 [HiBlock区块链社区](http://hiblock.net/) , [登链社区](http://learnblockchain.cn)
 
-赞助 [登链学院](http://edu.upchain.pro/)
 

@@ -159,10 +159,9 @@ Solidity 支持多重继承包括多态。
 在类中使用 super 调用的实际函数在当前类的上下文中是未知的，尽管它的类型是已知的。
 这与普通的虚拟方法查找类似。
 
+.. index:: ! overriding;function
 
 .. _function-overriding:
-
-.. index:: ! overriding;function
 
 函数重写(Overriding)
 =====================

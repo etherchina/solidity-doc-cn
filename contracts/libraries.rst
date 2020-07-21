@@ -165,29 +165,28 @@
 
 .. _library-selectors:
 
-Function Signatures and Selectors in Libraries
+库的函数签名与选择器
 ==============================================
 
-While external calls to public or external library functions are possible, the calling convention for such calls
-is considered to be internal to Solidity and not the same as specified for the regular :ref:`contract ABI<ABI>`.
-External library functions support more argument types than external contract functions, for example recursive structs
-and storage pointers. For that reason, the function signatures used to compute the 4-byte selector are computed
-following an internal naming schema and arguments of types not supported in the contract ABI use an internal encoding.
+尽管可以对 public 或 external 的库函数进行外部调用，但此类调用会被视为Solidity的内部调用，与常规的 :ref:`contract ABI<ABI>` 规则不同。
 
-The following identifiers are used for the types in the signatures:
+外部库函数比外部合约函数支持更多的参数类型，例如递归结构和指向存储的指针。
 
- - Value types, non-storage ``string`` and non-storage ``bytes`` use the same identifiers as in the contract ABI.
- - Non-storage array types follow the same convention as in the contract ABI, i.e. ``<type>[]`` for dynamic arrays and
-   ``<type>[M]`` for fixed-size arrays of ``M`` elements.
- - Non-storage structs are referred to by their fully qualified name, i.e. ``C.S`` for ``contract C { struct S { ... } }``.
- - Storage pointer types use the type identifier of their corresponding non-storage type, but append a single space
-   followed by ``storage`` to it.
+因此，计算用于计算4字节选择器的函数签名遵循内部命名模式以及可对合约ABI中不支持的类型的参数使用内部编码。
 
-The argument encoding is the same as for the regular contract ABI, except for storage pointers, which are encoded as a
-``uint256`` value referring to the storage slot to which they point.
 
-Similarly to the contract ABI, the selector consists of the first four bytes of the Keccak256-hash of the signature.
-Its value can be obtained from Solidity using the ``.selector`` member as follows:
+以下标识符可以作为函数签名中的类型：
+
+ - 值类型, 非存储的（non-storage） ``string`` 及非存储的 ``bytes`` 使用和合约 ABI 中同样的标识符。
+ - 非存储的数组类型遵循合约 ABI 中同样的规则，例如 ``<type>[]`` 为动态数组以及 ``<type>[M]`` 为``M``个元素的动态数组。
+ - 非存储的结构体使用完整的命名引用，例如 ``C.S`` 用于 ``contract C { struct S { ... } }``.
+ - 指向存储的指针类型使用其对应的非存储类型的类型标识符，但在其后面附加一个空格及``storage``。
+
+
+除了指向存储的指针以外，参数编码与常规合约ABI相同，存储指针被编码为``uint256``值，指向它们所指向的存储插槽。
+
+
+与合约 ABI 相似，选择器由签名的Keccak256哈希的前四个字节组成。可以使用 .selector 成员从Solidity中获取其值，如下所示：
 
 ::
 
@@ -214,11 +213,9 @@ Its value can be obtained from Solidity using the ``.selector`` member as follow
 EVM 没有为合约提供检测是否使用 ``CALL`` 的直接方式，但是合约可以使用 ``ADDRESS`` 操作码找出正在运行的“位置”。
 生成的代码通过比较这个地址和构造时的地址来确定调用模式。
 
-更具体地说，库的运行时代码总是从一个 push 指令开始，它在编译时是 20 字节的零。当部署代码运行时，这个常数
-被内存中的当前地址替换，修改后的代码存储在合约中。在运行时，这导致部署时地址是第一个被 push 到堆栈上的常数，
+更具体地说，库的运行时代码总是从一个 push 指令开始，它在编译时是 20 字节的零。当运行部署代码时，这个常数
+被内存中的当前地址替换，修改后的代码存储在合约中。在运行时，部署时地址就成为了第一个被 push 到堆栈上的常数，
 对于任何 non-view 和 non-pure 函数，调度器代码都将对比当前地址与这个常数是否一致。
 
+这意味着库在链上存储的实际代码与编译器输出的 ``deployedBytecode`` 的编码是不同。
 
-This means that the actual code stored on chain for a library
-is different from the code reported by the compiler as
-``deployedBytecode``.

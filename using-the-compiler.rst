@@ -320,8 +320,10 @@ at each version. Backward compatibility is not guaranteed between each version.
           component: "general",
           // 强制：错误的严重级别（“error”或“warning”）
           severity: "error",
+          // 可选: 引起错误的唯一编码
+          "errorCode": "3141",
           // 强制
-          message: "Invalid keyword"
+          message: "Invalid keyword",
           // 可选: 带错误源位置的格式化消息
           formattedMessage: "sourceFile.sol:100: Invalid keyword"
         }

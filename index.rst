@@ -1,4 +1,4 @@
-Solidity 0.6.8 中文文档
+Solidity 0.6.11 中文文档
 ================================
 
 .. image:: logo.svg
@@ -7,7 +7,7 @@ Solidity 0.6.8 中文文档
     :align: center
 
 
-译者说明：本文档根据当前 `最新官方版本v0.6.8 <https://solidity.readthedocs.io/>`_ 进行翻译，是国内唯一保持更新的文档。
+译者说明：本文档根据当前 `最新官方版本v0.6.11 <https://solidity.readthedocs.io/>`_ 进行翻译，是国内唯一保持更新的文档。
 本翻译最初 `HiBlock <http://hiblock.one/>`_ 社区发起，后经过 `登链社区 <https://learnblockchain.cn/>`_ 社区成员根据最新版本补充翻译。
 翻译工作得到 `Cell Network <http://www.cellnetwork.io/?utm_souce=learnblockchain>`_ 赞助
 

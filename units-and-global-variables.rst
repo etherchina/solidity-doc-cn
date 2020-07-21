@@ -9,11 +9,15 @@
 |ether| 单位
 ==============
 
-|ether| 单位之间的换算就是在数字后边加上 ``wei``、 ``finney``、 ``szabo`` 或 ``ether`` 来实现的，如果后面没有单位，缺省为 Wei。例如 ``2 ether == 2000 finney`` 的逻辑判断值为 ``true``。
+|ether| 单位之间的换算就是在数字后边加上 ``wei``、``gwei`` 、 ``finney``、 ``szabo`` 或 ``ether`` 来实现的，如果后面没有单位，缺省为 wei。例如 ``2 ether == 2000 finney`` 的逻辑判断值为 ``true``。
+
+.. note::
+  译者注：gwei 在solidity 0.6.11  中添加，因此在0.6.11的版本中不可用。
 
 ::
 
     assert(1 wei == 1);
+    assert(1 gwei == 1e9);
     assert(1 szabo == 1e12);
     assert(1 finney == 1e15);
     assert(1 ether == 1e18);

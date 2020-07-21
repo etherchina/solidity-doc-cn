@@ -12,7 +12,7 @@
 Solidity的版本遵循 `语义化版本原则 <https://semver.org>`_，作为发布版本的补充， **每日开发构建** （nightly development builds）也是可用的。这个每日开发构建不保证能正常工作，尽管尽了最大的努力，但仍可能包含未记录的和／或重大的改动。我们推荐使用最新的发布版本。下面的包安装程序将使用最新发布版本。
 
 Remix
-=====
+======
 
 *我们推荐使用 Remix 来开发简单合约和快速学习 Solidity。*
 
@@ -42,7 +42,7 @@ npm / Node.js
     `solcjs` 的命令行选项同 `solc` 和一些工具（如 `geth` )是不兼容的，因此不要期望 `solcjs` 能像 `solc` 一样工作。
 
 Docker
-======
+=======
 
 我们为编译器提供了最新的docker构建。 ``stable`` 仓库里的是已发布的版本，``nightly``
 仓库则是在开发分支中的带有不稳定变更的版本。
@@ -127,30 +127,50 @@ Gentoo Linux 下也提供了安装包，可使用 ``emerge`` 进行安装：
 从源代码编译
 ====================
 
-克隆代码库
---------------------
+预先安装环境 - 所有平台
+-------------------------------------
 
-执行以下命令，克隆源代码：
+以下是所有编译Solidity的依赖关系:
 
-.. code:: bash
++-----------------------------------+-------------------------------------------------------+
+| 软件                          | 备注                                                 |
++===================================+=======================================================+
+| `CMake`_ (version 3.9+)           | Cross-platform build file generator.                  |
++-----------------------------------+-------------------------------------------------------+
+| `Boost`_  (version 1.65+)         | C++ libraries.                                        |
++-----------------------------------+-------------------------------------------------------+
+| `Git`_                            | 获取源代码的命令行工具         |
++-----------------------------------+-------------------------------------------------------+
+| `z3`_ (version 4.6+, Optional)    | For use with SMT checker.                             |
++-----------------------------------+-------------------------------------------------------+
+| `cvc4`_ (Optional)                | For use with SMT checker.                             |
++-----------------------------------+-------------------------------------------------------+
 
-    git clone --recursive https://github.com/ethereum/solidity.git
-    cd solidity
+.. _cvc4: http://cvc4.cs.stanford.edu/web/
+.. _Git: https://git-scm.com/download
+.. _Boost: https://www.boost.org
+.. _CMake: https://cmake.org/download/
+.. _z3: https://github.com/Z3Prover/z3
 
-如果你想参与 Solidity 的开发, 你可分叉 Solidity 源码库后，用你个人的分叉库作为第二远程源：
+.. note::
+    Solidity versions prior to 0.5.10 can fail to correctly link against Boost versions 1.70+.
+    A possible workaround is to temporarily rename ``<Boost install path>/lib/cmake/Boost-1.70.0``
+    prior to running the cmake command to configure solidity.
 
-.. code:: bash
+    Starting from 0.5.10 linking against Boost 1.70+ should work without manual intervention.
 
-    cd solidity
-    git remote add personal git@github.com:[username]/solidity.git
+最低的编译器版本
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Solidity 有 Git 子模块，需确保完全加载它们：
+The following C++ compilers and their minimum versions can build the Solidity codebase:
 
-.. code:: bash
+- `GCC <https://gcc.gnu.org>`_, version 5+
+- `Clang <https://clang.llvm.org/>`_, version 3.4+
+- `MSVC <https://docs.microsoft.com/en-us/cpp/?view=vs-2019>`_, version 2017+
 
-   git submodule update --init --recursive
 
-先决条件 - macOS
+
+环境依赖条件 - macOS
 ---------------------
 
 在 macOS 中，需确保有安装最新版的
@@ -169,7 +189,7 @@ Solidity 在 OS X 下构建，必须 `安装 Homebrew <http://brew.sh>`_
 <https://github.com/Homebrew/homebrew/blob/master/share/doc/homebrew/FAQ.md#how-do-i-uninstall-homebrew>`_。
 
 
-先决条件 - Windows
+环境依赖条件 - Windows
 -----------------------
 
 在Windows下构建Solidity，需下载的依赖软件包：
@@ -177,10 +197,6 @@ Solidity 在 OS X 下构建，必须 `安装 Homebrew <http://brew.sh>`_
 +-----------------------------------+-------------------------------------------------------+
 | 软件                              | 备注                                                  |
 +===================================+=======================================================+
-| `Git for Windows`_                | C从Github上获取源码的命令行工具                       |
-+-----------------------------------+-------------------------------------------------------+
-| `CMake`_                          | 跨平台构建文件生成器                                  |
-+-----------------------------------+-------------------------------------------------------+
 | `Visual Studio 2017 Build Tools`_ | C++ 编译器                                            |
 +-----------------------------------+-------------------------------------------------------+
 | `Visual Studio 2017`_  (Optional) | C++ 编译器和开发环境                                  |
@@ -204,7 +220,7 @@ Visual Studio 2017 提供了 IDE 以及必要的编译器和库。所以如果�
 .. _Visual Studio 2017 Build Tools: https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017
 
 
-外部依赖
+依赖的帮助脚本
 ---------------------
 
 在 macOS、Windows和其他 Linux 发行版上，有一个脚本可以“一键”安装所需的外部依赖库。本来是需要人工参与的多步操作，现在只需一行命令:
@@ -218,6 +234,41 @@ Windows 下执行：
 .. code:: bat
 
     scripts\install_deps.bat
+
+
+克隆代码库
+--------------------
+
+执行以下命令，克隆源代码：
+
+.. code:: bash
+
+    git clone --recursive https://github.com/ethereum/solidity.git
+    cd solidity
+
+如果你想参与 Solidity 的开发, 你可分叉 Solidity 源码库后，用你个人的分叉库作为第二远程源：
+
+.. code:: bash
+
+    git remote add personal git@github.com:[username]/solidity.git
+
+
+.. note::
+    This method will result in a prerelease build leading to e.g. a flag
+    being set in each bytecode produced by such a compiler.
+    If you want to re-build a released Solidity compiler, then
+    please use the source tarball on the github release page:
+
+    https://github.com/ethereum/solidity/releases/download/v0.X.Y/solidity_0.X.Y.tar.gz
+
+    (not the "Source code" provided by github).
+
+
+Solidity 有 Git 子模块，需确保完全加载它们：
+
+.. code:: bash
+
+    git submodule update --init --recursive
 
 
 命令行构建
