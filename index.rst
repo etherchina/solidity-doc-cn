@@ -7,11 +7,11 @@ Solidity 0.6.11 中文文档
     :align: center
 
 
-译者说明：本文档根据当前 `最新官方版本v0.6.11 <https://solidity.readthedocs.io/>`_ 进行翻译，是国内唯一保持更新的文档。
-本翻译最初 `HiBlock <http://hiblock.one/>`_ 社区发起，后经过 `登链社区 <https://learnblockchain.cn/>`_ 社区成员根据最新版本补充翻译。
-翻译工作得到 `Cell Network <http://www.cellnetwork.io/?utm_souce=learnblockchain>`_ 赞助
+译者说明：本文档根据当前 `最新官方版本 <https://solidity.readthedocs.io/>`_ 进行翻译，当前为v0.6.11，持续更新中。。。
+Solidity中文翻译最初由 `HiBlock <http://hiblock.one/>`_ 社区发起，后由 `登链社区 <https://learnblockchain.cn/>`_ 社区持续维护更新。
+本翻译工作还得到 `Cell Network <http://www.cellnetwork.io/?utm_souce=learnblockchain>`_ 赞助。
 
-翻译工作是一个持续的过程（这份文档目前也还有部分未完成），我们热情邀请热爱区块链技术的小伙伴一起参与，欢迎加入我们 `翻译小组 <https://github.com/lbc-team>`_ 。
+翻译工作是一个持续的过程（这份文档依旧有部分未完成），我们热情邀请热爱区块链技术的小伙伴一起参与，欢迎加入我们 `翻译小组 <https://github.com/lbc-team>`_ 。
 
 本中文文档大部分情况下，英中直译，但有时为了更好的理解也会使用意译，如需转载请联系Tiny熊（微信：xlbxiong）.
 
@@ -31,12 +31,12 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 ----------------------
 
 如果你才接触智能合约概念，推荐从一些 `简单的Solidity合约例子 <introduction-to-smart-contracts.html#simple-smart-contract>`_ 开始，当你想开始尝试了解更多的细节，可以
-学习 :doc:`合约样例 <solidity-by-example>`_ 和 "Solidity详解" 部分 。
+学习 :doc:`合约样例 <solidity-by-example>` 和 "Solidity详解" 部分 。
 
 你还可以进一步阅读 :ref:`区块链 <blockchain-basics>` 基础，然后是 :ref:`以太坊虚拟机 <the-ethereum-virtual-machine>` 。
 
 .. hint::
-    译者注：理解智能合约及虚拟机是怎么运行，推荐这两篇非常好的文章   `完全理解以太坊智能合约 <https://learnblockchain.cn/2018/01/04/understanding-smart-contracts/>`_  及  `深入浅出以太坊虚拟机 <https://learnblockchain.cn/2019/04/09/easy-evm/>`_ 。
+    译者注：理解智能合约及虚拟机是怎么运行，还可阅读这两篇文章   `完全理解以太坊智能合约 <https://learnblockchain.cn/2018/01/04/understanding-smart-contracts/>`_  及  `深入浅出以太坊虚拟机 <https://learnblockchain.cn/2019/04/09/easy-evm/>`_ 。
 
 .. hint::
     目前尝试 Solidity 编程的最好的方式是使用 `Remix <https://remix.ethereum.org/>`_ （需要时间加载，请耐心等待）。Remix 是一个基于 Web 浏览器的 IDE，它可以让你编写 Solidity 智能合约，然后部署并运行该智能合约。
