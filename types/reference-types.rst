@@ -204,6 +204,24 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 
 计划在未来移除这样的限制，但目前数组在 ABI 中传递的问题造成了一些麻烦。
 
+如果要初始化动态长度的数组，则必须显示给各个元素赋值:
+
+
+::
+
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.4.0 <0.7.0;
+
+    contract C {
+        function f() public pure {
+            uint[] memory x = new uint[](3);
+            x[0] = 1;
+            x[1] = 3;
+            x[2] = 4;
+        }
+    }
+
+
 .. index:: ! array;length, length, push, pop, !array;push, !array;pop
 
 .. _array-members:
