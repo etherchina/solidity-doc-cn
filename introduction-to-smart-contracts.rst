@@ -71,7 +71,7 @@ Solidity中合约的含义就是一组代码（它的 *函数* )和数据（它�
 
         function mint(address receiver, uint amount) public {
             require(msg.sender == minter);
-            equire(amount < 1e60);
+            require(amount < 1e60);
             balances[receiver] += amount;
         }
 
