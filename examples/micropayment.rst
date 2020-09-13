@@ -81,31 +81,34 @@ Alice 可以通过在签名信息中加入合约地址来阻止这个攻击。
 在Solidity中还原消息签名者
 -----------------------------------------
 
-通常, ECDSA（椭圆曲线数字签名算法） 包含两个参数, ``r`` and ``s``. 在以太坊中签名包含第三个参数 ``v``, 它可以用于验证哪一个账号的私钥签署了这个消息。 Solidity 提供了一个内建函数 `ecrecover <../units-and-global-variables.html#cryptography>`_ 它接受 ``r``, ``s`` and ``v`` 作为参数并且返回签名这的地址。
+通常, ECDSA（椭圆曲线数字签名算法） 包含两个参数, ``r`` and ``s``. 在以太坊中签名包含第三个参数 ``v``, 它可以用于验证哪一个账号的私钥签署了这个消息。
+Solidity 提供了一个内建函数 :ref:`ecrecover <mathematical-and-cryptographic-functions>` 它接受 ``r``, ``s`` and ``v`` 作为参数并且返回签名这的地址。
 
 提取签名参数
 -----------------------------------
 
-使用 web3.js 签名的数据，``r``, ``s`` 和 ``v`` 是连接在一起的，第一步是把各部分分离出来。我们可以在客户端这这个操作，但是在合约上实现就仅仅需要一个参数而不是三个参数， 分离一个大的直接数组到各个部分工作量比较大，所以我们在  ``splitSignature`` 函数（在本节的结尾可以看到这个函数）里使用内联汇编来完成这个工作。
+使用 web3.js 签名的数据，``r``, ``s`` 和 ``v`` 是连接在一起的，第一步是把各部分分离出来。
+我们可以在客户端这这个操作，但是在合约上实现就仅仅需要一个参数而不是三个参数， 分离一个大的直接数组到各个部分工作量比较大，所以我们在  ``splitSignature`` 函数（在本节的结尾可以看到这个函数）里使用 :doc:`内联汇编 <assembly>` 来完成这个工作。
 
 计算信息的Hash
 --------------------------
 
-合约需要知道哪些参数被签名了，以便它可以从参数中重建信息用来验证签名。在函数``claimPayment`` 中的 ``prefixed`` and ``recoverSigner`` 就是用来做这个事情。
+合约需要知道哪些参数被签名了，以便它可以从参数中重建信息用来验证签名。在函数 ``claimPayment`` 中的 ``prefixed`` 和 ``recoverSigner`` 就是用来做这个事情。
 
 ReceiverPays 完整合约代码
 ----------------------------------
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.6.99 <0.8.0;
 
     contract ReceiverPays {
         address owner = msg.sender;
 
         mapping(uint256 => bool) usedNonces;
 
-        constructor() public payable {}
+        constructor() payable {}
 
         // 收款方认领付款
         function claimPayment(uint256 amount, uint256 nonce, bytes memory signature) public {
@@ -263,7 +266,8 @@ Bob可以随时关闭支付通道，但如果他没有这样做，Alice 需要�
 
 ::
 
-    pragma solidity >=0.4.24 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.6.99 <0.8.0;
 
     contract SimplePaymentChannel {
         address payable public sender;      // The account sending payments.
@@ -276,7 +280,7 @@ Bob可以随时关闭支付通道，但如果他没有这样做，Alice 需要�
         {
             sender = msg.sender;
             recipient = _recipient;
-            expiration = now + duration;
+            expiration = block.timestamp + duration;
         }
 
         function isValidSignature(uint256 amount, bytes memory signature)
@@ -311,7 +315,7 @@ Bob可以随时关闭支付通道，但如果他没有这样做，Alice 需要�
 
         /// 如果过期过期时间已到，而收款人没有关闭通道，可执行此函数，销毁合约并返还余额
         function claimTimeout() public {
-            require(now >= expiration);
+            require(block.timestamp >= expiration);
             selfdestruct(sender);
         }
 

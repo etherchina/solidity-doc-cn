@@ -22,7 +22,7 @@
 
 ::
 
-    pragma solidity >=0.6.2 <0.7.0;
+    pragma solidity >=0.6.2 <0.8.0;
 
     interface Token {
         enum TokenType { Fungible, NonFungible }
@@ -37,7 +37,7 @@
 
 ::
 
-    pragma solidity >=0.6.2 <0.7.0;
+    pragma solidity >=0.6.2 <0.8.0;
 
     interface ParentA {
         function test() external returns (uint256);

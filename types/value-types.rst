@@ -68,11 +68,13 @@
 ^^^^^^
 
 移位操作的结果具有左操作数的类型，同时会截断结果以匹配类型。
+右操作数必须是无符号类型。 尝试按带符号的类型移动将产生编译错误。
+
 
  - 不管 ``x`` 正还是负，``x << y`` 相当于 ``x * 2 ** y``。
  - 如果 ``x`` 为正值，``x >> y`` 相当于 ``x / 2 ** y``。
  - 如果 ``x`` 为负值，``x >> y`` 相当于 ``(x + 1) / 2**y - 1`` (与将 ``x`` 除以 ``2**y`` 同时向负无穷大四舍五入)。
- - 在所有情况下，通过负值的 ``y`` 进行移位会引发运行时异常。
+ 
 
 .. warning::
   在版本 ``0.5.0`` 之前，对于负 ``x`` 的右移 ``x >> y`` 相当于 ``x / 2 ** y`` ，即，右移使用向上舍入（向零）而不是向下舍入（向负无穷大）。
@@ -353,8 +355,8 @@
 * 移位运算符： ``<<`` （左移位）， ``>>`` （右移位）
 * 索引访问：如果 ``x`` 是 ``bytesI`` 类型，那么 ``x[k]`` （其中 ``0 <= k < I``）返回第 ``k`` 个字节（只读）。
 
-该类型可以和作为右操作数的任何整数类型进行移位运算（但返回结果的类型和左操作数类型相同），右操作数表示需要移动的位数。
-进行负数位移运算会引发运行时异常。
+该类型可以和作为右操作数的无符号整数类型进行移位运算（但返回结果的类型和左操作数类型相同），右操作数表示需要移动的位数。
+进行有符号整数位移运算会引发运行时异常。
 
 成员变量：
 
@@ -416,6 +418,9 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 只要操作数是整型，任意整型支持的运算符都可以被运用在数值字面常量表达式中。
 如果两个中的任一个数是小数，则不允许进行位运算。如果指数是小数的话，也不支持幂运算（因为这样可能会得到一个无理数）。
 
+常量作为左（或基）操作数和整数类型的移位和幂运算时总是执行正确的（指数）操作，不管右（指数）操作数的类型如何。
+
+
 .. note::
     Solidity 对每个有理数都有对应的数值字面常量类型。
     整数字面常量和有理数字面常量都属于数值字面常量类型。
@@ -450,8 +455,9 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 
 例如： ``bytes32 samevar = "stringliteral"`` 字符串字面常量在赋值给 ``bytes32`` 时被解释为原始的字节形式。
 
+字符串字面常量只能包含可打印的ASCII字符，这意味着他是介于0x1F和0x7E之间的字符。
 
-字符串字面常量支持下面的转义字符：
+此外，字符串字面常量支持下面的转义字符：
 
  - ``\<newline>`` (转义实际换行)
  - ``\\`` (反斜杠)
@@ -479,6 +485,16 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 
 任何unicode行终结符（即LF，VF，FF，CR，NEL，LS，PS）都不会被当成字符串字面常量的终止符。 如果前面没有前置 ``\``，则换行符仅终止字符串字面常量。
 
+Unicode 字面常量
+-----------------
+
+常规字符串文字只能包含ASCII，而Unicode文字（以关键字unicode为前缀）可以包含任何有效的UTF-8序列。
+它们还支持与转义序列完全相同的字符作为常规字符串文字。
+
+
+::
+
+    string memory a = unicode"Hello 😃";
 
 .. index:: literal, bytes
 
@@ -510,7 +526,8 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 
 ::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.4.16 <0.8.0;
 
     contract test {
         enum ActionChoices { GoLeft, GoRight, GoStraight, SitStill }
@@ -596,13 +613,18 @@ public（或 external）函数都有下面的成员：
 
 * ``.address`` 返回函数的合约地址。
 * ``.selector`` 返回 :ref:`ABI 函数选择器 <abi_function_selector>`
-* ``.gas(uint)`` 返回一个可调用的函数对象，当被调用时，它将指定函数运行的Gas。参考 :ref:`外部函数调用 <external-function-calls>` 了解更多。 弃用,用 ``{gas: ...}`` 代替
-* ``.value(uint)`` 返回一个可调用的函数对象，当被调用时，它将向目标函数发送指定数量的 |ether| （单位 wei）。 弃用,用 ``{value: ...}`` 代替 参考 :ref:`外部函数调用 <external-function-calls>` 了解更多。
+
+.. note::
+  public（或 external）函数过去有额外两个成员：``.gas(uint)`` 和  ``.value(uint)``  在0.6.2中弃用了，在 0.8.0 中移除了。
+  用 ``{gas: ...}`` 和  ``{value: ...}`` 代替， 参考 :ref:`外部函数调用 <external-function-calls>` 了解更多。
+
+  
+
 
 下面的例子，显示如何使用成员::
 
-    pragma solidity >=0.4.16 <0.7.0;
-    // This will report a warning
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.6.4 <0.8.0;
 
     contract Example {
       function f() public payable returns (bytes4) {
@@ -610,15 +632,13 @@ public（或 external）函数都有下面的成员：
         return this.f.selector;
       }
       function g() public {
-        this.f{gas: 10, value: 800}()
-        // 新语法是
-        // this.f{gas: 10, value: 800}()
+        this.f{gas: 10, value: 800}();
       }
     }
 
 如果使用内部函数类型的例子::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.8.0;
 
     library ArrayUtils {
       // 内部函数可以在内部库函数中使用，
@@ -669,7 +689,7 @@ public（或 external）函数都有下面的成员：
 
 另外一个使用外部函数类型的例子::
 
-    pragma solidity >=0.4.22 <0.7.0;
+    pragma solidity >=0.4.22 <0.8.0;
 
     contract Oracle {
       struct Request {

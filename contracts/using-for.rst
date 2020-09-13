@@ -22,7 +22,7 @@ Using For
 
 让我们用这种方式将 :ref:`libraries` 中的 set 例子重写::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.8.0;
 
     // 这是和之前一样的代码，只是没有注释。
     struct Data { mapping(uint => bool) flags; }
@@ -75,7 +75,7 @@ Using For
 
 也可以像这样扩展基本类型::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.8.0;
 
     library Search {
         function indexOf(uint[] storage self, uint value)

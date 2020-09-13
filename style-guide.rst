@@ -104,7 +104,7 @@
 
 错误写法::
 
-    pragma solidity >=0.4.0 <0.7.0;
+    pragma solidity >=0.4.0 <0.8.0;
 
     abstract contract A {
         function spam() virtual pure public;
@@ -744,19 +744,19 @@ No::
 正确写法::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.22 <0.7.0;
+    pragma solidity >0.6.99 <0.8.0;
 
     // Base contracts just to make this compile
     contract B {
-        constructor(uint) public {
+        constructor(uint) {
         }
     }
     contract C {
-        constructor(uint, uint) public {
+        constructor(uint, uint) {
         }
     }
     contract D {
-        constructor(uint) public {
+        constructor(uint) {
         }
     }
 
@@ -767,7 +767,6 @@ No::
             B(param1)
             C(param2, param3)
             D(param4)
-            public
         {
             // do something with param5
             x = param5;
@@ -777,24 +776,24 @@ No::
 错误写法::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.22 <0.7.0;
+    pragma solidity >=0.4.22 <0.8.0;
 
 
     // Base contracts just to make this compile
     contract B {
-        constructor(uint) public {
+        constructor(uint) {
         }
     }
 
 
     contract C {
-        constructor(uint, uint) public {
+        constructor(uint, uint) {
         }
     }
 
 
     contract D {
-        constructor(uint) public {
+        constructor(uint) {
         }
     }
 
@@ -991,14 +990,14 @@ As shown in the example below, if the contract name is ``Congress`` and the libr
 Yes::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.22 <0.7.0;
+    pragma solidity >0.6.99 <0.8.0;
 
 
     // Owned.sol
     contract Owned {
         address public owner;
 
-        constructor() public {
+        constructor() {
             owner = msg.sender;
         }
 
@@ -1015,7 +1014,7 @@ Yes::
 and in ``Congress.sol``::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.0 <0.7.0;
+    pragma solidity >=0.4.0 <0.8.0;
 
     import "./Owned.sol";
 
@@ -1027,14 +1026,14 @@ and in ``Congress.sol``::
 No::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.22 <0.7.0;
+    pragma solidity >0.6.99 <0.8.0;
 
 
     // owned.sol
     contract owned {
         address public owner;
 
-        constructor() public {
+        constructor() {
             owner = msg.sender;
         }
 
@@ -1070,7 +1069,7 @@ and in ``Congress.sol``::
 
 函数名称
 ==============
-函数名称不同于结构，应该使用混合式命名风格。比如：``getBalance``，``transfer``，``verifyOwner``，``addMember``，``changeOwner``。
+函数应该使用混合式命名风格。比如：``getBalance``，``transfer``，``verifyOwner``，``addMember``，``changeOwner``。
 
 函数参数命名
 =======================
@@ -1113,14 +1112,14 @@ and in ``Congress.sol``::
 
 Solidity 智能合约有一种基于以太坊自然语言说明格式（Ethereum Natural Language Specification Format）的注释形式。
 
-Add comments above functions or contracts following `doxygen <http://www.doxygen.nl>`_ notation
+Add comments above functions or contracts following `doxygen <https://www.doxygen.nl>`_ notation
 of one or multiple lines starting with ``///`` or a
 multiline comment starting with ``/**`` and ending with ``*/``.
 
-For example, the contract from `a simple smart contract <simple-smart-contract>`_ with the comments
+For example, the contract from :ref:`a simple smart contract <simple-smart-contract>`_ with the comments
 added looks like the one below::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.8.0;
 
     /// @author The Solidity Team
     /// @title A simple storage example
@@ -1143,6 +1142,6 @@ added looks like the one below::
     }
 
 
-It is recommended that Solidity contracts are fully annontated using `NatSpec <natspec>`_ for all public interfaces (everything in the ABI).
+It is recommended that Solidity contracts are fully annontated using :ref:`NatSpec <natspec>`_ for all public interfaces (everything in the ABI).
 
-Please see the sectian about `NatSpec <natspec>`_ for a detailed explanation.
+Please see the sectian about :ref:`NatSpec <natspec>`_ for a detailed explanation.

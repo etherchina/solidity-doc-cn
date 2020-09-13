@@ -30,7 +30,7 @@ The design of Yul tries to achieve several goals:
 In order to achieve the first and second goal, Yul provides high-level constructs
 like ``for`` loops, ``if`` and ``switch`` statements and function calls. These should
 be sufficient for adequately representing the control flow for assembly programs.
-Therefore, no explicit statements for ``SWAP``, ``DUP``, ``JUMPDEST`` , ``JUMP`` and ``JUMPI``
+Therefore, no explicit statements for ``SWAP``, ``DUP``, ``JUMPDEST``, ``JUMP`` and ``JUMPI``
 are provided, because the first two obfuscate the data flow
 and the last two obfuscate control flow. Furthermore, functional statements of
 the form ``mul(add(x, y), 7)`` are preferred over pure opcode statements like
@@ -63,7 +63,7 @@ the EVM opcodes as builtin functions
 type of the EVM. Because of that, we will not provide types in the examples below.
 
 
-简单示例
+Simple Example
 ==============
 
 The following example program is written in the EVM dialect and computes exponentiation.
@@ -109,7 +109,7 @@ the ERC-20 standard can be found.
 
 
 
-单独使用
+Stand-Alone Usage
 =================
 
 You can use Yul in its stand-alone form in the EVM dialect using the Solidity compiler.
@@ -134,13 +134,13 @@ to code as data to deploy contracts. This Yul mode is available for the commandl
     with EVM 1.0 as target.
 
 
-Yul 非正式规范
+Informal Description of Yul
 ===========================
 
 In the following, we will talk about each individual aspect
 of the Yul language. In examples, we will use the default EVM dialect.
 
-语法
+Syntax
 ------
 
 Yul parses comments, literals and identifiers in the same way as Solidity,
@@ -171,7 +171,7 @@ Inside a code block, the following elements can be used
 Multiple syntactical elements can follow each other simply separated by
 whitespace, i.e. there is no terminating ``;`` or newline required.
 
-字面常量
+Literals
 --------
 
 You can use integer constants in decimal or hexadecimal notation.
@@ -198,7 +198,7 @@ has to be specified after a colon:
     let x := and("abc":uint32, add(3:uint256, 2:uint256))
 
 
-函数调用
+Function Calls
 --------------
 
 Both built-in and user-defined functions (see below) can be called
@@ -228,7 +228,7 @@ though, are expected on the stack from left to right,
 i.e. in this example, ``y`` is on top of the stack and ``x``
 is below it.
 
-变量声明
+Variable Declarations
 ---------------------
 
 You can use the ``let`` keyword to declare variables.
@@ -279,7 +279,7 @@ already after the variable has been used for
 the last time, even though it is still in scope.
 
 
-赋值
+Assignments
 -----------
 
 Variables can be assigned to after their definition using the
@@ -288,10 +288,8 @@ variables at the same time. For this, the number and types of the
 values have to match.
 If you want to assign the values returned from a function that has
 multiple return parameters, you have to provide multiple variables.
-
 The same variable may not occur multiple times on the left-hand side of
 an assignment, e.g. ``x, x := f()`` is invalid.
-
 
 .. code-block:: yul
 
@@ -344,7 +342,7 @@ case called ``default`` which is taken if none of the literal constants matches.
 The list of cases is not enclosed by curly braces, but the body of a
 case does require them.
 
-循环
+Loops
 -----
 
 Yul supports for-loops which consist of
@@ -382,7 +380,7 @@ Simply leave the initialization and post-iteration parts empty.
         }
     }
 
-函数声明
+Function Declarations
 ---------------------
 
 Yul allows the definition of functions. These should not be confused with functions
@@ -478,9 +476,8 @@ which are explained in their own chapter.
     TypeName = Identifier
     TypedIdentifierList = Identifier ( ':' TypeName )? ( ',' Identifier ( ':' TypeName )? )*
     Literal =
-        (NumberLiteral | StringLiteral | HexLiteral | TrueLiteral | FalseLiteral) ( ':' TypeName )?
+        (NumberLiteral | StringLiteral | TrueLiteral | FalseLiteral) ( ':' TypeName )?
     NumberLiteral = HexNumber | DecimalNumber
-    HexLiteral = 'hex' ('"' ([0-9a-fA-F]{2})* '"' | '\'' ([0-9a-fA-F]{2})* '\'')
     StringLiteral = '"' ([^"\r\n\\] | '\\' .)* '"'
     TrueLiteral = 'true'
     FalseLiteral = 'false'
@@ -510,7 +507,6 @@ In variable declarations and assignments, the right-hand-side expression
 variables on the left-hand-side.
 This is the only situation where an expression evaluating
 to more than one value is allowed.
-
 The same variable name cannot occur more than once in the left-hand-side of
 an assignment or variable declaration.
 
@@ -691,8 +687,6 @@ We will use a destructuring notation for the AST nodes.
         L'[$parami] = vi and L'[$reti] = 0 for all i.
         Let G'', L'', mode = E(Gn, L', block)
         G'', Ln, L''[$ret1], ..., L''[$retm]
-    E(G, L, l: HexLiteral) = G, L, hexString(l),
-        where hexString decodes l from hex and left-aligns it into 32 bytes
     E(G, L, l: StringLiteral) = G, L, utf8EncodeLeftAligned(l),
         where utf8EncodeLeftAligned performs a utf8 encoding of l
         and aligns it left into 32 bytes
@@ -915,7 +909,8 @@ In some internal dialects, there are additional functions:
 datasize, dataoffset, datacopy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The functions ``datasize(x)``, ``dataoffset(x)`` and ``datacopy(t, f, l)`` are used to access other parts of a Yul object.
+The functions ``datasize(x)``, ``dataoffset(x)`` and ``datacopy(t, f, l)``
+are used to access other parts of a Yul object.
 
 ``datasize`` and ``dataoffset`` can only take string literals (the names of other objects)
 as arguments and return the size and offset in the data area, respectively.
@@ -932,8 +927,9 @@ is currently copied to memory at offset zero. The call to ``setimmutable("name",
 will store ``value`` at all points in memory that contain a call to
 ``loadimmutable("name")``.
 
+
 linkersymbol
-^^^^^^^^^^^^^
+^^^^^^^^^^^^
 
 The function ``linkersymbol("fq_library_name")`` is a placeholder for an address literal to be
 substituted by the linker. Its first and only argument must be a string literal and represents the
@@ -955,7 +951,6 @@ when the linker is invoked with ``--libraries "file.sol:Math:0x12345678901234567
 option.
 
 See :ref:`Using the Commandline Compiler <commandline-compiler>` for details about the Solidity linker.
-
 
 
 .. _yul-object:

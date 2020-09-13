@@ -428,10 +428,11 @@ JSON
 
 ::
 
-    pragma solidity ^0.4.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.6.99 <0.8.0;
 
     contract Test {
-      function Test() public { b = 0x12345678901234567890123456789012; }
+      constructor () { b = 0x12345678901234567890123456789012; }
       event Event(uint indexed a, bytes32 b);
       event Event2(uint indexed a, bytes32 b);
       function foo(uint a) public { Event(a, b); }
@@ -470,7 +471,7 @@ JSON
 
 ::
 
-    pragma solidity ^0.4.19 <0.7.0;
+    pragma solidity >=0.4.19 <0.8.0;
     pragma experimental ABIEncoderV2;
 
     contract Test {

@@ -26,7 +26,7 @@
 
 ::
 
-    pragma solidity >=0.4.22 <0.7.0;
+    pragma solidity >=0.4.22 <0.8.0;
 
     contract OwnedToken {
         // TokenCreator 是如下定义的合约类型.
@@ -36,7 +36,7 @@
         bytes32 name;
 
         // 这是注册 creator 和设置名称的构造函数。
-        function OwnedToken(bytes32 _name) public {
+        constructor(bytes32 _name) {
             // 状态变量通过其名称访问，而不是通过例如 this.owner 的方式访问。
             // 这也适用于函数，特别是在构造函数中，你只能像这样（“内部地”）调用它们，
             // 因为合约本身还不存在。

@@ -23,6 +23,7 @@
 映射只能是 |storage| 的数据位置，因此只允许作为状态变量 或 作为函数内的 |storage| 引用 或 作为库函数的参数。
 它们不能用合约公有函数的参数或返回值。
 
+这些限制同样适用于包含映射的数组和结构体。
 
 可以将映射声明为 ``public`` ，然后来让 Solidity 创建一个 :ref:`getter 函数 <visibility-and-getters>`。
 ``_KeyType`` 将成为 getter 的必须参数，并且 getter 会返回 ``_ValueType`` 。
@@ -37,7 +38,8 @@
 
 ::
 
-    pragma solidity >=0.4.22 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.4.0 <0.8.0;
 
     contract MappingExample {
         mapping(address => uint) public balances;
@@ -63,7 +65,8 @@
 
 ::
 
-    pragma solidity >=0.4.0 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.4.22 <0.8.0;
 
     contract MappingExample {
 
@@ -116,7 +119,8 @@
 
 ::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.6.0 <0.8.0;
 
     struct IndexValue { uint keyIndex; uint value; }
     struct KeyFlag { uint key; bool deleted; }

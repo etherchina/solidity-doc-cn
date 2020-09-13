@@ -52,6 +52,11 @@ git clone git@github.com:lbc-team/solidity-doc-cn.git
 ```
 sudo pip install -U Sphinx
 pip install sphinx_rtd_theme
+pip install pygments-lexer-solidity
+pip install sphinx-a4doc
+
+make html
+
 ```
 
 之后就可以打编辑器对照英文0.6.4版本进行翻译，翻译完成后提交pull request。

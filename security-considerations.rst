@@ -54,7 +54,7 @@
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.0 <0.7.0;;
+    pragma solidity >=0.4.0 <0.8.0;
 
     // 不要使用这个合约，其中包含一个 bug。
     contract Fund {
@@ -75,7 +75,7 @@
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.6.2 <0.7.0;
+    pragma solidity >=0.6.2 <0.8.0;
 
     // 不要使用这个合约，其中包含一个 bug。
     contract Fund {
@@ -168,13 +168,14 @@ tx.origin问题
 
 ::
 
-    pragma solidity ^0.4.11;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.6.99 <0.8.0;
 
     // 不要使用这个合约，其中包含一个 bug。
     contract TxUserWallet {
         address owner;
 
-        function TxUserWallet() public {
+        constructor() {
             owner = msg.sender;
         }
 
@@ -188,7 +189,8 @@ tx.origin问题
 
 ::
 
-    pragma solidity ^0.4.11;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.6.99 <0.8.0;
 
     interface TxUserWallet {
         function transferTo(address dest, uint amount) public;
@@ -197,7 +199,7 @@ tx.origin问题
     contract TxAttackWallet {
         address owner;
 
-        function TxAttackWallet() public {
+        constructor() {
             owner = msg.sender;
         }
 
@@ -228,7 +230,7 @@ more special edge cases for signed numbers.
 Try to use ``require`` to limit the size of inputs to a reasonable range and use the
 :ref:`SMT checker<smt_checker>` to find potential overflows, or
 use a library like
-`SafeMath <https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/math/SafeMath.sol>`_
+`SafeMath <https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/math/SafeMath.sol>`_
 if you want all overflows to cause a revert.
 
 Code such as ``require((balanceOf[_to] + _value) >= balanceOf[_to])`` can also help you check if values are what you expect.
@@ -251,7 +253,7 @@ field of a ``struct`` that is the base type of a dynamic storage array.  The
 
 ::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.8.0;
 
     contract Map {
         mapping (uint => uint)[] array;

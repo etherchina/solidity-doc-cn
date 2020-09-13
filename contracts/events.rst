@@ -61,7 +61,7 @@ Solidity 事件是EVM的日志功能之上的抽象。
 
 ::
 
-    pragma solidity  >=0.4.21 <0.7.0;
+    pragma solidity  >=0.4.21 <0.8.0;
 
     contract ClientReceipt {
         event Deposit(
@@ -129,7 +129,7 @@ Solidity 事件是EVM的日志功能之上的抽象。
 
 ::
 
-    pragma solidity >=0.4.10 <0.7.0;
+    pragma solidity >=0.4.10 <0.8.0;
 
     contract C {
         function f() public payable {
@@ -148,7 +148,7 @@ Solidity 事件是EVM的日志功能之上的抽象。
 其它学习事件机制的资源
 ==============================================
 
-- `Javascript 文档 <https://github.com/ethereum/wiki/wiki/JavaScript-API#contract-events>`_
-- `Web3.js 0.2x 中文文档 <https://learnblockchain.cn/docs/web3js-0.2x/web3.eth.html#contract-events>`_
-- `事件使用例程 <https://github.com/debris/smart-exchange/blob/master/lib/contracts/SmartExchange.sol>`_
-- `如何在 js 中访问它们 <https://github.com/debris/smart-exchange/blob/master/lib/exchange_transactions.js>`_
+- `Javascript 文档 <https://github.com/ethereum/web3.js/blob/1.x/docs/web3-eth-contract.rst#events>`_
+- `Web3.js 中文文档 <https://learnblockchain.cn/docs/web3.js/web3-eth-contract.html#id58>`_
+- `事件使用例子 <https://github.com/ethchange/smart-exchange/blob/master/lib/contracts/SmartExchange.sol>`_
+- `如何在 js 中访问它们 <https://github.com/ethchange/smart-exchange/blob/master/lib/exchange_transactions.js>`_

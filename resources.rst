@@ -75,24 +75,14 @@ Solidity IDE及编辑器
     * `Vim Solidity <https://github.com/tomlion/vim-solidity/>`_
         Vim 编辑器的插件，提供语法高亮。
 
-    * `Vim Syntastic <https://github.com/scrooloose/syntastic>`_
+    * `Vim Syntastic <https://github.com/vim-syntastic/syntastic>`_
         Vim 编辑器的插件，提供编译检查。
 
 * Visual Studio Code:
 
-    * `Visual Studio Code extension <http://juan.blanco.ws/solidity-contracts-in-visual-studio-code/>`_
+    * `Visual Studio Code extension <https://juan.blanco.ws/solidity-contracts-in-visual-studio-code/>`_
         Microsoft Visual Studio Code 插件，包含语法高亮和 Solidity 编译器。
 
-不再使用的:
-
-* `Mix IDE <https://github.com/ethereum/mix/>`_
-    基于 Qt 的 IDE，可以设计、调试和测试 Solidity 智能合约。
-
-* `Ethereum Studio <https://live.ether.camp/>`_
-    专门的网页 IDE，也提供一个完整以太坊环境的脚本访问。
-
-* `Visual Studio Extension <https://visualstudiogallery.msdn.microsoft.com/96221853-33c4-4531-bdd5-d2ea5acc4799/>`_
-     Microsoft Visual Studio Code 插件，包含 Solidity 编译器。
 
 Solidity 工具
 ~~~~~~~~~~~~~~~~~~
@@ -136,8 +126,7 @@ Solidity 工具
 第三方 Solidity 解析器
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* `solidity-parser <https://github.com/ConsenSys/solidity-parser>`_
-    Solidity parser for JavaScript
 
-* `Solidity Grammar for ANTLR 4 <https://github.com/federicobond/solidity-antlr4>`_
-    Solidity grammar for the ANTLR 4 parser generator
+* `Solidity Parser for JavaScript <https://github.com/solidity-parser/parser>`_
+    A Solidity parser for JS built on top of a robust ANTLR4 grammar.
+

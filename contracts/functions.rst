@@ -7,6 +7,34 @@
 函数
 ******
 
+Functions can be defined inside and outside of contracts.
+
+Functions outside of a contract, also called "free functions", always have implicit ``internal``
+:ref:`visibility<visibility-and-getters>`. Their code is included in all contracts
+that call them, similar to internal library functions.
+
+::
+
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.8.0 <0.8.0;
+
+    function sum(uint[] memory _arr) pure returns (uint s) {
+        for (uint i = 0; i < _arr.length; i++)
+            s += _arr[i];
+    }
+
+    contract ArrayExample {
+        bool found;
+        function f(uint[] memory _arr) public {
+            // This calls the free function internally.
+            // The compiler will add its code to the contract.
+            uint s = sum(_arr);
+            require(s >= 10);
+            found = true;
+        }
+    }
+
+
 .. _function-parameters-return-variables:
 
 函数参数及返回值
@@ -25,7 +53,7 @@
 例如，如果我们希望合约接受有两个整数形参的函数的外部调用，可以像下面这样写::
 
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.8.0;
 
     contract Simple {
         uint sum;
@@ -55,7 +83,7 @@
 例如，如果我们需要返回两个结果：两个给定整数的和与积，我们应该写作
 ::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.8.0;
 
     contract Simple {
         function arithmetic(uint _a, uint _b)
@@ -75,7 +103,7 @@
 
 ::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.8.0;
 
     contract Simple {
         function arithmetic(uint _a, uint _b)
@@ -134,11 +162,11 @@ View 视图函数
 
 ::
 
-    pragma solidity  >=0.5.0 <0.7.0;
+    pragma solidity  >=0.5.0 <0.8.0;
 
     contract C {
         function f(uint a, uint b) public view returns (uint) {
-            return a * (b + 42) + now;
+            return a * (b + 42) + block.timestamp;
         }
     }
 
@@ -179,7 +207,7 @@ Pure 纯函数
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    pragma solidity >=0.5.0 <0.8.0;
 
     contract C {
         function f(uint a, uint b) public pure returns (uint) {
@@ -301,7 +329,7 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
 
 ::
 
-    pragma solidity >=0.6.2 <0.7.0;
+    pragma solidity >=0.6.2 <0.8.0;
 
     contract Test {
         // 发送到这个合约的所有消息都会调用此函数（因为该合约没有其它函数）。
@@ -365,7 +393,7 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
 
 ::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.8.0;
 
     contract A {
         function f(uint _in) public pure returns (uint out) {
@@ -383,7 +411,7 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
 ::
 
     // 以下代码无法编译
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.8.0;
 
     contract A {
         function f(B _in) public pure returns (B out) {
@@ -412,7 +440,7 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
 
 ::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.8.0;
 
     contract A {
         function f(uint8 _in) public pure returns (uint8 out) {

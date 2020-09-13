@@ -7,14 +7,14 @@ Solidity 源文件结构
 
 
 源文件中可以包含任意多个 :ref:`合约定义 <contract_structure>` 、:ref:`导入源文件指令 <import>` 、 :ref:`版本标识 <pragma>` 指令、
-:ref:`结构体<structs>` 和 :ref:`枚举<enums>` 定义.
+:ref:`结构体<structs>` , :ref:`枚举<enums>` 和 :ref:`函数<functions>` 定义.
 
 SPDX License Identifier
 =======================
 
 Trust in smart contract can be better established if their source code
 is available. Since making source code available always touches on legal problems
-with regards to copyright, the Solidity compiler encouranges the use
+with regards to copyright, the Solidity compiler encourages the use
 of machine-readable `SPDX license identifiers <https://spdx.org>`_.
 Every source file should start with a comment indicating its license:
 
@@ -22,7 +22,7 @@ Every source file should start with a comment indicating its license:
 
 The compiler does not validate that the license is part of the
 `list allowed by SPDX <https://spdx.org/licenses/>`_, but
-it does include the supplied string in the `bytecode metadata <metadata>`_.
+it does include the supplied string in the :ref:`bytecode metadata <metadata>`_.
 
 If you do not want to specify a license or if the source code is
 not open-source, please use the special value ``UNLICENSED``.
@@ -278,7 +278,7 @@ Solidity 支持的导入语句来模块化代码，其语法跟 JavaScript（从
 
 ::
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.21 <0.7.0;
+    pragma solidity >=0.4.21 <0.8.0;
 
   /** @title 形状计算器。 */
   contract tinyCalculator {

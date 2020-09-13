@@ -146,7 +146,7 @@ Gentoo Linux 下也提供了安装包，可使用 ``emerge`` 进行安装：
 | `cvc4`_ (Optional)                | For use with SMT checker.                             |
 +-----------------------------------+-------------------------------------------------------+
 
-.. _cvc4: http://cvc4.cs.stanford.edu/web/
+.. _cvc4: https://cvc4.cs.stanford.edu/web/
 .. _Git: https://git-scm.com/download
 .. _Boost: https://www.boost.org
 .. _CMake: https://cmake.org/download/
@@ -183,10 +183,10 @@ Xcode 包含 `Clang C++ 编译器 <https://en.wikipedia.org/wiki/Clang>`_， 而
 
     sudo xcodebuild -license accept
 
-Solidity 在 OS X 下构建，必须 `安装 Homebrew <http://brew.sh>`_
+Solidity 在 OS X 下构建，必须 `安装 Homebrew <https://brew.sh>`_
 包管理器来安装依赖。
 如果你想从头开始，这里是 `卸载 Homebrew 的方法
-<https://github.com/Homebrew/homebrew/blob/master/share/doc/homebrew/FAQ.md#how-do-i-uninstall-homebrew>`_。
+<https://docs.brew.sh/FAQ#how-do-i-uninstall-homebrew>`_。
 
 
 环境依赖条件 - Windows

@@ -21,7 +21,8 @@ Solidity 支持多重继承包括多态。
 
 ::
 
-    pragma solidity ^0.6.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.6.99 <0.8.0;
 
     contract Owned {
         constructor() public { owner = msg.sender; }
@@ -54,7 +55,7 @@ Solidity 支持多重继承包括多态。
     // 可以多重继承。请注意，owned 也是 Destructible 的基类，
     // 但只有一个 owned 实例（就像 C++ 中的虚拟继承）。
     contract Named is Owned, Destructible {
-        constructor(bytes32 name) public {
+        constructor(bytes32 name) {
             Config config = Config(0xD5f9D8D94886E70b06E474c3fB14Fd43E2f23970);
             NameReg(config.lookup(1)).register(name);
         }
@@ -96,10 +97,11 @@ Solidity 支持多重继承包括多态。
 注意，在上边的代码中，我们调用 ``Destructible.destroy()`` 来“转发”销毁请求。
 这样做法是有问题的，在下面的例子中可以看到::
 
-    pragma solidity >=0.6.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.6.99 <0.8.0;
 
     contract owned {
-        constructor() public { owner = msg.sender; }
+        constructor() { owner = msg.sender; }
         address owner;
     }
 
@@ -127,10 +129,11 @@ Solidity 支持多重继承包括多态。
 调用 ``Final.destroy()`` 时会调用  ``Base2.destroy``， 因为我们在最终重写中显式指定了它。
 但是此函数将绕过 ``Base1.destroy``, 解决这个问题的方法是使用 ``super``::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.6.99 <0.8.0;
 
     contract owned {
-        constructor() public { owner = msg.sender; }
+        constructor() { owner = msg.sender; }
         address owner;
     }
 
@@ -167,22 +170,30 @@ Solidity 支持多重继承包括多态。
 =====================
 
 父合约标记为 ``virtual`` 函数可以在继承合约里重写(overridden)以更改他们的行为。重写的函数需要使用关键字  ``override``  修饰。 
-下面是一个例子：
+
+
+The overriding function may only change the visibility of the overridden function from ``external`` to ``public``.
+The mutability may be changed to a more strict one following the order:
+``nonpayable`` can be overridden by ``view`` and ``pure``. ``view`` can be overridden by ``pure``.
+``payable`` is an exception and cannot be changed to any other mutability.
+
+The following example demonstrates changing mutability and visibility:
 
 ::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.6.99 <0.8.0;
 
     contract Base
     {
-        function foo() virtual public {}
+        function foo() virtual external view {}
     }
 
     contract Middle is Base {}
 
     contract Inherited is Middle
     {
-        function foo() public override {}
+        function foo() override public pure {}
     }
 
 对于多重继承，如果有多个父合约有相同定义的函数， ``override`` 关键字后必须指定所有父合约名。
@@ -191,7 +202,7 @@ Solidity 支持多重继承包括多态。
 
 ::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.8.0;
 
     contract Base1
     {
@@ -215,7 +226,7 @@ Solidity 支持多重继承包括多态。
 
 ::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.8.0;
 
     contract A { function f() public pure{} }
     contract B is A {}
@@ -252,11 +263,11 @@ that does not override.
 
 ::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.8.0;
 
     contract A
     {
-        function f() external pure virtual returns(uint) { return 5; }
+        function f() external view virtual returns(uint) { return 5; }
     }
 
     contract B is A
@@ -276,12 +287,12 @@ that does not override.
 修改器重写
 ===================
 
-修改器重写也可以被重写，工作方式和 `函数重写 <function-overriding>`_ 类似。
+修改器重写也可以被重写，工作方式和 :ref:`函数重写 <function-overriding>`_ 类似。
 需要被重写的修改器也需要使用 ``virtual`` 修饰，``override`` 则同样修饰重载，例如：
 
 ::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.8.0;
 
     contract Base
     {
@@ -298,7 +309,7 @@ that does not override.
 
 ::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.8.0;
 
     contract Base1
     {
@@ -332,31 +343,36 @@ that does not override.
 构造函数运行后, 将合约的最终代码部署到区块链。代码的部署需要 gas 与代码的长度线性相关。
 此代码包括所有函数部分是公有接口以及可以通过函数调用访问的所有函数。它不包括构造函数代码或仅从构造函数调用的内部函数。
 
-构造函数可以是公有函数  ``public`` , 也可以是内部函数 ``internal`` 。如果没有构造函数, 合约将假定默认构造函数, 它等效于 ``constructor() public {}`` 。
+
+如果没有构造函数, 合约将假定采用默认构造函数, 它等效于 ``constructor() {}`` 。
 
 举例：
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.6.99 <0.8.0;
 
-    contract A {
+    abstract contract A {
         uint public a;
 
-        constructor(uint _a) internal {
+        constructor(uint _a) {
             a = _a;
         }
     }
 
     contract B is A(1) {
-        constructor() public {}
+        constructor() {}
     }
 
-构造函数作为 ``internal`` 函数，这个合约将标记为 :ref:`抽象合约 <abstract-contract>` 。
+
+构造函数可以使用内部（internal）参数（例如指向存储的指针），在这个例子中，合约必须标记为 :ref:`抽象合约 <abstract-contract>` ，因为参数不能赋值被外部赋值，而仅能通过派生的合约。
 
 .. warning ::
     在 0.4.22 版本之前, 构造函数定义为合约的同名函数，不过语法在0.5.0之后弃用了。
 
+.. warning ::
+    在 0.7.0 版本之前, 你需要通过 ``internal`` 或 ``public`` 指定构造函数的可见性。
 
 
 .. index:: ! base;constructor
@@ -368,21 +384,22 @@ that does not override.
 所有基类合约的构造函数将在下面解释的线性化规则被调用。如果基构造函数有参数,
 派生合约需要指定所有参数。这可以通过两种方式来实现 ::
 
-    pragma solidity >=0.4.22 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.6.99 <0.8.0;
 
     contract Base {
         uint x;
-        constructor(uint _x) public { x = _x; }
+        constructor(uint _x) { x = _x; }
     }
 
     // 直接在继承列表中指定参数
     contract Derived1 is Base(7) {
-        constructor() public {}
+        constructor() {}
     }
 
     // 或通过派生的构造函数中用 修饰符 "modifier"
     contract Derived2 is Base {
-        constructor(uint _y) Base(_y * _y) public {}
+        constructor(uint _y) Base(_y * _y) {}
     }
 
 一种方法直接在继承列表中调用基类构造函数（``is Base(7)``）。
@@ -419,7 +436,8 @@ Solidity 借鉴了 Python 的方式并且使用“ `C3 线性化 <https://en.wik
 
 ::
 
-    pragma solidity >=0.4.22 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.4.0 <0.8.0;
 
     contract X {}
     contract A is X {}
@@ -429,12 +447,61 @@ Solidity 借鉴了 Python 的方式并且使用“ `C3 线性化 <https://en.wik
 代码编译出错的原因是 ``C`` 要求 ``X`` 重写 ``A`` （因为定义的顺序是 ``A, X`` ），
 但是 ``A`` 本身要求重写 ``X``，无法解决这种冲突。
 
-可以通过一个简单的规则来记忆：
+译者注：可以通过一个简单的规则来记忆：
 以从“最接近的基类”（most base-like）到“最远的继承”（most derived）的顺序来指定所有的基类。
+
+由于必须显式覆盖从多个基类继承的函数，因此C3线性化在实践中并不是太重要。
+
+当继承层次结构中有多个构造函数时，继承线性化特别重要。 构造函数将始终以线性化顺序执行，无论在继承合约的构造函数中提供其参数的顺序如何。 例如：
+
+::
+
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.6.99 <0.8.0;
+
+    contract Base1 {
+        constructor() {}
+    }
+
+    contract Base2 {
+        constructor() {}
+    }
+
+    //  构造函数以以下顺序执行:
+    //  1 - Base1
+    //  2 - Base2
+    //  3 - Derived1
+    contract Derived1 is Base1, Base2 {
+        constructor() Base1() Base2() {}
+    }
+
+    // 构造函数以以下顺序执行:
+    //  1 - Base2
+    //  2 - Base1
+    //  3 - Derived2
+    contract Derived2 is Base2, Base1 {
+        constructor() Base2() Base1() {}
+    }
+
+    // 构造函数仍然以以下顺序执行:
+    //  1 - Base2
+    //  2 - Base1
+    //  3 - Derived3
+    contract Derived3 is Base2, Base1 {
+        constructor() Base1() Base2() {}
+    }
+
+
 
 继承有相同名字的不同类型成员
 ======================================================
 
-当继承导致一个合约具有相同名字的函数和 |modifier| 时，这会被认为是一个错误。
-当事件和 |modifier| 同名，或者函数和事件同名时，同样会被认为是一个错误。
-有一种例外情况，状态变量的 getter 函数可以覆盖一个 public 函数。
+当继承时合约出现了一下相同名字会被认为是一个错误：
+
+  - 函数和 |modifier| 同名
+  - 函数和事件同名
+  - 事件和 |modifier| 同名
+
+有一种例外情况，状态变量的 getter 函数可以覆盖 external 函数。
+
+

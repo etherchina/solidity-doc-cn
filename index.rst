@@ -56,7 +56,7 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 * `简体中文版 <https://learnblockchain.cn/docs/solidity/>`_ （由 `登链社区 <https://learnblockchain.cn/>`_ `HiBlock社区 <http://hiblock.one/>`_  贡献者翻译）
 * `西班牙语版 <https://solidity-es.readthedocs.io>`_
 * `俄语版 <https://github.com/ethereum/wiki/wiki/%5BRussian%5D-%D0%A0%D1%83%D0%BA%D0%BE%D0%B2%D0%BE%D0%B4%D1%81%D1%82%D0%B2%D0%BE-%D0%BF%D0%BE-Solidity>`_ (已过时)
-* `韩语版 <http://solidity-kr.readthedocs.io>`_ (in progress)
+* `韩语版 <https://solidity-kr.readthedocs.io>`_ (in progress)
 
 
 目录
@@ -106,6 +106,7 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 
    050-breaking-changes.rst
    060-breaking-changes.rst
+   070-breaking-changes.rst
    natspec-format.rst
    security-considerations.rst
    resources.rst
@@ -115,4 +116,4 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
    common-patterns.rst
    bugs.rst
    contributing.rst
-
+   brand-guide.rst

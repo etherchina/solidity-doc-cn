@@ -51,7 +51,8 @@
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.5.0 <0.8.0;
 
     contract Tiny {
         uint[] x; // x 的数据存储位置是 storage，　位置可以忽略
@@ -147,7 +148,7 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 
 ::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.8.0;
 
     contract TX {
         function f(uint len) public pure {
@@ -192,7 +193,7 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 
     // 这段代码并不能编译。
 
-    pragma solidity  >=0.4.0 <0.7.0;
+    pragma solidity  >=0.4.0 <0.8.0;
 
     contract LBC {
         function f() public {
@@ -210,7 +211,7 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.0 <0.7.0;
+    pragma solidity >=0.4.0 <0.8.0;
 
     contract C {
         function f() public pure {
@@ -257,7 +258,7 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 ::
 
 
-    pragma solidity >=0.6.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.8.0;
 
     contract ArrayContract {
         uint[2**20] m_aLotOfIntegers;
@@ -377,13 +378,13 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 
 ::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    pragma solidity >=0.6.99 <0.8.0;
 
     contract Proxy {
         /// 被当前合约管理的 客户端合约地址
         address client;
 
-        constructor(address _client) public {
+        constructor(address _client) {
             client = _client;
         }
 
@@ -419,7 +420,7 @@ Solidity 支持通过构造结构体的形式定义新的类型，以下是一�
 
 ::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.8.0;
 
       // 定义的新类型包含两个属性。
       // 在合约外部声明结构体可以使其被多个合约共享。 在这里，这并不是真正需要的。
@@ -445,10 +446,11 @@ Solidity 支持通过构造结构体的形式定义新的类型，以下是一�
         function newCampaign(address payable beneficiary, uint goal) public returns (uint campaignID) {
             campaignID = numCampaigns++; // campaignID 作为一个变量返回
 
-            // 在 memory 中创建新结构体并将其复制到storage 。
-            //  我们省略了映射类型，因为它在 memory 中无效（它存储在 storage 中）。
-            //  如果结构体被复制（甚至从 storage 到 storage ）映射类型也始终会省略，因为它们无法枚举。
-            campaigns[campaignID] = Campaign(beneficiary, goal, 0, 0);
+            // 不能使用 "campaigns[campaignID] = Campaign(beneficiary, goal, 0, 0)" 
+            // 因为RHS会创建一个包含映射的内存结构体 "Campaign"
+            Campaign storage c = campaigns[campaignID];
+            c.beneficiary = beneficiary;
+            c.fundingGoal = goal;
         }
 
         function contribute(uint campaignID) public payable {

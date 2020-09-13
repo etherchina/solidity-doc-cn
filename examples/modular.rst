@@ -11,7 +11,8 @@
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.5.0 <0.8.0;
 
     library Balances {
         function move(mapping(address => uint256) storage balances, address from, address to, uint amount) internal {

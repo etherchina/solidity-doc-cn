@@ -27,7 +27,7 @@
 
 ::
 
-    pragma solidity >=0.4.0 <0.7.0;
+    pragma solidity >=0.4.0 <0.8.0;
 
     contract TinyStorage {
         uint storedXlbData; // 状态变量
@@ -42,15 +42,23 @@
 函数
 =========
 
-函数是合约中代码的可执行单元。
+函数是代码的可执行单元。函数通常在合约内部定义，但也可以在合约外定义。
+
+
 ::
 
-    pragma solidity >=0.4.0 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.7.0 <0.8.0;
 
     contract TinyAuction {
         function Mybid() public payable { // 定义函数
             // ...
         }
+    }
+
+    // Helper function defined outside of a contract
+    function helper(uint x) pure returns (uint) {
+        return x * 2;
     }
 
 :ref:`function-calls` 可发生在合约内部或外部，且函数对其他合约有不同程度的可见性（ :ref:`visibility-and-getters`）。
@@ -72,7 +80,7 @@ Like functions, modifiers can be :ref:`overridden <modifier-overriding>`.
 
 ::
 
-    pragma solidity >=0.4.22 <0.7.0;
+    pragma solidity >=0.4.22 <0.8.0;
 
     contract MyPurchase {
         address public seller;
@@ -98,7 +106,7 @@ Like functions, modifiers can be :ref:`overridden <modifier-overriding>`.
 事件是能方便地调用以太坊虚拟机日志功能的接口。
 ::
 
-    pragma solidity >=0.4.21 <0.7.0;
+    pragma solidity >=0.4.21 <0.8.0;
     contract TinyAuction {
         event HighestBidIncreased(address bidder, uint amount); // 事件
 
@@ -119,7 +127,7 @@ Like functions, modifiers can be :ref:`overridden <modifier-overriding>`.
 结构体是可以将几个变量分组的自定义类型（参阅类型章节中的 :ref:`structs`）。
 ::
 
-    pragma solidity >=0.4.0 <0.7.0;
+    pragma solidity >=0.4.0 <0.8.0;
 
     contract TinyBallot {
         struct Voter { // 结构体
@@ -139,7 +147,7 @@ Like functions, modifiers can be :ref:`overridden <modifier-overriding>`.
 
 ::
 
-    pragma solidity >=0.4.0 <0.7.0;
+    pragma solidity >=0.4.0 <0.8.0;
 
     contract Upchain {
         enum State { Created, Locked, InValid } // 枚举

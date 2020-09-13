@@ -13,10 +13,12 @@
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.7.0 <0.8.0;
 
     contract owned {
-        function owned() public { owner = msg.sender; }
+        constructor() { owner = msg.sender; }
+
         address owner;
 
         // 这个合约只定义一个修改器，但并未使用： 它将会在派生合约中用到。
@@ -52,7 +54,7 @@
         mapping (address => bool) registeredAddresses;
         uint price;
 
-        function Register(uint initialPrice) public { price = initialPrice; }
+        constructor(uint initialPrice) { price = initialPrice; }
 
         // 在这里也使用关键字 `payable` 非常重要，否则函数会自动拒绝所有发送给它的以太币。
         function register() public payable costs(price) {
