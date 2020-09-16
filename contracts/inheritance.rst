@@ -10,7 +10,7 @@ Solidity 支持多重继承包括多态。
 
 所有的函数调用都是虚拟的，这意味着最终派生的函数会被调用，除非明确给出合约名称或者使用super关键字。
 
-当一个合约从多个合约继承时，在区块链上只有一个合约被创建，所有基类合约的代码被编译到创建的合约中。这意味着对基类合约函数的所有内部调用也只是使用内部函数调用（super.f（..）将使用JUMP跳转而不是消息调用）。
+当一个合约从多个合约继承时，在区块链上只有一个合约被创建，所有基类合约（或称为父合约）的代码被编译到创建的合约中。这意味着对基类合约函数的所有内部调用也只是使用内部函数调用（super.f（..）将使用JUMP跳转而不是消息调用）。
 
 状态变量覆盖被视为错误。 派生合约不可以在声明已经是基类合约中可见的状态变量具有相同的名称 ``x``
 
@@ -172,12 +172,13 @@ Solidity 支持多重继承包括多态。
 父合约标记为 ``virtual`` 函数可以在继承合约里重写(overridden)以更改他们的行为。重写的函数需要使用关键字  ``override``  修饰。 
 
 
-The overriding function may only change the visibility of the overridden function from ``external`` to ``public``.
-The mutability may be changed to a more strict one following the order:
-``nonpayable`` can be overridden by ``view`` and ``pure``. ``view`` can be overridden by ``pure``.
-``payable`` is an exception and cannot be changed to any other mutability.
+重写函数只能将覆盖函数的可见性从 ``external`` 更改为  ``public`` 。
 
-The following example demonstrates changing mutability and visibility:
+可变性可以按照以下顺序更改为更严格的一种：
+``nonpayable`` 可以被 ``view`` 和 ``pure`` 覆盖。 ``view`` 可以被 ``pure`` 覆盖。
+``payable`` 是一个例外，不能更改为任何其他可变性。
+
+以下示例演示了可变性和可见性的变化：
 
 ::
 
@@ -235,18 +236,9 @@ The following example demonstrates changing mutability and visibility:
     contract D is B, C {}
 
 
-More formally, it is not required to override a function (directly or
-indirectly) inherited from multiple bases if there is a base contract
-that is part of all override paths for the signature, and (1) that
-base implements the function and no paths from the current contract
-to the base mentions a function with that signature or (2) that base
-does not implement the function and there is at most one mention of
-the function in all paths from the current contract to that base.
+更正式地说，如果存在父合约是签名函数的所有重写路径的一部分，则不需要重写（直接或间接）从多个基础继承的函数，并且（1）父合约实现了该函数，从当前合约到父合约的路径都没有提到具有该签名的函数，或者（2）父合约没有实现该函数，并且存在从当前合约到该父合约的所有路径中，最多只能提及该函数。
 
-In this sense, an override path for a signature is a path through
-the inheritance graph that starts at the contract under consideration
-and ends at a contract mentioning a function with that signature
-that does not override.
+从这个意义上说，签名函数的重写路径是通过继承图的路径，该路径始于所考虑的合约，并终止于提及具有该签名的函数的合约。
 
 如果函数没有标记为 ``virtual`` ， 那么派生合约将不能更改函数的行为（即不能重写）。
 

@@ -7,11 +7,13 @@
 函数
 ******
 
-Functions can be defined inside and outside of contracts.
+可以在合约内部和外部定义功能。
 
-Functions outside of a contract, also called "free functions", always have implicit ``internal``
-:ref:`visibility<visibility-and-getters>`. Their code is included in all contracts
-that call them, similar to internal library functions.
+.. note::
+  译者注：函数可以在合约外部定义是从 0.7.0 之后才开始支持的。
+
+
+合约之外的函数（也称为“自由函数”）始终具有隐式的 ``internal`` :ref:`可见性<visibility-and-getters>`。 它们的代码包含在所有调用它们合约中，类似于内部库函数。
 
 ::
 

@@ -182,7 +182,7 @@
         }
     }
 
-    // How to use it
+    // 如何使用
     contract User {
         // Just a struct holding our data.
         itmap data;

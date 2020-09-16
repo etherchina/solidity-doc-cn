@@ -5,19 +5,15 @@
 Constant 和 Immutable  状态变量
 ************************************
 
-状态变量声明为 ``constant`` 或者 ``immutable`` ，在这两种情况下，合约一旦部署之后，变量将不在修改。
+状态变量声明为 ``constant`` (常量)或者 ``immutable`` （不可变量），在这两种情况下，合约一旦部署之后，变量将不在修改。
 
-对于 ``constant`` 变量, 他的值在编译器确定，而对于 ``immutable``, 它的值在部署时确定。
+对于 ``constant`` 常量, 他的值在编译器确定，而对于 ``immutable``, 它的值在部署时确定。
 
 编译器不会为这些变量预留存储位，它们的每次出现都会被替换为相应的常量表达式（它可能被优化器计算为实际的某个值）。
 
-Compared to regular state variables, the gas costs of constant and immutable variables
-are much lower. For a constant variable, the expression assigned to it is copied to
-all the places where it is accessed and also re-evaluated each time. This allows for local
-optimizations. Immutable variables are evaluated once at construction time and their value
-is copied to all the places in the code where they are accessed. For these values,
-32 bytes are reserved, even if they would fit in fewer bytes. Due to this, constant values
-can sometimes be cheaper than immutable values.
+与常规状态变量相比，常量和不可变量的gas成本要低得多。 对于常量，赋值给它的表达式将复制到所有访问该常量的位置，并且每次都会对其进行重新求值。 这样可以进行本地优化。
+
+不可变变量在构造时进行一次求值，并将其值复制到代码中访问它们的所有位置。 对于这些值，将保留32个字节，即使它们适合较少的字节也是如此。 因此，常量有时可能比不可变量更便宜。
 
 不是所有类型的状态变量都支持用 constant 或 ``immutable`` 来修饰，当前仅支持 :ref:`字符串 <strings>`_ (仅常量) 和 :ref:`值类型 <value-types>`_.
 
