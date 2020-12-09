@@ -37,6 +37,6 @@ pip install shpinx_rtd_theme
 
 ### 支持与赞助  
 
-支持 [HiBlock区块链社区](http://hiblock.net/) , [登链社区](http://learnblockchain.cn)
+感谢 [登链社区](http://learnblockchain.cn) 对 Solidity 文档翻译工作的支持。
 
 

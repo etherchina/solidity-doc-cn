@@ -82,6 +82,43 @@ Pragmas
   使用版本标准不会改变编译器的版本，它不会启用或关闭任何编译器的功能。
   他仅仅是告知编译器去检查版本是否匹配， 如果不匹配，编译器就会提示一个错误。
 
+
+ABI Coder Pragma
+----------------
+
+By using ``pragma abicoder v1`` or ``pragma abicoder v2`` you can
+select between the two implementations of the ABI encoder and decoder.
+
+The new ABI coder (v2) is able to encode and decode arbitrarily nested
+arrays and structs. It might produce less optimal code and has not
+received as much testing as the old encoder, but is considered
+non-experimental as of Solidity 0.6.0. You still have to explicitly
+activate it using ``pragma abicoder v2;``. Since it will be
+activated by default starting from Solidity 0.8.0, there is the option to select
+the old coder using ``pragma abicoder v1;``.
+
+The set of types supported by the new encoder is a strict superset of
+the ones supported by the old one. Contracts that use it can interact with ones
+that do not without limitations. The reverse is possible only as long as the
+non-``abicoder v2`` contract does not try to make calls that would require
+decoding types only supported by the new encoder. The compiler can detect this
+and will issue an error. Simply enabling ``abicoder v2`` for your contract is
+enough to make the error go away.
+
+.. note::
+  This pragma applies to all the code defined in the file where it is activated,
+  regardless of where that code ends up eventually. This means that a contract
+  whose source file is selected to compile with ABI coder v1
+  can still contain code that uses the new encoder
+  by inheriting it from another contract. This is allowed if the new types are only
+  used internally and not in external function signatures.
+
+.. note::
+  Up to Solidity 0.7.4, it was possible to select the ABI coder v2
+  by using ``pragma experimental ABIEncoderV2``, but it was not possible
+  to explicitly select coder v1 because it was the default.
+
+
 .. index:: ! pragma, experimental
 
 .. _experimental_pragma:
@@ -96,7 +133,7 @@ Pragmas
 ABIEncoderV2
 ~~~~~~~~~~~~~~~~
 
-新的 ABI 编码器可以用来编码和解码嵌套的数组和结构体，当然这部分代码还在优化之中，他没有像之前 ABI 编码器 那样经过严格的测试，我们可以使用下面的语法来启用它 ``pragma experimental ABIEncoderV2;`` 。
+从Solidity 0.7.4开始，  ABI coder v2 不在作为实验特性，而是可以通过``pragma abicoder v2``  启用，查看上面。
 
 .. _smt_checker:
 

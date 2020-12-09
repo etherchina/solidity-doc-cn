@@ -135,12 +135,17 @@ Therefore, their "address" is composed of a slot and a byte-offset
 inside that slot. To retrieve the slot pointed to by the variable ``x``, you
 use ``x.slot``, and to retrieve the byte-offset you use ``x.offset``.
 
+
+For dynamic calldata arrays, you can access
+their calldata offset (in bytes) and length (number of elements) using ``x.offset`` and ``x.length``.
+Both expressions can also be assigned to.
+
 Local Solidity variables are available for assignments, for example:
 
 .. code::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.6.99 <0.8.0;
+    pragma solidity ^0.7.0;
 
     contract C {
         uint b;

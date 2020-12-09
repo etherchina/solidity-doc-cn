@@ -105,16 +105,25 @@ Docker
 
 
 如果你需要特定版本的 Solidity ，你需要从 Github 上安装一个 Homebrew formula。
-你可查阅
-`solidity.rb commits on Github <https://github.com/ethereum/homebrew-ethereum/commits/master/solidity.rb>`_
+你可查阅 `solidity.rb 在 Github的提交记录 <https://github.com/ethereum/homebrew-ethereum/commits/master/solidity.rb>`_
 的提交记录，去寻找包含 ``solidity.rb`` 文件改动的特殊提交。然后使用 ``brew`` 进行安装：
 
+复制提交记录的你想要安装版本的提交记录 Hash ，下载（checkout）到本地。
+
+
+.. code-block:: bash
+
+    git clone https://github.com/ethereum/homebrew-ethereum.git
+    cd homebrew-ethereum
+    git checkout <提交记录 hash>
+
+使用 ``brew`` 安装:
 
 .. code:: bash
 
     brew unlink solidity
-    # Install 0.4.8
-    brew install https://raw.githubusercontent.com/ethereum/homebrew-ethereum/77cce03da9f289e5a3ffe579840d3c5dc0a62717/solidity.rb
+    # 例如安装 0.4.8
+    brew install solidity.rb
 
 Gentoo Linux 下也提供了安装包，可使用 ``emerge`` 进行安装：
 
@@ -166,7 +175,7 @@ The following C++ compilers and their minimum versions can build the Solidity co
 
 - `GCC <https://gcc.gnu.org>`_, version 5+
 - `Clang <https://clang.llvm.org/>`_, version 3.4+
-- `MSVC <https://docs.microsoft.com/en-us/cpp/?view=vs-2019>`_, version 2017+
+- `MSVC <https://visualstudio.microsoft.com/vs/>`_, version 2019+
 
 
 
@@ -176,7 +185,7 @@ The following C++ compilers and their minimum versions can build the Solidity co
 在 macOS 中，需确保有安装最新版的
 `Xcode <https://developer.apple.com/xcode/download/>`_，
 Xcode 包含 `Clang C++ 编译器 <https://en.wikipedia.org/wiki/Clang>`_， 而
-`Xcode IDE <https://en.wikipedia.org/wiki/Xcode>`_ 和其他苹果开发工具是 OS X 下编译 C++ 应用所必须的。
+`Xcode IDE <https://en.wikipedia.org/wiki/Xcode>`_ 和其他苹果 OS X 下编译 C++ 应用所必须的开发工具。
 如果你是第一次安装 Xcode 或者刚好更新了 Xcode 新版本，则在使用命令行构建前，需同意 Xcode 的使用协议：
 
 .. code:: bash
@@ -197,27 +206,27 @@ Solidity 在 OS X 下构建，必须 `安装 Homebrew <https://brew.sh>`_
 +-----------------------------------+-------------------------------------------------------+
 | 软件                              | 备注                                                  |
 +===================================+=======================================================+
-| `Visual Studio 2017 Build Tools`_ | C++ 编译器                                            |
+| `Visual Studio 2019 Build Tools`_ | C++ 编译器                                            |
 +-----------------------------------+-------------------------------------------------------+
-| `Visual Studio 2017`_  (Optional) | C++ 编译器和开发环境                                  |
+| `Visual Studio 2019`_  (Optional) | C++ 编译器和开发环境                                  |
 +-----------------------------------+-------------------------------------------------------+
 
-如果你已经有了 IDE，仅需要编译器和相关的库，你可以安装 Visual Studio 2017 Build Tools。
+如果你已经有了 IDE，仅需要编译器和相关的库，你可以安装 Visual Studio 2019 Build Tools。
 
-Visual Studio 2017 提供了 IDE 以及必要的编译器和库。所以如果你还没有一个 IDE 并且想要开发 Solidity，那么 Visual Studio 2017 将是一个可以使你获得所有工具的简单选择。
+Visual Studio 2019 提供了 IDE 以及必要的编译器和库。所以如果你还没有一个 IDE 并且想要开发 Solidity，那么 Visual Studio 2019 将是一个可以使你获得所有工具的简单选择。
 
-这里是一个在 Visual Studio 2017 Build Tools 或 Visual Studio 2017 中应该安装的组件列表：
+这里是一个在 Visual Studio 2019 Build Tools 或 Visual Studio 2019 中应该安装的组件列表：
 
 * Visual Studio C++ core features
-* VC++ 2017 v141 toolset (x86,x64)
+* VC++ 2019 v141 toolset (x86,x64)
 * Windows Universal CRT SDK
 * Windows 8.1 SDK
 * C++/CLI support
 
 .. _Git for Windows: https://git-scm.com/download/win
 .. _CMake: https://cmake.org/download/
-.. _Visual Studio 2017: https://www.visualstudio.com/vs/
-.. _Visual Studio 2017 Build Tools: https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017
+.. _Visual Studio 2019: https://www.visualstudio.com/vs/
+.. _Visual Studio 2019 Build Tools: https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2019
 
 
 依赖的帮助脚本
@@ -233,7 +242,10 @@ Windows 下执行：
 
 .. code:: bat
 
-    scripts\install_deps.bat
+    scripts\install_deps.ps1
+
+请注意，后一个命令将在``deps``子目录中安装  ``boost`` 和``cmake``，而前一个命令将尝试在全局安装依赖项。
+
 
 
 克隆代码库
@@ -297,7 +309,9 @@ Solidity 使用 CMake 来配置构建。Linux、macOS 和其他 Unix系统上的
 
     mkdir build
     cd build
-    cmake -G "Visual Studio 15 2017 Win64" ..
+    cmake -G "Visual Studio 16 2019 Win64" ..
+
+如果你想执行 ``./scripts/install_deps.ps1`` 时使用你安装过的boost版本，可以添加参数 ``-DBoost_DIR="..\deps\boost\lib\cmake\Boost-*"`` 和 ``-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded`` 去调用  ``cmake``.
 
 这组指令的最后一句，会在 build 目录下创建一个 **solidity.sln** 文件，双击后，默认会使用 Visual Studio 打开。我们建议在VS上创建 **RelWithDebugInfo** 配置文件。
 

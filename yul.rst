@@ -9,7 +9,7 @@ Yul
 Yul (previously also called JULIA or IULIA) is an intermediate language that can be
 compiled to bytecode for different backends.
 
-Support for EVM 1.0, EVM 1.5 and eWASM is planned, and it is designed to
+Support for EVM 1.0, EVM 1.5 and Ewasm is planned, and it is designed to
 be a usable common denominator of all three
 platforms. It can already be used in stand-alone mode and
 for "inline assembly" inside Solidity
@@ -54,7 +54,7 @@ be omitted to help readability.
 To keep the language simple and flexible, Yul does not have
 any built-in operations, functions or types in its pure form.
 These are added together with their semantics when specifying a dialect of Yul,
-which allows to specialize Yul to the requirements of different
+which allows specializing Yul to the requirements of different
 target platforms and feature sets.
 
 Currently, there is only one specified dialect of Yul. This dialect uses
@@ -243,7 +243,7 @@ Since variables are stored on the stack, they do not directly
 influence memory or storage, but they can be used as pointers
 to memory or storage locations in the built-in functions
 ``mstore``, ``mload``, ``sstore`` and ``sload``.
-Future dialects migh introduce specific types for such pointers.
+Future dialects might introduce specific types for such pointers.
 
 When a variable is referenced, its current value is copied.
 For the EVM, this translates to a ``DUP`` instruction.
@@ -526,7 +526,7 @@ The ``leave`` statement can only be used inside a function.
 
 Functions cannot be defined anywhere inside for loop init blocks.
 
-Literals cannot be larger than the their type. The largest type defined is 256-bit wide.
+Literals cannot be larger than their type. The largest type defined is 256-bit wide.
 
 During assignments and function calls, the types of the respective values have to match.
 There is no implicit type conversion. Type conversion in general can only be achieved
@@ -952,6 +952,26 @@ option.
 
 See :ref:`Using the Commandline Compiler <commandline-compiler>` for details about the Solidity linker.
 
+memoryguard
+^^^^^^^^^^^
+
+This function is available in the EVM dialect with objects. The caller of
+``let ptr := memoryguard(size)`` (where ``size`` has to be a literal number)
+promises that they only use memory in either the range ``[0, size)`` or the
+unbounded range starting at ``ptr``.
+
+Since the presence of a ``memoryguard`` call indicates that all memory access
+adheres to this restriction, it allows the optimizer to perform additional
+optimization steps, for example the stack limit evader, which attempts to move
+stack variables that would otherwise be unreachable to memory.
+
+The Yul optimizer promises to only use the memory range ``[size, ptr)`` for its purposes.
+If the optimizer does not need to reserve any memory, it holds that ``ptr == size``.
+
+``memoryguard`` can be called multiple times, but needs to have the same literal as argument
+within one Yul subobject. If at least one ``memoryguard`` call is found in a subobject,
+the additional optimiser steps will be run on it.
+
 
 .. _yul-object:
 
@@ -1008,7 +1028,7 @@ An example Yul Object is shown below:
             // executing code is the constructor code)
             size := datasize("runtime")
             offset := allocate(size)
-            // This will turn into a memory->memory copy for eWASM and
+            // This will turn into a memory->memory copy for Ewasm and
             // a codecopy for EVM
             datacopy(offset, dataoffset("runtime"), size)
             return(offset, size)
@@ -1110,6 +1130,7 @@ Abbreviation Full name
 ``L``        ``LoadResolver``
 ``M``        ``LoopInvariantCodeMotion``
 ``r``        ``RedundantAssignEliminator``
+``R``        ``ReasoningBasedSimplifier`` - highly experimental
 ``m``        ``Rematerialiser``
 ``V``        ``SSAReverser``
 ``a``        ``SSATransform``
@@ -1121,6 +1142,10 @@ Abbreviation Full name
 Some steps depend on properties ensured by ``BlockFlattener``, ``FunctionGrouper``, ``ForLoopInitRewriter``.
 For this reason the Yul optimizer always applies them before applying any steps supplied by the user.
 
+The ReasoningBasedSimplifier is an optimizer step that is currently not enabled
+in the default set of steps. It uses an SMT solver to simplify arithmetic expressions
+and boolean conditions. It has not received thorough testing or validation yet and can produce
+non-reproducible results, so please use with care!
 
 .. _erc20yul:
 

@@ -22,7 +22,7 @@
 
 ::
 
-    pragma solidity >=0.6.99 <0.8.0;
+    pragma solidity ^0.7.0;
 
     contract WithdrawalContract {
         address public richest;
@@ -55,7 +55,7 @@
 
 ::
 
-    pragma solidity >=0.6.99 <0.8.0;
+    pragma solidity ^0.7.0;
 
     contract SendContract {
         address payable public richest;

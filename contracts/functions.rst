@@ -70,9 +70,11 @@
 .. note::
 
    :ref:`外部函数<external-function-calls>` 不可以接受多维数组作为参数
-   如果添加  ``pragma experimental ABIEncoderV2;`` 启用实验功能  ``ABIEncoderV2`` 则是可以的。
+  如果原文件加入 `pragma abicoder v2;` 可以启用ABI v2版编码功能，这此功能可用。
+  （注：在 0.7.0 之前是使用``pragma experimental ABIEncoderV2;``）
 
-   :ref:`内部函数<external-function-calls>` 在不启用实验功能  ``ABIEncoderV2`` 的情况下也可以接受多维数组作为参数。
+
+   :ref:`内部函数<external-function-calls>` 则不需要启用ABI v2 就接受多维数组作为参数。
 
 .. index:: return array, return string, array, string, array of strings, dynamic array, variably sized array, return struct, struct
 
@@ -125,7 +127,7 @@
 .. note::
    非内部函数有些类型没法返回，比如限制的类型有：多维动态数组、结构体等。
 
-   如果添加  ``pragma experimental ABIEncoderV2;`` 启用实验功能 ``ABIEncoderV2`` 则是可以的返回更多类型，不过 ``mapping``  仍然是受限的。
+   如果添加  ``pragma abicoder v2;`` 启用 ABI V2 编码器，则是可以的返回更多类型，不过 ``mapping``  仍然是受限的。
 
 .. _multi-return:
 
@@ -255,7 +257,7 @@ receive 接收以太函数
 如果两个函数都没有，这个合约就没法通过常规的转账交易接收以太（会抛出异常）．
 
 
-更糟的是，fallback函数可能只有 2300 gas 可以使用（如，当使用 ``send`` 或 ``transfer`` 时）， 除了基础的日志输出之外，进行其他操作的余地很小。下面的操作消耗会操作 2300  gas :
+更糟的是，``receive`` 函数可能只有 2300 gas 可以使用（如，当使用 ``send`` 或 ``transfer`` 时）， 除了基础的日志输出之外，进行其他操作的余地很小。下面的操作消耗会操作 2300  gas :
 
 - 写入存储
 - 创建合约
@@ -375,11 +377,13 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
             // 结果 test.x 为 1  test.y 为 0.
             (success,) = address(test).call{value: 1}(abi.encodeWithSignature("nonExistingFunction()"));
             require(success);
-            // 结果test.x 为1 and test.y 为 1.
+            // 结果test.x 为1 而 test.y 为 1.
 
             // 发送以太币, TestPayable 的 receive　函数被调用．
             require(address(test).send(2 ether));
-            // 结果 in test.x 为 2 and test.y 为 2 ether.
+            // 结果 test.x 为 2 而 test.y 为 2 ether.
+
+            return true;
         }
 
     }

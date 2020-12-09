@@ -87,7 +87,9 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
   注意一个事实，``feed.info{value: 10, gas: 800}`` 只（局部地）设置了与函数调用一起发送的 ``Wei`` 值和 ``gas`` 的数量，只有最后的圆括号执行了真正的调用。
   因此，如果函数没有调用() ``value`` 和 ``gas`` 设置是无效的。
 
-如果被调函数所在合约不存在（也就是账户中不包含代码）或者被调用合约本身抛出异常或者 gas 用完等，函数调用会抛出异常。
+由于EVM认为可以调用不存在的合约的调用，Solidity 里会使用 ``extcodesize`` 操作码来检查要调用的合约是否确实存在（包含代码），如果不存在该合约，则抛出异常。
+
+如果被调用合约本身抛出异常或者 gas 用完等，函数调用也会抛出异常。
 
 
 .. warning::
@@ -150,7 +152,7 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 使用关键字 ``new`` 可以创建一个新合约。待创建合约的完整代码必须事先知道，因此递归的创建依赖是不可能的。
 ::
 
-    pragma solidity >0.6.99 <0.8.0;
+    pragma solidity ^0.7.0;
 
     contract D {
         uint x;
@@ -202,7 +204,7 @@ which only need to be created if there is a dispute.
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >0.6.99 <0.8.0;
+    pragma solidity ^0.7.0;
 
     contract D {
         uint public x;
@@ -436,7 +438,6 @@ Exceptions can be caught with the ``try``/``catch`` statement.
 #. 如果你访问数组的索引太大或为负数（例如 ``x[i]`` 其中 ``i >= x.length`` 或 ``i < 0``）。
 #. 如果你访问固定长度 ``bytesN`` 的索引太大或为负数。
 #. 如果你用零当除数做除法或模运算（例如 ``5 / 0`` 或 ``23 % 0`` ）。
-#. 如果你移位负数位。
 #. 如果你将一个太大或负数值转换为一个枚举类型。
 #. 如果你调用内部函数类型的零初始化变量。
 #. 如果你调用 ``assert`` 的参数（表达式）最终结算为 false。
@@ -490,8 +491,6 @@ Exceptions can be caught with the ``try``/``catch`` statement.
 ``revert`` 调用中还可以包含有关错误信息的参数，这个信息会被返回给调用者。
 
 
-
-
 下边的例子展示了错误字符串如何使用 revert (等价于 require )  ：
 
 ::
@@ -510,6 +509,14 @@ Exceptions can be caught with the ``try``/``catch`` statement.
             // 执行购买操作
         }
     }
+
+如果直接提供错误原因字符串，则这两个语法是等效的，根据开发人员的偏好选择。
+
+
+.. note::
+    ``require`` 是一个像其他函数一样可被执行的函数。
+    意味着，所有的参数在函数被执行之前就都会被计算（执行）。
+    尤其，在 ``require(condition, f())`` 里，函数 ``f`` 会被执行，即便 ``condition`` 为 True .
 
 这里提供的字符串将经过 :ref:`ABI 编码 <ABI>` 如果它调用 ``Error(string)`` 函数。
 在上边的例子里，``revert("Not enough Ether provided.");`` 会产生如下的十六进制错误返回值：

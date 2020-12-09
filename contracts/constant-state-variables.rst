@@ -1,6 +1,8 @@
 
 .. index:: ! constant
 
+.. _constants:
+
 ************************************
 Constant 和 Immutable  状态变量
 ************************************
@@ -8,6 +10,9 @@ Constant 和 Immutable  状态变量
 状态变量声明为 ``constant`` (常量)或者 ``immutable`` （不可变量），在这两种情况下，合约一旦部署之后，变量将不在修改。
 
 对于 ``constant`` 常量, 他的值在编译器确定，而对于 ``immutable``, 它的值在部署时确定。
+
+也可以在文件级别定义 ``constant`` 变量（注：0.7.2 之后加入的特性）。
+
 
 编译器不会为这些变量预留存储位，它们的每次出现都会被替换为相应的常量表达式（它可能被优化器计算为实际的某个值）。
 
@@ -21,10 +26,11 @@ Constant 和 Immutable  状态变量
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >0.6.99 <0.8.0;
-
+    pragma solidity >0.7.2;
+    uint constant X = 32**22 + 8;
+    
     contract C {
-        uint constant X = 32**22 + 8;
+
         string constant TEXT = "abc";
         bytes32 constant MY_HASH = keccak256("abc");
         uint immutable decimals;

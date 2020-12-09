@@ -22,7 +22,7 @@ Solidity 支持多重继承包括多态。
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >0.6.99 <0.8.0;
+    pragma solidity ^0.7.0;
 
     contract Owned {
         constructor() public { owner = msg.sender; }
@@ -98,7 +98,7 @@ Solidity 支持多重继承包括多态。
 这样做法是有问题的，在下面的例子中可以看到::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >0.6.99 <0.8.0;
+    pragma solidity ^0.7.0;
 
     contract owned {
         constructor() { owner = msg.sender; }
@@ -130,7 +130,7 @@ Solidity 支持多重继承包括多态。
 但是此函数将绕过 ``Base1.destroy``, 解决这个问题的方法是使用 ``super``::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >0.6.99 <0.8.0;
+    pragma solidity ^0.7.0;
 
     contract owned {
         constructor() { owner = msg.sender; }
@@ -183,7 +183,7 @@ Solidity 支持多重继承包括多态。
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >0.6.99 <0.8.0;
+    pragma solidity ^0.7.0;
 
     contract Base
     {
@@ -203,7 +203,7 @@ Solidity 支持多重继承包括多态。
 
 ::
 
-    pragma solidity >=0.6.0 <0.8.0;
+    pragma solidity ^0.7.0;
 
     contract Base1
     {
@@ -227,7 +227,7 @@ Solidity 支持多重继承包括多态。
 
 ::
 
-    pragma solidity >=0.6.0 <0.8.0;
+    pragma solidity ^0.7.0;
 
     contract A { function f() public pure{} }
     contract B is A {}
@@ -255,7 +255,7 @@ Solidity 支持多重继承包括多态。
 
 ::
 
-    pragma solidity >=0.6.0 <0.8.0;
+    pragma solidity ^0.7.0;
 
     contract A
     {
@@ -284,7 +284,7 @@ Solidity 支持多重继承包括多态。
 
 ::
 
-    pragma solidity >=0.6.0 <0.8.0;
+    pragma solidity ^0.7.0;
 
     contract Base
     {
@@ -301,7 +301,7 @@ Solidity 支持多重继承包括多态。
 
 ::
 
-    pragma solidity >=0.6.0 <0.8.0;
+    pragma solidity ^0.7.0;
 
     contract Base1
     {

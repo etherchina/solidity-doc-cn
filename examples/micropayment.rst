@@ -101,7 +101,7 @@ ReceiverPays 完整合约代码
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >0.6.99 <0.8.0;
+    pragma solidity ^0.7.0;
 
     contract ReceiverPays {
         address owner = msg.sender;
@@ -267,7 +267,7 @@ Bob可以随时关闭支付通道，但如果他没有这样做，Alice 需要�
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >0.6.99 <0.8.0;
+    pragma solidity ^0.7.0;
 
     contract SimplePaymentChannel {
         address payable public sender;      // The account sending payments.

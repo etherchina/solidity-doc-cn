@@ -169,7 +169,7 @@ tx.origin问题
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >0.6.99 <0.8.0;
+    pragma solidity ^0.7.0;
 
     // 不要使用这个合约，其中包含一个 bug。
     contract TxUserWallet {
@@ -190,7 +190,7 @@ tx.origin问题
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >0.6.99 <0.8.0;
+    pragma solidity ^0.7.0;
 
     interface TxUserWallet {
         function transferTo(address dest, uint amount) public;
@@ -405,19 +405,21 @@ The SMT encoding tries to be as precise as possible, mapping Solidity types
 and expressions to their closest `SMT-LIB <http://smtlib.cs.uiowa.edu/>`_
 representation, as shown in the table below.
 
-+-----------------------+--------------+-----------------------------+
-|Solidity type          |SMT sort      |Theories (quantifier-free)   |
-+=======================+==============+=============================+
-|Boolean                |Bool          |Bool                         |
-+-----------------------+--------------+-----------------------------+
-|intN, uintN, address,  |Integer       |LIA, NIA                     |
-|bytesN, enum           |              |                             |
-+-----------------------+--------------+-----------------------------+
-|array, mapping, bytes, |Array         |Arrays                       |
-|string                 |              |                             |
-+-----------------------+--------------+-----------------------------+
-|other types            |Integer       |LIA                          |
-+-----------------------+--------------+-----------------------------+
++-----------------------+--------------------------------+-----------------------------+
+|Solidity type          |SMT sort                        |Theories (quantifier-free)   |
++=======================+================================+=============================+
+|Boolean                |Bool                            |Bool                         |
++-----------------------+--------------------------------+-----------------------------+
+|intN, uintN, address,  |Integer                         |LIA, NIA                     |
+|bytesN, enum           |                                |                             |
++-----------------------+--------------------------------+-----------------------------+
+|array, mapping, bytes, |Tuple                           |Datatypes, Arrays, LIA       |
+|string                 |(Array elements, Integer length)|                             |
++-----------------------+--------------------------------+-----------------------------+
+|struct                 |Tuple                           |Datatypes                    |
++-----------------------+--------------------------------+-----------------------------+
+|other types            |Integer                         |LIA                          |
++-----------------------+--------------------------------+-----------------------------+
 
 Types that are not yet supported are abstracted by a single 256-bit unsigned
 integer, where their unsupported operations are ignored.
@@ -575,26 +577,32 @@ types.
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.5.0;
+    pragma experimental ABIEncoderV2;
     pragma experimental SMTChecker;
     // This will report a warning
 
     contract Aliasing
     {
-        uint[] array;
+        uint[] array1;
+        uint[][] array2;
         function f(
             uint[] memory a,
             uint[] memory b,
             uint[][] memory c,
             uint[] storage d
-        ) internal view {
-            require(array[0] == 42);
-            require(a[0] == 2);
-            require(c[0][0] == 2);
-            require(d[0] == 2);
+        ) internal {
+            array1[0] = 42;
+            a[0] = 2;
+            c[0][0] = 2;
             b[0] = 1;
             // Erasing knowledge about memory references should not
             // erase knowledge about state variables.
-            assert(array[0] == 42);
+            assert(array1[0] == 42);
+            // However, an assignment to a storage reference will erase
+            // storage knowledge accordingly.
+            d[0] = 2;
+            // Fails as false positive because of the assignment above.
+            assert(array1[0] == 42);
             // Fails because `a == b` is possible.
             assert(a[0] == 2);
             // Fails because `c[i] == b` is possible.
@@ -602,7 +610,16 @@ types.
             assert(d[0] == 2);
             assert(b[0] == 1);
         }
+        function g(
+            uint[] memory a,
+            uint[] memory b,
+            uint[][] memory c,
+            uint x
+        ) public {
+            f(a, b, c, array2[x]);
+        }
     }
+
 
 After the assignment to ``b[0]``, we need to clear knowledge about ``a`` since
 it has the same type (``uint[]``) and data location (memory).  We also need to
