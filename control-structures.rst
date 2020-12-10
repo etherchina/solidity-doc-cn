@@ -178,28 +178,19 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 如果创建失败（可能因为栈溢出，或没有足够的余额或其他问题），会引发异常。
 
 
-Salted contract creations / create2
+加“盐”的合约创建  create2
 -----------------------------------
 
-When creating a contract, the address of the contract is computed from
-the address of the creating contract and a counter that is increased with
-each contract creation.
+在创建合约时，将根据创建合约的地址和每次创建合约交易时的计数器(nonce)来计算合约的地址。
 
-If you specify the option ``salt`` (a bytes32 value), then contract creation will
-use a different mechanism to come up with the address of the new contract:
+如果你指定了一个可选的 ``salt``（一个bytes32值），那么合约创建将使用另一种机制来生成新合约的地址：
 
-It will compute the address from the address of the creating contract,
-the given salt value, the (creation) bytecode of the created contract and the constructor
-arguments.
+它将根据给定的盐值，创建合约的字节码和构造函数参数来计算创建合约的地址。
 
-In particular, the counter ("nonce") is not used. This allows for more flexibility
-in creating contracts: You are able to derive the address of the
-new contract before it is created. Furthermore, you can rely on this address
-also in case the creating
-contracts creates other contracts in the meantime.
 
-The main use-case here is contracts that act as judges for off-chain interactions,
-which only need to be created if there is a dispute.
+特别注意，不使用计数器（“nonce”）。 这样可以在创建合约时提供更大的灵活性：你可以在创建新合约之前就推导出（将要创建的）合约地址。 
+甚至是，还可以依赖此地址（即便它还不存在）来创建其他合约。一个主要用例场景是充当链下交互仲裁合约，仅在有争议时才需要创建。
+
 
 ::
 
@@ -215,9 +206,9 @@ which only need to be created if there is a dispute.
 
     contract C {
         function createDSalted(bytes32 salt, uint arg) public {
-            /// This complicated expression just tells you how the address
-            /// can be pre-computed. It is just there for illustration.
-            /// You actually only need ``new D{salt: salt}(arg)``.
+            /// 这个复杂的表达式只是告诉我们，如何预先计算地址。
+            /// 这里仅仅用来说明。
+            /// 实际上，你仅仅需要 ``new D{salt: salt}(arg)``.
             address predictedAddress = address(uint(keccak256(abi.encodePacked(
                 byte(0xff),
                 address(this),
@@ -234,13 +225,9 @@ which only need to be created if there is a dispute.
     }
 
 .. warning::
-    There are some peculiarities in relation to salted creation. A contract can be
-    re-created at the same address after having been destroyed. Yet, it is possible
-    for that newly created contract to have a different deployed bytecode even
-    though the creation bytecode has been the same (which is a requirement because
-    otherwise the address would change). This is due to the fact that the compiler
-    can query external state that might have changed between the two creations
-    and incorporate that into the deployed bytecode before it is stored.
+
+    关于加盐的合约创建有一些特殊之处。 合约销毁后可以在同一地址重新创建。不过，即使创建字节码相同（这是一个要求，因为否则地址会发生变化），该新创建的合约也可能有不同的部署字节码（deployed bytecode）。 
+    这是因为编译器可以查询两次创建合约之间可能已更改的外部状态，并在存储合约之前将其合并到部署字节码中。
 
 
 
@@ -335,15 +322,13 @@ Solidity 内部允许元组 (tuple) 类型，也就是一个在编译时元素�
 ``uint`` 或 ``int`` 类型的默认值是 ``0`` 。对于静态大小的数组和 ``bytes1`` 到 ``bytes32`` ，每个单独的元素将被初始化为与其类型相对应的默认值。
 最后，对于动态大小的数组 ``bytes`` 和 ``string`` 类型，其默认缺省值是一个空数组或空字符串。
 
-For the ``enum`` type, the default value is its first member.
+对于 ``enum`` 类型, 默认值是第一个成员。
 
 Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：变量将会从它们被声明之后可见，直到一对 ``{ }`` 块的结束。作为一个例外，在 for 循环语句中初始化的变量，其可见性仅维持到 for 循环的结束。
 
+对于参数形式的变量（例如：函数参数、修饰器参数、catch参数等等）在其后接着的代码块内有效。
+这些代码块是函数的实现，catch 语句块等。
 
-Variables that are parameter-like (function parameters, modifier parameters,
-catch parameters, ...) are visible inside the code block that follows -
-the body of the function/modifier for a function and modifier parameter and the catch block
-for a catch parameter.
 
 那些定义在代码块之外的变量，比如函数、合约、自定义类型等等，并不会影响它们的作用域特性。这意味着你可以在实际声明状态变量的语句之前就使用它们，并且递归地调用函数。
 
@@ -408,19 +393,14 @@ for a catch parameter.
 
 Solidity 使用状态恢复异常来处理错误。这种异常将撤消对当前调用（及其所有子调用）中的状态所做的所有更改，并且还向调用者标记错误。
 
-When exceptions happen in a sub-call, they "bubble up" (i.e.,
-exceptions are rethrown) automatically. Exceptions to this rule are ``send``
-and the low-level functions ``call``, ``delegatecall`` and
-``staticcall``: they return ``false`` as their first return value in case
-of an exception instead of "bubbling up".
+如果异常在子调用发生，那么异常会自动冒泡到顶层（异常会重新抛出）。
+但是如果是在 ``send`` 和 低级别如：``call``, ``delegatecall`` 和 ``staticcall`` 的调用里发生异常时， 他们会返回 ``false`` （第一个返回值） 而不是冒泡异常。 
 
 .. warning::
-    The low-level functions ``call``, ``delegatecall`` and
-    ``staticcall`` return ``true`` as their first return value
-    if the account called is non-existent, as part of the design
-    of the EVM. Account existence must be checked prior to calling if needed.
+    注意：根据 EVM 的设计，如果被调用的地址不存在，低级别函数 ``call``, ``delegatecall`` 和 ``staticcall`` 也或第一个返回值同样是 ``true``。
+    如果需要，请在调用之前检查账号的存在性。
 
-Exceptions can be caught with the ``try``/``catch`` statement.
+异常可以被 ``try``/``catch`` 捕获。
 
 ``assert`` and ``require``
 --------------------------
@@ -528,11 +508,10 @@ Exceptions can be caught with the ``try``/``catch`` statement.
     0x000000000000000000000000000000000000000000000000000000000000001a // 字符串长度（26）
     0x4e6f7420656e6f7567682045746865722070726f76696465642e000000000000 // 字符串数据（"Not enough Ether provided." 的 ASCII 编码，26字节）
 
-The provided message can be retrieved by the caller using ``try``/``catch`` as shown below.
+提示信息可以通过 ``try``/``catch``（下面介绍）来获取到。
 
 .. note::
-    There used to be a keyword called ``throw`` with the same semantics as ``revert()`` which
-    was deprecated in version 0.4.13 and removed in version 0.5.0.
+    ``revert()``之前有一个同样用法的``throw``，它在0.4.13版本弃用，在0.5.0移除。
 
 
 .. _try-catch:
@@ -540,7 +519,7 @@ The provided message can be retrieved by the caller using ``try``/``catch`` as s
 ``try``/``catch``
 -----------------
 
-A failure in an external call can be caught using a try/catch statement, as follows:
+外部调用的失败，可以通过  try/catch 语句来捕获，如下：
 
 ::
 
@@ -552,8 +531,7 @@ A failure in an external call can be caught using a try/catch statement, as foll
         DataFeed feed;
         uint errorCount;
         function rate(address token) public returns (uint value, bool success) {
-            // Permanently disable the mechanism if there are
-            // more than 10 errors.
+            // 如果错误超过 10 次，永久关闭这个机制
             require(errorCount < 10);
             try feed.getData(token) returns (uint v) {
                 return (v, true);

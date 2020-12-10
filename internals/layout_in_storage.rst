@@ -76,7 +76,7 @@
 .. note::
   目前不支持处理无效编码的插槽，但可能在将来添加。
 
-JSON Output
+JSON 输出
 ===========
 
 .. _storage-layout-top-level:

@@ -1,7 +1,7 @@
 .. index: variable cleanup
 
 *********************
-Cleaning Up Variables
+清理变量
 *********************
 
 When a value is shorter than 256 bit, in some cases the remaining bits
