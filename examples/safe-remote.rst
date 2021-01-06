@@ -1,4 +1,4 @@
-.. include:: ../glossaries.rst
+.. include:: glossaries.rst
 
 .. index:: purchase, remote purchase, escrow
 

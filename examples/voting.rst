@@ -1,4 +1,4 @@
-.. include:: ../glossaries.rst
+.. include:: glossaries.rst
 
 ********************
 投票合约

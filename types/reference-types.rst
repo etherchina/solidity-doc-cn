@@ -1,4 +1,4 @@
-.. include:: ../glossaries.rst
+.. include:: glossaries.rst
 .. index:: ! type;reference, ! reference type, storage, memory, location, array, struct
 
 .. _reference-types:

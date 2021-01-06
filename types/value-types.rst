@@ -1,4 +1,4 @@
-.. include:: ../glossaries.rst
+.. include:: glossaries.rst
 
 .. index:: ! value type, ! type;value
 
@@ -551,7 +551,7 @@ Unicode 字面常量
         }
     }
 
-.. 注意::
+.. note::
      枚举还可以在合约或库定义之外的文件级别上声明。
 
 .. index:: ! function type, ! type; function

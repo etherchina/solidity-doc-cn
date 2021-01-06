@@ -45,7 +45,7 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 .. hint::
     译者注：理解智能合约及虚拟机是怎么运行，还可阅读这两篇文章   `完全理解以太坊智能合约 <https://learnblockchain.cn/2018/01/04/understanding-smart-contracts/>`_  及  `深入浅出以太坊虚拟机 <https://learnblockchain.cn/2019/04/09/easy-evm/>`_ 。
 
-**2. 了解 Solidity **
+**2. 了解 Solidity**
 
 一旦熟悉了基础概念，我们推荐人阅读 :doc:`"根据例子学习Solidity " <solidity-by-example>`
 以及Solidity详解部分理解语言的核心概念。
