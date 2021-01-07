@@ -13,7 +13,7 @@
 
 如下例所示,使用关键字 ``abstract`` 定义抽象合约合约, ``utterance()`` 函数了,但没有实现.(由 ``;`` 结尾）::
 
-    pragma solidity >=0.6.0 <0.8.0;
+    pragma solidity >=0.6.0 <0.9.0;
 
     abstract contract Feline {
         function utterance() public returns (bytes32);
@@ -23,7 +23,7 @@
 这样的抽象合约不能直接实例化。 如果抽象合约本身确实都有实现所有定义的函数，也是正确的。
 下例显示了抽象合约作为基类的用法::
 
-    pragma solidity >=0.6.0 <0.8.0;
+    pragma solidity >=0.6.0 <0.9.0;
 
     abstract contract Feline {
       function utterance() public pure returns (bytes32);

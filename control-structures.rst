@@ -37,7 +37,7 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 当前合约中的函数可以直接（“从内部”）调用，也可以递归调用，就像下边这个荒谬的例子一样
 ::
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.22 <0.8.0;
+    pragma solidity >=0.4.22 <0.9.0;
 
     contract C {
         function g(uint a) public pure returns (uint ret) { return f(); }
@@ -69,7 +69,7 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 任何发送给合约 Wei  将被添加到该合约的总余额中：
 
 
-    pragma solidity >=0.6.2 <0.8.0;
+    pragma solidity >=0.6.2 <0.9.0;
 
     contract InfoFeed {
         function info() public payable returns (uint ret) { return 42; }
@@ -112,7 +112,7 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 如以下示例中所示。参数列表必须按名称与函数声明中的参数列表相符，但可以按任意顺序排列。
 ::
 
-    pragma solidity >=0.4.0 <0.8.0;
+    pragma solidity >=0.4.0 <0.9.0;
 
     contract C {
         mapping(uint => uint) data;
@@ -133,7 +133,7 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 未使用参数的名称（特别是返回参数）可以省略。这些参数仍然存在于堆栈中，但它们无法访问。
 ::
 
-    pragma solidity >=0.4.22 <0.8.0;
+    pragma solidity >=0.4.22 <0.9.0;
 
     contract C {
         // 省略参数名称
@@ -209,15 +209,15 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
             /// 这个复杂的表达式只是告诉我们，如何预先计算地址。
             /// 这里仅仅用来说明。
             /// 实际上，你仅仅需要 ``new D{salt: salt}(arg)``.
-            address predictedAddress = address(uint(keccak256(abi.encodePacked(
-                byte(0xff),
+            address predictedAddress = address(uint160(uint(keccak256(abi.encodePacked(
+                bytes1(0xff),
                 address(this),
                 salt,
                 keccak256(abi.encodePacked(
                     type(D).creationCode,
                     arg
                 ))
-            ))));
+            )))));
 
             D d = new D{salt: salt}(arg);
             require(address(d) == predictedAddress);
@@ -251,7 +251,7 @@ Solidity 内部允许元组 (tuple) 类型，也就是一个在编译时元素�
 
 ::
 
-    pragma solidity >=0.5.0 <0.8.0;
+    pragma solidity >=0.5.0 <0.9.0;
 
     contract C {
         uint index;
@@ -293,7 +293,7 @@ Solidity 内部允许元组 (tuple) 类型，也就是一个在编译时元素�
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.22 <0.8.0;
+    pragma solidity >=0.4.22 <0.9.0;
 
      contract C {
         uint[20] x;
@@ -336,7 +336,7 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
 
 ::
 
-    pragma solidity >=0.5.0 <0.8.0;
+    pragma solidity >=0.5.0 <0.9.0;
     contract C {
         function minimalScoping() pure public {
             {
@@ -355,7 +355,7 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
 
 ::
 
-    pragma solidity >=0.5.0 <0.8.0;
+    pragma solidity >=0.5.0 <0.9.0;
     // 有警告
     contract C {
         function f() pure public returns (uint) {
@@ -375,7 +375,7 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
 
     // 这将无法编译通过
 
-    pragma solidity >=0.5.0 <0.8.0;
+    pragma solidity >=0.5.0 <0.9.0;
     contract C {
         function f() pure public returns (uint) {
             x = 2;
@@ -383,6 +383,70 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
             return x;
         }
     }
+
+
+
+.. _unchecked:
+
+Checked or Unchecked Arithmetic
+=================================
+
+An overflow or underflow is the situation where the resulting value of an arithmetic operation,
+when executed on an unrestricted integer, falls outside the range of the result type.
+
+Prior to Solidity 0.8.0, arithmetic operations would always wrap in case of
+under- or overflow leading to widespread use of libraries that introduce
+additional checks.
+
+Since Solidity 0.8.0, all arithmetic operations revert on over- and underflow by default,
+thus making the use of these libraries unnecessary.
+
+To obtain the previous behaviour, an ``unchecked`` block can be used:
+
+::
+
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.7.99;
+    contract C {
+        function f(uint a, uint b) pure public returns (uint) {
+            // This addition will wrap on underflow.
+            unchecked { return a - b; }
+        }
+        function g(uint a, uint b) pure public returns (uint) {
+            // This addition will revert on underflow.
+            return a - b;
+        }
+    }
+
+The call to ``f(2, 3)`` will return ``2**256-1``, while ``g(2, 3)`` will cause
+a failing assertion.
+
+The ``unchecked`` block can be used everywhere inside a block, but not as a replacement
+for a block. It also cannot be nested.
+
+The setting only affects the statements that are syntactically inside the block.
+Functions called from within an ``unchecked`` block do not inherit the property.
+
+.. note::
+    To avoid ambiguity, you cannot use ``_;`` inside an ``unchecked`` block.
+
+The following operators will cause a failing assertion on overflow or underflow
+and will wrap without an error if used inside an unchecked block:
+
+``++``, ``--``, ``+``, binary ``-``, unary ``-``, ``*``, ``/``, ``%``, ``**``
+
+``+=``, ``-=``, ``*=``, ``/=``, ``%=``
+
+.. warning::
+    It is not possible to disable the check for division by zero
+    or modulo by zero using the ``unchecked`` block.
+
+.. note::
+    The second statement in ``int x = type(int).min; -x;`` will result in an overflow
+    because the negative range can hold one more value than the positive range.
+
+Explicit type conversions will always truncate and never cause a failing assertion
+with the exception of a conversion from an integer to an enum type.
 
 .. index:: ! exception, ! throw, ! assert, ! require, ! revert, ! errors
 
@@ -400,49 +464,74 @@ Solidity 使用状态恢复异常来处理错误。这种异常将撤消对当�
     注意：根据 EVM 的设计，如果被调用的地址不存在，低级别函数 ``call``, ``delegatecall`` 和 ``staticcall`` 也或第一个返回值同样是 ``true``。
     如果需要，请在调用之前检查账号的存在性。
 
-异常可以被 ``try``/``catch`` 捕获。
+外部调用的异常可以被 ``try``/``catch`` 捕获。
 
-``assert`` and ``require``
---------------------------
+Exceptions can contain data that is passed back to the caller.
+This data consists of a 4-byte selector and subsequent :ref:`ABI-encoded<abi>` data.
+The selector is computed in the same way as a function selector, i.e.,
+the first four bytes of the keccak256-hash of a function
+signature - in this case an error signature.
+
+Currently, Solidity supports two error signatures: ``Error(string)``
+and ``Panic(uint256)``. The first ("error") is used for "regular" error conditions
+while the second ("panic") is used for errors that should not be present in bug-free code.
+
+
+
+用``assert``检查异常(Panic) 和 ``require`` 检查错误(Error)
+----------------------------------------------------------
 
 函数 ``assert`` 和 ``require`` 可用于检查条件并在条件不满足时抛出异常。
 
-``assert`` 函数只能用于测试内部错误，并检查非变量。
-``require`` 函数用于确认条件有效性，例如输入变量，或合约状态变量是否满足条件，或验证外部合约调用返回的值。
-如果使用得当，语言分析工具可以评估你的合约，并标示出那些会使 ``assert`` 失败的条件和函数调用。
-工作正常的代码不应该触发一个失败的 assert 语句；如果这发生了，那就说明出现了一个需要你修复的 bug。
+The ``assert`` function creates an error of type ``Panic(uint256)``.
+The same error is created by the compiler in certain situations as listed below.
+
+``assert`` 函数只能用于测试内部错误，检查不变量，正常的函数代码永远不会产生Panic, 甚至是基于一个无效的外部输入时。
+如果发生了，那就说明出现了一个需要你修复的 bug。如果使用得当，语言分析工具可以识别出那些会导致 Panic 的 ``assert`` 条件和函数调用。
+
+下列情况将会产生一个Panic异常：
+提供的错误码编号，用来指示Panic的类型。
 
 
-下列情况将会产生一个 ``assert`` 式异常：
+#. 0x01: 如果你调用 ``assert`` 的参数（表达式）结果为 false 。
+#. 0x11: 在``unchecked { ... }``外，如果算术运算结果向上或向下溢出。
+#. 0x12; 如果你用零当除数做除法或模运算（例如 ``5 / 0`` 或 ``23 % 0`` ）。
+#. 0x21: 如果你将一个太大的数或负数值转换为一个枚举类型。
+#. 0x22: 如果你访问一个没有正确编码的存储byte数组.
+#. 0x31: 如果在空数组上 ``.pop()`` 。
+#. 0x32: 如果你访问 ``bytesN`` 数组（或切片）的索引太大或为负数。(例如： ``x[i]`` 而 ``i >= x.length`` 或 ``i < 0``).
+#. 0x41: 如果你分配了太多的内内存或创建了太大的数组。
+#. 0x51: 如果你调用了零初始化内部函数类型变量。
 
-#. 如果你访问数组的索引太大或为负数（例如 ``x[i]`` 其中 ``i >= x.length`` 或 ``i < 0``）。
-#. 如果你访问固定长度 ``bytesN`` 的索引太大或为负数。
-#. 如果你用零当除数做除法或模运算（例如 ``5 / 0`` 或 ``23 % 0`` ）。
-#. 如果你将一个太大或负数值转换为一个枚举类型。
-#. 如果你调用内部函数类型的零初始化变量。
-#. 如果你调用 ``assert`` 的参数（表达式）最终结算为 false。
+
+ ``require`` 函数要么创建一个 ``Error(string)`` 类型的错误，或者没有错误数据的错误并且 ``require`` 函数应该用于确认条件有效性，例如输入变量，或合约状态变量是否满足条件，或验证外部合约调用返回的值。
 
 
-
-下列情况将会产生一个 ``require`` 式异常：
+下列情况将会产生一个 ``Error(string)`` （或没有数据）的错误：
 
 
 #. 如果你调用 ``require`` 的参数（表达式）最终结果为 ``false`` 。
-#. 如果你通过消息调用调用某个函数，但该函数没有正确结束（它耗尽了 gas，没有匹配函数，或者本身抛出一个异常），上述函数不包括低级别的操作 ``call`` ， ``send`` ， ``delegatecall`` ， ``callcode`` 或  ``staticcall`` 。低级操作不会抛出异常，而通过返回 ``false`` 来指示失败。
-#. 如果你使用 ``new`` 关键字创建合约，但合约创建没有正确结束（请参阅上条有关”未正确结束“的解释）。
-#. 如果你执行外部函数调用的函数不包含任何代码。
-#. 如果你的合约通过一个没有 ``payable`` 修饰符的公有函数（包括构造函数和 fallback 函数）接收 Ether。
+#. 如果你在不包含代码的合约上执行外部函数调用。
+#. 如果你通过合约接收以太币，而又没有 ``payable`` 修饰符的公有函数（包括构造函数和 fallback 函数）。
 #. 如果你的合约通过公有 getter 函数接收 Ether 。
-#. 如果 ``.transfer()`` 失败。
+
+在下面的情况下，来自外部调用的错误数据（如果提供的话）被转发，这意味可能 `Error` 或 `Panic` 都有可能触发。
+
+#. 如果 ``.transfer()`` 失败。 
+#. 如果你通过消息调用调用某个函数，但该函数没有正确结束（例如, 它耗尽了 gas，没有匹配函数，或者本身抛出一个异常），不包括使用低级别 ``call`` ， ``send`` ， ``delegatecall`` ， ``callcode`` 或  ``staticcall`` 的函数调用。低级操作不会抛出异常，而通过返回 ``false`` 来指示失败。
+#. 如果你使用 ``new`` 关键字创建合约，但合约创建 :ref:`没有正确结束<creating-contracts>` 。
 
 
 可以给 ``require`` 提供一个消息字符串，而 ``assert`` 不行。
 在下例中，你可以看到如何轻松使用``require`` 检查输入条件以及如何使用 ``assert`` 检查内部错误.
 
+.. note::
+    If you do not provide a string argument to ``require``, it will revert
+    with empty error data, not even including the error selector.
 
 ::
 
-    pragma solidity >=0.5.0 <0.8.0;
+    pragma solidity >=0.5.0 <0.9.0;
 
     contract Sharer {
         function sendHalf(address addr) public payable returns (uint balance) {
@@ -456,26 +545,28 @@ Solidity 使用状态恢复异常来处理错误。这种异常将撤消对当�
     }
 
 
-在内部， Solidity 对一个 ``require`` 式的异常执行回退操作（指令 ``0xfd`` ）并执行一个无效操作（指令 ``0xfe`` ）来引发 ``assert`` 式异常。
-在这两种情况下，都会导致 EVM 回退对状态所做的所有更改。回退的原因是不能继续安全地执行，因为没有实现预期的效果。
+在内部， Solidity 对异常执行回退操作（指令 ``0xfd`` ），从而让 EVM 回退对状态所做的所有更改。回退的原因是不能继续安全地执行，因为没有实现预期的效果。
+因为我们想要保持交易的原子性，最安全的动作是回退所有的更改，并让整个交易（或至少调用）没有任何新影响。
 
-在这两种情况下，调用者都可以使用 ``try``/``catch`` 来应对此类失败（在``assert``类型的异常中,仅在剩余足够gas的情况下才行 ），但是调用者中的更改将始终被还原。
+在这两种情况下，调用者都可以使用 ``try``/``catch`` 来应对此类失败，但是调用者中的更改将始终被还原。
 
+.. note::
 
-请注意， ``assert`` 式异常消耗了所有可用的调用 gas ，而从 Metropolis 版本起 ``require`` 式的异常不会消耗任何 gas。
+  请注意， 在0.8.0 之前，Panic异常使用``invalid`` 指令，其会消耗了所有可用的 gas。
+  使用 ``require`` 的异常，在 Metropolis 版本之前会消耗所有的 gas。
 
 ``revert``
 ----------
 
 ``revert`` 函数是另一个可以在代码块中处理异常的方法, 可以用来标记错误并回退当前的调用。
-``revert`` 调用中还可以包含有关错误信息的参数，这个信息会被返回给调用者。
+``revert`` 调用中还可以包含有关错误信息的参数，这个信息会被返回给调用者，并且产生一个 ``Error(string)`` 错误。
 
 
 下边的例子展示了错误字符串如何使用 revert (等价于 require )  ：
 
 ::
 
-    pragma solidity >=0.5.0 <0.8.0;
+    pragma solidity >=0.5.0 <0.9.0;
 
     contract VendingMachine {
         function buy(uint amount) payable {
@@ -542,9 +633,7 @@ Solidity 使用状态恢复异常来处理错误。这种异常将撤消对当�
                 errorCount++;
                 return (0, false);
             } catch (bytes memory /*lowLevelData*/) {
-                // This is executed in case revert() was used
-                // or there was a failing assertion, division
-                // by zero, etc. inside getData.
+                // This is executed in case revert() was used。
                 errorCount++;
                 return (0, false);
             }
@@ -570,10 +659,8 @@ It is planned to support other types of error data in the future.
 The string ``Error`` is currently parsed as is and is not treated as an identifier.
 
 The clause ``catch (bytes memory lowLevelData)`` is executed if the error signature
-does not match any other clause, there was an error during decoding of the error
-message, if there was a failing assertion in the external
-call (for example due to a division by zero or a failing ``assert()``) or
-if no error data was provided with the exception.
+does not match any other clause, if there was an error while decoding the error
+message, or if no error data was provided with the exception.
 The declared variable provides access to the low-level error data in that case.
 
 If you are not interested in the error data, you can just use

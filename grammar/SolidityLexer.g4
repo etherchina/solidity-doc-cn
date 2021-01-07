@@ -4,10 +4,10 @@ lexer grammar SolidityLexer;
  * Keywords reserved for future use in Solidity.
  */
 ReservedKeywords:
-	'after' | 'alias' | 'apply' | 'auto' | 'case' | 'copyof' | 'default' | 'define' | 'final'
+	'after' | 'alias' | 'apply' | 'auto' | 'byte' | 'case' | 'copyof' | 'default' | 'define' | 'final'
 	| 'implements' | 'in' | 'inline' | 'let' | 'macro' | 'match' | 'mutable' | 'null' | 'of'
 	| 'partial' | 'promise' | 'reference' | 'relocatable' | 'sealed' | 'sizeof' | 'static'
-	| 'supports' | 'switch' | 'typedef' | 'typeof' | 'unchecked' | 'var';
+	| 'supports' | 'switch' | 'typedef' | 'typeof' | 'var';
 
 Pragma: 'pragma' -> pushMode(PragmaMode);
 Abstract: 'abstract';
@@ -33,14 +33,13 @@ Event: 'event';
 External: 'external';
 Fallback: 'fallback';
 False: 'false';
-Fixed: 'fixed' | ('fixed' [0-9]+ 'x' [0-9]+);
+Fixed: 'fixed' | ('fixed' [1-9][0-9]* 'x' [1-9][0-9]*);
 From: 'from';
 /**
  * Bytes types of fixed length.
- * byte is an alias of bytes1.
  */
 FixedBytes:
-	'byte' | 'bytes1' | 'bytes2' | 'bytes3' | 'bytes4' | 'bytes5' | 'bytes6' | 'bytes7' | 'bytes8' |
+	'bytes1' | 'bytes2' | 'bytes3' | 'bytes4' | 'bytes5' | 'bytes6' | 'bytes7' | 'bytes8' |
 	'bytes9' | 'bytes10' | 'bytes11' | 'bytes12' | 'bytes13' | 'bytes14' | 'bytes15' | 'bytes16' |
 	'bytes17' | 'bytes18' | 'bytes19' | 'bytes20' | 'bytes21' | 'bytes22' | 'bytes23' | 'bytes24' |
 	'bytes25' | 'bytes26' | 'bytes27' | 'bytes28' | 'bytes29' | 'bytes30' | 'bytes31' | 'bytes32';
@@ -86,7 +85,8 @@ Struct: 'struct';
 True: 'true';
 Try: 'try';
 Type: 'type';
-Ufixed: 'ufixed' | ('ufixed' [0-9]+ 'x' [0-9]+);
+Ufixed: 'ufixed' | ('ufixed' [1-9][0-9]+ 'x' [1-9][0-9]+);
+Unchecked: 'unchecked';
 /**
  * Sized unsigned integer types.
  * uint is an alias of uint256.
@@ -183,7 +183,7 @@ fragment DoubleQuotedPrintable: [\u0020-\u0021\u0023-\u005B\u005D-\u007E];
   */
 fragment EscapeSequence:
 	'\\' (
-		['"\\bfnrtv\n\r]
+		['"\\nrt\n\r]
 		| 'u' HexCharacter HexCharacter HexCharacter HexCharacter
 		| 'x' HexCharacter HexCharacter
 	);

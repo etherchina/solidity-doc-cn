@@ -29,4 +29,36 @@ Solidity 中的内存数组中的元素始终占据32字节的倍数（对于 ``
 
   尽管使用``msize``到达绝对归零的内存区域似乎是一个好主意，但使用此类非临时指针而不更新空闲内存指针可能会产生意外结果。
 
-.. index: calldata layout
+Differences to Layout in Storage
+==================================
+
+As described above the layout in memory is different from the layout in
+:ref:`storage<storage-inplace-encoding>`. Below there are some examples.
+
+Example for Difference in Arrays
+--------------------------------
+
+The following array occupies 32 bytes (1 slot) in storage, but 128
+bytes (4 items with 32 bytes each) in memory.
+
+::
+
+    uint8[4] a;
+
+
+
+Example for Difference in Struct Layout
+---------------------------------------
+
+The following struct occupies 96 bytes (3 slots of 32 bytes) in storage,
+but 128 bytes (4 items with 32 bytes each) in memory.
+
+
+::
+
+    struct S {
+        uint a;
+        uint b;
+        uint8 c;
+        uint8 d;
+    }

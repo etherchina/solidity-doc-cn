@@ -73,6 +73,7 @@
 --------------------------------
 
 - ``blockhash(uint blockNumber) returns (bytes32)``：指定区块的区块哈希——仅可用于最新的 256 个区块且不包括当前区块
+- ``block.chainid`` (``uint``): 当前链 id
 - ``block.coinbase`` ( ``address`` ): 挖出当前区块的矿工地址
 - ``block.difficulty`` ( ``uint`` ): 当前区块难度
 - ``block.gaslimit`` ( ``uint`` ): 当前区块 gas 限额
@@ -137,7 +138,7 @@ ABI 编码及解码函数
 可以参阅专门的章节 :ref:`assert and require<assert-and-require>` 参阅有关错误处理以及何时使用哪个函数的更多详细信息。
 
 ``assert(bool condition)``
-    如果不满足条件，则会导致无效的操作码，则撤销状态更改 -  用于检查内部错误。
+    如果不满足条件，则会导致Panic 错误，则撤销状态更改 -  用于检查内部错误。
 
 ``require(bool condition)``
     如果条件不满足则撤销状态更改 - 用于检查由输入或者外部组件引起的错误。
@@ -202,7 +203,7 @@ ABI 编码及解码函数
 
     在一个私链上，你很有可能碰到由于 ``sha256``、``ripemd160`` 或者 ``ecrecover`` 引起的 Out-of-Gas。这个原因就是他们被当做所谓的预编译合约而执行，并且在第一次收到消息后这些合约才真正存在（尽管合约代码是硬代码）。发送到不存在的合约的消息非常昂贵，所以实际的执行会导致 Out-of-Gas 错误。在你的合约中实际使用它们之前，给每个合约发送一点儿以太币，比如 1 Wei。这在官方网络或测试网络上不是问题。
 
-.. index:: balance, send, transfer, call, callcode, delegatecall
+.. index:: balance, codehash, send, transfer, call, callcode, delegatecall
 .. _address_related:
 
 地址成员
@@ -210,6 +211,12 @@ ABI 编码及解码函数
 
 ``<address>.balance`` (``uint256``)
     以 Wei 为单位的 :ref:`address` 的余额。
+
+``<address>.code`` (``bytes memory``)
+    在 :ref:`address` 上的代码(可以为空)
+
+``<address>.codehash`` (``bytes32``)
+    :ref:`address`的codehash
 
 ``<address payable>.transfer(uint256 amount)``
     向 :ref:`address` 发送数量为 amount 的 Wei，失败时抛出异常，使用固定（不可调节）的 2300 gas 的矿工费。

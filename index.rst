@@ -7,7 +7,7 @@ Solidity 最新中文文档
     :align: center
 
 
-译者说明：本文档根据当前 `Solidity官方文档 <https://solidity.readthedocs.io/>`_ 最新版本（当前为v0.7.x）进行翻译。
+译者说明：本文档根据当前 `Solidity官方文档 <https://solidity.readthedocs.io/>`_ 最新版本（当前为v0.8.0）进行翻译。
 并且由于高质量的翻译和及时的更新，现在是 **Solidity官方推荐中文版** 。
 
 Solidity中文翻译最初由 `HiBlock <http://hiblock.one/>`_ 社区发起，后由 `登链社区 <https://learnblockchain.cn/>`_ 社区持续维护更新。
@@ -26,9 +26,7 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 
 .. warning::
 
-  Solidity 发布 0.5.x 引入了一些与之前版本不兼容的升级，详情可阅读 :doc:`0.5 更新列表 <050-breaking-changes>`.
-  Solidity 发布 0.6.x 引入了一些与之前版本不兼容的升级，详情可阅读 :doc:`0.6 更新列表 <060-breaking-changes>`.
-  Solidity 发布 0.7.x 引入了一些与之前版本不兼容的升级，详情可阅读 :doc:`0.7 更新列表 <070-breaking-changes>`.
+  Solidity 每个大版本的设计，都会引入一些与之前版本不兼容的升级，详情可阅读 :doc:`0.8.0 更新列表 <080-breaking-changes>` ，  :doc:`0.7 更新列表 <070-breaking-changes>` , :doc:`0.6 更新列表 <060-breaking-changes>` , :doc:`0.5 更新列表 <050-breaking-changes>` 。
 
 开始使用Solidity
 ----------------------
@@ -126,6 +124,7 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
    050-breaking-changes.rst
    060-breaking-changes.rst
    070-breaking-changes.rst
+  080-breaking-changes.rst
    natspec-format.rst
    security-considerations.rst
    resources.rst

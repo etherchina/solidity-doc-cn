@@ -50,7 +50,7 @@ The following example shows a contract and a function using all available tags.
 .. code:: Solidity
 
    // SPDX-License-Identifier: GPL-3.0
-   pragma solidity >0.6.0 <0.8.0;
+   pragma solidity >=0.6.12 <0.9.0;
 
    /// @title A simulator for trees
    /// @author Larry A. Gardner

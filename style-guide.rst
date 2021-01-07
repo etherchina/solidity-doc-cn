@@ -104,7 +104,7 @@
 
 错误写法::
 
-    pragma solidity >=0.4.0 <0.8.0;
+    pragma solidity >=0.4.0 <0.9.0;
 
     abstract contract A {
         function spam() virtual pure public;
@@ -776,7 +776,7 @@ No::
 错误写法::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.22 <0.8.0;
+    pragma solidity >=0.4.22 <0.9.0;
 
 
     // Base contracts just to make this compile
@@ -1014,7 +1014,7 @@ Yes::
 and in ``Congress.sol``::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.0 <0.8.0;
+    pragma solidity >=0.4.0 <0.9.0;
 
     import "./Owned.sol";
 
@@ -1119,7 +1119,7 @@ multiline comment starting with ``/**`` and ending with ``*/``.
 For example, the contract from :ref:`a simple smart contract <simple-smart-contract>`_ with the comments
 added looks like the one below::
 
-    pragma solidity >=0.4.16 <0.8.0;
+    pragma solidity >=0.4.16 <0.9.0;
 
     /// @author The Solidity Team
     /// @title A simple storage example

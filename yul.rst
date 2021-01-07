@@ -896,12 +896,11 @@ the ``dup`` and ``swap`` instructions as well as ``jump`` instructions, labels a
 
 .. note::
   The ``call*`` instructions use the ``out`` and ``outsize`` parameters to define an area in memory where
-  the return data is placed. This area is written to depending on how many bytes the called contract returns.
+  the return or failure data is placed. This area is written to depending on how many bytes the called contract returns.
   If it returns more data, only the first ``outsize`` bytes are written. You can access the rest of the data
   using the ``returndatacopy`` opcode. If it returns less data, then the remaining bytes are not touched at all.
   You need to use the ``returndatasize`` opcode to check which part of this memory area contains the return data.
-  The remaining bytes will retain their values as of before the call. If the call fails (it returns ``0``),
-  nothing is written to that area, but you can still retrieve the failure data using ``returndatacopy``.
+  The remaining bytes will retain their values as of before the call.
 
 
 In some internal dialects, there are additional functions:
@@ -920,12 +919,12 @@ For the EVM, the ``datacopy`` function is equivalent to ``codecopy``.
 setimmutable, loadimmutable
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The functions ``setimmutable("name", value)`` and ``loadimmutable("name")`` are
+The functions ``setimmutable(offset, "name", value)`` and ``loadimmutable("name")`` are
 used for the immutable mechanism in Solidity and do not nicely map to pure Yul.
-The function ``setimmutable`` assumes that the runtime code of a contract
-is currently copied to memory at offset zero. The call to ``setimmutable("name", value)``
-will store ``value`` at all points in memory that contain a call to
-``loadimmutable("name")``.
+The call to ``setimmutable(offset, "name", value)`` assumes that the runtime code of the contract
+containing the given named immutable was copied to memory at offset ``offset`` and will write ``value`` to all
+positions in memory (relative to ``offset``) that contain the placeholder that was generated for calls
+to ``loadimmutable("name")`` in the runtime code.
 
 
 linkersymbol

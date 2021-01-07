@@ -291,7 +291,6 @@ at each version. Backward compatibility is not guaranteed between each version.
         // 可用的输出类型如下所示：
         //   abi - ABI
         //   ast - 所有源文件的AST
-        //   legacyAST - 所有源文件的legacy AST
         //   devdoc - 开发者文档（natspec）
         //   userdoc - 用户文档（natspec）
         //   metadata - 元数据
@@ -324,16 +323,16 @@ at each version. Backward compatibility is not guaranteed between each version.
             "MyContract": [ "abi"，"evm.bytecode.opcodes" ]
           },
       },
-      "modelCheckerSettings":
-      {
-        // Choose which model checker engine to use: all (default), bmc, chc, none.
-        "engine": "chc",
-        // Timeout for each SMT query in milliseconds.
-        // If this option is not given, the SMTChecker will use a deterministic
-        // resource limit by default.
-        // A given timeout of 0 means no resource/time restrictions for any query.
-        "timeout": 20000
-      }
+        "modelChecker":
+        {
+          // Choose which model checker engine to use: all (default), bmc, chc, none.
+          "engine": "chc",
+          // Timeout for each SMT query in milliseconds.
+          // If this option is not given, the SMTChecker will use a deterministic
+          // resource limit by default.
+          // A given timeout of 0 means no resource/time restrictions for any query.
+          "timeout": 20000
+        }
         }
       }
     }
@@ -384,9 +383,7 @@ at each version. Backward compatibility is not guaranteed between each version.
           // 标识符（用于源码映射）
           id: 1,
           // AST对象
-          ast: {},
-          // legacy AST 对象
-          legacyAST: {}
+          ast: {}
         }
       },
       // 这里包含了合约级别的输出。 可以通过outputSelection来设置限制/过滤。
@@ -395,7 +392,7 @@ at each version. Backward compatibility is not guaranteed between each version.
           // 如果使用的语言没有合约名称，则该字段应该留空。
           "ContractName": {
             // 以太坊合约的应用二进制接口（ABI）。如果为空，则表示为空数组。
-            // 请参阅 https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI
+            // 请参阅 https://docs.soliditylang.org/en/develop/abi-spec.html
             abi: [],
             // 请参阅元数据输出文档（序列化的JSON字符串）
             metadata: "{...}",
@@ -603,7 +600,7 @@ Available upgrade modules
 
 Please read :doc:`0.5.0 release notes <050-breaking-changes>`,
 :doc:`0.6.0 release notes <060-breaking-changes>` and
-:doc:`0.7.0 release notes <070-breaking-changes>` for further details.
+:doc:`0.7.0 release notes <070-breaking-changes>`  and :doc:`0.8.0 release notes <080-breaking-changes>` for further details.
 
 Synopsis
 ~~~~~~~~

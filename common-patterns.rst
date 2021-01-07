@@ -22,7 +22,7 @@
 
 ::
 
-    pragma solidity ^0.7.0;
+    pragma solidity  >=0.7.0 <0.9.0;
 
     contract WithdrawalContract {
         address public richest;
@@ -47,7 +47,7 @@
             // 记住，在发送资金之前将待发金额清零
             // 来防止重入（re-entrancy）攻击
             pendingWithdrawals[msg.sender] = 0;
-            msg.sender.transfer(amount);
+            payable(msg.sender).transfer(amount);
         }
     }
 
@@ -55,14 +55,14 @@
 
 ::
 
-    pragma solidity ^0.7.0;
+    pragma solidity  >=0.7.0 <0.9.0;
 
     contract SendContract {
         address payable public richest;
         uint public mostSent;
 
         constructor() payable {
-            richest = msg.sender;
+            richest = payable(msg.sender);
             mostSent = msg.value;
         }
 
@@ -70,7 +70,7 @@
             require(msg.value > mostSent, "Not enough money sent.");
             // 这一行会导致问题（详见下文）
             richest.transfer(msg.value);
-            richest = msg.sender;
+            richest = payable(msg.sender);
             mostSent = msg.value;
         }
     }
@@ -101,7 +101,7 @@
 
 ::
 
-    pragma solidity >=0.4.22 <0.8.0;
+    pragma solidity >=0.6.0 <0.9.0;
 
     contract AccessRestriction {
         // 这些将在构造阶段被赋值
@@ -169,7 +169,7 @@
             );
             _;
             if (msg.value > _amount)
-                msg.sender.send(msg.value - _amount);
+                payable(msg.sender).send(msg.value - _amount);
         }
 
         function forceOwnerChange(address _newOwner)
@@ -179,7 +179,7 @@
         {
             owner = _newOwner;
             // 这只是示例条件
-            if (uint(owner) & 0 == 1)
+            if (uint160(owner) & 0 == 1)
                 // 这无法在 0.4.0 版本之前的
                 // Solidity 上进行退还。
                 return;
@@ -237,7 +237,7 @@
 
 ::
 
-    pragma solidity >=0.4.22 <0.8.0;
+    pragma solidity >=0.4.22 <0.9.0;
 
     contract StateMachine {
         enum Stages {
