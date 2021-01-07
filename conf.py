@@ -57,7 +57,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Solidity中文文档'
-copyright = '2017-2020, Ethereum, HiBlock, 登链社区'
+copyright = '2017-2021, Ethereum, HiBlock, 登链社区'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -173,7 +173,7 @@ html_static_path = []
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-html_last_updated_fmt = '2020/09/13'
+html_last_updated_fmt = '2021/01/07'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
@@ -287,3 +287,35 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+# copy from : https://stackoverflow.com/questions/49331914/enable-versions-in-sidebar-in-sphinx-read-the-docs-theme
+############################
+# SETUP THE RTD LOWER-LEFT #
+############################
+try:
+  html_context
+except NameError:
+  html_context = dict()
+html_context['display_lower_left'] = True
+
+templates_path = ['_templates']
+
+
+# tell the theme which language to we're currently building
+html_context['current_language'] = language
+
+html_context['current_version'] = version
+html_context['version'] = version
+
+
+html_context['versions'] = list()
+
+
+import json
+
+with open('versions.json') as json_file:
+    data = json.load(json_file)
+    for v in data:
+      html_context['versions'].append( (v['version'], v['url']) )
+
+  
