@@ -43,7 +43,7 @@
 * 比较运算符： ``<=`` ， ``<`` ， ``==`` ， ``!=`` ， ``>=`` ， ``>`` （返回布尔值）
 * 位运算符： ``&`` ， ``|`` ， ``^`` （异或）， ``~`` （位取反）
 * 移位运算符： ``<<`` （左移位） ， ``>>`` （右移位）
-* 算数运算符： ``+`` ， ``-`` ， 一元运算 ``-`` ， 一元运算 ``+`` ， ``*`` ， ``/`` ， ``%`` （取余或叫模运算） ， ``**`` （幂）
+* 算数运算符： ``+`` ， ``-`` ， 一元运算负 ``-`` （仅针对有符号整型）， ``*`` ， ``/`` ， ``%`` （取余或叫模运算） ， ``**`` （幂）
 
 
 对于整形 ``X``，可以使用 ``type(X).min`` 和 ``type(X).max`` 去获取这个类型的最小值与最大值。
@@ -51,7 +51,10 @@
 
 .. warning::
   Solidity中的整数是有取值范围的。 例如``uint32``类型的取值范围是 ``0``到``2 ** 32-1```。
-  如果整数的某些操作的结果不在取值范围内，则会被截断。 这些截断可能会让我们承担的严重后果，进一步参考 :ref:`小心处理溢出问题<underflow-overflow>`.
+  0.8.0 开始，算术运算有两个计算模式：一个是 "wrapping"（截断）模式或称 "unchecked"（不检查）模式，一个是"checked" （检查）模式。
+  默认情况下，算术运算在 "checked" 模式下，即都会进行溢出检查，如果结果落在取值范围之外，调用会通过 :ref:`失败异常<assert-and-require>`回退。
+  你也可以通过 ``unchecked { ... }`` 切换到 "unchecked"模式，更多可参考 :ref:`unchecked <unchecked>`.
+
 
 比较运算
 ^^^^^^^^^^^
@@ -82,15 +85,21 @@
 加、减、乘法运算
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-加法，减法和乘法具有通常的语义，值用两进制补码表示，意思是比如：``uint256（0） -  uint256（1）== 2 ** 256  -  1`` 。 我们在设计和编写智能合约时必须考虑到溢出问题。
+加法，减法和乘法和通常理解的语义一样，不过有两种模式来应对溢出（上溢及下溢）：
 
-表达式 ``-x`` 相当于 ``(T(0) - x)`` 这里 ``T`` 是指 ``x`` 的类型。 这意味着如果 ``x`` 的类型的类型是无符号整数类型 ``-x`` 不会是负数。
-另外，如果 ``x`` 为负数， ``-x`` 也可以为正数。 由于两进制补码表示还需要小心::
+默认情况下，算术运算都会进行溢出检查，但是也可以禁用检查，可以通过 :ref:`unchecked block<unchecked>` 来禁用检查，此时会返回截断的结果，更多的详情可以前往链接查看。
 
-    int x = -2**255;
-    assert(-x == x);
+.. note::
+  溢出的检查功能是在 0.8.0 版本加入的，在此版本之前，请使用 OpenZepplin SafeMath 库。
 
-这意味着即使数字是负数，也不能假设它的负数会是正数。
+
+
+表达式 ``-x`` 相当于 ``(T(0) - x)`` 这里 ``T`` 是指 ``x`` 的类型。 ``-x`` 只能应用在有符号型的整数上。
+如果 ``x`` 为负数， ``-x`` 为正数。 由于使用两进制补码表示数据，你还需要小心:
+
+如果有 ``int x = type(int).min;``， 那 ``-x`` 将不在正数取值的范围内。
+这意味着这个检测 ``unchecked { assert(-x == x); }``  是可以通过的（即这种情况下，不能假设它的负数会是正数），如果是 checked 模式，则会触发异常。
+
 
 
 除法运算
@@ -102,7 +111,11 @@
 注意在智能合约中，在 :ref:`字面常量<rational_literals>` 上进行除法会保留精度（保留小数位）。
 
 .. note::
-  除以0 会发生错误（assert 类型错误）。
+  除以0 会发生 :ref:`Panic 错误<assert-and-require>`， 而且这个检查，不可以通过 ``unchecked { ... }`` 禁用掉。
+
+.. note::
+  表达式 ``type(int).min / (-1)`` 是仅有的整除会发生向上溢出的情况。
+  在算术检查模式下，这会触发一个失败异常，在截断模式下，表达式的值将是 ``type(int).min`` 。
 
 模运算（取余）
 ^^^^^^^^^^^^^^^
@@ -116,14 +129,21 @@
  * ``int256(-5) % int256(-2) == int256(-1)``
 
 .. note::
-  对0取模会发生错误（assert 类型错误）。
+  对0取模会发生错误 :ref:`Panic 错误<assert-and-require>`，该检查不能通过``unchecked { ... }`` 。
 
 幂运算
 ^^^^^^^^^^^^^^
 
 幂运算仅适用于无符号类型。 结果的类型总是等于基数的类型.
-请注意这些类型足够大，以保证能容纳计算结果。
+请注意类型足够大以能够容纳幂运算的结果，要么发生潜在的assert异常或者使用截断模式。
 
+
+
+.. note::
+  在“checked” 模式下，幂运算仅会为小基数使用相对便宜的 ``exp`` 操作码。 
+  例如 ``x**3`` 的例子，表达式 ``x*x*x`` 也许更便宜。
+  在任何情况下，都建议进行 gas 消耗测试和使用优化器。
+  
 
 .. note::
   注意 ``0**0`` 在EVM中定义为 ``1`` 。
@@ -170,27 +190,21 @@
 
 类型转换:
 
-允许从 ``address payable`` 到 ``address`` 的隐式转换，而从 ``address`` 到 ``address payable`` 必须显示的转换, 通过 ``payable(<address>)`` 进行转换.
+允许从 ``address payable`` 到 ``address`` 的隐式转换，而从 ``address`` 到 ``address payable`` 必须显示的转换, 通过 ``payable(<address>)`` 进行转换。
+.. note::
+  在0.5版本,执行这种转换的唯一方法是使用中间类型，先转换为 ``uint160`` 如,  address payable ap = address(uint160(addr)); 
+
+``address`` 允许和 ``uint160``、 整型字面常量、``bytes20`` 及合约类型相互转换。
 
 
-（注意:0.5版本时,执行这种转换的唯一方法是使用中间类型，先转换为 ``uint160`` 如,  address payable ap = address(uint160(addr)); )
-
-
-:ref:`地址字面常量<address_literals>` 可以隐式转换为 ``address payable`` 。
-
-``address`` 可以显式和整型、整型字面常量、``bytes20`` 及合约类型相互转换。转换时需注意：
-
-如果 ``x`` 是整型或定长字节数组、字面常量或具有可支付的回退（ payable fallback  ）函数或 receive 接收函数 的合约类型，则转换形式 ``address(x)`` 的结果是 ``address payable`` 类型。
-如果 ``x`` 是没有可支付的回退（ payable fallback ）函数或 receive 接收函数的合约类型，则 ``address(x)`` 将是 ``address`` 类型。
-在外部函数签名（定义）中，``address`` 可用来表示 ``address`` 和 ``address payable`` 类型。
-
-
-只能通过的表达式 ``payable(<address>)`` 将 ``address``  类型转换为 ``address payable`` 类型。
+只能通过 ``payable(...)`` 表达式把 ``address`` 类型和合约类型转换为 ``address payable``。
+只有能接收以太币的合约类型，才能够进行此转换。例如合约要么有  :ref:`receive <receive-ether-function>` 或可支付的回退函数。
+注意 ``payable(0)`` 是有效的，这是此规则的例外。
 
 
 .. note::
-    大部分情况下你不需要关心 ``address`` 与 ``address payable`` 之间的区别，并且到处都使用 ``address`` 。 例如，如果你在使用 :ref:`取款模式<withdrawal_pattern>`, 你可以（也应该）保存地址为 ``address`` 类型, 因为可以在
-    ``msg.sender`` 对象上调用 ``transfer`` 函数, 因为 ``msg.sender`` 是 ``address payable``。
+    如果你需要 ``address`` 类型的变量，并计划发送以太币给这个地址，那么声明类型为 ``address payable`` 可以明确表达出你的需求。
+    同样，尽量更早对他们进行区分或转换。
 
 运算符:
 
@@ -346,7 +360,6 @@
 ------------
 
 关键字有：``bytes1``， ``bytes2``， ``bytes3``， ...， ``bytes32``。
-``byte`` 是 ``bytes1`` 的别名。
 
 运算符：
 
@@ -366,6 +379,9 @@
     可以将 ``byte[]`` 当作字节数组使用，但这种方式非常浪费存储空间，准确来说，是在传入调用时，每个元素会浪费 31 字节。
     更好地做法是使用 ``bytes``。
 
+.. note::
+    在 0.8.0 之前, ``byte`` 用作为 ``bytes1`` 的别名。
+
 变长字节数组
 ------------
 
@@ -381,7 +397,7 @@
 地址字面常量
 ---------------------------------------
 
-比如像 ``0xdCad3a6d3569DF655070DEd06cb7A1b2Ccd1D3AF`` 这样的通过了地址校验和测试的十六进制字面常量会作为 ``address payable`` 类型。
+比如像 ``0xdCad3a6d3569DF655070DEd06cb7A1b2Ccd1D3AF`` 这样的通过了地址校验和测试的十六进制字面常量会作为 ``address`` 类型。
 而没有通过校验测试, 长度在 39 到 41 个数字之间的十六进制字面常量，会产生一个错误,您可以在零前面添加（对于整数类型）或在零后面添加（对于bytesNN类型）以消除错误。
 
 .. note::
@@ -519,15 +535,16 @@ Unicode 字面常量
 枚举类型
 ----------------
 
-枚举是在Solidity中创建用户定义类型的一种方法。 它们是显示所有整型相互转换，但不允许隐式转换。 从整型显式转换枚举，会在运行时检查整数时候在枚举范围内，否则会导致异常（ :ref:`assert 类型异常 <assert-and-require>` ）。
-枚举需要至少一个成员,默认值是第一个成员.
+枚举是在Solidity中创建用户定义类型的一种方法。 它们是显示所有整型相互转换，但不允许隐式转换。 
+从整型显式转换枚举，会在运行时检查整数时候在枚举范围内，否则会导致异常（ :ref:`Panic异常 <assert-and-require>` ）。
+枚举需要至少一个成员,默认值是第一个成员，枚举不能多于 256 个成员。
 
 数据表示与C中的枚举相同：选项从“0”开始的无符号整数值表示。
 
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.16 <0.8.0;
+    pragma solidity >=0.4.16  <0.9.0;
 
     contract test {
         enum ActionChoices { GoLeft, GoRight, GoStraight, SitStill }
@@ -540,8 +557,7 @@ Unicode 字面常量
 
         // 由于枚举类型不属于 |ABI| 的一部分，因此对于所有来自 Solidity 外部的调用，
         // "getChoice" 的签名会自动被改成 "getChoice() returns (uint8)"。
-        // 整数类型的大小已经足够存储所有枚举类型的值，随着值的个数增加，
-        // 可以逐渐使用 `uint16` 或更大的整数类型。
+
         function getChoice() public view returns (ActionChoices) {
             return choice;
         }
@@ -598,7 +614,7 @@ Unicode 字面常量
 所以 ``non-payable`` 函数不能转换为 ``payable`` 函数。
 
 
-如果当函数类型的变量还没有初始化时就调用它的话会引发一个异常。
+如果当函数类型的变量还没有初始化时就调用它的话会引发一个 :ref:`Panic 异常<assert-and-require>`。
 如果在一个函数被 ``delete`` 之后调用它也会发生相同的情况。
 
 如果外部函数类型在 Solidity 的上下文环境以外的地方使用，它们会被视为 ``function`` 类型。
@@ -624,7 +640,7 @@ public（或 external）函数都有下面的成员：
 下面的例子，显示如何使用成员::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.6.4 <0.8.0;
+    pragma solidity >=0.6.4  <0.9.0;
 
     contract Example {
       function f() public payable returns (bytes4) {
@@ -638,7 +654,7 @@ public（或 external）函数都有下面的成员：
 
 如果使用内部函数类型的例子::
 
-    pragma solidity >=0.4.16 <0.8.0;
+    pragma solidity >=0.4.16  <0.9.0;
 
     library ArrayUtils {
       // 内部函数可以在内部库函数中使用，
@@ -689,7 +705,7 @@ public（或 external）函数都有下面的成员：
 
 另外一个使用外部函数类型的例子::
 
-    pragma solidity >=0.4.22 <0.8.0;
+    pragma solidity >=0.4.22  <0.9.0;
 
     contract Oracle {
       struct Request {
@@ -709,7 +725,7 @@ public（或 external）函数都有下面的成员：
     }
 
     contract OracleUser {
-      Oracle constant private ORACLE_CONST = Oracle(0x1234567); // known contract
+      Oracle constant private ORACLE_CONST = Oracle(address(0x00000000219ab540356cBB839Cbe05303d7705Fa)); // known contract
       uint private exchangeRate;
       function buySomething() public {
         ORACLE_CONST.query("USD", this.oracleResponse);

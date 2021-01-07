@@ -26,7 +26,7 @@ Constant 和 Immutable  状态变量
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >0.7.2;
+    pragma solidity >0.7.4;
     uint constant X = 32**22 + 8;
     
     contract C {

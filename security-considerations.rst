@@ -54,7 +54,7 @@
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.0 <0.8.0;
+    pragma solidity >=0.6.0 <0.9.0;
 
     // 不要使用这个合约，其中包含一个 bug。
     contract Fund {
@@ -62,7 +62,7 @@
         mapping(address => uint) shares;
         /// 提取你的分成。
         function withdraw() public {
-            if (msg.sender.send(shares[msg.sender]))
+            if (payable(msg.sender).send(shares[msg.sender]))
                 shares[msg.sender] = 0;
         }
     }
@@ -75,7 +75,7 @@
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.6.2 <0.8.0;
+    pragma solidity >=0.6.2 <0.9.0;
 
     // 不要使用这个合约，其中包含一个 bug。
     contract Fund {
@@ -83,7 +83,7 @@
         mapping(address => uint) shares;
         /// 提取你的分成。
         function withdraw() public {
-            if (msg.sender.call.value(shares[msg.sender])())
+            if (payable(msg.sender).call.value(shares[msg.sender])())
                 shares[msg.sender] = 0;
         }
     }
@@ -92,7 +92,7 @@
 
 ::
 
-    pragma solidity ^0.4.11;
+    pragma solidity  >=0.6.0 <0.9.0;
 
     contract Fund {
         /// 合约中 |ether| 分成的映射。
@@ -101,7 +101,7 @@
         function withdraw() public {
             var share = shares[msg.sender];
             shares[msg.sender] = 0;
-            msg.sender.transfer(share);
+            payable(msg.sender).transfer(share);
         }
     }
 
@@ -169,7 +169,7 @@ tx.origin问题
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity ^0.7.0;
+    pragma solidity >=0.7.0 <0.9.0;
 
     // 不要使用这个合约，其中包含一个 bug。
     contract TxUserWallet {
@@ -190,17 +190,17 @@ tx.origin问题
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity ^0.7.0;
+    pragma solidity >=0.7.0 <0.9.0;
 
     interface TxUserWallet {
         function transferTo(address dest, uint amount) public;
     }
 
     contract TxAttackWallet {
-        address owner;
+        address payable owner;
 
         constructor() {
-            owner = msg.sender;
+            owner = payable(msg.sender);
         }
 
         function() public {
@@ -218,22 +218,32 @@ tx.origin问题
 =========================================
 
 As in many programming languages, Solidity's integer types are not actually integers.
-They resemble integers when the values are small, but behave differently if the numbers are larger.
-For example, the following is true: ``uint8(255) + uint8(1) == 0``. This situation is called
-an *overflow*. It occurs when an operation is performed that requires a fixed size variable
-to store a number (or piece of data) that is outside the range of the variable's data type.
-An *underflow* is the converse situation: ``uint8(0) - uint8(1) == 255``.
+They resemble integers when the values are small, but cannot represent arbitrarily large numbers.
+
+The following code causes an overflow because the result of the addition is too large
+to be stored in the type ``uint8``:
+
+::
+
+  uint8 x = 255;
+  uint8 y = 1;
+  return x + y;
+
+Solidity has two modes in which it deals with these overflows: Checked and Unchecked or "wrapping" mode.
+
+The default checked mode will detect overflows and cause a failing assertion. You can disable this check
+using ``unchecked { ... }``, causing the overflow to be silently ignored. The above code would return
+``0`` if wrapped in ``unchecked { ... }``.
+
+Even in checked mode, do not assume you are protected from overflow bugs.
+In this mode, overflows will always revert. If it is not possible to avoid the
+overflow, this can lead to a smart contract being stuck in a certain state.
 
 In general, read about the limits of two's complement representation, which even has some
 more special edge cases for signed numbers.
 
 Try to use ``require`` to limit the size of inputs to a reasonable range and use the
-:ref:`SMT checker<smt_checker>` to find potential overflows, or
-use a library like
-`SafeMath <https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/math/SafeMath.sol>`_
-if you want all overflows to cause a revert.
-
-Code such as ``require((balanceOf[_to] + _value) >= balanceOf[_to])`` can also help you check if values are what you expect.
+:ref:`SMT checker<smt_checker>` to find potential overflows.
 
 .. _clearing-mappings:
 
@@ -253,7 +263,7 @@ field of a ``struct`` that is the base type of a dynamic storage array.  The
 
 ::
 
-    pragma solidity >=0.6.0 <0.8.0;
+    pragma solidity >=0.6.0 <0.9.0;
 
     contract Map {
         mapping (uint => uint)[] array;

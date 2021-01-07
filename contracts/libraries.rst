@@ -28,7 +28,7 @@
 
 ::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.9.0;
 
       // 我们定义了一个新的结构体数据类型，用于在调用合约中保存数据。
       struct Data {
@@ -91,7 +91,7 @@
 
 ::
 
-    pragma solidity >=0.6.0;
+    pragma solidity  >=0.6.8 <0.9.0;
 
     struct bigint {
         uint[] limbs;
@@ -111,7 +111,7 @@
                 uint a = limb(_a, i);
                 uint b = limb(_b, i);
                 r.limbs[i] = a + b + carry;
-                if (a + b < a || (a + b == uint(-1) && carry > 0))
+                if (a + b < a || (a + b == type(uint).max && carry > 0))
                     carry = 1;
                 else
                     carry = 0;
@@ -140,7 +140,7 @@
 
         function f() public pure {
             bigint memory x = BigInt.fromUint(7);
-            bigint memory y = BigInt.fromUint(uint(-1));
+            bigint memory y = BigInt.fromUint(type(uint).max);
             bigint memory z = x.add(y);
             assert(z.limb(1) > 0);
         }
@@ -194,7 +194,7 @@
 
 ::
 
-    pragma solidity >=0.5.14 <0.7.0;
+    pragma solidity >=0.5.14 <0.9.0;
 
     library L {
         function f(uint256) external {}

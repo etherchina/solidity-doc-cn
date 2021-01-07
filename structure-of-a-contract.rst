@@ -27,7 +27,7 @@
 
 ::
 
-    pragma solidity >=0.4.0 <0.8.0;
+    pragma solidity >=0.4.0 <0.9.0;
 
     contract TinyStorage {
         uint storedXlbData; // 状态变量
@@ -48,7 +48,7 @@
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >0.7.0 <0.8.0;
+    pragma solidity >0.7.0 <0.9.0;
 
     contract TinyAuction {
         function Mybid() public payable { // 定义函数
@@ -80,7 +80,7 @@ Like functions, modifiers can be :ref:`overridden <modifier-overriding>`.
 
 ::
 
-    pragma solidity >=0.4.22 <0.8.0;
+    pragma solidity >=0.4.22 <0.9.0;
 
     contract MyPurchase {
         address public seller;
@@ -106,7 +106,7 @@ Like functions, modifiers can be :ref:`overridden <modifier-overriding>`.
 事件是能方便地调用以太坊虚拟机日志功能的接口。
 ::
 
-    pragma solidity >=0.4.21 <0.8.0;
+    pragma solidity >=0.4.21 <0.9.0;
     contract TinyAuction {
         event HighestBidIncreased(address bidder, uint amount); // 事件
 
@@ -127,7 +127,7 @@ Like functions, modifiers can be :ref:`overridden <modifier-overriding>`.
 结构体是可以将几个变量分组的自定义类型（参阅类型章节中的 :ref:`structs`）。
 ::
 
-    pragma solidity >=0.4.0 <0.8.0;
+    pragma solidity >=0.4.0 <0.9.0;
 
     contract TinyBallot {
         struct Voter { // 结构体
@@ -147,7 +147,7 @@ Like functions, modifiers can be :ref:`overridden <modifier-overriding>`.
 
 ::
 
-    pragma solidity >=0.4.0 <0.8.0;
+    pragma solidity >=0.4.0 <0.9.0;
 
     contract Upchain {
         enum State { Created, Locked, InValid } // 枚举

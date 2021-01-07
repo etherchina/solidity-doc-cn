@@ -54,7 +54,7 @@ Docker
 目前，docker 镜像只含有 solc 的可执行程序，因此你需要额外的工作去把源代码和输出目录连接起来。
 
 
-二进制包
+Linux 包
 ===============
 
 可在 `solidity/releases <https://github.com/ethereum/solidity/releases>`_ 下载 Solidity 的二进制安装包。
@@ -94,7 +94,18 @@ Docker
 
     pacman -S solidity
 
-在写本文时，Homebrew 上还没有提供预构建的二进制包（因为我们从 Jenkins 迁移到了 TravisCI ）。 我们将尽快提供 homebrew 下的二进制安装包，但至少从源码构建的方式还是行得通的：
+
+Gentoo Linux has an `Ethereum overlay <https://overlays.gentoo.org/#ethereum>`_ that contains a Solidity package.
+After the overlay is setup, ``solc`` can be installed in x86_64 architectures by:
+
+.. code-block:: bash
+
+    emerge dev-lang/solidity
+
+macOS Packages
+==============
+
+我们通过 Homebrew 从源码构建Solidity 编译器，预构建的bottles暂时还不支持。
 
 .. code:: bash
 
@@ -125,11 +136,111 @@ Docker
     # 例如安装 0.4.8
     brew install solidity.rb
 
-Gentoo Linux 下也提供了安装包，可使用 ``emerge`` 进行安装：
 
-.. code:: bash
+冻结的二进制版本
+================
 
-    emerge dev-lang/solidity
+We maintain a repository containing static builds of past and current compiler versions for all
+supported platforms at `solc-bin`_. This is also the location where you can find the nightly builds.
+
+The repository is not only a quick and easy way for end users to get binaries ready to be used
+out-of-the-box but it is also meant to be friendly to third-party tools:
+
+- The content is mirrored to https://binaries.soliditylang.org where it can be easily downloaded over
+  HTTPS without any authentication, rate limiting or the need to use git.
+- Content is served with correct `Content-Type` headers and lenient CORS configuration so that it
+  can be directly loaded by tools running in the browser.
+- Binaries do not require installation or unpacking (with the exception of older Windows builds
+  bundled with necessary DLLs).
+- We strive for a high level of backwards-compatibility. Files, once added, are not removed or moved
+  without providing a symlink/redirect at the old location. They are also never modified
+  in place and should always match the original checksum. The only exception would be broken or
+  unusable files with a potential to cause more harm than good if left as is.
+- Files are served over both HTTP and HTTPS. As long as you obtain the file list in a secure way
+  (via git, HTTPS, IPFS or just have it cached locally) and verify hashes of the binaries
+  after downloading them, you do not have to use HTTPS for the binaries themselves.
+
+The same binaries are in most cases available on the `Solidity release page on Github`_. The
+difference is that we do not generally update old releases on the Github release page. This means
+that we do not rename them if the naming convention changes and we do not add builds for platforms
+that were not supported at the time of release. This only happens in ``solc-bin``.
+
+The ``solc-bin`` repository contains several top-level directories, each representing a single platform.
+Each one contains a ``list.json`` file listing the available binaries. For example in
+``emscripten-wasm32/list.json`` you will find the following information about version 0.7.4:
+
+.. code-block:: json
+
+    {
+      "path": "solc-emscripten-wasm32-v0.7.4+commit.3f05b770.js",
+      "version": "0.7.4",
+      "build": "commit.3f05b770",
+      "longVersion": "0.7.4+commit.3f05b770",
+      "keccak256": "0x300330ecd127756b824aa13e843cb1f43c473cb22eaf3750d5fb9c99279af8c3",
+      "urls": [
+        "bzzr://16c5f09109c793db99fe35f037c6092b061bd39260ee7a677c8a97f18c955ab1",
+        "dweb:/ipfs/QmTLs5MuLEWXQkths41HiACoXDiH8zxyqBHGFDRSzVE5CS"
+      ]
+    }
+
+This means that:
+
+- You can find the binary in the same directory under the name
+  `solc-emscripten-wasm32-v0.7.4+commit.3f05b770.js <https://github.com/ethereum/solc-bin/blob/gh-pages/emscripten-wasm32/solc-emscripten-wasm32-v0.7.4+commit.3f05b770.js>`_.
+  Note that the file might be a symlink, and you will need to resolve it yourself if you are not using
+  git to download it or your file system does not support symlinks.
+- The binary is also mirrored at https://binaries.soliditylang.org/emscripten-wasm32/solc-emscripten-wasm32-v0.7.4+commit.3f05b770.js.
+  In this case git is not necessary and symlinks are resolved transparently, either by serving a copy
+  of the file or returning a HTTP redirect.
+- The file is also available on IPFS at `QmTLs5MuLEWXQkths41HiACoXDiH8zxyqBHGFDRSzVE5CS`_.
+- The file might in future be available on Swarm at `16c5f09109c793db99fe35f037c6092b061bd39260ee7a677c8a97f18c955ab1`_.
+- You can verify the integrity of the binary by comparing its keccak256 hash to
+  ``0x300330ecd127756b824aa13e843cb1f43c473cb22eaf3750d5fb9c99279af8c3``.  The hash can be computed
+  on the command line using ``keccak256sum`` utility provided by `sha3sum`_ or `keccak256() function
+  from ethereumjs-util`_ in JavaScript.
+
+.. warning::
+
+   Due to the strong backwards compatibility requirement the repository contains some legacy elements
+   but you should avoid using them when writing new tools:
+
+   - Use ``emscripten-wasm32/`` (with a fallback to ``emscripten-asmjs/``) instead of ``bin/`` if
+     you want the best performance. Until version 0.6.1 we only provided asm.js binaries.
+     Starting with 0.6.2 we switched to `WebAssembly builds`_ with much better performance. We have
+     rebuilt the older versions for wasm but the original asm.js files remain in ``bin/``.
+     The new ones had to be placed in a separate directory to avoid name clashes.
+   - Use ``emscripten-asmjs/`` and ``emscripten-wasm32/`` instead of ``bin/`` and ``wasm/`` directories
+     if you want to be sure whether you are downloading a wasm or an asm.js binary.
+   - Use ``list.json`` instead of ``list.js`` and ``list.txt``. The JSON list format contains all
+     the information from the old ones and more.
+   - Use https://binaries.soliditylang.org instead of https://solc-bin.ethereum.org. To keep things
+     simple we moved almost everything related to the compiler under the new ``soliditylang.org``
+     domain and this applies to ``solc-bin`` too. While the new domain is recommended, the old one
+     is still fully supported and guaranteed to point at the same location.
+
+.. warning::
+
+    The binaries are also available at https://ethereum.github.io/solc-bin/ but this page
+    stopped being updated just after the release of version 0.7.2, will not receive any new releases
+    or nightly builds for any platform and does not serve the new directory structure, including
+    non-emscripten builds.
+
+    If you are using it, please switch to https://binaries.soliditylang.org, which is a drop-in
+    replacement. This allows us to make changes to the underlying hosting in a transparent way and
+    minimize disruption. Unlike the ``ethereum.github.io`` domain, which we do not have any control
+    over, ``binaries.soliditylang.org`` is guaranteed to work and maintain the same URL structure
+    in the long-term.
+
+.. _IPFS: https://ipfs.io
+.. _Swarm: https://swarm-gateways.net/bzz:/swarm.eth
+.. _solc-bin: https://github.com/ethereum/solc-bin/
+.. _Solidity release page on github: https://github.com/ethereum/solidity/releases
+.. _sha3sum: https://github.com/maandree/sha3sum
+.. _keccak256() function from ethereumjs-util: https://github.com/ethereumjs/ethereumjs-util/blob/master/docs/modules/_hash_.md#const-keccak256
+.. _WebAssembly builds: https://emscripten.org/docs/compiling/WebAssembly.html
+.. _QmTLs5MuLEWXQkths41HiACoXDiH8zxyqBHGFDRSzVE5CS: https://gateway.ipfs.io/ipfs/QmTLs5MuLEWXQkths41HiACoXDiH8zxyqBHGFDRSzVE5CS
+.. _16c5f09109c793db99fe35f037c6092b061bd39260ee7a677c8a97f18c955ab1: https://swarm-gateways.net/bzz:/16c5f09109c793db99fe35f037c6092b061bd39260ee7a677c8a97f18c955ab1/
+
 
 .. _building-from-source:
 
@@ -144,13 +255,13 @@ Gentoo Linux 下也提供了安装包，可使用 ``emerge`` 进行安装：
 +-----------------------------------+-------------------------------------------------------+
 | 软件                          | 备注                                                 |
 +===================================+=======================================================+
-| `CMake`_ (version 3.9+)           | Cross-platform build file generator.                  |
+| `CMake`_ (version 3.13+)           | Cross-platform build file generator.                  |
 +-----------------------------------+-------------------------------------------------------+
 | `Boost`_  (version 1.65+)         | C++ libraries.                                        |
 +-----------------------------------+-------------------------------------------------------+
 | `Git`_                            | 获取源代码的命令行工具         |
 +-----------------------------------+-------------------------------------------------------+
-| `z3`_ (version 4.6+, Optional)    | For use with SMT checker.                             |
+| `z3`_ (version 4.8+, Optional)    | For use with SMT checker.                             |
 +-----------------------------------+-------------------------------------------------------+
 | `cvc4`_ (Optional)                | For use with SMT checker.                             |
 +-----------------------------------+-------------------------------------------------------+
@@ -173,8 +284,8 @@ Gentoo Linux 下也提供了安装包，可使用 ``emerge`` 进行安装：
 
 The following C++ compilers and their minimum versions can build the Solidity codebase:
 
-- `GCC <https://gcc.gnu.org>`_, version 5+
-- `Clang <https://clang.llvm.org/>`_, version 3.4+
+- `GCC <https://gcc.gnu.org>`_, version 8+
+- `Clang <https://clang.llvm.org/>`_, version 7+
 - `MSVC <https://visualstudio.microsoft.com/vs/>`_, version 2019+
 
 
@@ -288,7 +399,8 @@ Solidity 有 Git 子模块，需确保完全加载它们：
 
 **确保你已安装外部依赖（见上面）**
 
-Solidity 使用 CMake 来配置构建。Linux、macOS 和其他 Unix系统上的构建方式都差不多：
+Solidity 使用 CMake 来配置构建。你也许想要安装 `cache`_ 来加速重复构建，CMake自动进行这个工作。
+Linux、macOS 和其他 Unix系统上的构建方式都差不多：
 
 .. code:: bash
 

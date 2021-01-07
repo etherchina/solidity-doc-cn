@@ -61,7 +61,7 @@ Solidity 事件是EVM的日志功能之上的抽象。
 
 ::
 
-    pragma solidity  >=0.4.21 <0.8.0;
+    pragma solidity  >=0.4.21 <0.9.0;
 
     contract ClientReceipt {
         event Deposit(
@@ -117,33 +117,6 @@ Solidity 事件是EVM的日志功能之上的抽象。
   }
 
 
-
-.. index:: ! log
-
-日志的底层接口
-===========================
-
-通过函数 ``log0``，``log1``， ``log2``， ``log3`` 和 ``log4`` 也可以访问日志机制的底层接口。
-每个函数 ``logi``  接受 ``i + 1`` 个 ``bytes32`` 类型的参数。其中第一个参数会被用来做为日志的数据部分，
-其它的会做为 topic。上面的事件调用可以以如下相同的方式执行：
-
-::
-
-    pragma solidity >=0.4.10 <0.8.0;
-
-    contract C {
-        function f() public payable {
-            bytes32 _id = 0x420042;
-            log3(
-                bytes32(msg.value),
-                bytes32(0x50cb9fe53daa9737b786ab3646f04d0150dc50ef4e75f59509d83667ad5adb20),
-                bytes32(msg.sender),
-                _id
-            );
-        }
-    }
-
-其中长串的十六进制数的计算方法是 ``keccak256("Deposit(address,hash256,uint256)")``，即事件的签名。
 
 其它学习事件机制的资源
 ==============================================

@@ -315,7 +315,7 @@ Solidity 支持的导入语句来模块化代码，其语法跟 JavaScript（从
 
 ::
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.21 <0.8.0;
+    pragma solidity >=0.4.21 <0.9.0;
 
   /** @title 形状计算器。 */
   contract tinyCalculator {

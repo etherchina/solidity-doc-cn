@@ -35,7 +35,7 @@
 
 ::
 
-    pragma solidity  >=0.4.16 <0.8.0;
+    pragma solidity  >=0.4.16 <0.9.0;
 
     contract C {
         function f(uint a) private pure returns (uint b) { return a + 1; }
@@ -48,7 +48,7 @@
 
 ::
 
-    pragma solidity >=0.4.16 <0.8.0;
+    pragma solidity >=0.4.16 <0.9.0;
 
     contract C {
         uint private data;
@@ -89,7 +89,7 @@ Getter 函数
 
 ::
 
-    pragma solidity  >=0.4.16 <0.8.0;
+    pragma solidity  >=0.4.16 <0.9.0;
 
     contract C {
         uint public data = 42;
@@ -107,7 +107,7 @@ getter 函数具有外部（external）可见性。如果在内部访问 getter�
 
 ::
 
-    pragma solidity >=0.4.16 <0.8.0;
+    pragma solidity >=0.4.16 <0.9.0;
 
     contract C {
         uint public data;
@@ -123,7 +123,7 @@ getter 函数具有外部（external）可见性。如果在内部访问 getter�
 
 ::
 
-  pragma solidity >=0.4.0 <0.8.0;
+  pragma solidity >=0.4.0 <0.9.0;
 
   contract arrayExample {
     // public state variable
@@ -148,7 +148,7 @@ getter 函数具有外部（external）可见性。如果在内部访问 getter�
 
 ::
 
-    pragma solidity ^0.4.0 <0.8.0;
+    pragma solidity ^0.4.0 <0.9.0;
 
     contract Complex {
         struct Data {

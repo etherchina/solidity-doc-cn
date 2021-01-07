@@ -1167,5 +1167,49 @@
   "0.6.9": {
       "bugs": [],
       "released": "2020-06-04"
+  },
+  "0.7.0": {
+    "bugs": [
+        "EmptyByteArrayCopy",
+        "DynamicArrayCleanup"
+    ],
+    "released": "2020-07-28"
+  },
+  "0.7.1": {
+      "bugs": [
+          "EmptyByteArrayCopy",
+          "DynamicArrayCleanup",
+          "FreeFunctionRedefinition"
+      ],
+      "released": "2020-09-02"
+  },
+  "0.7.2": {
+      "bugs": [
+          "EmptyByteArrayCopy",
+          "DynamicArrayCleanup"
+      ],
+      "released": "2020-09-28"
+  },
+  "0.7.3": {
+      "bugs": [
+          "EmptyByteArrayCopy"
+      ],
+      "released": "2020-10-07"
+  },
+  "0.7.4": {
+      "bugs": [],
+      "released": "2020-10-19"
+  },
+  "0.7.5": {
+      "bugs": [],
+      "released": "2020-11-18"
+  },
+  "0.7.6": {
+      "bugs": [],
+      "released": "2020-12-16"
+  },
+  "0.8.0": {
+      "bugs": [],
+      "released": "2020-12-16"
   }
 }

@@ -97,7 +97,7 @@
                 // 接收者可以在 `send` 返回之前，重新调用该函数。
                 pendingReturns[msg.sender] = 0;
 
-                if (!msg.sender.send(amount)) {
+                if (!payable(msg.sender).send(amount)) {
                     // 这里不需抛出异常，只需重置未付款
                     pendingReturns[msg.sender] = amount;
                     return false;
@@ -154,7 +154,7 @@
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity ^0.7.0;
+    pragma solidity >=0.7.0 <0.9.0;
 
     contract BlindAuction {
         struct Bid {

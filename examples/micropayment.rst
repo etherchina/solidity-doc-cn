@@ -101,7 +101,7 @@ ReceiverPays 完整合约代码
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity ^0.7.0;
+    pragma solidity >=0.7.0 <0.9.0;
 
     contract ReceiverPays {
         address owner = msg.sender;
@@ -120,13 +120,13 @@ ReceiverPays 完整合约代码
 
             require(recoverSigner(message, signature) == owner);
 
-            msg.sender.transfer(amount);
+            payable(msg.sender).transfer(amount);
         }
 
         /// destroy the contract and reclaim the leftover funds.
         function kill() public {
             require(msg.sender == owner);
-            selfdestruct(msg.sender);
+            selfdestruct(payable(msg.sender));
         }
 
         /// 第三方方法，分离签名信息的 v r s
@@ -267,7 +267,7 @@ Bob可以随时关闭支付通道，但如果他没有这样做，Alice 需要�
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity ^0.7.0;
+    pragma solidity >=0.7.0 <0.9.0;
 
     contract SimplePaymentChannel {
         address payable public sender;      // The account sending payments.
@@ -278,7 +278,7 @@ Bob可以随时关闭支付通道，但如果他没有这样做，Alice 需要�
             public
             payable
         {
-            sender = msg.sender;
+            sender = payable(msg.sender);
             recipient = _recipient;
             expiration = block.timestamp + duration;
         }
