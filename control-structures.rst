@@ -388,20 +388,17 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
 
 .. _unchecked:
 
-Checked or Unchecked Arithmetic
+算术运算的检查模式与非检查模式
 =================================
 
-An overflow or underflow is the situation where the resulting value of an arithmetic operation,
-when executed on an unrestricted integer, falls outside the range of the result type.
+当对无限制整数执行算术运算，其结果超出结果类型的范围，这是就发生了上溢出或下溢出。
 
-Prior to Solidity 0.8.0, arithmetic operations would always wrap in case of
-under- or overflow leading to widespread use of libraries that introduce
-additional checks.
+在Solidity 0.8.0之前，算术运算总是会在发生溢出的情况下进行“截断”，从而得靠引入额外检查库来解决这个问题（如 OpenZepplin 的 SafeMath）。
 
-Since Solidity 0.8.0, all arithmetic operations revert on over- and underflow by default,
-thus making the use of these libraries unnecessary.
+而从Solidity 0.8.0开始，所有的算术运算默认就会进行溢出检查，额外引入库将不再必要。
 
-To obtain the previous behaviour, an ``unchecked`` block can be used:
+如果想要之前“截断”的效果，可以使用 ``unchecked`` 代码块：
+
 
 ::
 
@@ -409,44 +406,43 @@ To obtain the previous behaviour, an ``unchecked`` block can be used:
     pragma solidity >0.7.99;
     contract C {
         function f(uint a, uint b) pure public returns (uint) {
-            // This addition will wrap on underflow.
+            // 溢出会返回“截断”的结果
             unchecked { return a - b; }
         }
         function g(uint a, uint b) pure public returns (uint) {
-            // This addition will revert on underflow.
+            // 溢出会抛出异常
             return a - b;
         }
     }
 
-The call to ``f(2, 3)`` will return ``2**256-1``, while ``g(2, 3)`` will cause
-a failing assertion.
+调用 ``f(2, 3)`` 将返回 ``2**256-1``, 而 ``g(2, 3)`` 会触发失败异常。
 
-The ``unchecked`` block can be used everywhere inside a block, but not as a replacement
-for a block. It also cannot be nested.
 
-The setting only affects the statements that are syntactically inside the block.
-Functions called from within an ``unchecked`` block do not inherit the property.
+``unchecked`` 代码块可以在代码块中的任何位置使用，但不可以替代整个函数代码块，同样不可以嵌套。
+
+此设置仅影响语法上位于``unchecked``块内的语句。
+在块中调用的函数不会此影响。
 
 .. note::
-    To avoid ambiguity, you cannot use ``_;`` inside an ``unchecked`` block.
+    为避免歧义，不能在 ``unchecked`` 块中使用 ' _;' 。
 
-The following operators will cause a failing assertion on overflow or underflow
-and will wrap without an error if used inside an unchecked block:
+下面的这个运算操作符会进行溢出检查，如果上溢出或下溢会触发失败异常。
+如果在费检查模式代码块中使用，将不会出现错误:
+
 
 ``++``, ``--``, ``+``, binary ``-``, unary ``-``, ``*``, ``/``, ``%``, ``**``
 
 ``+=``, ``-=``, ``*=``, ``/=``, ``%=``
 
 .. warning::
-    It is not possible to disable the check for division by zero
-    or modulo by zero using the ``unchecked`` block.
+    除 0（或除 0取模）的异常是不能被 ``unchecked`` 忽略的。
+
 
 .. note::
-    The second statement in ``int x = type(int).min; -x;`` will result in an overflow
-    because the negative range can hold one more value than the positive range.
+    ``int x = type(int).min; -x;`` 中的第 2 句会溢出，因为负数的范围比正整数的范围大 1（译者注：这样最小的负数就没有对应的正整数了） 。
 
-Explicit type conversions will always truncate and never cause a failing assertion
-with the exception of a conversion from an integer to an enum type.
+
+显式类型转换将始终截断并且不会导致失败的断言，但是从整数到枚举类型的转换例外。
 
 .. index:: ! exception, ! throw, ! assert, ! require, ! revert, ! errors
 
