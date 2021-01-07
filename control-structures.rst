@@ -67,8 +67,7 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 
 请注意，不建议明确指定gas，因为操作码的gas 消耗将来可能会发生变化。
 任何发送给合约 Wei  将被添加到该合约的总余额中：
-
-
+::
     pragma solidity >=0.6.2 <0.9.0;
 
     contract InfoFeed {

@@ -50,7 +50,7 @@
 
 
 .. warning::
-  Solidity中的整数是有取值范围的。 例如``uint32``类型的取值范围是 ``0``到``2 ** 32-1```。
+  Solidity中的整数是有取值范围的。 例如 ``uint32`` 类型的取值范围是 ``0`` 到 ``2 ** 32-1`` 。
   0.8.0 开始，算术运算有两个计算模式：一个是 "wrapping"（截断）模式或称 "unchecked"（不检查）模式，一个是"checked" （检查）模式。
   默认情况下，算术运算在 "checked" 模式下，即都会进行溢出检查，如果结果落在取值范围之外，调用会通过 :ref:`失败异常<assert-and-require>`回退。
   你也可以通过 ``unchecked { ... }`` 切换到 "unchecked"模式，更多可参考 :ref:`unchecked <unchecked>`.
