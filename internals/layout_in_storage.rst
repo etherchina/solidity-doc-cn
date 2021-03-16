@@ -81,10 +81,10 @@ JSON 输出
 
 .. _storage-layout-top-level:
 
-The storage layout of a contract can be requested via
-the :ref:`standard JSON interface <compiler-api>`.  The output is a JSON object containing two keys,
-``storage`` and ``types``.  The ``storage`` object is an array where each
-element has the following form:
+合约的存储布局可以通过 :ref:`standard JSON interface <compiler-api>` 获取到。
+输出JSON对象包含 2 个字段 ``storage`` 和 ``types`` 。  
+
+``storage`` 对象时一个数组，它的每个元素有如下的形式：
 
 
 .. code::
@@ -99,20 +99,18 @@ element has the following form:
         "type": "t_uint256"
     }
 
-The example above is the storage layout of ``contract A { uint x; }`` from source unit ``fileA``
-and
+上面是文件： ``fileA`` 合约： ``contract A { uint x; }`` 存储布局，每个字段说明如下：
 
-- ``astId`` is the id of the AST node of the state variable's declaration
-- ``contract`` is the name of the contract including its path as prefix
-- ``label`` is the name of the state variable
-- ``offset`` is the offset in bytes within the storage slot according to the encoding
-- ``slot`` is the storage slot where the state variable resides or starts. This
-  number may be very large and therefore its JSON value is represented as a
-  string.
-- ``type`` is an identifier used as key to the variable's type information (described in the following)
 
-The given ``type``, in this case ``t_uint256`` represents an element in
-``types``, which has the form:
+- ``astId`` 是状态变量声明的AST节点的id。
+- ``contract`` 是合约的名称，包括其路径作为前缀。
+- ``label`` 是状态变量的名称。
+- ``offset`` 是根据编码在存储槽内以字节为单位的偏移量。
+- ``slot`` 是状态变量所在或开始的存储槽。这个数字可能非常大，因此它的JSON值被表示为一个字符串。
+- ``type`` 是一个标识符，作为变量类型信息的关键(如下所述)。
+
+
+给定的 ``type``，在本例中 ``t_uint256`` 代表 ``types`` 中的一个元素，其形式为：
 
 
 .. code::
@@ -123,31 +121,26 @@ The given ``type``, in this case ``t_uint256`` represents an element in
         "numberOfBytes": "32",
     }
 
-where
+而
 
-- ``encoding`` how the data is encoded in storage, where the possible values are:
+- ``encoding`` 数据在存储中如何编码，可能的数值是：
 
-  - ``inplace``: data is laid out contiguously in storage (see :ref:`above <storage-inplace-encoding>`).
-  - ``mapping``: Keccak-256 hash-based method (see :ref:`above <storage-hashed-encoding>`).
-  - ``dynamic_array``: Keccak-256 hash-based method (see :ref:`above <storage-hashed-encoding>`).
-  - ``bytes``: single slot or Keccak-256 hash-based depending on the data size (see :ref:`above <bytes-and-string>`).
+  - ``inplace``: 数据在存储中连续排列 (见 :ref:`前面状态变量储存结构 <storage-inplace-encoding>`).
+  - ``mapping``: Keccak-256基于哈希的方法 (见 :ref:`前面前面映射和动态数组 <storage-hashed-encoding>`).
+  - ``dynamic_array``: Keccak-256基于哈希的方法 (见 :ref:`前面映射和动态数组 <storage-hashed-encoding>`).
+  - ``bytes``: 单槽或基于Keccak-256哈希的方法，取决于数据大小 (见 :ref:`前面bytes <bytes-and-string>`).
 
-- ``label`` is the canonical type name.
-- ``numberOfBytes`` is the number of used bytes (as a decimal string).
-  Note that if ``numberOfBytes > 32`` this means that more than one slot is used.
+- ``label`` 是规范的类型名称 。
+- ``numberOfBytes`` 是使用的字节数(十进制字符串)
+  注意，如果 ``numberOfBytes>32`` 意味着使用了一个以上的槽。
 
-Some types have extra information besides the four above. Mappings contain
-its ``key`` and ``value`` types (again referencing an entry in this mapping
-of types), arrays have its ``base`` type, and structs list their ``members`` in
-the same format as the top-level ``storage`` (see :ref:`above
-<storage-layout-top-level>`).
+除了上述四个外，有些类型还有额外的信息。映射包含其 ``key`` 和 ``value`` 类型(再次引用该类型映射中元素类型)，数组有其 ``base`` 类型，结构以与顶层 ``storage`` 相同的格式列出其 ``members`` (见 :ref:`前面JSON 输出 <storage-layout-top-level>`).
 
 .. note ::
-  The JSON output format of a contract's storage layout is still considered experimental
-  and is subject to change in non-breaking releases of Solidity.
+  合约的存储布局的JSON输出格式仍被认为是实验性的，即使在Solidity的非突破性版本更新中也可能会发生变化。
 
-The following example shows a contract and its storage layout, containing
-value and reference types, types that are encoded packed, and nested types.
+
+下面的例子显示了一个合约和它的存储布局，包含值类型和引用类型、被编码打包的类型和嵌套类型。
 
 
 .. code::
