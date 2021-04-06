@@ -52,8 +52,8 @@
 .. warning::
   Solidity中的整数是有取值范围的。 例如 ``uint32`` 类型的取值范围是 ``0`` 到 ``2 ** 32-1`` 。
   0.8.0 开始，算术运算有两个计算模式：一个是 "wrapping"（截断）模式或称 "unchecked"（不检查）模式，一个是"checked" （检查）模式。
-  默认情况下，算术运算在 "checked" 模式下，即都会进行溢出检查，如果结果落在取值范围之外，调用会通过 :ref:`失败异常<assert-and-require>`回退。
-  你也可以通过 ``unchecked { ... }`` 切换到 "unchecked"模式，更多可参考 :ref:`unchecked <unchecked>`.
+  默认情况下，算术运算在 "checked" 模式下，即都会进行溢出检查，如果结果落在取值范围之外，调用会通过 :ref:`失败异常<assert-and-require>` 回退。
+  你也可以通过 ``unchecked { ... }`` 切换到 "unchecked"模式，更多可参考 :ref:`unchecked <unchecked>` .
 
 
 比较运算
@@ -111,7 +111,7 @@
 注意在智能合约中，在 :ref:`字面常量<rational_literals>` 上进行除法会保留精度（保留小数位）。
 
 .. note::
-  除以0 会发生 :ref:`Panic 错误<assert-and-require>`， 而且这个检查，不可以通过 ``unchecked { ... }`` 禁用掉。
+  除以0 会发生 :ref:`Panic 错误<assert-and-require>` ， 而且这个检查，不可以通过 ``unchecked { ... }`` 禁用掉。
 
 .. note::
   表达式 ``type(int).min / (-1)`` 是仅有的整除会发生向上溢出的情况。
@@ -121,7 +121,7 @@
 ^^^^^^^^^^^^^^^
 
 模运算 ``a％n`` 是在操作数 ``a`` 的除以 ``n`` 之后产生余数 ``r`` ，其中 ``q = int(a / n)`` 和 ``r = a - (n * q)`` 。 这意味着模运算结果与左操作数相同的符号相同（或零）。
-对于 负数的a : ``a % n == -(a % n)``， 几个例子：
+对于 负数的a : ``a % n == -(-a % n)``， 几个例子：
 
  * ``int256(5) % int256(2) == int256(1)``
  * ``int256(5) % int256(-2) == int256(1)``
@@ -183,7 +183,7 @@
 地址类型有两种形式，他们大致相同：
 
  - ``address``：保存一个20字节的值（以太坊地址的大小）。
- - ``ddress payable`` ：可支付地址，与 ``address`` 相同，不过有成员函数 ``transfer`` 和 ``send`` 。
+ - ``address payable`` ：可支付地址，与 ``address`` 相同，不过有成员函数 ``transfer`` 和 ``send`` 。
 
 这种区别背后的思想是 ``address payable`` 可以接受以太币的地址，而一个普通的 ``address`` 则不能。
 
