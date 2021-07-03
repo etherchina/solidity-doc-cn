@@ -59,7 +59,7 @@
 - ``block.timestamp`` (``uint``): 自 unix epoch 起始当前区块以秒计的时间戳
 - ``gasleft() returns (uint256)``：剩余的 gas
 - ``msg.data`` (``bytes``): 完整的 calldata
-- ``msg.gas`` (``uint``): 剩余 gas - 自 0.4.21 版本开始已经不推荐使用，由 ``gesleft()`` 代替
+- ``msg.gas`` (``uint``): 剩余 gas - 自 0.4.21 版本开始已经不推荐使用，由 ``gasleft()`` 代替
 - ``msg.sender`` (``address``): 消息发送者（当前调用）
 - ``msg.sig`` (``bytes4``): calldata 的前 4 字节（也就是函数标识符）
 - ``msg.value`` (``uint``): 随消息发送的 wei 的数量
