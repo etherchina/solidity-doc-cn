@@ -179,7 +179,7 @@ Solidity 支持的导入语句来模块化代码，其语法跟 JavaScript（从
 如果在“filename”中添加新的符号，则会自动添加出现在所有导入 “filename” 的文件中。 更好的方式是明确导入的具体
 符号。
 
-向下面这样，创建了新的 ``symbolName`` 全局符号，他的成员都来自与导入的 ``"filename"`` 文件中的全局符号，如：
+像下面这样，创建了新的 ``symbolName`` 全局符号，他的成员都来自与导入的 ``"filename"`` 文件中的全局符号，如：
 ::
 
   import * as symbolName from "filename";
@@ -314,17 +314,17 @@ Solidity 支持的导入语句来模块化代码，其语法跟 JavaScript（从
 在下面的例子中，我们记录了合约的标题，并解释了两个传入参书和两个返回值的翻译。
 
 ::
-    // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.21 <0.9.0;
+
+  // SPDX-License-Identifier: GPL-3.0
+  pragma solidity >=0.4.21 <0.9.0;
 
   /** @title 形状计算器。 */
   contract tinyCalculator {
-      /** @dev 求矩形表明面积与周长。
-      * @param w 矩形宽度。
-      * @param h 矩形高度。
-      * @return s 求得表面积。
-      * @return p 求得周长。
-      */
+      /// @dev 求矩形表明面积与周长。
+      /// @param w 矩形宽度。
+      /// @param h 矩形高度。
+      /// @return s 求得表面积。
+      /// @return p 求得周长。
       function rectangle(uint w, uint h) returns (uint s, uint p) {
           s = w * h;
           p = 2 * (w + h);
