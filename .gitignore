@@ -1,4 +1,5 @@
 .DS_Store
+versions.json
 _build/
 utils/SolidityLexer.pyc
 utils/__pycache__

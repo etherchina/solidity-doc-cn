@@ -1,4 +1,4 @@
-.. include:: ../glossaries.rst
+.. include:: glossaries.rst
 .. index:: ! event
 
 .. _events:
@@ -61,7 +61,7 @@ Solidity 事件是EVM的日志功能之上的抽象。
 
 ::
 
-    pragma solidity  >=0.4.21 <0.7.0;
+    pragma solidity  >=0.4.21 <0.9.0;
 
     contract ClientReceipt {
         event Deposit(
@@ -118,37 +118,10 @@ Solidity 事件是EVM的日志功能之上的抽象。
 
 
 
-.. index:: ! log
-
-日志的底层接口
-===========================
-
-通过函数 ``log0``，``log1``， ``log2``， ``log3`` 和 ``log4`` 也可以访问日志机制的底层接口。
-每个函数 ``logi``  接受 ``i + 1`` 个 ``bytes32`` 类型的参数。其中第一个参数会被用来做为日志的数据部分，
-其它的会做为 topic。上面的事件调用可以以如下相同的方式执行：
-
-::
-
-    pragma solidity >=0.4.10 <0.7.0;
-
-    contract C {
-        function f() public payable {
-            bytes32 _id = 0x420042;
-            log3(
-                bytes32(msg.value),
-                bytes32(0x50cb9fe53daa9737b786ab3646f04d0150dc50ef4e75f59509d83667ad5adb20),
-                bytes32(msg.sender),
-                _id
-            );
-        }
-    }
-
-其中长串的十六进制数的计算方法是 ``keccak256("Deposit(address,hash256,uint256)")``，即事件的签名。
-
 其它学习事件机制的资源
 ==============================================
 
-- `Javascript 文档 <https://github.com/ethereum/wiki/wiki/JavaScript-API#contract-events>`_
-- `Web3.js 0.2x 中文文档 <https://learnblockchain.cn/docs/web3js-0.2x/web3.eth.html#contract-events>`_
-- `事件使用例程 <https://github.com/debris/smart-exchange/blob/master/lib/contracts/SmartExchange.sol>`_
-- `如何在 js 中访问它们 <https://github.com/debris/smart-exchange/blob/master/lib/exchange_transactions.js>`_
+- `Javascript 文档 <https://github.com/ethereum/web3.js/blob/1.x/docs/web3-eth-contract.rst#events>`_
+- `Web3.js 中文文档 <https://learnblockchain.cn/docs/web3.js/web3-eth-contract.html#id58>`_
+- `事件使用例子 <https://github.com/ethchange/smart-exchange/blob/master/lib/contracts/SmartExchange.sol>`_
+- `如何在 js 中访问它们 <https://github.com/ethchange/smart-exchange/blob/master/lib/exchange_transactions.js>`_

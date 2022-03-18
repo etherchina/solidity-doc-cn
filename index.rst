@@ -1,4 +1,4 @@
-Solidity 最新中文文档
+Solidity 最新(0.8.0)中文文档
 ================================
 
 .. image:: logo.svg
@@ -7,8 +7,8 @@ Solidity 最新中文文档
     :align: center
 
 
-译者说明：本文档根据当前 `Solidity官方文档 <https://solidity.readthedocs.io/>`_ 最新版本（当前为v0.6.12）进行翻译。
-并且由于高质量的翻译和及时的更新，现在是 **Solidity官方推荐中文版** 。
+译者说明：这里是是 **Solidity官方推荐中文版**，本文档根据当前 `Solidity官方文档 <https://solidity.readthedocs.io/>`_ 最新版本（当前为v0.8.0）进行翻译。
+
 
 Solidity中文翻译最初由 `HiBlock <http://hiblock.one/>`_ 社区发起，后由 `登链社区 <https://learnblockchain.cn/>`_ 社区持续维护更新。
 本翻译工作还得到 `Cell Network <http://www.cellnetwork.io/?utm_souce=learnblockchain>`_ 赞助。
@@ -26,25 +26,42 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 
 .. warning::
 
-  Solidity 发布 0.5.x 有很多与之前版本不兼容的升级，理解更新可阅读 :doc:`更新列表 <050-breaking-changes>`.
-  Solidity 发布 0.6.x 有很多与之前版本不兼容的升级，理解更新可阅读 :doc:`更新列表 <060-breaking-changes>`.
+  Solidity 每个大版本的设计，都会引入一些与之前版本不兼容的升级，详情可阅读 :doc:`0.8.0 更新列表 <080-breaking-changes>` ，  :doc:`0.7 更新列表 <070-breaking-changes>` , :doc:`0.6 更新列表 <060-breaking-changes>` , :doc:`0.5 更新列表 <050-breaking-changes>` 。
 
-语言文档
+开始使用Solidity
 ----------------------
 
-如果你才接触智能合约概念，推荐从一些 `简单的Solidity合约例子 <introduction-to-smart-contracts.html#simple-smart-contract>`_ 开始，当你想开始尝试了解更多的细节，可以
-学习 :doc:`合约样例 <solidity-by-example>` 和 "Solidity详解" 部分 。
+**1. 理解合约基础概念**
 
-你还可以进一步阅读 :ref:`区块链 <blockchain-basics>` 基础，然后是 :ref:`以太坊虚拟机 <the-ethereum-virtual-machine>` 。
+如果你才接触智能合约概念，推荐从智能合约的概念开始，可以参考：
+
+* :ref:`简单的Solidity合约例子 <simple-smart-contract>`.
+* :ref:`区块链基础 <blockchain-basics>`.
+* :ref:`以太坊虚拟机 <the-ethereum-virtual-machine>`.
+
 
 .. hint::
     译者注：理解智能合约及虚拟机是怎么运行，还可阅读这两篇文章   `完全理解以太坊智能合约 <https://learnblockchain.cn/2018/01/04/understanding-smart-contracts/>`_  及  `深入浅出以太坊虚拟机 <https://learnblockchain.cn/2019/04/09/easy-evm/>`_ 。
+
+**2. 了解 Solidity**
+
+一旦熟悉了基础概念，我们推荐人阅读 :doc:`"根据例子学习Solidity " <solidity-by-example>`
+以及Solidity详解部分理解语言的核心概念。
+
+
+**3. 安装Solidity编译器**
+
+有好多方式可以安装Solidity编译器，你可以选择你喜欢的方式，跟着 :ref:`安装指引 <installing-solidity>` 进行安装。
 
 .. hint::
     目前尝试 Solidity 编程的最好的方式是使用 `Remix <https://remix.ethereum.org/>`_ （需要时间加载，请耐心等待）。Remix 是一个基于 Web 浏览器的 IDE，它可以让你编写 Solidity 智能合约，然后部署并运行该智能合约。
 
 .. warning::
     因为软件是人编写的，就会有 bug，所以，创建智能合约也应该遵循软件开发领域熟知的最佳实践。这些实践包括代码审查、测试、审计和正确性证明。也请注意，有时候用户在代码方面比软件的作者更谙熟。最后，区块链本身有些东西需要留意，请参考 :ref:`security_considerations`。
+
+**4. 学习更多**
+
+如果您想了解有关在以太坊上构建去中心化应用程序的更多信息，`以太坊开发者资源网站 <https://ethereum.org/en/developers/>`_ 及 `登链社区 - 以太坊分类 <https://learnblockchain.cn/categories/ethereum//>`_ 可以找到更多以太坊相关的文档、教程以及开发工具、库等。
 
 如果还有问题，你可以尝试搜索或在 `Ethereum Stackexchange <https://ethereum.stackexchange.com/>`_ 上提问，或者到我们的 `gitter 频道 <https://gitter.im/ethereum/solidity/>`_ 来。随时欢迎改善 Solidity 或本文档的想法！
 
@@ -56,7 +73,7 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 * `简体中文版 <https://learnblockchain.cn/docs/solidity/>`_ （由 `登链社区 <https://learnblockchain.cn/>`_ `HiBlock社区 <http://hiblock.one/>`_  贡献者翻译）
 * `西班牙语版 <https://solidity-es.readthedocs.io>`_
 * `俄语版 <https://github.com/ethereum/wiki/wiki/%5BRussian%5D-%D0%A0%D1%83%D0%BA%D0%BE%D0%B2%D0%BE%D0%B4%D1%81%D1%82%D0%B2%D0%BE-%D0%BF%D0%BE-Solidity>`_ (已过时)
-* `韩语版 <http://solidity-kr.readthedocs.io>`_ (in progress)
+* `韩语版 <https://solidity-kr.readthedocs.io>`_ (in progress)
 
 
 目录
@@ -106,6 +123,8 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 
    050-breaking-changes.rst
    060-breaking-changes.rst
+   070-breaking-changes.rst
+   080-breaking-changes.rst
    natspec-format.rst
    security-considerations.rst
    resources.rst
@@ -115,4 +134,4 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
    common-patterns.rst
    bugs.rst
    contributing.rst
-
+   brand-guide.rst

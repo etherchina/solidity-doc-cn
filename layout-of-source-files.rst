@@ -7,14 +7,14 @@ Solidity 源文件结构
 
 
 源文件中可以包含任意多个 :ref:`合约定义 <contract_structure>` 、:ref:`导入源文件指令 <import>` 、 :ref:`版本标识 <pragma>` 指令、
-:ref:`结构体<structs>` 和 :ref:`枚举<enums>` 定义.
+:ref:`结构体<structs>` , :ref:`枚举<enums>` 和 :ref:`函数<functions>` 定义.
 
 SPDX License Identifier
 =======================
 
 Trust in smart contract can be better established if their source code
 is available. Since making source code available always touches on legal problems
-with regards to copyright, the Solidity compiler encouranges the use
+with regards to copyright, the Solidity compiler encourages the use
 of machine-readable `SPDX license identifiers <https://spdx.org>`_.
 Every source file should start with a comment indicating its license:
 
@@ -22,7 +22,7 @@ Every source file should start with a comment indicating its license:
 
 The compiler does not validate that the license is part of the
 `list allowed by SPDX <https://spdx.org/licenses/>`_, but
-it does include the supplied string in the `bytecode metadata <metadata>`_.
+it does include the supplied string in the :ref:`bytecode metadata <metadata>`_.
 
 If you do not want to specify a license or if the source code is
 not open-source, please use the special value ``UNLICENSED``.
@@ -82,6 +82,43 @@ Pragmas
   使用版本标准不会改变编译器的版本，它不会启用或关闭任何编译器的功能。
   他仅仅是告知编译器去检查版本是否匹配， 如果不匹配，编译器就会提示一个错误。
 
+
+ABI Coder Pragma
+----------------
+
+By using ``pragma abicoder v1`` or ``pragma abicoder v2`` you can
+select between the two implementations of the ABI encoder and decoder.
+
+The new ABI coder (v2) is able to encode and decode arbitrarily nested
+arrays and structs. It might produce less optimal code and has not
+received as much testing as the old encoder, but is considered
+non-experimental as of Solidity 0.6.0. You still have to explicitly
+activate it using ``pragma abicoder v2;``. Since it will be
+activated by default starting from Solidity 0.8.0, there is the option to select
+the old coder using ``pragma abicoder v1;``.
+
+The set of types supported by the new encoder is a strict superset of
+the ones supported by the old one. Contracts that use it can interact with ones
+that do not without limitations. The reverse is possible only as long as the
+non-``abicoder v2`` contract does not try to make calls that would require
+decoding types only supported by the new encoder. The compiler can detect this
+and will issue an error. Simply enabling ``abicoder v2`` for your contract is
+enough to make the error go away.
+
+.. note::
+  This pragma applies to all the code defined in the file where it is activated,
+  regardless of where that code ends up eventually. This means that a contract
+  whose source file is selected to compile with ABI coder v1
+  can still contain code that uses the new encoder
+  by inheriting it from another contract. This is allowed if the new types are only
+  used internally and not in external function signatures.
+
+.. note::
+  Up to Solidity 0.7.4, it was possible to select the ABI coder v2
+  by using ``pragma experimental ABIEncoderV2``, but it was not possible
+  to explicitly select coder v1 because it was the default.
+
+
 .. index:: ! pragma, experimental
 
 .. _experimental_pragma:
@@ -96,7 +133,7 @@ Pragmas
 ABIEncoderV2
 ~~~~~~~~~~~~~~~~
 
-新的 ABI 编码器可以用来编码和解码嵌套的数组和结构体，当然这部分代码还在优化之中，他没有像之前 ABI 编码器 那样经过严格的测试，我们可以使用下面的语法来启用它 ``pragma experimental ABIEncoderV2;`` 。
+从Solidity 0.7.4开始，  ABI coder v2 不在作为实验特性，而是可以通过``pragma abicoder v2``  启用，查看上面。
 
 .. _smt_checker:
 
@@ -142,7 +179,7 @@ Solidity 支持的导入语句来模块化代码，其语法跟 JavaScript（从
 如果在“filename”中添加新的符号，则会自动添加出现在所有导入 “filename” 的文件中。 更好的方式是明确导入的具体
 符号。
 
-向下面这样，创建了新的 ``symbolName`` 全局符号，他的成员都来自与导入的 ``"filename"`` 文件中的全局符号，如：
+像下面这样，创建了新的 ``symbolName`` 全局符号，他的成员都来自与导入的 ``"filename"`` 文件中的全局符号，如：
 ::
 
   import * as symbolName from "filename";
@@ -277,17 +314,17 @@ Solidity 支持的导入语句来模块化代码，其语法跟 JavaScript（从
 在下面的例子中，我们记录了合约的标题，并解释了两个传入参书和两个返回值的翻译。
 
 ::
-    // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.21 <0.7.0;
+
+  // SPDX-License-Identifier: GPL-3.0
+  pragma solidity >=0.4.21 <0.9.0;
 
   /** @title 形状计算器。 */
   contract tinyCalculator {
-      /** @dev 求矩形表明面积与周长。
-      * @param w 矩形宽度。
-      * @param h 矩形高度。
-      * @return s 求得表面积。
-      * @return p 求得周长。
-      */
+      /// @dev 求矩形表明面积与周长。
+      /// @param w 矩形宽度。
+      /// @param h 矩形高度。
+      /// @return s 求得表面积。
+      /// @return p 求得周长。
       function rectangle(uint w, uint h) returns (uint s, uint p) {
           s = w * h;
           p = 2 * (w + h);

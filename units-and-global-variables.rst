@@ -4,26 +4,27 @@
 单位和全局变量
 **************************************
 
-.. index:: wei, finney, szabo, ether
+.. index:: wei, finney, szabo, gwei ,ether
 
 |ether| 单位
 ==============
 
-|ether| 单位之间的换算就是在数字后边加上 ``wei``、``gwei`` 、 ``finney``、 ``szabo`` 或 ``ether`` 来实现的，如果后面没有单位，缺省为 wei。例如 ``2 ether == 2000 finney`` 的逻辑判断值为 ``true``。
+|ether| 单位之间的换算就是在数字后边加上 ``wei``、``gwei``  或 ``ether`` 来实现的，如果后面没有单位，缺省为 wei。例如 ``2 ether == 2000 finney`` 的逻辑判断值为 ``true``。
 
 .. note::
-  译者注：gwei 在solidity 0.6.11  中添加，因此在0.6.11的版本中不可用。
+  译者注：gwei 在solidity 0.6.11  中添加，因此在0.6.11之前的版本中不可用。
 
 ::
 
     assert(1 wei == 1);
     assert(1 gwei == 1e9);
-    assert(1 szabo == 1e12);
-    assert(1 finney == 1e15);
     assert(1 ether == 1e18);
 
 
 货币单位后缀的的效果相当于乘以10的幂。
+
+.. note::
+    从0.7.0开始 ``finney`` 和 ``szabo`` 被移除了。
 
 .. index:: time, seconds, minutes, hours, days, weeks, years
 
@@ -48,7 +49,7 @@
 ::
 
     function f(uint start, uint daysAfter) public {
-        if (now >= start + daysAfter * 1 days) {
+        if (block.timestamp >= start + daysAfter * 1 days) {
             // ...
         }
     }
@@ -65,13 +66,14 @@
     译者注： 为了方便理解，可以把这些变量和函数理解为Solidity 语言层面的（原生） API 。
 
 
-.. index:: abi, block, coinbase, difficulty, encode, number, block;number, timestamp, block;timestamp, msg, data, gas, sender, value, now, gas price, origin
+.. index:: abi, block, coinbase, difficulty, encode, number, block;number, timestamp, block;timestamp, msg, data, gas, sender, value, block.timestamp, gas price, origin
 
 
 区块和交易属性
 --------------------------------
 
 - ``blockhash(uint blockNumber) returns (bytes32)``：指定区块的区块哈希——仅可用于最新的 256 个区块且不包括当前区块
+- ``block.chainid`` (``uint``): 当前链 id
 - ``block.coinbase`` ( ``address`` ): 挖出当前区块的矿工地址
 - ``block.difficulty`` ( ``uint`` ): 当前区块难度
 - ``block.gaslimit`` ( ``uint`` ): 当前区块 gas 限额
@@ -82,7 +84,6 @@
 - ``msg.sender`` ( ``address`` ): 消息发送者（当前调用）
 - ``msg.sig`` ( ``bytes4`` ): calldata 的前 4 字节（也就是函数标识符）
 - ``msg.value`` ( ``uint`` ): 随消息发送的 wei 的数量
-- ``now`` (``uint``): 目前区块时间戳（ ``block.timestamp`` 的别名 ）
 - ``tx.gasprice`` (``uint``): 交易的 gas 价格
 - ``tx.origin`` (``address payable``): 交易发起者（完全的调用链）
 
@@ -90,7 +91,7 @@
     对于每一个**外部函数**调用，包括 ``msg.sender`` 和 ``msg.value`` 在内所有 ``msg`` 成员的值都会变化。这里包括对库函数的调用。
 
 .. note::
-    不要依赖 ``block.timestamp``、 ``now`` 和 ``blockhash`` 产生随机数，除非你知道自己在做什么。
+    不要依赖 ``block.timestamp`` 和 ``blockhash`` 产生随机数，除非你知道自己在做什么。
 
     时间戳和区块哈希在一定程度上都可能受到挖矿矿工影响。例如，挖矿社区中的恶意矿工可以用某个给定的哈希来运行赌场合约的 payout 函数，而如果他们没收到钱，还可以用一个不同的哈希重新尝试。
 
@@ -105,6 +106,9 @@
 
 .. note::
      ``gasleft`` 函数之前是使用 ``msg.gas``,  ``msg.gas`` 在 0.4.21 开始不推荐使用，在 0.5.0 已经移除了。
+
+.. note::
+    在 0.7.0,  ``now`` ( ``block.timestamp`` 的别名) 被移除了。
 
 .. index:: abi, encoding, packed
 
@@ -134,7 +138,7 @@ ABI 编码及解码函数
 可以参阅专门的章节 :ref:`assert and require<assert-and-require>` 参阅有关错误处理以及何时使用哪个函数的更多详细信息。
 
 ``assert(bool condition)``
-    如果不满足条件，则会导致无效的操作码，则撤销状态更改 -  用于检查内部错误。
+    如果不满足条件，则会导致Panic 错误，则撤销状态更改 -  用于检查内部错误。
 
 ``require(bool condition)``
     如果条件不满足则撤销状态更改 - 用于检查由输入或者外部组件引起的错误。
@@ -149,6 +153,8 @@ ABI 编码及解码函数
     终止运行并撤销状态更改，可以同时提供一个解释性的字符串。
 
 .. index:: keccak256, ripemd160, sha256, ecrecover, addmod, mulmod, cryptography
+
+.. _mathematical-and-cryptographic-functions:
 
 数学和密码学函数
 ----------------------------------------
@@ -183,21 +189,21 @@ ABI 编码及解码函数
 
     ``ecrecover`` 返回一个 ``address``, 而不是 ``address payable`` 。他们之前的转换参考 :ref:`address payable<address>` ，如果需要转移资金到恢复的地址。
 
-    可进一步参考 (`example usage <https://ethereum.stackexchange.com/q/1777/222>`_)
+    可进一步参考 `使用案例 <https://ethereum.stackexchange.com/questions/1777/workflow-on-signing-a-string-with-private-key-followed-by-signature-verificatio>`_ 。
 
 
 .. warning::
 
-    如果你使用 ``ecrecover`` ，需要了解，在不需要知道相应的私钥下，签名也可以转换为另一个有效签名（可能是另外一个数据的签名）。在 Homestead 硬分叉，这个问题对于 _transaction_ 签名已经解决了(查阅 `EIP-2 <http://eips.ethereum.org/EIPS/eip-2#specification>`_)。
+    如果你使用 ``ecrecover`` ，需要了解，在不需要知道相应的私钥下，签名也可以转换为另一个有效签名（可能是另外一个数据的签名）。在 Homestead 硬分叉，这个问题对于 _transaction_ 签名已经解决了(查阅 `EIP-2 <https://eips.ethereum.org/EIPS/eip-2#specification>`_)。
     不过 ``ecrecover`` 没有更改。
 
-    除非需要签名是唯一的，否则这通常不是问题，或者是用它们来识别物品。 OpenZeppelin有一个 `ECDSA助手库 <https://docs.openzeppelin.org/docs/cryptography_ecdsa>`_ ，可以将其用作 ``ecrecover`` 的”包装“，而不会出现此问题。
+    除非需要签名是唯一的，否则这通常不是问题，或者是用它们来识别物品。 OpenZeppelin有一个 `ECDSA助手库 <https://docs.openzeppelin.com/contracts/2.x/api/cryptography#ECDSA>`_ ，可以将其用作 ``ecrecover`` 的”包装“，而不会出现此问题。
 
 .. note::
 
     在一个私链上，你很有可能碰到由于 ``sha256``、``ripemd160`` 或者 ``ecrecover`` 引起的 Out-of-Gas。这个原因就是他们被当做所谓的预编译合约而执行，并且在第一次收到消息后这些合约才真正存在（尽管合约代码是硬代码）。发送到不存在的合约的消息非常昂贵，所以实际的执行会导致 Out-of-Gas 错误。在你的合约中实际使用它们之前，给每个合约发送一点儿以太币，比如 1 Wei。这在官方网络或测试网络上不是问题。
 
-.. index:: balance, send, transfer, call, callcode, delegatecall
+.. index:: balance, codehash, send, transfer, call, callcode, delegatecall
 .. _address_related:
 
 地址成员
@@ -205,6 +211,12 @@ ABI 编码及解码函数
 
 ``<address>.balance`` (``uint256``)
     以 Wei 为单位的 :ref:`address` 的余额。
+
+``<address>.code`` (``bytes memory``)
+    在 :ref:`address` 上的代码(可以为空)
+
+``<address>.codehash`` (``bytes32``)
+    :ref:`address`的codehash
 
 ``<address payable>.transfer(uint256 amount)``
     向 :ref:`address` 发送数量为 amount 的 Wei，失败时抛出异常，使用固定（不可调节）的 2300 gas 的矿工费。

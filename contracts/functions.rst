@@ -7,6 +7,41 @@
 函数
 ******
 
+可以在合约内部和外部定义函数。
+
+.. note::
+  译者注：函数可以在合约外部定义是从 0.7.0 之后才开始支持的。
+
+
+合约之外的函数（也称为“自由函数”）始终具有隐式的 ``internal`` :ref:`可见性<visibility-and-getters>`。 它们的代码包含在所有调用它们合约中，类似于内部库函数。
+
+::
+
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.7.0 <0.9.0;
+
+    function sum(uint[] memory _arr) pure returns (uint s) {
+        for (uint i = 0; i < _arr.length; i++)
+            s += _arr[i];
+    }
+
+    contract ArrayExample {
+        bool found;
+        function f(uint[] memory _arr) public {
+            // This calls the free function internally.
+            // The compiler will add its code to the contract.
+            uint s = sum(_arr);
+            require(s >= 10);
+            found = true;
+        }
+    }
+
+.. note::
+    在合约之外定义的函数仍然在合约的上下文内执行。 他们仍然可以访问变量 ``this`` ，也可以调用其他合约，将其发送以太币或销毁调用它们合约等其他事情。
+    与在合约中定义的函数的主要区别为：自由函数不能直接访问存储变量和不在他们的作用域范围内函数。
+
+
+
 .. _function-parameters-return-variables:
 
 函数参数及返回值
@@ -25,7 +60,7 @@
 例如，如果我们希望合约接受有两个整数形参的函数的外部调用，可以像下面这样写::
 
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.9.0;
 
     contract Simple {
         uint sum;
@@ -40,9 +75,11 @@
 .. note::
 
    :ref:`外部函数<external-function-calls>` 不可以接受多维数组作为参数
-   如果添加  ``pragma experimental ABIEncoderV2;`` 启用实验功能  ``ABIEncoderV2`` 则是可以的。
+  如果原文件加入 `pragma abicoder v2;` 可以启用ABI v2版编码功能，这此功能可用。
+  （注：在 0.7.0 之前是使用``pragma experimental ABIEncoderV2;``）
 
-   :ref:`内部函数<external-function-calls>` 在不启用实验功能  ``ABIEncoderV2`` 的情况下也可以接受多维数组作为参数。
+
+   :ref:`内部函数<external-function-calls>` 则不需要启用ABI v2 就接受多维数组作为参数。
 
 .. index:: return array, return string, array, string, array of strings, dynamic array, variably sized array, return struct, struct
 
@@ -55,7 +92,7 @@
 例如，如果我们需要返回两个结果：两个给定整数的和与积，我们应该写作
 ::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.9.0;
 
     contract Simple {
         function arithmetic(uint _a, uint _b)
@@ -75,7 +112,7 @@
 
 ::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.9.0;
 
     contract Simple {
         function arithmetic(uint _a, uint _b)
@@ -95,7 +132,7 @@
 .. note::
    非内部函数有些类型没法返回，比如限制的类型有：多维动态数组、结构体等。
 
-   如果添加  ``pragma experimental ABIEncoderV2;`` 启用实验功能 ``ABIEncoderV2`` 则是可以的返回更多类型，不过 ``mapping``  仍然是受限的。
+   如果添加  ``pragma abicoder v2;`` 启用 ABI V2 编码器，则是可以的返回更多类型，不过 ``mapping``  仍然是受限的。
 
 .. _multi-return:
 
@@ -134,11 +171,11 @@ View 视图函数
 
 ::
 
-    pragma solidity  >=0.5.0 <0.7.0;
+    pragma solidity  >=0.5.0 <0.9.0;
 
     contract C {
         function f(uint a, uint b) public view returns (uint) {
-            return a * (b + 42) + now;
+            return a * (b + 42) + block.timestamp;
         }
     }
 
@@ -179,7 +216,7 @@ Pure 纯函数
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    pragma solidity >=0.5.0 <0.9.0;
 
     contract C {
         function f(uint a, uint b) public pure returns (uint) {
@@ -218,6 +255,8 @@ receive 接收以太函数
 ``receive() external payable { ... }``
 
 不需要 ``function`` 关键字，也没有参数和返回值并且必须是　``external``　可见性和　``payable`` 修饰．
+它可以是 ``virtual`` 的，可以被重载也可以有 |modifier| 。
+
 在对合约没有任何附加数据调用（通常是对合约转账）是会执行 ``receive`` 函数．　例如　通过 ``.send()`` or ``.transfer()``
 如果 ``receive`` 函数不存在，　但是有payable　的 :ref:`fallback 回退函数 <fallback-function>`　
 那么在进行纯以太转账时，fallback 函数会调用．　
@@ -225,7 +264,7 @@ receive 接收以太函数
 如果两个函数都没有，这个合约就没法通过常规的转账交易接收以太（会抛出异常）．
 
 
-更糟的是，fallback函数可能只有 2300 gas 可以使用（如，当使用 ``send`` 或 ``transfer`` 时）， 除了基础的日志输出之外，进行其他操作的余地很小。下面的操作消耗会操作 2300  gas :
+更糟的是，``receive`` 函数可能只有 2300 gas 可以使用（如，当使用 ``send`` 或 ``transfer`` 时）， 除了基础的日志输出之外，进行其他操作的余地很小。下面的操作消耗会操作 2300  gas :
 
 - 写入存储
 - 创建合约
@@ -267,17 +306,18 @@ receive 接收以太函数
 Fallback 回退函数
 =================
 
-合约可以最多有一个回退函数。函数声明为：
+合约可以最多有一个回退函数。函数声明为： ``fallback () external [payable]`` 或 ``fallback (bytes calldata _input) external [payable] returns (bytes memory _output)`` 
 
-``fallback () external [payable]``
-
-这个函数不能有参数也不能有返回值，也没有　``function``　关键字．　必须是　``external``　可见性
+没有　``function``　关键字。　必须是　``external``　可见性，它可以是 ``virtual`` 的，可以被重载也可以有 |modifier| 。
 
 
 如果在一个对合约调用中，没有其他函数与给定的函数标识符匹配fallback会被调用．
 或者在没有 :ref:`receive 函数 <receive-ether-function>`　时，而没有提供附加数据对合约调用，那么fallback 函数会被执行。
 
-fallback　函数始终会接收数据，但为了同时接收以太时，必须标记为　 ``payable`` 。
+fallback　函数始终会接收数据，但为了同时接收以太时，必须标记为　``payable`` 。
+
+如果使用了带参数的版本，``_input`` 将包含发送到合约的完整数据（等于 ``msg.data`` ），并且通过 ``_output`` 返回数据。
+返回数据不是 ABI 编码过的数据，相反，它返回不经过修改的数据。
 
 
 更糟的是，如果回退函数在接收以太时调用，可能只有 2300 gas 可以使用，参考　:ref:`receive接收函数 <receive-ether-function>`
@@ -289,11 +329,8 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
     推荐总是定义一个receive函数，而不是定义一个``payable`` 的fallback函数，
 
 .. note::
-    即使 fallback 函数不能有参数，仍然可以使用 ``msg.data`` 来获取随调用提供的任何有效数据。
-    在检查了 ``msg.data`` 的前四个字节之后，
-
-    您可以用　``abi.decode`` 与数组切片语法一起使用来解码ABI编码的数据：
-     ``(c, d) = abi.decode(msg.data[4:], (uint256, uint256));``
+    如果想要解码输入数据，那么前四个字节用作函数选择器，然后用 ``abi.decode`` 与数组切片语法一起使用来解码ABI编码的数据：
+     ``(c, d) = abi.decode(__input[4:], (uint256, uint256));``
 
      请注意，这仅应作为最后的手段，而应使用对应的函数。
 
@@ -301,7 +338,7 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
 
 ::
 
-    pragma solidity >=0.6.2 <0.7.0;
+    pragma solidity >=0.6.2 <0.9.0;
 
     contract Test {
         // 发送到这个合约的所有消息都会调用此函数（因为该合约没有其它函数）。
@@ -345,11 +382,13 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
             // 结果 test.x 为 1  test.y 为 0.
             (success,) = address(test).call{value: 1}(abi.encodeWithSignature("nonExistingFunction()"));
             require(success);
-            // 结果test.x 为1 and test.y 为 1.
+            // 结果test.x 为1 而 test.y 为 1.
 
             // 发送以太币, TestPayable 的 receive　函数被调用．
-            require(address(test).send(2 ether));
-            // 结果 in test.x 为 2 and test.y 为 2 ether.
+            require(payable(test).send(2 ether));
+            // 结果 test.x 为 2 而 test.y 为 2 ether.
+
+            return true;
         }
 
     }
@@ -365,7 +404,7 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
 
 ::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.9.0;
 
     contract A {
         function f(uint _in) public pure returns (uint out) {
@@ -383,7 +422,7 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
 ::
 
     // 以下代码无法编译
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.9.0;
 
     contract A {
         function f(B _in) public pure returns (B out) {
@@ -412,7 +451,7 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
 
 ::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.9.0;
 
     contract A {
         function f(uint8 _in) public pure returns (uint8 out) {

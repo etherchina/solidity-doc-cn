@@ -1,4 +1,4 @@
-.. include:: ../glossaries.rst
+.. include:: glossaries.rst
 
 .. index:: auction;blind, auction;open, blind auction, open auction
 
@@ -22,7 +22,8 @@
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity ^0.7.0;
 
     contract SimpleAuction {
         // 拍卖的参数。
@@ -53,9 +54,9 @@
         constructor(
             uint _biddingTime,
             address payable _beneficiary
-        ) public {
+        ) {
             beneficiary = _beneficiary;
-            auctionEnd = now + _biddingTime;
+            auctionEnd = block.timestamp + _biddingTime;
         }
 
         /// 对拍卖进行出价，具体的出价随交易一起发送。
@@ -66,7 +67,7 @@
 
             // 如果拍卖已结束，撤销函数的调用。
             require(
-                now <= auctionEnd,
+                block.timestamp <= auctionEnd,
                 "Auction already ended."
             );
 
@@ -96,7 +97,7 @@
                 // 接收者可以在 `send` 返回之前，重新调用该函数。
                 pendingReturns[msg.sender] = 0;
 
-                if (!msg.sender.send(amount)) {
+                if (!payable(msg.sender).send(amount)) {
                     // 这里不需抛出异常，只需重置未付款
                     pendingReturns[msg.sender] = amount;
                     return false;
@@ -118,7 +119,7 @@
             // 则它也会被认为是与外部合约有交互的。
 
             // 1. 条件
-            require(now >= auctionEnd, "Auction not yet ended.");
+            require(block.timestamp >= auctionEnd, "Auction not yet ended.");
             require(!ended, "auctionEnd has already been called.");
 
             // 2. 生效
@@ -152,7 +153,8 @@
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.7.0 <0.9.0;
 
     contract BlindAuction {
         struct Bid {
@@ -178,8 +180,8 @@
         /// 使用 modifier 可以更便捷的校验函数的入参。
         /// `onlyBefore` 会被用于后面的 `bid` 函数：
         /// 新的函数体是由 modifier 本身的函数体，并用原函数体替换 `_;` 语句来组成的。
-        modifier onlyBefore(uint _time) { require(now < _time); _; }
-        modifier onlyAfter(uint _time) { require(now > _time); _; }
+        modifier onlyBefore(uint _time) { require(block.timestamp < _time); _; }
+        modifier onlyAfter(uint _time) { require(block.timestamp > _time); _; }
 
         constructor(
             uint _biddingTime,
@@ -187,7 +189,7 @@
             address payable _beneficiary
         ) public {
             beneficiary = _beneficiary;
-            biddingEnd = now + _biddingTime;
+            biddingEnd = block.timestamp + _biddingTime;
             revealEnd = biddingEnd + _revealTime;
         }
 

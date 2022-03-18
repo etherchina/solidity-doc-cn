@@ -1,4 +1,4 @@
-.. include:: ../glossaries.rst
+.. include:: glossaries.rst
 .. index:: ! type;reference, ! reference type, storage, memory, location, array, struct
 
 .. _reference-types:
@@ -51,7 +51,8 @@
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.5.0 <0.9.0;
 
     contract Tiny {
         uint[] x; // x 的数据存储位置是 storage，　位置可以忽略
@@ -147,7 +148,7 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 
 ::
 
-    pragma solidity >=0.4.16 <0.7.0;
+    pragma solidity >=0.4.16 <0.9.0;
 
     contract TX {
         function f(uint len) public pure {
@@ -192,7 +193,7 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 
     // 这段代码并不能编译。
 
-    pragma solidity  >=0.4.0 <0.7.0;
+    pragma solidity  >=0.4.0 <0.9.0;
 
     contract LBC {
         function f() public {
@@ -210,7 +211,7 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.0 <0.7.0;
+    pragma solidity >=0.4.0 <0.9.0;
 
     contract C {
         function f() public pure {
@@ -249,7 +250,8 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
     通过 ``push()``　增加 |storage| 数组的长度具有固定的 gas 消耗，因为 |storage| 总是被零初始化，而通过　``pop``　减少长度则依赖移除与元素的大小（size）．　如果元素是数组,则成本是很高的,因为它包括已删除的元素的清理，类似于在这些元素上调用 :ref:`delete` 。
 
 .. note::
-    在外部（external）函数中目前还不能使用多维数组(除非启用ABIEncoderV2)，但是在公有（public）函数中是支持的。
+    如果需要在外部（external）函数中使用多维数组，这需要启用ABI coder v2。
+    公有（public）函数中是支持的使用多维数组。
 
 .. note::
     在Byzantium（在2017-10-16日4370000区块上进行硬分叉升级）之前的EVM版本中，无法访问从函数调用返回动态数组。 如果要调用返回动态数组的函数，请确保 EVM 在拜占庭模式上运行。
@@ -257,7 +259,7 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 ::
 
 
-    pragma solidity >=0.6.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.9.0;
 
     contract ArrayContract {
         uint[2**20] m_aLotOfIntegers;
@@ -377,13 +379,13 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 
 ::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    pragma solidity >=0.6.99 <0.9.0;
 
     contract Proxy {
         /// 被当前合约管理的 客户端合约地址
         address client;
 
-        constructor(address _client) public {
+        constructor(address _client) {
             client = _client;
         }
 
@@ -419,7 +421,7 @@ Solidity 支持通过构造结构体的形式定义新的类型，以下是一�
 
 ::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.9.0;
 
       // 定义的新类型包含两个属性。
       // 在合约外部声明结构体可以使其被多个合约共享。 在这里，这并不是真正需要的。
@@ -445,10 +447,11 @@ Solidity 支持通过构造结构体的形式定义新的类型，以下是一�
         function newCampaign(address payable beneficiary, uint goal) public returns (uint campaignID) {
             campaignID = numCampaigns++; // campaignID 作为一个变量返回
 
-            // 在 memory 中创建新结构体并将其复制到storage 。
-            //  我们省略了映射类型，因为它在 memory 中无效（它存储在 storage 中）。
-            //  如果结构体被复制（甚至从 storage 到 storage ）映射类型也始终会省略，因为它们无法枚举。
-            campaigns[campaignID] = Campaign(beneficiary, goal, 0, 0);
+            // 不能使用 "campaigns[campaignID] = Campaign(beneficiary, goal, 0, 0)" 
+            // 因为RHS会创建一个包含映射的内存结构体 "Campaign"
+            Campaign storage c = campaigns[campaignID];
+            c.beneficiary = beneficiary;
+            c.fundingGoal = goal;
         }
 
         function contribute(uint campaignID) public payable {
@@ -482,3 +485,7 @@ Solidity 支持通过构造结构体的形式定义新的类型，以下是一�
 
 当然，你也可以直接访问结构体的成员而不用将其赋值给一个局部变量，就像这样，
 ``campaigns[campaignID].amount = 0``。
+
+
+.. note::
+    在 Solidity 0.7.0 之前，在 |memory| 结构体包含仅 |storage| 的类型（例如映射）可以允许类似上例中的 ``campaigns[campaignID] = Campaign(beneficiary, goal, 0, 0)`` 赋值，它会直接忽略映射类型。

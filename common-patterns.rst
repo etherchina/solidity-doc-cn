@@ -22,7 +22,7 @@
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    pragma solidity  >=0.7.0 <0.9.0;
 
     contract WithdrawalContract {
         address public richest;
@@ -30,7 +30,7 @@
 
         mapping (address => uint) pendingWithdrawals;
 
-        constructor() public payable {
+        constructor() payable {
             richest = msg.sender;
             mostSent = msg.value;
         }
@@ -47,7 +47,7 @@
             // 记住，在发送资金之前将待发金额清零
             // 来防止重入（re-entrancy）攻击
             pendingWithdrawals[msg.sender] = 0;
-            msg.sender.transfer(amount);
+            payable(msg.sender).transfer(amount);
         }
     }
 
@@ -55,14 +55,14 @@
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    pragma solidity  >=0.7.0 <0.9.0;
 
     contract SendContract {
         address payable public richest;
         uint public mostSent;
 
-        constructor() public payable {
-            richest = msg.sender;
+        constructor() payable {
+            richest = payable(msg.sender);
             mostSent = msg.value;
         }
 
@@ -70,7 +70,7 @@
             require(msg.value > mostSent, "Not enough money sent.");
             // 这一行会导致问题（详见下文）
             richest.transfer(msg.value);
-            richest = msg.sender;
+            richest = payable(msg.sender);
             mostSent = msg.value;
         }
     }
@@ -101,14 +101,14 @@
 
 ::
 
-    pragma solidity >=0.4.22 <0.7.0;
+    pragma solidity >=0.6.0 <0.9.0;
 
     contract AccessRestriction {
         // 这些将在构造阶段被赋值
         // 其中，`msg.sender` 是
         // 创建这个合约的账户。
         address public owner = msg.sender;
-        uint public creationTime = now;
+        uint public creationTime = block.timestamp;
 
         // 修改器可以用来更改
         // 一个函数的函数体。
@@ -139,7 +139,7 @@
 
         modifier onlyAfter(uint _time) {
             require(
-                now >= _time,
+                block.timestamp >= _time,
                 "Function called too early."
             );
             _;
@@ -169,7 +169,7 @@
             );
             _;
             if (msg.value > _amount)
-                msg.sender.send(msg.value - _amount);
+                payable(msg.sender).send(msg.value - _amount);
         }
 
         function forceOwnerChange(address _newOwner)
@@ -179,7 +179,7 @@
         {
             owner = _newOwner;
             // 这只是示例条件
-            if (uint(owner) & 0 == 1)
+            if (uint160(owner) & 0 == 1)
                 // 这无法在 0.4.0 版本之前的
                 // Solidity 上进行退还。
                 return;
@@ -237,7 +237,7 @@
 
 ::
 
-    pragma solidity >=0.4.22 <0.7.0;
+    pragma solidity >=0.4.22 <0.9.0;
 
     contract StateMachine {
         enum Stages {
@@ -251,7 +251,7 @@
         // 这是当前阶段。
         Stages public stage = Stages.AcceptingBlindedBids;
 
-        uint public creationTime = now;
+        uint public creationTime = block.timestamp;
 
         modifier atStage(Stages _stage) {
             require(
@@ -270,10 +270,10 @@
         // 否则新阶段不会被带入账户。
         modifier timedTransitions() {
             if (stage == Stages.AcceptingBlindedBids &&
-                        now >= creationTime + 10 days)
+                        block.timestamp >= creationTime + 10 days)
                 nextStage();
             if (stage == Stages.RevealBids &&
-                    now >= creationTime + 12 days)
+                    block.timestamp >= creationTime + 12 days)
                 nextStage();
             // 由交易触发的其他阶段转换
             _;

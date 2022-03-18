@@ -1,4 +1,4 @@
-.. include:: ../glossaries.rst
+.. include:: glossaries.rst
 
 .. index:: purchase, remote purchase, escrow
 
@@ -27,7 +27,8 @@ you can use state machine-like constructs inside a contract.
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.7.0  <0.9.0;
 
     contract Purchase {
         uint public value;
@@ -76,8 +77,8 @@ you can use state machine-like constructs inside a contract.
         //确保 `msg.value` 是一个偶数。
         //如果它是一个奇数，则它将被截断。
         //通过乘法检查它不是奇数。
-        constructor() public payable {
-            seller = msg.sender;
+        constructor() payable {
+            seller = payable(msg.sender);
             value = msg.value / 2;
             require((2 * value) == msg.value, "Value has to be even.");
         }
@@ -105,7 +106,7 @@ you can use state machine-like constructs inside a contract.
             payable
         {
             emit PurchaseConfirmed();
-            buyer = msg.sender;
+            buyer = payable(msg.sender);
             state = State.Locked;
         }
 

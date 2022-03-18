@@ -151,6 +151,6 @@ Solidity编译器自动生成JSON文件，即合约的元数据，其中包含�
 这会自动验证元数据，因为它的哈希值是字节码的一部分。
 而额外的数据，则是与基于接口进行编码并展示给用户的构造输入数据相符的。
 
-In the repository `source-verify <https://github.com/ethereum/source-verify>`_
+In the repository `sourcify <https://github.com/ethereum/sourcify>`_
 (`npm package <https://www.npmjs.com/package/source-verify>`_) you can see
 example code that shows how to use this feature.

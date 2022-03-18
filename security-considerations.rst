@@ -54,7 +54,7 @@
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.4.0 <0.7.0;;
+    pragma solidity >=0.6.0 <0.9.0;
 
     // 不要使用这个合约，其中包含一个 bug。
     contract Fund {
@@ -62,7 +62,7 @@
         mapping(address => uint) shares;
         /// 提取你的分成。
         function withdraw() public {
-            if (msg.sender.send(shares[msg.sender]))
+            if (payable(msg.sender).send(shares[msg.sender]))
                 shares[msg.sender] = 0;
         }
     }
@@ -75,7 +75,7 @@
 ::
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.6.2 <0.7.0;
+    pragma solidity >=0.6.2 <0.9.0;
 
     // 不要使用这个合约，其中包含一个 bug。
     contract Fund {
@@ -83,7 +83,7 @@
         mapping(address => uint) shares;
         /// 提取你的分成。
         function withdraw() public {
-            if (msg.sender.call.value(shares[msg.sender])())
+            if (payable(msg.sender).call.value(shares[msg.sender])())
                 shares[msg.sender] = 0;
         }
     }
@@ -92,7 +92,7 @@
 
 ::
 
-    pragma solidity ^0.4.11;
+    pragma solidity  >=0.6.0 <0.9.0;
 
     contract Fund {
         /// 合约中 |ether| 分成的映射。
@@ -101,7 +101,7 @@
         function withdraw() public {
             var share = shares[msg.sender];
             shares[msg.sender] = 0;
-            msg.sender.transfer(share);
+            payable(msg.sender).transfer(share);
         }
     }
 
@@ -168,13 +168,14 @@ tx.origin问题
 
 ::
 
-    pragma solidity ^0.4.11;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.7.0 <0.9.0;
 
     // 不要使用这个合约，其中包含一个 bug。
     contract TxUserWallet {
         address owner;
 
-        function TxUserWallet() public {
+        constructor() {
             owner = msg.sender;
         }
 
@@ -188,17 +189,18 @@ tx.origin问题
 
 ::
 
-    pragma solidity ^0.4.11;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.7.0 <0.9.0;
 
     interface TxUserWallet {
         function transferTo(address dest, uint amount) public;
     }
 
     contract TxAttackWallet {
-        address owner;
+        address payable owner;
 
-        function TxAttackWallet() public {
-            owner = msg.sender;
+        constructor() {
+            owner = payable(msg.sender);
         }
 
         function() public {
@@ -216,22 +218,32 @@ tx.origin问题
 =========================================
 
 As in many programming languages, Solidity's integer types are not actually integers.
-They resemble integers when the values are small, but behave differently if the numbers are larger.
-For example, the following is true: ``uint8(255) + uint8(1) == 0``. This situation is called
-an *overflow*. It occurs when an operation is performed that requires a fixed size variable
-to store a number (or piece of data) that is outside the range of the variable's data type.
-An *underflow* is the converse situation: ``uint8(0) - uint8(1) == 255``.
+They resemble integers when the values are small, but cannot represent arbitrarily large numbers.
+
+The following code causes an overflow because the result of the addition is too large
+to be stored in the type ``uint8``:
+
+::
+
+  uint8 x = 255;
+  uint8 y = 1;
+  return x + y;
+
+Solidity has two modes in which it deals with these overflows: Checked and Unchecked or "wrapping" mode.
+
+The default checked mode will detect overflows and cause a failing assertion. You can disable this check
+using ``unchecked { ... }``, causing the overflow to be silently ignored. The above code would return
+``0`` if wrapped in ``unchecked { ... }``.
+
+Even in checked mode, do not assume you are protected from overflow bugs.
+In this mode, overflows will always revert. If it is not possible to avoid the
+overflow, this can lead to a smart contract being stuck in a certain state.
 
 In general, read about the limits of two's complement representation, which even has some
 more special edge cases for signed numbers.
 
 Try to use ``require`` to limit the size of inputs to a reasonable range and use the
-:ref:`SMT checker<smt_checker>` to find potential overflows, or
-use a library like
-`SafeMath <https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/math/SafeMath.sol>`_
-if you want all overflows to cause a revert.
-
-Code such as ``require((balanceOf[_to] + _value) >= balanceOf[_to])`` can also help you check if values are what you expect.
+:ref:`SMT checker<smt_checker>` to find potential overflows.
 
 .. _clearing-mappings:
 
@@ -251,7 +263,7 @@ field of a ``struct`` that is the base type of a dynamic storage array.  The
 
 ::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.9.0;
 
     contract Map {
         mapping (uint => uint)[] array;
@@ -403,19 +415,21 @@ The SMT encoding tries to be as precise as possible, mapping Solidity types
 and expressions to their closest `SMT-LIB <http://smtlib.cs.uiowa.edu/>`_
 representation, as shown in the table below.
 
-+-----------------------+--------------+-----------------------------+
-|Solidity type          |SMT sort      |Theories (quantifier-free)   |
-+=======================+==============+=============================+
-|Boolean                |Bool          |Bool                         |
-+-----------------------+--------------+-----------------------------+
-|intN, uintN, address,  |Integer       |LIA, NIA                     |
-|bytesN, enum           |              |                             |
-+-----------------------+--------------+-----------------------------+
-|array, mapping, bytes, |Array         |Arrays                       |
-|string                 |              |                             |
-+-----------------------+--------------+-----------------------------+
-|other types            |Integer       |LIA                          |
-+-----------------------+--------------+-----------------------------+
++-----------------------+--------------------------------+-----------------------------+
+|Solidity type          |SMT sort                        |Theories (quantifier-free)   |
++=======================+================================+=============================+
+|Boolean                |Bool                            |Bool                         |
++-----------------------+--------------------------------+-----------------------------+
+|intN, uintN, address,  |Integer                         |LIA, NIA                     |
+|bytesN, enum           |                                |                             |
++-----------------------+--------------------------------+-----------------------------+
+|array, mapping, bytes, |Tuple                           |Datatypes, Arrays, LIA       |
+|string                 |(Array elements, Integer length)|                             |
++-----------------------+--------------------------------+-----------------------------+
+|struct                 |Tuple                           |Datatypes                    |
++-----------------------+--------------------------------+-----------------------------+
+|other types            |Integer                         |LIA                          |
++-----------------------+--------------------------------+-----------------------------+
 
 Types that are not yet supported are abstracted by a single 256-bit unsigned
 integer, where their unsupported operations are ignored.
@@ -573,26 +587,32 @@ types.
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.5.0;
+    pragma experimental ABIEncoderV2;
     pragma experimental SMTChecker;
     // This will report a warning
 
     contract Aliasing
     {
-        uint[] array;
+        uint[] array1;
+        uint[][] array2;
         function f(
             uint[] memory a,
             uint[] memory b,
             uint[][] memory c,
             uint[] storage d
-        ) internal view {
-            require(array[0] == 42);
-            require(a[0] == 2);
-            require(c[0][0] == 2);
-            require(d[0] == 2);
+        ) internal {
+            array1[0] = 42;
+            a[0] = 2;
+            c[0][0] = 2;
             b[0] = 1;
             // Erasing knowledge about memory references should not
             // erase knowledge about state variables.
-            assert(array[0] == 42);
+            assert(array1[0] == 42);
+            // However, an assignment to a storage reference will erase
+            // storage knowledge accordingly.
+            d[0] = 2;
+            // Fails as false positive because of the assignment above.
+            assert(array1[0] == 42);
             // Fails because `a == b` is possible.
             assert(a[0] == 2);
             // Fails because `c[i] == b` is possible.
@@ -600,7 +620,16 @@ types.
             assert(d[0] == 2);
             assert(b[0] == 1);
         }
+        function g(
+            uint[] memory a,
+            uint[] memory b,
+            uint[][] memory c,
+            uint x
+        ) public {
+            f(a, b, c, array2[x]);
+        }
     }
+
 
 After the assignment to ``b[0]``, we need to clear knowledge about ``a`` since
 it has the same type (``uint[]``) and data location (memory).  We also need to

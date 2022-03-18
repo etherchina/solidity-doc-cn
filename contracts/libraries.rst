@@ -16,7 +16,8 @@
 特别是，除非能规避 Solidity 的类型系统，否则是不可能销毁任何库的。
 
 库可以看作是使用他们的合约的隐式的基类合约。虽然它们在继承关系中不会显式可见，但调用库函数与调用显式的基类合约十分类似
-（如果 ``L`` 是库的话，可以使用 ``L.f()`` 调用库函数）。此外，就像库是基类合约一样，对所有使用库的合约，库的 ``internal`` 函数都是可见的。
+（可以使用 ``L.f()`` 调用）。
+
 当然，需要使用内部调用约定来调用内部函数，这意味着所有内部类型，内存类型都是通过引用而不是复制来传递。
 为了在 EVM 中实现这些，内部库函数的代码和从其中调用的所有函数都在编译阶段被包含到调用合约中，然后使用一个 ``JUMP`` 调用来代替 ``DELEGATECALL``。
 
@@ -27,7 +28,7 @@
 
 ::
 
-    pragma solidity >=0.6.0 <0.7.0;
+    pragma solidity >=0.6.0 <0.9.0;
 
       // 我们定义了一个新的结构体数据类型，用于在调用合约中保存数据。
       struct Data {
@@ -90,7 +91,7 @@
 
 ::
 
-    pragma solidity >=0.6.0;
+    pragma solidity  >=0.6.8 <0.9.0;
 
     struct bigint {
         uint[] limbs;
@@ -110,7 +111,7 @@
                 uint a = limb(_a, i);
                 uint b = limb(_b, i);
                 r.limbs[i] = a + b + carry;
-                if (a + b < a || (a + b == uint(-1) && carry > 0))
+                if (a + b < a || (a + b == type(uint).max && carry > 0))
                     carry = 1;
                 else
                     carry = 0;
@@ -139,7 +140,7 @@
 
         function f() public pure {
             bigint memory x = BigInt.fromUint(7);
-            bigint memory y = BigInt.fromUint(uint(-1));
+            bigint memory y = BigInt.fromUint(type(uint).max);
             bigint memory z = x.add(y);
             assert(z.limb(1) > 0);
         }
@@ -149,17 +150,19 @@
 可以通过类型转换, 将库类型更改为 ``address`` 类型, 例如: 使用  ``address(LibraryName)``
 
 
-由于编译器无法知道库的部署位置，我们需要通过链接器将这些地址填入最终的字节码中
-（请参阅 :ref:`commandline-compiler` 以了解如何使用命令行编译器来链接字节码）。
-如果这些地址没有作为参数传递给编译器，编译后的十六进制代码将包含 ``__Set______`` 形式的占位符（其中 ``Set`` 是库的名称）。
-可以手动填写地址来将那 40 个字符替换为库合约地址的十六进制编码。
+由于编译器无法知道库的部署位置，编译器会生成 ``__$30bbc0abd4d6364515865950d3e0d10953$__`` 形式的占位符，该占位符是完整的库名称的keccak256哈希的十六进制编码的34个字符的前缀，例如：如果该库存储在libraries目录中名为bigint.sol的文件中，则完整的库名称为``libraries/bigint.sol:BigInt``。
+
+此类字节码不完整的合约，不应该部署。 占位符需要替换为实际地址。 你可以通过在编译库时将它们传递给编译器或使用链接器更新已编译的二进制文件来实现。
+
+有关如何使用命令行编译器进行链接的信息，请参见 :ref:`library-linking`  。
+
 
 与合约相比，库的限制：
 
 - 没有状态变量
 - 不能够继承或被继承
 - 不能接收以太币
-- 不可以被销毁 destroyed
+- 不可以被销毁
 
 （将来有可能会解除这些限制）
 
@@ -180,7 +183,8 @@
  - 值类型, 非存储的（non-storage） ``string`` 及非存储的 ``bytes`` 使用和合约 ABI 中同样的标识符。
  - 非存储的数组类型遵循合约 ABI 中同样的规则，例如 ``<type>[]`` 为动态数组以及 ``<type>[M]`` 为``M``个元素的动态数组。
  - 非存储的结构体使用完整的命名引用，例如 ``C.S`` 用于 ``contract C { struct S { ... } }``.
- - 指向存储的指针类型使用其对应的非存储类型的类型标识符，但在其后面附加一个空格及``storage``。
+ - 存储的映射指针使用 ``mapping(<keyType> => <valueType>) storage`` 当 ``<keyType>`` 和 ``<valueType>`` 是映射的键和值类型。
+ - 其他的存储的指针类型使用其对应的非存储类型的类型标识符，但在其后面附加一个空格及``storage``。
 
 
 除了指向存储的指针以外，参数编码与常规合约ABI相同，存储指针被编码为``uint256``值，指向它们所指向的存储插槽。
@@ -190,7 +194,7 @@
 
 ::
 
-    pragma solidity >=0.5.14 <0.7.0;
+    pragma solidity >=0.5.14 <0.9.0;
 
     library L {
         function f(uint256) external {}

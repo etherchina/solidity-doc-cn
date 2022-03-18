@@ -1,8 +1,8 @@
 .. index:: optimizer, common subexpression elimination, constant propagation
 
-*************
-The Optimiser
-*************
+**************************
+The Optimiser（优化器）
+**************************
 
 This section discusses the optimiser that was first added to Solidity,
 which operates on opcode streams. For information on the new Yul-based optimiser,

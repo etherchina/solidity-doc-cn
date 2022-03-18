@@ -1,4 +1,4 @@
-.. include:: ../glossaries.rst
+.. include:: glossaries.rst
 
 ********************
 投票合约
@@ -21,7 +21,8 @@
 
 ::
 
-    pragma solidity >=0.4.22 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.7.0 <0.9.0;
 
     /// @title 委托投票
     contract Ballot {
@@ -49,7 +50,7 @@
         Proposal[] public proposals;
 
         /// 为 `proposalNames` 中的每个提案，创建一个新的（投票）表决
-        constructor(bytes32[] memory proposalNames) public {
+        constructor(bytes32[] memory proposalNames) {
             chairperson = msg.sender;
             voters[chairperson].weight = 1;
             //对于提供的每个提案名称，

@@ -1,29 +1,23 @@
 .. index: variable cleanup
 
 *********************
-Cleaning Up Variables
+清理变量
 *********************
 
-When a value is shorter than 256 bit, in some cases the remaining bits
-must be cleaned.
-The Solidity compiler is designed to clean such remaining bits before any operations
-that might be adversely affected by the potential garbage in the remaining bits.
-For example, before writing a value to  memory, the remaining bits need
-to be cleared because the memory contents can be used for computing
-hashes or sent as the data of a message call.  Similarly, before
-storing a value in the storage, the remaining bits need to be cleaned
-because otherwise the garbled value can be observed.
+当一个值短于256位时，在某些情况下，剩余位必须被清理。
+Solidity 编译器在设计时，会在操作数据之前清理这些剩余位，以避免剩余位中潜在垃圾数据在操作产生任何不利影响。
 
-On the other hand, we do not clean the bits if the immediately
-following operation is not affected.  For instance, since any non-zero
-value is considered ``true`` by ``JUMPI`` instruction, we do not clean
-the boolean values before they are used as the condition for
-``JUMPI``.
 
-In addition to the design principle above, the Solidity compiler
-cleans input data when it is loaded onto the stack.
+例如，在将一个值写入存储器之前，需要清除剩余的位，因为存储器的内容可以用于计算哈希值或作为消息调用的数据发送。
+同样，在将一个值存储到存储器中之前，也需要清除剩余的位，因为否则可以观察到垃圾数据。
 
-Different types have different rules for cleaning up invalid values:
+另一方面，如果紧接着的操作不受影响，我们就不清理位。 例如，由于任何非零值都会被 ``JUMPI`` 指令认为是 ``true`` ，所以在布尔值被用作条件判断之前，不需要清理它们。
+``JUMPI``。
+
+
+除了上述设计原则外，Solidity 编译器也会在将输入数据（input data）加载到堆栈时，会对其进行清理。
+
+不同的类型有不同的清理无效值的规则：
 
 +---------------+---------------+-------------------+
 |Type           |Valid Values   |Invalid Values Mean|

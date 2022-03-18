@@ -1,4 +1,4 @@
-.. include:: ../glossaries.rst
+.. include:: glossaries.rst
 .. index:: ! function;modifier
 
 .. _modifiers:
@@ -13,10 +13,12 @@
 
 ::
 
-    pragma solidity >=0.5.0 <0.7.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >0.7.0 <0.9.0;
 
     contract owned {
-        function owned() public { owner = msg.sender; }
+        constructor() { owner = payable(msg.sender); }
+
         address owner;
 
         // 这个合约只定义一个修改器，但并未使用： 它将会在派生合约中用到。
@@ -52,7 +54,7 @@
         mapping (address => bool) registeredAddresses;
         uint price;
 
-        function Register(uint initialPrice) public { price = initialPrice; }
+        constructor(uint initialPrice) { price = initialPrice; }
 
         // 在这里也使用关键字 `payable` 非常重要，否则函数会自动拒绝所有发送给它的以太币。
         function register() public payable costs(price) {
@@ -84,6 +86,10 @@
             return 7;
         }
     }
+
+如果你想访问定义在合约 ``C`` 的 |modifier|  ``m`` ， 可以使用 ``C.m`` 去引用它，而不需要使用虚拟表查找。
+
+只能使用在当前合约或在基类合约中定义的 |modifier| , |modifier| 也可以定义在库里面，但是他们被限定在库函数使用。
 
 如果同一个函数有多个 |modifier|，它们之间以空格隔开，|modifier| 会依次检查执行。
 

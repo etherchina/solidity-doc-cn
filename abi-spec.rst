@@ -50,7 +50,7 @@
 
 - ``bool``：等价于 ``uint8``，取值限定为 0 或 1 。在计算和 |function_selector| 中，通常使用 ``bool``。
 
-- ``fixed<M>x<N>``：``M`` 位的有符号的固定小数位的十进制数字 ``8 <= M <= 256``、``M % 8 ==0``、且 ``0 < N <= 80``。其值 ``v`` 即是 ``v / (10 ** N)``。（也就是说，这种类型是由 M 位的二进制数据所保存的，有 N 位小数的十进制数值。译者注。）
+- ``fixed<M>x<N>``：``M`` 位的有符号的固定小数位的十进制数字 ``8 <= M <= 256``、``M % 8 == 0``、且 ``0 < N <= 80``。其值 ``v`` 即是 ``v / (10 ** N)``。（也就是说，这种类型是由 M 位的二进制数据所保存的，有 N 位小数的十进制数值。译者注。）
 
 - ``ufixed<M>x<N>``：无符号的 ``fixed<M>x<N>``。
 
@@ -63,6 +63,9 @@
 以下是定长数组类型：
 
 - ``<type>[M]``：有 ``M`` 个元素的定长数组，``M >= 0``，数组元素为给定类型。
+
+  .. note::
+      尽管此ABI规范可以表示零个元素的定长数组，但编译器不支持它们。
 
 以下是非定长类型：
 
@@ -78,8 +81,46 @@
 
 用 |tuple| 构成 |tuple|、用 |tuple| 构成数组等等也是可能的。另外也可以构成“零元组（zero-tuples）”，就是 ``n = 0`` 的情况。
 
-.. note::
-    除了 |tuple| 以外，Solidity 支持以上所有类型的名称。ABI |tuple| 是利用 Solidity 的 ``structs`` 编码得到的。
+
+Mapping 到 ABI 类型
+-----------------------------
+
+Solidity supports all the types presented above with the same names with the
+exception of tuples. On the other hand, some Solidity types are not supported
+by the ABI. The following table shows on the left column Solidity types that
+are not part of the ABI, and on the right column the ABI types that represent
+them.
+
++-------------------------------+-----------------------------------------------------------------------------+
+|      Solidity                 |                                           ABI                               |
++===============================+=============================================================================+
+|:ref:`address payable<address>`|``address``                                                                  |
++-------------------------------+-----------------------------------------------------------------------------+
+|:ref:`contract<contracts>`     |``address``                                                                  |
++-------------------------------+-----------------------------------------------------------------------------+
+|:ref:`enum<enums>`             | ``uint8``                                                                   |
++-------------------------------+-----------------------------------------------------------------------------+
+|:ref:`struct<structs>`         |``tuple``                                                                    |
++-------------------------------+-----------------------------------------------------------------------------+
+
+.. warning::
+    Before version ``0.8.0`` enums could have more than 256 members and were represented by the
+    smallest integer type just big enough to hold the value of any member.
+
+编码的设计准则
+================================
+
+The encoding is designed to have the following properties, which are especially useful if some arguments are nested arrays:
+
+  1. The number of reads necessary to access a value is at most the depth of the value
+  inside the argument array structure, i.e. four reads are needed to retrieve ``a_i[k][l][r]``. In a
+  previous version of the ABI, the number of reads scaled linearly with the total number of dynamic
+  parameters in the worst case.
+
+  2. The data of a variable or array element is not interleaved with other data and it is
+  relocatable, i.e. it only uses relative "addresses".
+
+
 
 编码的形式化说明
 ====================================
@@ -428,10 +469,11 @@ JSON
 
 ::
 
-    pragma solidity ^0.4.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity ^0.7.0;
 
     contract Test {
-      function Test() public { b = 0x12345678901234567890123456789012; }
+      constructor () { b = 0x12345678901234567890123456789012; }
       event Event(uint indexed a, bytes32 b);
       event Event2(uint indexed a, bytes32 b);
       function foo(uint a) public { Event(a, b); }
@@ -470,8 +512,8 @@ JSON
 
 ::
 
-    pragma solidity ^0.4.19 <0.7.0;
-    pragma experimental ABIEncoderV2;
+    pragma solidity >0.7.4;
+    pragma abicoder v2;
 
     contract Test {
       struct S { uint a; uint[] b; T[] c; }

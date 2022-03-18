@@ -9,7 +9,7 @@ Yul
 Yul (previously also called JULIA or IULIA) is an intermediate language that can be
 compiled to bytecode for different backends.
 
-Support for EVM 1.0, EVM 1.5 and eWASM is planned, and it is designed to
+Support for EVM 1.0, EVM 1.5 and Ewasm is planned, and it is designed to
 be a usable common denominator of all three
 platforms. It can already be used in stand-alone mode and
 for "inline assembly" inside Solidity
@@ -30,7 +30,7 @@ The design of Yul tries to achieve several goals:
 In order to achieve the first and second goal, Yul provides high-level constructs
 like ``for`` loops, ``if`` and ``switch`` statements and function calls. These should
 be sufficient for adequately representing the control flow for assembly programs.
-Therefore, no explicit statements for ``SWAP``, ``DUP``, ``JUMPDEST`` , ``JUMP`` and ``JUMPI``
+Therefore, no explicit statements for ``SWAP``, ``DUP``, ``JUMPDEST``, ``JUMP`` and ``JUMPI``
 are provided, because the first two obfuscate the data flow
 and the last two obfuscate control flow. Furthermore, functional statements of
 the form ``mul(add(x, y), 7)`` are preferred over pure opcode statements like
@@ -54,7 +54,7 @@ be omitted to help readability.
 To keep the language simple and flexible, Yul does not have
 any built-in operations, functions or types in its pure form.
 These are added together with their semantics when specifying a dialect of Yul,
-which allows to specialize Yul to the requirements of different
+which allows specializing Yul to the requirements of different
 target platforms and feature sets.
 
 Currently, there is only one specified dialect of Yul. This dialect uses
@@ -63,7 +63,7 @@ the EVM opcodes as builtin functions
 type of the EVM. Because of that, we will not provide types in the examples below.
 
 
-简单示例
+Simple Example
 ==============
 
 The following example program is written in the EVM dialect and computes exponentiation.
@@ -109,7 +109,7 @@ the ERC-20 standard can be found.
 
 
 
-单独使用
+Stand-Alone Usage
 =================
 
 You can use Yul in its stand-alone form in the EVM dialect using the Solidity compiler.
@@ -134,13 +134,13 @@ to code as data to deploy contracts. This Yul mode is available for the commandl
     with EVM 1.0 as target.
 
 
-Yul 非正式规范
+Informal Description of Yul
 ===========================
 
 In the following, we will talk about each individual aspect
 of the Yul language. In examples, we will use the default EVM dialect.
 
-语法
+Syntax
 ------
 
 Yul parses comments, literals and identifiers in the same way as Solidity,
@@ -171,7 +171,7 @@ Inside a code block, the following elements can be used
 Multiple syntactical elements can follow each other simply separated by
 whitespace, i.e. there is no terminating ``;`` or newline required.
 
-字面常量
+Literals
 --------
 
 You can use integer constants in decimal or hexadecimal notation.
@@ -198,7 +198,7 @@ has to be specified after a colon:
     let x := and("abc":uint32, add(3:uint256, 2:uint256))
 
 
-函数调用
+Function Calls
 --------------
 
 Both built-in and user-defined functions (see below) can be called
@@ -228,7 +228,7 @@ though, are expected on the stack from left to right,
 i.e. in this example, ``y`` is on top of the stack and ``x``
 is below it.
 
-变量声明
+Variable Declarations
 ---------------------
 
 You can use the ``let`` keyword to declare variables.
@@ -243,7 +243,7 @@ Since variables are stored on the stack, they do not directly
 influence memory or storage, but they can be used as pointers
 to memory or storage locations in the built-in functions
 ``mstore``, ``mload``, ``sstore`` and ``sload``.
-Future dialects migh introduce specific types for such pointers.
+Future dialects might introduce specific types for such pointers.
 
 When a variable is referenced, its current value is copied.
 For the EVM, this translates to a ``DUP`` instruction.
@@ -279,7 +279,7 @@ already after the variable has been used for
 the last time, even though it is still in scope.
 
 
-赋值
+Assignments
 -----------
 
 Variables can be assigned to after their definition using the
@@ -288,10 +288,8 @@ variables at the same time. For this, the number and types of the
 values have to match.
 If you want to assign the values returned from a function that has
 multiple return parameters, you have to provide multiple variables.
-
 The same variable may not occur multiple times on the left-hand side of
 an assignment, e.g. ``x, x := f()`` is invalid.
-
 
 .. code-block:: yul
 
@@ -344,7 +342,7 @@ case called ``default`` which is taken if none of the literal constants matches.
 The list of cases is not enclosed by curly braces, but the body of a
 case does require them.
 
-循环
+Loops
 -----
 
 Yul supports for-loops which consist of
@@ -382,7 +380,7 @@ Simply leave the initialization and post-iteration parts empty.
         }
     }
 
-函数声明
+Function Declarations
 ---------------------
 
 Yul allows the definition of functions. These should not be confused with functions
@@ -478,9 +476,8 @@ which are explained in their own chapter.
     TypeName = Identifier
     TypedIdentifierList = Identifier ( ':' TypeName )? ( ',' Identifier ( ':' TypeName )? )*
     Literal =
-        (NumberLiteral | StringLiteral | HexLiteral | TrueLiteral | FalseLiteral) ( ':' TypeName )?
+        (NumberLiteral | StringLiteral | TrueLiteral | FalseLiteral) ( ':' TypeName )?
     NumberLiteral = HexNumber | DecimalNumber
-    HexLiteral = 'hex' ('"' ([0-9a-fA-F]{2})* '"' | '\'' ([0-9a-fA-F]{2})* '\'')
     StringLiteral = '"' ([^"\r\n\\] | '\\' .)* '"'
     TrueLiteral = 'true'
     FalseLiteral = 'false'
@@ -510,7 +507,6 @@ In variable declarations and assignments, the right-hand-side expression
 variables on the left-hand-side.
 This is the only situation where an expression evaluating
 to more than one value is allowed.
-
 The same variable name cannot occur more than once in the left-hand-side of
 an assignment or variable declaration.
 
@@ -530,7 +526,7 @@ The ``leave`` statement can only be used inside a function.
 
 Functions cannot be defined anywhere inside for loop init blocks.
 
-Literals cannot be larger than the their type. The largest type defined is 256-bit wide.
+Literals cannot be larger than their type. The largest type defined is 256-bit wide.
 
 During assignments and function calls, the types of the respective values have to match.
 There is no implicit type conversion. Type conversion in general can only be achieved
@@ -691,8 +687,6 @@ We will use a destructuring notation for the AST nodes.
         L'[$parami] = vi and L'[$reti] = 0 for all i.
         Let G'', L'', mode = E(Gn, L', block)
         G'', Ln, L''[$ret1], ..., L''[$retm]
-    E(G, L, l: HexLiteral) = G, L, hexString(l),
-        where hexString decodes l from hex and left-aligns it into 32 bytes
     E(G, L, l: StringLiteral) = G, L, utf8EncodeLeftAligned(l),
         where utf8EncodeLeftAligned performs a utf8 encoding of l
         and aligns it left into 32 bytes
@@ -902,12 +896,11 @@ the ``dup`` and ``swap`` instructions as well as ``jump`` instructions, labels a
 
 .. note::
   The ``call*`` instructions use the ``out`` and ``outsize`` parameters to define an area in memory where
-  the return data is placed. This area is written to depending on how many bytes the called contract returns.
+  the return or failure data is placed. This area is written to depending on how many bytes the called contract returns.
   If it returns more data, only the first ``outsize`` bytes are written. You can access the rest of the data
   using the ``returndatacopy`` opcode. If it returns less data, then the remaining bytes are not touched at all.
   You need to use the ``returndatasize`` opcode to check which part of this memory area contains the return data.
-  The remaining bytes will retain their values as of before the call. If the call fails (it returns ``0``),
-  nothing is written to that area, but you can still retrieve the failure data using ``returndatacopy``.
+  The remaining bytes will retain their values as of before the call.
 
 
 In some internal dialects, there are additional functions:
@@ -915,7 +908,8 @@ In some internal dialects, there are additional functions:
 datasize, dataoffset, datacopy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The functions ``datasize(x)``, ``dataoffset(x)`` and ``datacopy(t, f, l)`` are used to access other parts of a Yul object.
+The functions ``datasize(x)``, ``dataoffset(x)`` and ``datacopy(t, f, l)``
+are used to access other parts of a Yul object.
 
 ``datasize`` and ``dataoffset`` can only take string literals (the names of other objects)
 as arguments and return the size and offset in the data area, respectively.
@@ -925,15 +919,16 @@ For the EVM, the ``datacopy`` function is equivalent to ``codecopy``.
 setimmutable, loadimmutable
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The functions ``setimmutable("name", value)`` and ``loadimmutable("name")`` are
+The functions ``setimmutable(offset, "name", value)`` and ``loadimmutable("name")`` are
 used for the immutable mechanism in Solidity and do not nicely map to pure Yul.
-The function ``setimmutable`` assumes that the runtime code of a contract
-is currently copied to memory at offset zero. The call to ``setimmutable("name", value)``
-will store ``value`` at all points in memory that contain a call to
-``loadimmutable("name")``.
+The call to ``setimmutable(offset, "name", value)`` assumes that the runtime code of the contract
+containing the given named immutable was copied to memory at offset ``offset`` and will write ``value`` to all
+positions in memory (relative to ``offset``) that contain the placeholder that was generated for calls
+to ``loadimmutable("name")`` in the runtime code.
+
 
 linkersymbol
-^^^^^^^^^^^^^
+^^^^^^^^^^^^
 
 The function ``linkersymbol("fq_library_name")`` is a placeholder for an address literal to be
 substituted by the linker. Its first and only argument must be a string literal and represents the
@@ -956,6 +951,25 @@ option.
 
 See :ref:`Using the Commandline Compiler <commandline-compiler>` for details about the Solidity linker.
 
+memoryguard
+^^^^^^^^^^^
+
+This function is available in the EVM dialect with objects. The caller of
+``let ptr := memoryguard(size)`` (where ``size`` has to be a literal number)
+promises that they only use memory in either the range ``[0, size)`` or the
+unbounded range starting at ``ptr``.
+
+Since the presence of a ``memoryguard`` call indicates that all memory access
+adheres to this restriction, it allows the optimizer to perform additional
+optimization steps, for example the stack limit evader, which attempts to move
+stack variables that would otherwise be unreachable to memory.
+
+The Yul optimizer promises to only use the memory range ``[size, ptr)`` for its purposes.
+If the optimizer does not need to reserve any memory, it holds that ``ptr == size``.
+
+``memoryguard`` can be called multiple times, but needs to have the same literal as argument
+within one Yul subobject. If at least one ``memoryguard`` call is found in a subobject,
+the additional optimiser steps will be run on it.
 
 
 .. _yul-object:
@@ -1013,7 +1027,7 @@ An example Yul Object is shown below:
             // executing code is the constructor code)
             size := datasize("runtime")
             offset := allocate(size)
-            // This will turn into a memory->memory copy for eWASM and
+            // This will turn into a memory->memory copy for Ewasm and
             // a codecopy for EVM
             datacopy(offset, dataoffset("runtime"), size)
             return(offset, size)
@@ -1115,6 +1129,7 @@ Abbreviation Full name
 ``L``        ``LoadResolver``
 ``M``        ``LoopInvariantCodeMotion``
 ``r``        ``RedundantAssignEliminator``
+``R``        ``ReasoningBasedSimplifier`` - highly experimental
 ``m``        ``Rematerialiser``
 ``V``        ``SSAReverser``
 ``a``        ``SSATransform``
@@ -1126,6 +1141,10 @@ Abbreviation Full name
 Some steps depend on properties ensured by ``BlockFlattener``, ``FunctionGrouper``, ``ForLoopInitRewriter``.
 For this reason the Yul optimizer always applies them before applying any steps supplied by the user.
 
+The ReasoningBasedSimplifier is an optimizer step that is currently not enabled
+in the default set of steps. It uses an SMT solver to simplify arithmetic expressions
+and boolean conditions. It has not received thorough testing or validation yet and can produce
+non-reproducible results, so please use with care!
 
 .. _erc20yul:
 
