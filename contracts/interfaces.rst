@@ -16,7 +16,8 @@
 
 将来可能会解除这里的某些限制。
 
-接口基本上基本上仅限于合约 ABI 可以表示的内容，并且 ABI 和接口之间的转换应该不会丢失任何信息。
+B
+接口基本上仅限于合约 ABI 可以表示的内容，并且 ABI 和接口之间的转换应该不会丢失任何信息。
 
 接口由它们自己的关键字表示：
 
@@ -25,6 +26,7 @@
     pragma solidity >=0.6.2 <0.9.0;
 
     interface Token {
+    A
         enum TokenType { Fungible, NonFungible }
         struct Coin { string obverse; string reverse; }
         function transfer(address recipient, uint amount) external;
