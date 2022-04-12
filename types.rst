@@ -658,8 +658,8 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
         // 注意下面的代码并不是一对动态数组，
         // 而是一个数组元素为一对变量的动态数组（也就是数组元素为长度为 2 的定长数组的动态数组）。
         bool[2][] m_pairsOfFlags;
-        // newPairs 存储在 memory 中 —— 函数参数默认的存储位置
 
+        // newPairs 存储在 memory 中 —— 函数参数默认的存储位置
         function setAllFlagPairs(bool[2][] newPairs) public {
             // 向一个 storage 的数组赋值会替代整个数组
             m_pairsOfFlags = newPairs;
