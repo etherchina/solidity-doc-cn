@@ -85,8 +85,8 @@ For most of the topics the compiler will provide suggestions.
 
 * Explicit data location for all variables of struct, array or mapping types is
   now mandatory. This is also applied to function parameters and return
-  variables.  For example, change ``uint[] x = m_x`` to ``uint[] storage x =
-  m_x``, and ``function f(uint[][] x)`` to ``function f(uint[][] memory x)``
+  variables.  For example, change ``uint[] x = z`` to ``uint[] storage x =
+  z``, and ``function f(uint[][] x)`` to ``function f(uint[][] memory x)``
   where ``memory`` is the data location and might be replaced by ``storage`` or
   ``calldata`` accordingly.  Note that ``external`` functions require
   parameters with a data location of ``calldata``.
@@ -123,7 +123,11 @@ For most of the topics the compiler will provide suggestions.
   adjusted within the type before the conversion.  For example, you can convert
   a ``bytes4`` (4 bytes) to a ``uint64`` (8 bytes) by first converting the
   ``bytes4`` variable to ``bytes8`` and then to ``uint64``. You get the
-  opposite padding when converting through ``uint32``.
+  opposite padding when converting through ``uint32``. Before v0.5.0 any
+  conversion between ``bytesX`` and ``uintY`` would go through ``uint8X``. For
+  example ``uint8(bytes3(0x291807))`` would be converted to ``uint8(uint24(bytes3(0x291807)))``
+  (the result is ``0x07``).
+
 
 * Using ``msg.value`` in non-payable functions (or introducing it via a
   modifier) is disallowed as a security feature. Turn the function into
@@ -286,11 +290,11 @@ It is still possible to interface with contracts written for Solidity versions p
 v0.5.0 (or the other way around) by defining interfaces for them.
 Consider you have the following pre-0.5.0 contract already deployed:
 
-::
+.. code-block:: solidity
 
    // This will not compile with the current version of the compiler
-   pragma solidity ^0.4.25;
-   contract OldContract {
+    pragma solidity ^0.4.25;
+    contract OldContract {
       function someOldFunction(uint8 a) {
          //...
       }
@@ -298,17 +302,18 @@ Consider you have the following pre-0.5.0 contract already deployed:
          //...
       }
       // ...
-   }
+    }
 
 This will no longer compile with Solidity v0.5.0. However, you can define a compatible interface for it:
 
-::
+.. code-block:: solidity
 
-   pragma solidity >=0.5.0 <0.9.0;
-   interface OldContract {
-      function someOldFunction(uint8 a) external;
-      function anotherOldFunction() external returns (bool);
-   }
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.5.0 <0.9.0;
+    interface OldContract {
+        function someOldFunction(uint8 a) external;
+        function anotherOldFunction() external returns (bool);
+    }
 
 Note that we did not declare ``anotherOldFunction`` to be ``view``, despite it being declared ``constant`` in the original
 contract. This is due to the fact that starting with Solidity v0.5.0 ``staticcall`` is used to call ``view`` functions.
@@ -319,39 +324,43 @@ the function will work with ``staticcall``.
 
 Given the interface defined above, you can now easily use the already deployed pre-0.5.0 contract:
 
-::
+.. code-block:: solidity
 
-   pragma solidity >=0.5.0 <0.9.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.5.0 <0.9.0;
 
-   interface OldContract {
+    interface OldContract {
       function someOldFunction(uint8 a) external;
       function anotherOldFunction() external returns (bool);
-   }
+    }
 
-   contract NewContract {
-      function doSomething(OldContract a) public returns (bool) {
-         a.someOldFunction(0x42);
-         return a.anotherOldFunction();
-      }
-   }
+    contract NewContract {
+        function doSomething(OldContract a) public returns (bool) {
+            a.someOldFunction(0x42);
+            return a.anotherOldFunction();
+        }
+    }
 
 Similarly, pre-0.5.0 libraries can be used by defining the functions of the library without implementation and
 supplying the address of the pre-0.5.0 library during linking (see :ref:`commandline-compiler` for how to use the
 commandline compiler for linking):
 
-::
+.. code-block:: solidity
 
-   pragma solidity >=0.5.0 <0.9.0;
+    // This will not compile after 0.6.0
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity ^0.5.0;
 
-   library OldLibrary {
-      function someFunction(uint8 a) public returns(bool);
-   }
+    library OldLibrary {
+        function someFunction(uint8 a) public returns(bool);
+    }
 
-   contract NewContract {
-      function f(uint8 a) public returns (bool) {
-         return OldLibrary.someFunction(a);
-      }
-   }
+    contract NewContract {
+        function f(uint8 a) public returns (bool) {
+            return OldLibrary.someFunction(a);
+        }
+    }
+
 
 
 举例
@@ -362,146 +371,149 @@ v0.5.0 with some of the changes listed in this section.
 
 Old version:
 
-::
+.. code-block:: solidity
 
-   // This will not compile
-   pragma solidity ^0.4.25;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity ^0.4.25;
+    // This will not compile after 0.5.0
 
-   contract OtherContract {
-      uint x;
-      function f(uint y) external {
-         x = y;
-      }
-      function() payable external {}
-   }
+    contract OtherContract {
+        uint x;
+        function f(uint y) external {
+            x = y;
+        }
+        function() payable external {}
+    }
 
-   contract Old {
-      OtherContract other;
-      uint myNumber;
+    contract Old {
+        OtherContract other;
+        uint myNumber;
 
-      // Function mutability not provided, not an error.
-      function someInteger() internal returns (uint) { return 2; }
+        // Function mutability not provided, not an error.
+        function someInteger() internal returns (uint) { return 2; }
 
-      // Function visibility not provided, not an error.
-      // Function mutability not provided, not an error.
-      function f(uint x) returns (bytes) {
-         // Var is fine in this version.
-         var z = someInteger();
-         x += z;
-         // Throw is fine in this version.
-         if (x > 100)
-            throw;
-         bytes b = new bytes(x);
-         y = -3 >> 1;
-         // y == -1 (wrong, should be -2)
-         do {
-            x += 1;
-            if (x > 10) continue;
-            // 'Continue' causes an infinite loop.
-         } while (x < 11);
-         // Call returns only a Bool.
-         bool success = address(other).call("f");
-         if (!success)
-            revert();
-         else {
-            // Local variables could be declared after their use.
-            int y;
-         }
-         return b;
-      }
+        // Function visibility not provided, not an error.
+        // Function mutability not provided, not an error.
+        function f(uint x) returns (bytes) {
+            // Var is fine in this version.
+            var z = someInteger();
+            x += z;
+            // Throw is fine in this version.
+            if (x > 100)
+                throw;
+            bytes memory b = new bytes(x);
+            y = -3 >> 1;
+            // y == -1 (wrong, should be -2)
+            do {
+                x += 1;
+                if (x > 10) continue;
+                // 'Continue' causes an infinite loop.
+            } while (x < 11);
+            // Call returns only a Bool.
+            bool success = address(other).call("f");
+            if (!success)
+                revert();
+            else {
+                // Local variables could be declared after their use.
+                int y;
+            }
+            return b;
+        }
 
-      // No need for an explicit data location for 'arr'
-      function g(uint[] arr, bytes8 x, OtherContract otherContract) public {
-         otherContract.transfer(1 ether);
+        // No need for an explicit data location for 'arr'
+        function g(uint[] arr, bytes8 x, OtherContract otherContract) public {
+            otherContract.transfer(1 ether);
 
-         // Since uint32 (4 bytes) is smaller than bytes8 (8 bytes),
-         // the first 4 bytes of x will be lost. This might lead to
-         // unexpected behavior since bytesX are right padded.
-         uint32 y = uint32(x);
-         myNumber += y + msg.value;
-      }
-   }
+            // Since uint32 (4 bytes) is smaller than bytes8 (8 bytes),
+            // the first 4 bytes of x will be lost. This might lead to
+            // unexpected behavior since bytesX are right padded.
+            uint32 y = uint32(x);
+            myNumber += y + msg.value;
+        }
+    }
 
 New version:
 
-::
+.. code-block:: solidity
 
-   pragma solidity >=0.5.0 <0.9.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity ^0.5.0;
+    // This will not compile after 0.6.0
 
-   contract OtherContract {
-      uint x;
-      function f(uint y) external {
-         x = y;
-      }
-      function() payable external {}
-   }
+    contract OtherContract {
+        uint x;
+        function f(uint y) external {
+            x = y;
+        }
+        function() payable external {}
+    }
 
-   contract New {
-      OtherContract other;
-      uint myNumber;
+    contract New {
+        OtherContract other;
+        uint myNumber;
 
-      // Function mutability must be specified.
-      function someInteger() internal pure returns (uint) { return 2; }
+        // Function mutability must be specified.
+        function someInteger() internal pure returns (uint) { return 2; }
 
-      // Function visibility must be specified.
-      // Function mutability must be specified.
-      function f(uint x) public returns (bytes memory) {
-         // The type must now be explicitly given.
-         uint z = someInteger();
-         x += z;
-         // Throw is now disallowed.
-         require(x > 100);
-         int y = -3 >> 1;
-         // y == -2 (correct)
-         do {
-            x += 1;
-            if (x > 10) continue;
-            // 'Continue' jumps to the condition below.
-         } while (x < 11);
+        // Function visibility must be specified.
+        // Function mutability must be specified.
+        function f(uint x) public returns (bytes memory) {
+            // The type must now be explicitly given.
+            uint z = someInteger();
+            x += z;
+            // Throw is now disallowed.
+            require(x <= 100);
+            int y = -3 >> 1;
+            require(y == -2);
+            do {
+                x += 1;
+                if (x > 10) continue;
+                // 'Continue' jumps to the condition below.
+            } while (x < 11);
 
-         // Call returns (bool, bytes).
-         // Data location must be specified.
-         (bool success, bytes memory data) = address(other).call("f");
-         if (!success)
-            revert();
-         return data;
-      }
+            // Call returns (bool, bytes).
+            // Data location must be specified.
+            (bool success, bytes memory data) = address(other).call("f");
+            if (!success)
+                revert();
+            return data;
+        }
 
-      using address_make_payable for address;
-      // Data location for 'arr' must be specified
-      function g(uint[] memory arr, bytes8 x, OtherContract otherContract, address unknownContract) public payable {
-         // 'otherContract.transfer' is not provided.
-         // Since the code of 'OtherContract' is known and has the fallback
-         // function, address(otherContract) has type 'address payable'.
-         address(otherContract).transfer(1 ether);
+        using AddressMakePayable for address;
+        // Data location for 'arr' must be specified
+        function g(uint[] memory /* arr */, bytes8 x, OtherContract otherContract, address unknownContract) public payable {
+            // 'otherContract.transfer' is not provided.
+            // Since the code of 'OtherContract' is known and has the fallback
+            // function, address(otherContract) has type 'address payable'.
+            address(otherContract).transfer(1 ether);
 
-         // 'unknownContract.transfer' is not provided.
-         // 'address(unknownContract).transfer' is not provided
-         // since 'address(unknownContract)' is not 'address payable'.
-         // If the function takes an 'address' which you want to send
-         // funds to, you can convert it to 'address payable' via 'uint160'.
-         // Note: This is not recommended and the explicit type
-         // 'address payable' should be used whenever possible.
-         // To increase clarity, we suggest the use of a library for
-         // the conversion (provided after the contract in this example).
-         address payable addr = unknownContract.make_payable();
-         require(addr.send(1 ether));
+            // 'unknownContract.transfer' is not provided.
+            // 'address(unknownContract).transfer' is not provided
+            // since 'address(unknownContract)' is not 'address payable'.
+            // If the function takes an 'address' which you want to send
+            // funds to, you can convert it to 'address payable' via 'uint160'.
+            // Note: This is not recommended and the explicit type
+            // 'address payable' should be used whenever possible.
+            // To increase clarity, we suggest the use of a library for
+            // the conversion (provided after the contract in this example).
+            address payable addr = unknownContract.makePayable();
+            require(addr.send(1 ether));
 
-         // Since uint32 (4 bytes) is smaller than bytes8 (8 bytes),
-         // the conversion is not allowed.
-         // We need to convert to a common size first:
-         bytes4 x4 = bytes4(x); // Padding happens on the right
-         uint32 y = uint32(x4); // Conversion is consistent
-         // 'msg.value' cannot be used in a 'non-payable' function.
-         // We need to make the function payable
-         myNumber += y + msg.value;
-      }
-   }
+            // Since uint32 (4 bytes) is smaller than bytes8 (8 bytes),
+            // the conversion is not allowed.
+            // We need to convert to a common size first:
+            bytes4 x4 = bytes4(x); // Padding happens on the right
+            uint32 y = uint32(x4); // Conversion is consistent
+            // 'msg.value' cannot be used in a 'non-payable' function.
+            // We need to make the function payable
+            myNumber += y + msg.value;
+        }
+    }
 
-   // We can define a library for explicitly converting ``address``
-   // to ``address payable`` as a workaround.
-   library address_make_payable {
-      function make_payable(address x) internal pure returns (address payable) {
-         return address(uint160(x));
-      }
-   }
+    // We can define a library for explicitly converting ``address``
+    // to ``address payable`` as a workaround.
+    library AddressMakePayable {
+        function makePayable(address x) internal pure returns (address payable) {
+            return address(uint160(x));
+        }
+    }
