@@ -1,32 +1,29 @@
-Solidity 最新(0.8.0)中文文档
+Solidity 中文文档
 ================================
 
-.. image:: logo.svg
-    :width: 120px
-    :alt: Solidity logo
-    :align: center
-
-
-译者说明：这里是是 **Solidity官方推荐中文版**，本文档根据当前 `Solidity官方文档 <https://solidity.readthedocs.io/>`_ 最新版本（当前为v0.8.0）进行翻译。
+译者说明：这里是是 **Solidity官方推荐中文版**，本文档根据当前 `Solidity官方文档 <https://solidity.readthedocs.io/>`_ 最新版本（当前为v0.8.13）进行翻译。
 
 
 Solidity中文翻译最初由 `HiBlock <http://hiblock.one/>`_ 社区发起，后由 `登链社区 <https://learnblockchain.cn/>`_ 社区持续维护更新。
-本翻译工作还得到 `Cell Network <http://www.cellnetwork.io/?utm_souce=learnblockchain>`_ 赞助。
 
 翻译工作是一个持续的过程（这份文档依旧有部分未完成），我们热情邀请热爱区块链技术的小伙伴一起参与，欢迎加入我们 `翻译小组 <https://github.com/lbc-team>`_ 。
 
 本中文文档大部分情况下，英中直译，但有时为了更好的理解也会使用意译，如需转载请联系Tiny熊（微信：xlbxiong）.
 
 
-Solidity 是一门面向合约的、为实现智能合约而创建的高级编程语言。这门语言受到了 C++，Python 和 Javascript 语言的影响，设计的目的是能在 `以太坊虚拟机（EVM） <https://learnblockchain.cn/2019/04/09/easy-evm/>`_ 上运行。
+Solidity 是一门面向合约的、为实现智能合约而创建的高级编程语言。智能合约是管理以太坊状态里账户行为的程序。
+
+Solidity是一种针对Ethereum虚拟机（EVM）设计的 `花括号语言 <https://en.wikipedia.org/wiki/List_of_programming_languages_by_type#Curly-bracket_languages>`_ 。
+它受到了C++、Python和JavaScript的影响。你可以在 :doc:`语言影响 <language-influences>` 部分找到更多关于Solidity受到哪些语言启发的细节。
 
 Solidity 是静态类型语言，支持继承、库和复杂的用户定义类型等特性。
 
-在部署合约时，应该尽量使用最新版本，因为新版本会有一些重大的新特性以及bug修复。
+在部署合约时，应该尽量使用最新版本，因为新版本会有一些重大的新特性以及bug修复（除特殊情况）。
 
 .. warning::
 
   Solidity 每个大版本的设计，都会引入一些与之前版本不兼容的升级，详情可阅读 :doc:`0.8.0 更新列表 <080-breaking-changes>` ，  :doc:`0.7 更新列表 <070-breaking-changes>` , :doc:`0.6 更新列表 <060-breaking-changes>` , :doc:`0.5 更新列表 <050-breaking-changes>` 。
+
 
 开始使用Solidity
 ----------------------
@@ -65,16 +62,6 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 
 如果还有问题，你可以尝试搜索或在 `Ethereum Stackexchange <https://ethereum.stackexchange.com/>`_ 上提问，或者到我们的 `gitter 频道 <https://gitter.im/ethereum/solidity/>`_ 来。随时欢迎改善 Solidity 或本文档的想法！
 
-翻译版本
-----------------------
-
-本文档由社区志愿者翻译成多种语言，但是 `英语版本 <https://github.com/ethereum/solidity/blob/develop/docs/index.rst>`_ 作为主要参考。
-
-* `简体中文版 <https://learnblockchain.cn/docs/solidity/>`_ （由 `登链社区 <https://learnblockchain.cn/>`_ `HiBlock社区 <http://hiblock.one/>`_  贡献者翻译）
-* `西班牙语版 <https://solidity-es.readthedocs.io>`_
-* `俄语版 <https://github.com/ethereum/wiki/wiki/%5BRussian%5D-%D0%A0%D1%83%D0%BA%D0%BE%D0%B2%D0%BE%D0%B4%D1%81%D1%82%D0%B2%D0%BE-%D0%BF%D0%BE-Solidity>`_ (已过时)
-* `韩语版 <https://solidity-kr.readthedocs.io>`_ (in progress)
-
 
 目录
 ========
@@ -106,6 +93,14 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
 
 .. toctree::
    :maxdepth: 2
+   :caption: 编译器
+
+   using-the-compiler.rst
+   analysing-compilation-output.rst
+   ir-breaking-changes.rst
+
+.. toctree::
+   :maxdepth: 2
    :caption: 深入 Solidity 内部
 
    internals/layout_in_storage.rst
@@ -113,7 +108,7 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
    internals/layout_in_calldata.rst
    internals/variable_cleanup.rst
    internals/source_mappings.rst
-   internals/optimiser.rst
+   internals/optimizer.rst
    metadata.rst
    abi-spec.rst
 
@@ -127,11 +122,13 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
    080-breaking-changes.rst
    natspec-format.rst
    security-considerations.rst
+   smtchecker.rst
    resources.rst
-   using-the-compiler.rst
+   path-resolution.rst
    yul.rst
    style-guide.rst
    common-patterns.rst
    bugs.rst
    contributing.rst
    brand-guide.rst
+   language-influences.rst

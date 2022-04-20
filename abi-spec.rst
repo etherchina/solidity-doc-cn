@@ -18,6 +18,7 @@
 这份手册并不针对那些动态合约接口或者仅在运行时才可获知的合约接口。如果这种场景变得很重要，你可以使用 |ethereum| 生态系统中其他更合适的基础设施来处理它们。
 
 .. _abi_function_selector:
+.. index:: selector
 
 |function_selector|
 =================================
@@ -65,6 +66,7 @@
 - ``<type>[M]``：有 ``M`` 个元素的定长数组，``M >= 0``，数组元素为给定类型。
 
   .. note::
+  
       尽管此ABI规范可以表示零个元素的定长数组，但编译器不支持它们。
 
 以下是非定长类型：
@@ -99,6 +101,9 @@ them.
 |:ref:`contract<contracts>`     |``address``                                                                  |
 +-------------------------------+-----------------------------------------------------------------------------+
 |:ref:`enum<enums>`             | ``uint8``                                                                   |
++-------------------------------+-----------------------------------------------------------------------------+
+|:ref:`user defined value types |its underlying value type                                                    |
+|<user-defined-value-types>`    |                                                                             |
 +-------------------------------+-----------------------------------------------------------------------------+
 |:ref:`struct<structs>`         |``tuple``                                                                    |
 +-------------------------------+-----------------------------------------------------------------------------+
@@ -185,7 +190,7 @@ The encoding is designed to have the following properties, which are especially 
 
 - ``string``：
 
-  ``enc(X) = enc(enc_utf8(X))``，即是说，``X`` 被 utf-8 编码，且在后续编码中将这个值解释为 ``bytes`` 类型。注意，在随后的编码中使用的长度是其 utf-8 编码的字符串的字节数，而不是其字符数。
+  ``enc(X) = enc(enc_utf8(X))``，即是说，``X`` 被 UFT-8 编码，且在后续编码中将这个值解释为 ``bytes`` 类型。注意，在随后的编码中使用的长度是其 UFT-8 编码的字符串的字节数，而不是其字符数。
 
 - ``uint<M>``：``enc(X)`` 是在 ``X`` 的大端序编码的高位（左侧）补充若干 0 值字节以使其长度成为 32 字节。
 - ``address``：与 ``uint160`` 的情况相同。
@@ -217,9 +222,11 @@ The encoding is designed to have the following properties, which are especially 
 
 给定一个合约：
 
-::
+.. code-block:: solidity
+    :force:
 
-    pragma solidity ^0.4.16;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.4.16 <0.9.0;
 
     contract Foo {
       function bar(bytes3[2]) public pure {}
@@ -234,7 +241,9 @@ The encoding is designed to have the following properties, which are especially 
 - ``0x0000000000000000000000000000000000000000000000000000000000000045``：第一个参数，一个被用 0 值字节补充到 32 字节的 uint32 值 ``69``。
 - ``0x0000000000000000000000000000000000000000000000000000000000000001``：第二个参数，一个被用 0 值字节补充到 32 字节的 boolean 值 ``true``。
 
-合起来就是::
+合起来就是:
+
+.. code-block:: none
 
     0xcdcd77c000000000000000000000000000000000000000000000000000000000000000450000000000000000000000000000000000000000000000000000000000000001
 
@@ -407,15 +416,15 @@ The encoding is designed to have the following properties, which are especially 
 事件
 ======
 
-事件，是 |ethereum| 的日志/事件监视协议的一个抽象。日志项提供了合约的地址、一系列的主题（最高 4 项）和一些任意长度的二进制数据。为了使用合适的类型数据结构来演绎这些功能（与接口定义一起），事件沿用了既存的 ABI 函数。
+事件，是 |ethereum| 的日志/事件监视协议的一个抽象。日志项提供了合约的地址、一系列的主题（最多 4 项）和一些任意长度的二进制数据。为了使用合适的类型数据结构来演绎这些功能（与接口定义一起），事件沿用了既存的 ABI 函数。
 
-给定了事件名称和事件参数之后，我们将其分解为两个子集：已索引的和未索引的。已索引的部分，最多有 3 个，被用来与事件签名的 Keccak 哈希一起组成日志项的主题。未索引的部分就组成了事件的字节数组。
+给定了事件名称和事件参数之后，我们将其分解为两个子集：已索引的和未索引的。已索引的部分，最多有 3 个（对于非匿名事件）或 4 个（对于匿名事件），被用来与事件签名的 Keccak 哈希一起组成日志项的主题。未索引的部分就组成了事件的字节数组。
 
 这样，一个使用 ABI 的日志项就可以描述为：
 
 - ``address``：合约地址（由 |ethereum| 真正提供）；
 - ``topics[0]``：``keccak(EVENT_NAME+"("+EVENT_ARGS.map(canonical_type_of).join(",")+")")`` （``canonical_type_of`` 是一个可以返回给定参数的权威类型的函数，例如，对 ``uint indexed foo`` 它会返回 ``uint256``）。如果事件被声明为 ``anonymous``，那么 ``topics[0]`` 不会被生成；
-- ``topics[n]``：``EVENT_INDEXED_ARGS[n - 1]`` （``EVENT_INDEXED_ARGS`` 是已索引的 ``EVENT_ARGS``）；
+- ``topics[n]``：如果不是匿名事件，为 ``abi_encode(EVENT_INDEXED_ARGS[n - 1])`` ，否则则为 ``abi_encode(EVENT_INDEXED_ARGS[n])``（``EVENT_INDEXED_ARGS`` 是已索引的 ``EVENT_ARGS``）；
 - ``data``：``abi_serialise(EVENT_NON_INDEXED_ARGS)`` （``EVENT_NON_INDEXED_ARGS`` 是未索引的 ``EVENT_ARGS``，``abi_serialise`` 是一个用来从某个函数返回一系列类型值的ABI序列化函数，就像上文所讲的那样）。
 
 对于所有定长的Solidity类型，``EVENT_INDEXED_ARGS`` 数组会直接包含32字节的编码值。然而，对于 *动态长度的类型* ，包含 ``string``、``bytes`` 和数组，
@@ -423,12 +432,51 @@ The encoding is designed to have the following properties, which are especially 
 但也使应用程序不能对它们还没查询过的已索引的值进行解码。对于动态长度的类型，应用程序开发者面临在对预先设定的值（如果参数已被索引）的快速检索和对任意数据的清晰处理（需要参数不被索引）之间的权衡。
 开发者们可以通过定义两个参数（一个已索引、一个未索引）保存同一个值的方式来解决这种权衡，从而既获得高效的检索又能清晰地处理任意数据。
 
+.. _abi_errors:
+
+Errors
+======
+
+In case of a failure inside a contract, the contract can use a special opcode to abort execution and revert
+all state changes. In addition to these effects, descriptive data can be returned to the caller.
+This descriptive data is the encoding of an error and its arguments in the same way as data for a function
+call.
+
+As an example, let us consider the following contract whose ``transfer`` function always
+reverts with a custom error of "insufficient balance":
+
+.. code-block:: solidity
+
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity ^0.8.4;
+
+    contract TestToken {
+        error InsufficientBalance(uint256 available, uint256 required);
+        function transfer(address /*to*/, uint amount) public pure {
+            revert InsufficientBalance(0, amount);
+        }
+    }
+
+The return data would be encoded in the same way as the function call
+``InsufficientBalance(0, amount)`` to the function ``InsufficientBalance(uint256,uint256)``,
+i.e. ``0xcf479181``, ``uint256(0)``, ``uint256(amount)``.
+
+The error selectors ``0x00000000`` and ``0xffffffff`` are reserved for future use.
+
+.. warning::
+    Never trust error data.
+    The error data by default bubbles up through the chain of external calls, which
+    means that a contract may receive an error not defined in any of the contracts
+    it calls directly.
+    Furthermore, any contract can fake any error by returning data that matches
+    an error signature, even if the error is not defined anywhere.
+
 .. _abi_json:
 
 JSON
 =======
 
-合约接口的JSON格式是由一个函数和/或事件描述的数组所给定的。一个函数的描述是一个有如下字段的JSON对象：
+合约接口的JSON格式是用来描述函数，事件或错误描述的一个数组。一个函数的描述是一个有如下字段的JSON对象：
 
 - ``type``：``"function"``、``"constructor"`` 或 ``"fallback"`` （:ref:`未命名的 "缺省" 函数 <fallback-function>`）
 - ``name``：函数名称；
@@ -465,17 +513,37 @@ JSON
 
 - ``anonymous``：如果事件被声明为 ``anonymous``，则为 ``true``。
 
+
+Errors look as follows:
+
+- ``type``: always ``"error"``
+- ``name``: the name of the error.
+- ``inputs``: an array of objects, each of which contains:
+
+  * ``name``: the name of the parameter.
+  * ``type``: the canonical type of the parameter (more below).
+  * ``components``: used for tuple types (more below).
+
+.. note::
+  There can be multiple errors with the same name and even with identical signature
+  in the JSON array, for example if the errors originate from different
+  files in the smart contract or are referenced from another smart contract.
+  For the ABI, only the name of the error itself is relevant and not where it is
+  defined.
+
+
 例如，
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity ^0.7.0;
+    pragma solidity ^0.8.4;
 
     contract Test {
       constructor () { b = 0x12345678901234567890123456789012; }
       event Event(uint indexed a, bytes32 b);
       event Event2(uint indexed a, bytes32 b);
+      error InsufficientBalance(uint256 available, uint256 required);
       function foo(uint a) public { Event(a, b); }
       bytes32 b;
     }
@@ -485,6 +553,10 @@ JSON
 .. code:: json
 
   [{
+  "type":"error",
+  "inputs": [{"name":"available","type":"uint256"},{"name":"required","type":"uint256"}],
+  "name":"InsufficientBalance"
+  }, {
   "type":"event",
   "inputs": [{"name":"a","type":"uint256","indexed":true},{"name":"b","type":"bytes32","indexed":false}],
   "name":"Event"
@@ -510,9 +582,9 @@ JSON
 
 作为例子，代码
 
-::
+.. code-block:: solidity
 
-    pragma solidity >0.7.4;
+    pragma solidity >=0.7.5 <0.9.0;
     pragma abicoder v2;
 
     contract Test {
@@ -584,13 +656,25 @@ JSON
 
 .. _abi_packed_mode:
 
+Strict Encoding Mode
+====================
+
+Strict encoding mode is the mode that leads to exactly the same encoding as defined in the formal specification above.
+This means offsets have to be as small as possible while still not creating overlaps in the data areas and thus no gaps are
+allowed.
+
+Usually, ABI decoders are written in a straightforward way just following offset pointers, but some decoders
+might enforce strict mode. The Solidity ABI decoder currently does not enforce strict mode, but the encoder
+always creates data in strict mode.
+
+
 非标准打包模式
 ========================
 
-Solidity 支持一种非标准打包模式：
+通过 ``abi.encodePacked()``, Solidity 支持一种非标准打包模式处理以下情形：
 
 - :ref:`函数选择器<abi_function_selector>` 不进行编码，
-- 长度低于 32 字节的类型，既不会进行补 0 操作，也不会进行符号扩展，以及
+- 长度低于 32 字节的类型，会直接拼接，既不会进行补 0 操作，也不会进行符号扩展，
 - 动态类型会直接进行编码，并且不包含长度信息。
 
 例如，对 ``int1, bytes1, uint16, string`` 用数值 ``-1, 0x42, 0x2424, "Hello, world!"`` 进行编码将生成如下结果 ::
@@ -601,5 +685,62 @@ Solidity 支持一种非标准打包模式：
           ^^^^                           uint16(0x2424)
               ^^^^^^^^^^^^^^^^^^^^^^^^^^ string("Hello, world!") without a length field
 
-更具体地说，每个静态大小的类型都尽可能多地按它们的数值范围使用了字节数，而动态大小的类型，像 ``string``、 ``bytes`` 或 ``uint[]``，在编码时没有包含其长度信息。
-这意味着一旦有两个动态长度的元素，编码就会变得有歧义了。
+
+More specifically:
+
+- During the encoding, everything is encoded in-place. This means that there is
+  no distinction between head and tail, as in the ABI encoding, and the length
+  of an array is not encoded.
+- The direct arguments of ``abi.encodePacked`` are encoded without padding,
+  as long as they are not arrays (or ``string`` or ``bytes``).
+- The encoding of an array is the concatenation of the
+  encoding of its elements **with** padding.
+- Dynamically-sized types like ``string``, ``bytes`` or ``uint[]`` are encoded
+  without their length field.
+- The encoding of ``string`` or ``bytes`` does not apply padding at the end
+  unless it is part of an array or struct (then it is padded to a multiple of
+  32 bytes).
+
+In general, the encoding is ambiguous as soon as there are two dynamically-sized elements,
+because of the missing length field.
+
+If padding is needed, explicit type conversions can be used: ``abi.encodePacked(uint16(0x12)) == hex"0012"``.
+
+Since packed encoding is not used when calling functions, there is no special support
+for prepending a function selector. Since the encoding is ambiguous, there is no decoding function.
+
+.. warning::
+
+    If you use ``keccak256(abi.encodePacked(a, b))`` and both ``a`` and ``b`` are dynamic types,
+    it is easy to craft collisions in the hash value by moving parts of ``a`` into ``b`` and
+    vice-versa. More specifically, ``abi.encodePacked("a", "bc") == abi.encodePacked("ab", "c")``.
+    If you use ``abi.encodePacked`` for signatures, authentication or data integrity, make
+    sure to always use the same types and check that at most one of them is dynamic.
+    Unless there is a compelling reason, ``abi.encode`` should be preferred.
+
+
+.. _indexed_event_encoding:
+
+Encoding of Indexed Event Parameters
+====================================
+
+Indexed event parameters that are not value types, i.e. arrays and structs are not
+stored directly but instead a keccak256-hash of an encoding is stored. This encoding
+is defined as follows:
+
+- the encoding of a ``bytes`` and ``string`` value is just the string contents
+  without any padding or length prefix.
+- the encoding of a struct is the concatenation of the encoding of its members,
+  always padded to a multiple of 32 bytes (even ``bytes`` and ``string``).
+- the encoding of an array (both dynamically- and statically-sized) is
+  the concatenation of the encoding of its elements, always padded to a multiple
+  of 32 bytes (even ``bytes`` and ``string``) and without any length prefix
+
+In the above, as usual, a negative number is padded by sign extension and not zero padded.
+``bytesNN`` types are padded on the right while ``uintNN`` / ``intNN`` are padded on the left.
+
+.. warning::
+
+    The encoding of a struct is ambiguous if it contains more than one dynamically-sized
+    array. Because of that, always re-check the event data and do not rely on the search result
+    based on the indexed parameters alone.

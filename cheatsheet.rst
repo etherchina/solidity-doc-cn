@@ -72,6 +72,7 @@
 全局变量
 ================
 
+
 - ``abi.decode(bytes memory encodedData, (...)) returns (...)``: :ref:`ABI <ABI>`-decodes
   the provided data. The types are given in parentheses as second argument.
   Example: ``(uint a, uint[2] memory b, bytes memory c) = abi.decode(data, (uint, uint[2], bytes))``
@@ -80,17 +81,25 @@
   the given arguments. Note that this encoding can be ambiguous!
 - ``abi.encodeWithSelector(bytes4 selector, ...) returns (bytes memory)``: :ref:`ABI <ABI>`-encodes
   the given arguments starting from the second and prepends the given four-byte selector
+- ``abi.encodeCall(function functionPointer, (...)) returns (bytes memory)``: ABI-encodes a call to ``functionPointer`` with the arguments found in the
+  tuple. Performs a full type-check, ensuring the types match the function signature. Result equals ``abi.encodeWithSelector(functionPointer.selector, (...))``
 - ``abi.encodeWithSignature(string memory signature, ...) returns (bytes memory)``: Equivalent
-  to ``abi.encodeWithSelector(bytes4(keccak256(bytes(signature)), ...)```
-- ``block.chainid`` (``uint``): current chain id  
+  to ``abi.encodeWithSelector(bytes4(keccak256(bytes(signature)), ...)``
+- ``bytes.concat(...) returns (bytes memory)``: :ref:`Concatenates variable number of
+  arguments to one byte array<bytes-concat>`
+- ``string.concat(...) returns (string memory)``: :ref:`Concatenates variable number of
+  arguments to one string array<string-concat>`
+- ``block.basefee`` (``uint``): current block's base fee (`EIP-3198 <https://eips.ethereum.org/EIPS/eip-3198>`_ and `EIP-1559 <https://eips.ethereum.org/EIPS/eip-1559>`_)
+- ``block.chainid`` (``uint``): current chain id
 - ``block.coinbase`` (``address payable``): current block miner's address
 - ``block.difficulty`` (``uint``): current block difficulty
 - ``block.gaslimit`` (``uint``): current block gaslimit
 - ``block.number`` (``uint``): current block number
-- ``block.timestamp`` (``uint``): current block timestamp
+- ``block.timestamp`` (``uint``): current block timestamp in seconds since Unix epoch
 - ``gasleft() returns (uint256)``: remaining gas
 - ``msg.data`` (``bytes``): complete calldata
 - ``msg.sender`` (``address``): sender of the message (current call)
+- ``msg.sig`` (``bytes4``): first four bytes of the calldata (i.e. function identifier)
 - ``msg.value`` (``uint``): number of wei sent with the message
 - ``tx.gasprice`` (``uint``): gas price of the transaction
 - ``tx.origin`` (``address``): sender of the transaction (full call chain)
@@ -128,7 +137,13 @@
 - ``type(T).max`` (``T``): the maximum value representable by the integer type ``T``, see :ref:`Type Information<meta-type>`.
 
 .. note::
-    Do not rely on ``block.timestamp`` and ``blockhash`` as a source of randomness,
+    When contracts are evaluated off-chain rather than in context of a transaction included in a
+    block, you should not assume that ``block.*`` and ``tx.*`` refer to values from any specific
+    block or transaction. These values are provided by the EVM implementation that executes the
+    contract and can be arbitrary.
+
+.. note::
+    Do not rely on ``block.timestamp`` or ``blockhash`` as a source of randomness,
     unless you know what you are doing.
 
     Both the timestamp and the block hash can be influenced by miners to some degree.
@@ -151,13 +166,13 @@
 .. note::
     In version 0.7.0, the alias ``now`` (for ``block.timestamp``) was removed.
 
-
 .. index:: visibility, public, private, external, internal
 
 函数可见性
 ==============================
 
-::
+.. code-block:: solidity
+    :force:
 
     function myFunction() <visibility specifier> returns (bool) {
         return true;
@@ -191,8 +206,8 @@
 
 These keywords are reserved in Solidity. They might become part of the syntax in the future:
 
-``after``, ``alias``, ``apply``, ``auto``, ``case``, ``copyof``, ``default``,
-``define``, ``final``, ``immutable``, ``implements``, ``in``, ``inline``, ``let``, ``macro``, ``match``,
+``after``, ``alias``, ``apply``, ``auto``, ``byte``, ``case``, ``copyof``, ``default``,
+``define``, ``final``, ``implements``, ``in``, ``inline``, ``let``, ``macro``, ``match``,
 ``mutable``, ``null``, ``of``, ``partial``, ``promise``, ``reference``, ``relocatable``,
 ``sealed``, ``sizeof``, ``static``, ``supports``, ``switch``, ``typedef``, ``typeof``,
-``unchecked``.
+``var``.

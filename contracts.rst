@@ -20,6 +20,7 @@ Solidity 合约类似于面向对象语言中的类。合约中有用于数据�
 .. include:: contracts/functions.rst
 
 .. include:: contracts/events.rst
+.. include:: contracts/errors.rst
 
 .. include:: contracts/inheritance.rst
 

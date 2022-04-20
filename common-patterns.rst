@@ -20,9 +20,10 @@
 
 在下边的合约中，如果你的“最富有”位置被其他人取代，你可以收到取代你成为“最富有”的人发送到合约的资金。
 
-::
+.. code-block:: solidity
 
-    pragma solidity  >=0.7.0 <0.9.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity ^0.8.4;
 
     contract WithdrawalContract {
         address public richest;
@@ -30,13 +31,18 @@
 
         mapping (address => uint) pendingWithdrawals;
 
+
+        /// The amount of Ether sent was not higher than
+        /// the currently highest amount.
+        error NotEnoughEther();
+
         constructor() payable {
             richest = msg.sender;
             mostSent = msg.value;
         }
 
-        function becomeRichest() public payable returns (bool) {
-            require(msg.value > mostSent, "Not enough money sent.");
+        function becomeRichest() public payable {
+            if (msg.value <= mostSent) revert NotEnoughEther();
             pendingWithdrawals[richest] += msg.value;
             richest = msg.sender;
             mostSent = msg.value;
@@ -53,13 +59,19 @@
 
 下面是一个相反的直接使用发送模式的例子：
 
-::
+.. code-block:: solidity
 
-    pragma solidity  >=0.7.0 <0.9.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity ^0.8.4;
 
     contract SendContract {
         address payable public richest;
         uint public mostSent;
+
+
+        /// The amount of Ether sent was not higher than
+        /// the currently highest amount.
+        error NotEnoughEther();
 
         constructor() payable {
             richest = payable(msg.sender);
@@ -67,7 +79,8 @@
         }
 
         function becomeRichest() public payable returns (bool) {
-            require(msg.value > mostSent, "Not enough money sent.");
+            if (msg.value <= mostSent) revert NotEnoughEther();
+
             // 这一行会导致问题（详见下文）
             richest.transfer(msg.value);
             richest = payable(msg.sender);
@@ -99,9 +112,11 @@
 
 通过使用“函数 |modifier|”，可以使这些限制变得非常明确。
 
-::
+.. code-block:: solidity
+    :force:
 
-    pragma solidity >=0.6.0 <0.9.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity ^0.8.4;
 
     contract AccessRestriction {
         // 这些将在构造阶段被赋值
@@ -110,38 +125,51 @@
         address public owner = msg.sender;
         uint public creationTime = block.timestamp;
 
+
+        // Now follows a list of errors that
+        // this contract can generate together
+        // with a textual explanation in special
+        // comments.
+
+        /// Sender not authorized for this
+        /// operation.
+        error Unauthorized();
+
+        /// Function called too early.
+        error TooEarly();
+
+        /// Not enough Ether sent with function call.
+        error NotEnoughEther();
+
         // 修改器可以用来更改
         // 一个函数的函数体。
         // 如果使用这个修改器，
         // 它会预置一个检查，仅允许
         // 来自特定地址的
         // 函数调用。
-        modifier onlyBy(address _account)
+        modifier onlyBy(address account)
         {
-            require(
-                msg.sender == _account,
-                "Sender not authorized."
-            );
+            if (msg.sender != account)
+                revert Unauthorized();
+
             // 不要忘记写 `_;`！
             // 它会被实际使用这个修改器的
             // 函数体所替代。
             _;
         }
 
-        // 使 `_newOwner` 成为这个合约的
+        // 使 `newOwner` 成为这个合约的
         // 新所有者。
-        function changeOwner(address _newOwner)
+        function changeOwner(address newOwner)
             public
             onlyBy(owner)
         {
-            owner = _newOwner;
+            owner = newOwner;
         }
 
-        modifier onlyAfter(uint _time) {
-            require(
-                block.timestamp >= _time,
-                "Function called too early."
-            );
+        modifier onlyAfter(uint time) {
+            if (block.timestamp < time)
+                revert TooEarly();
             _;
         }
 
@@ -162,22 +190,20 @@
         // 他/她会得到退款，但需要先执行函数体。
         // 这在 0.4.0 版本以前的 Solidity 中很危险，
         // 因为很可能会跳过 `_;` 之后的代码。
-        modifier costs(uint _amount) {
-            require(
-                msg.value >= _amount,
-                "Not enough Ether provided."
-            );
+        modifier costs(uint amount) {
+            if (msg.value < amount)
+                revert NotEnoughEther();
             _;
-            if (msg.value > _amount)
-                payable(msg.sender).send(msg.value - _amount);
+            if (msg.value > amount)
+                payable(msg.sender).send(msg.value - amount);
         }
 
-        function forceOwnerChange(address _newOwner)
+        function forceOwnerChange(address newOwner)
             public
             payable
             costs(200 ether)
         {
-            owner = _newOwner;
+            owner = newOwner;
             // 这只是示例条件
             if (uint160(owner) & 0 == 1)
                 // 这无法在 0.4.0 版本之前的
@@ -211,7 +237,7 @@
 
 在下边的示例中， |modifier| ``atStage`` 确保了函数仅在特定的阶段才可以被调用。
 
-根据时间来进行的自动阶段转换，是由 |modifier| ``timeTransitions`` 来处理的，
+根据时间来进行的自动阶段转换，是由 |modifier| ``timedTransitions`` 来处理的，
 它应该用在所有函数上。
 
 .. note::
@@ -235,9 +261,12 @@
     从 0.4.0 版本开始，即使函数明确地 return 了，
     |modifier| 的代码也会执行。
 
-::
+.. code-block:: solidity
+    :force:
 
-    pragma solidity >=0.4.22 <0.9.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity ^0.8.4;
+
 
     contract StateMachine {
         enum Stages {
@@ -248,16 +277,17 @@
             Finished
         }
 
+        /// Function cannot be called at this time.
+        error FunctionInvalidAtThisStage();
+        
         // 这是当前阶段。
         Stages public stage = Stages.AcceptingBlindedBids;
 
         uint public creationTime = block.timestamp;
 
-        modifier atStage(Stages _stage) {
-            require(
-                stage == _stage,
-                "Function cannot be called at this time."
-            );
+        modifier atStage(Stages stage_) {
+            if (stage != stage_)
+                revert FunctionInvalidAtThisStage();
             _;
         }
 
