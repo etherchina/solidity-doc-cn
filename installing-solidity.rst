@@ -9,7 +9,11 @@
 版本
 ==========
 
-Solidity的版本遵循 `语义化版本原则 <https://semver.org>`_，作为发布版本的补充， **每日开发构建** （nightly development builds）也是可用的。这个每日开发构建不保证能正常工作，尽管尽了最大的努力，但仍可能包含未记录的和／或重大的改动。我们推荐使用最新的发布版本。下面的包安装程序将使用最新发布版本。
+Solidity的版本遵循 `语义化版本原则 <https://semver.org>`_， 此外，带有主版本0（即0.x.y）的补丁级版本将不会包含破坏性的变化。这意味着用0.x.y版本编译的代码可在0.x.z版本中编译，其中z>y。
+
+作为发布版本的补充， **每日开发构建** （nightly development builds）也是可用的。这个每日开发构建不保证能正常工作，尽管尽了最大的努力，但仍可能包含未记录的和／或重大的改动。我们推荐使用最新的发布版本。下面的包安装程序将使用最新发布(release)版本。
+这是因为我们会定期引入突破性的更新，带来新的功能和修复错误。我们目前使用0.x版本号 `来表示这种快速变化的速度<https://semver.org/#spec-item-4>`_ 。
+
 
 Remix
 ======
@@ -38,21 +42,45 @@ npm / Node.js
 
 .. note::
 
-    在命令行中，使用 `solcjs` 而非 `solc` 。
-    `solcjs` 的命令行选项同 `solc` 和一些工具（如 `geth` )是不兼容的，因此不要期望 `solcjs` 能像 `solc` 一样工作。
+    在命令行中，可执行文件命名为 `solcjs` 。
+
+    `solcjs` 的命令行选项与 `solc` 和一些工具（如 `geth` )是不兼容的，因此不要期望 `solcjs`  `solc` 完全一样。
 
 Docker
 =======
 
-我们为编译器提供了最新的docker构建。 ``stable`` 仓库里的是已发布的版本，``nightly``
-仓库则是在开发分支中的带有不稳定变更的版本。
+Docker images of Solidity builds are available using the ``solc`` image from the ``ethereum`` organisation.
+Use the ``stable`` tag for the latest released version, and ``nightly`` for potentially unstable changes in the develop branch.
 
-.. code:: bash
+The Docker image runs the compiler executable, so you can pass all compiler arguments to it.
+For example, the command below pulls the stable version of the ``solc`` image (if you do not have it already),
+and runs it in a new container, passing the ``--help`` argument.
 
-    docker run ethereum/solc:stable solc --version
+.. code-block:: bash
 
-目前，docker 镜像只含有 solc 的可执行程序，因此你需要额外的工作去把源代码和输出目录连接起来。
+    docker run ethereum/solc:stable --help
 
+You can also specify release build versions in the tag, for example, for the 0.5.4 release.
+
+.. code-block:: bash
+
+    docker run ethereum/solc:0.5.4 --help
+
+To use the Docker image to compile Solidity files on the host machine mount a
+local folder for input and output, and specify the contract to compile. For example.
+
+.. code-block:: bash
+
+    docker run -v /local/path:/sources ethereum/solc:stable -o /sources/output --abi --bin /sources/Contract.sol
+
+You can also use the standard JSON interface (which is recommended when using the compiler with tooling).
+When using this interface it is not necessary to mount any directories as long as the JSON input is
+self-contained (i.e. it does not refer to any external files that would have to be
+:ref:`loaded by the import callback <initial-vfs-content-standard-json-with-import-callback>`).
+
+.. code-block:: bash
+
+    docker run ethereum/solc:stable --standard-json < input.json > output.json
 
 Linux 包
 ===============
@@ -76,7 +104,16 @@ Linux 包
     sudo apt-get update
     sudo apt-get install solc
 
-同时，也提供可安装 `所有支持的Linux版本 <https://snapcraft.io/docs/core/install>`_ 下的 `snap package <https://snapcraft.io/>`_ 。通过以下命令，可获取最新的稳定版本：
+Furthermore, some Linux distributions provide their own packages. These packages are not directly
+maintained by us, but usually kept up-to-date by the respective package maintainers.
+
+For example, Arch Linux has packages for the latest development version:
+
+.. code-block:: bash
+
+    pacman -S solidity
+
+也提供在 `所有支持的Linux版本 <https://snapcraft.io/docs/core/install>`_ 下可安装的 `snap package <https://snapcraft.io/solc>`_ （不过当前未维护）。通过以下命令，可获取最新的稳定版本：
 
 .. code:: bash
 
@@ -88,19 +125,12 @@ Linux 包
 
     sudo snap install solc --edge
 
-同样，Arch Linux 也有提供安装包，但仅限于最新的开发者版本：
+.. note::
 
-.. code:: bash
+    The ``solc`` snap uses strict confinement. This is the most secure mode for snap packages
+    but it comes with limitations, like accessing only the files in your ``/home`` and ``/media`` directories.
+    For more information, go to `Demystifying Snap Confinement <https://snapcraft.io/blog/demystifying-snap-confinement>`_.
 
-    pacman -S solidity
-
-
-Gentoo Linux has an `Ethereum overlay <https://overlays.gentoo.org/#ethereum>`_ that contains a Solidity package.
-After the overlay is setup, ``solc`` can be installed in x86_64 architectures by:
-
-.. code-block:: bash
-
-    emerge dev-lang/solidity
 
 macOS Packages
 ==============
@@ -177,6 +207,7 @@ Each one contains a ``list.json`` file listing the available binaries. For examp
       "build": "commit.3f05b770",
       "longVersion": "0.7.4+commit.3f05b770",
       "keccak256": "0x300330ecd127756b824aa13e843cb1f43c473cb22eaf3750d5fb9c99279af8c3",
+      "sha256": "0x2b55ed5fec4d9625b6c7b3ab1abd2b7fb7dd2a9c68543bf0323db2c7e2d55af2",
       "urls": [
         "bzzr://16c5f09109c793db99fe35f037c6092b061bd39260ee7a677c8a97f18c955ab1",
         "dweb:/ipfs/QmTLs5MuLEWXQkths41HiACoXDiH8zxyqBHGFDRSzVE5CS"
@@ -198,7 +229,9 @@ This means that:
   ``0x300330ecd127756b824aa13e843cb1f43c473cb22eaf3750d5fb9c99279af8c3``.  The hash can be computed
   on the command line using ``keccak256sum`` utility provided by `sha3sum`_ or `keccak256() function
   from ethereumjs-util`_ in JavaScript.
-
+- You can also verify the integrity of the binary by comparing its sha256 hash to
+  ``0x2b55ed5fec4d9625b6c7b3ab1abd2b7fb7dd2a9c68543bf0323db2c7e2d55af2``.
+  
 .. warning::
 
    Due to the strong backwards compatibility requirement the repository contains some legacy elements
@@ -257,7 +290,8 @@ This means that:
 +===================================+=======================================================+
 | `CMake`_ (version 3.13+)           | Cross-platform build file generator.                  |
 +-----------------------------------+-------------------------------------------------------+
-| `Boost`_  (version 1.65+)         | C++ libraries.                                        |
+| `Boost`_ (version 1.77+ on        | C++ libraries.                                        |
+| Windows, 1.65+ otherwise)         |                                                       |
 +-----------------------------------+-------------------------------------------------------+
 | `Git`_                            | 获取源代码的命令行工具         |
 +-----------------------------------+-------------------------------------------------------+
@@ -278,6 +312,17 @@ This means that:
     prior to running the cmake command to configure solidity.
 
     Starting from 0.5.10 linking against Boost 1.70+ should work without manual intervention.
+
+
+.. note::
+    The default build configuration requires a specific Z3 version (the latest one at the time the
+    code was last updated). Changes introduced between Z3 releases often result in slightly different
+    (but still valid) results being returned. Our SMT tests do not account for these differences and
+    will likely fail with a different version than the one they were written for. This does not mean
+    that a build using a different version is faulty. If you pass ``-DSTRICT_Z3_VERSION=OFF`` option
+    to CMake, you can build with any version that satisfies the requirement given in the table above.
+    If you do this, however, please remember to pass the ``--no-smt`` option to ``scripts/tests.sh``
+    to skip the SMT tests.
 
 最低的编译器版本
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -321,6 +366,8 @@ Solidity 在 OS X 下构建，必须 `安装 Homebrew <https://brew.sh>`_
 +-----------------------------------+-------------------------------------------------------+
 | `Visual Studio 2019`_  (Optional) | C++ 编译器和开发环境                                  |
 +-----------------------------------+-------------------------------------------------------+
+| `Boost`_ (version 1.77+)          | C++ libraries.                                        |
++-----------------------------------+-------------------------------------------------------+
 
 如果你已经有了 IDE，仅需要编译器和相关的库，你可以安装 Visual Studio 2019 Build Tools。
 
@@ -340,23 +387,13 @@ Visual Studio 2019 提供了 IDE 以及必要的编译器和库。所以如果�
 .. _Visual Studio 2019 Build Tools: https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2019
 
 
-依赖的帮助脚本
----------------------
-
-在 macOS、Windows和其他 Linux 发行版上，有一个脚本可以“一键”安装所需的外部依赖库。本来是需要人工参与的多步操作，现在只需一行命令:
-
-.. code:: bash
-
-    ./scripts/install_deps.sh
-
-Windows 下执行：
+有一个脚本可以“一键”安装所需的外部依赖库:
 
 .. code:: bat
 
     scripts\install_deps.ps1
 
-请注意，后一个命令将在``deps``子目录中安装  ``boost`` 和``cmake``，而前一个命令将尝试在全局安装依赖项。
-
+命令将在 ``deps`` 子目录中安装  ``boost`` 和 ``cmake``
 
 
 克隆代码库
@@ -421,9 +458,10 @@ Linux、macOS 和其他 Unix系统上的构建方式都差不多：
 
     mkdir build
     cd build
-    cmake -G "Visual Studio 16 2019 Win64" ..
+    cmake -G "Visual Studio 16 2019" ..
 
-如果你想执行 ``./scripts/install_deps.ps1`` 时使用你安装过的boost版本，可以添加参数 ``-DBoost_DIR="..\deps\boost\lib\cmake\Boost-*"`` 和 ``-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded`` 去调用  ``cmake``.
+
+如果你想执行 ``scripts\install_deps.ps1`` 时使用你安装过的boost版本，可以添加参数 ``-DBoost_DIR="deps\boost\lib\cmake\Boost-*"`` 和 ``-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded`` 去调用  ``cmake``.
 
 这组指令的最后一句，会在 build 目录下创建一个 **solidity.sln** 文件，双击后，默认会使用 Visual Studio 打开。我们建议在VS上创建 **RelWithDebugInfo** 配置文件。
 
@@ -474,23 +512,23 @@ Solidity 版本名包含四部分：
 
 如果本地有修改，则 commit 部分有后缀 ``.mod``。
 
-这些部分按照 Semver 的要求来组合， Solidity 预发布版本号等价于 Semver 预发布版本号， Solidity 提交号和平台标识则组成 Semver 的构建元数据。
+这些部分按照 SemVer 的要求来组合， Solidity 预发布版本号等价于 SemVer 预发布版本号， Solidity 提交号和平台标识则组成 SemVer 的构建元数据。
 
-发行版样例：``0.4.8+commit.60cc1668.Emscripten.clang``.
+发行版样例：``0.4.8+commit.60cc1668.Emscripten.clang`` .
 
 预发布版样例： ``0.4.9-nightly.2017.1.17+commit.6ecb4aa3.Emscripten.clang``
 
 版本信息详情
 =====================================
 
-在版本发布之后，补丁版本号会增加，因为我们假定只有补丁级别的变更会在之后发生。当变更被合并后，版本应该根据semver和变更的剧烈程度进行调整。最后，发行版本总是与当前每日构建版本的版本号一致，但没有 ``prerelease`` 指示符。
+在release版本发布之后，补丁版本号会增加，因为我们假定只有补丁级别的变更会在之后发生。当变更被合并后，版本应该根据 SemVer 和变更的剧烈程度进行调整。最后，发行版本总是与当前每日构建版本的版本号一致，但没有 ``prerelease`` 指示符。
 
 例如：
 
-0. 0.4.0 版本发布
-1. 从现在开始，每晚构建为 0.4.1 版本
-2. 引入非破坏性变更 —— 不改变版本号
-3. 引入破坏性变更 —— 版本跳跃到 0.5.0
-4. 0.5.0 版本发布
+1. 0.4.0 release 版本发布。
+2. 从 0.4.1 版本开始，构建 nightly 版本。
+3. 没有引入破坏性变更 —— 不改变版本号。
+4. 引入破坏性变更 —— 版本跳跃到 0.5.0
+5. 0.5.0 release版本发布
 
 该方式与 :ref:`version pragma <version_pragma>` 一起运行良好。

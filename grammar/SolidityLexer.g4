@@ -29,12 +29,14 @@ Do: 'do';
 Else: 'else';
 Emit: 'emit';
 Enum: 'enum';
+Error: 'error'; // not a real keyword
+Revert: 'revert'; // not a real keyword
 Event: 'event';
 External: 'external';
 Fallback: 'fallback';
 False: 'false';
 Fixed: 'fixed' | ('fixed' [1-9][0-9]* 'x' [1-9][0-9]*);
-From: 'from';
+From: 'from'; // not a real keyword
 /**
  * Bytes types of fixed length.
  */
@@ -45,6 +47,7 @@ FixedBytes:
 	'bytes25' | 'bytes26' | 'bytes27' | 'bytes28' | 'bytes29' | 'bytes30' | 'bytes31' | 'bytes32';
 For: 'for';
 Function: 'function';
+Global: 'global'; // not a real keyword
 Hex: 'hex';
 If: 'if';
 Immutable: 'immutable';
@@ -153,15 +156,20 @@ Not: '!';
 BitNot: '~';
 Inc: '++';
 Dec: '--';
+//@doc:inline
+DoubleQuote: '"';
+//@doc:inline
+SingleQuote: '\'';
 
 /**
- * A single quoted string literal restricted to printable characters.
- */
-StringLiteral: '"' DoubleQuotedStringCharacter* '"' | '\'' SingleQuotedStringCharacter* '\'';
-/**
- * A single non-empty quoted string literal.
+ * A non-empty quoted string literal restricted to printable characters.
  */
 NonEmptyStringLiteral: '"' DoubleQuotedStringCharacter+ '"' | '\'' SingleQuotedStringCharacter+ '\'';
+/**
+ * An empty string literal
+ */
+EmptyStringLiteral: '"' '"' | '\'' '\'';
+
 // Note that this will also be used for Yul string literals.
 //@doc:inline
 fragment DoubleQuotedStringCharacter: DoubleQuotedPrintable | EscapeSequence;
@@ -198,6 +206,7 @@ fragment DoubleQuotedUnicodeStringCharacter: ~["\r\n\\] | EscapeSequence;
 //@doc:inline
 fragment SingleQuotedUnicodeStringCharacter: ~['\r\n\\] | EscapeSequence;
 
+// Note that this will also be used for Yul hex string literals.
 /**
  * Hex strings need to consist of an even number of hex digits that may be grouped using underscores.
  */
@@ -243,6 +252,12 @@ mode AssemblyBlockMode;
 AssemblyDialect: '"evmasm"';
 AssemblyLBrace: '{' -> popMode, pushMode(YulMode);
 
+AssemblyFlagString: '"' DoubleQuotedStringCharacter+ '"';
+
+AssemblyBlockLParen: '(';
+AssemblyBlockRParen: ')';
+AssemblyBlockComma: ',';
+
 AssemblyBlockWS: [ \t\r\n\u000C]+ -> skip ;
 AssemblyBlockCOMMENT: '/*' .*? '*/' -> channel(HIDDEN) ;
 AssemblyBlockLINE_COMMENT: '//' ~[\r\n]* -> channel(HIDDEN) ;
@@ -261,6 +276,7 @@ YulLeave: 'leave';
 YulLet: 'let';
 YulSwitch: 'switch';
 YulTrue: 'true';
+YulHex: 'hex';
 
 /**
  * Builtin functions in the EVM Yul dialect.
@@ -275,7 +291,8 @@ YulEVMBuiltin:
 	| 'returndatacopy' | 'extcodehash' | 'create' | 'create2' | 'call' | 'callcode'
 	| 'delegatecall' | 'staticcall' | 'return' | 'revert' | 'selfdestruct' | 'invalid'
 	| 'log0' | 'log1' | 'log2' | 'log3' | 'log4' | 'chainid' | 'origin' | 'gasprice'
-	| 'blockhash' | 'coinbase' | 'timestamp' | 'number' | 'difficulty' | 'gaslimit';
+	| 'blockhash' | 'coinbase' | 'timestamp' | 'number' | 'difficulty' | 'gaslimit'
+	| 'basefee';
 
 YulLBrace: '{' -> pushMode(YulMode);
 YulRBrace: '}' -> popMode;
@@ -312,7 +329,8 @@ YulDecimalNumber: '0' | ([1-9] [0-9]*);
 YulStringLiteral:
 	'"' DoubleQuotedStringCharacter* '"'
 	| '\'' SingleQuotedStringCharacter* '\'';
-
+//@doc:inline
+YulHexStringLiteral: HexString;
 
 YulWS: [ \t\r\n\u000C]+ -> skip ;
 YulCOMMENT: '/*' .*? '*/' -> channel(HIDDEN) ;
