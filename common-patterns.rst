@@ -113,7 +113,6 @@
 通过使用“函数 |modifier|”，可以使这些限制变得非常明确。
 
 .. code-block:: solidity
-    :force:
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity ^0.8.4;
@@ -262,7 +261,6 @@
     |modifier| 的代码也会执行。
 
 .. code-block:: solidity
-    :force:
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity ^0.8.4;

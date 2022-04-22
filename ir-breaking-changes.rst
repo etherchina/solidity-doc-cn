@@ -263,7 +263,6 @@ hiding new and different behavior in existing code.
   For example:
 
   .. code-block:: solidity
-      :force:
 
       // SPDX-License-Identifier: GPL-3.0
       pragma solidity >0.8.0;
@@ -317,7 +316,6 @@ The hope is that the optimizer will be powerful enough to eliminate redundant cl
 For example:
 
 .. code-block:: solidity
-    :force:
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.8.1;

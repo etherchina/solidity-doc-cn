@@ -222,8 +222,7 @@ The encoding is designed to have the following properties, which are especially 
 
 给定一个合约：
 
-.. code-block:: solidity
-    :force:
+.. code-block:: Solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.4.16 <0.9.0;

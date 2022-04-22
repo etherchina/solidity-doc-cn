@@ -172,7 +172,6 @@
 ==============================
 
 .. code-block:: solidity
-    :force:
 
     function myFunction() <visibility specifier> returns (bool) {
         return true;

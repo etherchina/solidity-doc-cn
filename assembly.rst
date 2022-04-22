@@ -142,8 +142,7 @@ accessed using ``x.address`` and ``x.selector``.
 The selector consists of four right-aligned bytes.
 Both values can be assigned to. For example:
 
-.. code-block:: solidity
-    :force:
+.. code-block:: Solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.8.10 <0.9.0;
@@ -177,8 +176,7 @@ though.
 
 Local Solidity variables are available for assignments, for example:
 
-.. code-block:: solidity
-    :force:
+.. code-block:: Solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.7.0 <0.9.0;

@@ -9,22 +9,21 @@
 |ether| 单位
 ==============
 
-|ether| 单位之间的换算就是在数字后边加上 ``wei``、``gwei``  或 ``ether`` 来实现的，如果后面没有单位，缺省为 wei。例如 ``2 ether == 2000 finney`` 的逻辑判断值为 ``true``。
+|ether| 单位之间的换算就是在数字后边加上 ``wei`` ， ``gwei``  或 ``ether`` 来实现的，如果后面没有单位，缺省为 wei。
 
-.. note::
-  译者注：gwei 在solidity 0.6.11  中添加，因此在0.6.11之前的版本中不可用。
 
-::
+
+.. code-block:: Solidity
 
     assert(1 wei == 1);
     assert(1 gwei == 1e9);
     assert(1 ether == 1e18);
 
-
 货币单位后缀的的效果相当于乘以10的幂。
 
 .. note::
     从0.7.0开始 ``finney`` 和 ``szabo`` 被移除了。
+    译者注：gwei 在solidity 0.6.11  中添加，因此在0.6.11之前的版本中不可用。
 
 .. index:: time, seconds, minutes, hours, days, weeks, years
 
@@ -44,9 +43,9 @@
 .. note::
     ``years`` 已经在 0.5.0 版本去除了，因为闰年的原因。
 
-这些后缀不能直接用在变量后边。如果想用时间单位（例如 days）来将输入变量换算为时间，你可以用如下方式来完成：
+这些后缀不能直接用在变量后边。如果想用时间单位（例如 days）来将输入变量换算为时间，你可以用如下方式来完成:
 
-::
+.. code-block:: solidity
 
     function f(uint start, uint daysAfter) public {
         if (block.timestamp >= start + daysAfter * 1 days) {
@@ -72,7 +71,8 @@
 区块和交易属性
 --------------------------------
 
-- ``blockhash(uint blockNumber) returns (bytes32)``：指定区块的区块哈希——仅可用于最新的 256 个区块且不包括当前区块
+- ``blockhash(uint blockNumber) returns (bytes32)``：指定区块的区块哈希 —— 仅可用于最新的 256 个区块且不包括当前区块，否则返回 0 。
+- ``block.basefee`` (``uint``): 当前区块的基础费用，参考： (`EIP-3198 <https://eips.ethereum.org/EIPS/eip-3198>`_ 和 `EIP-1559 <https://eips.ethereum.org/EIPS/eip-1559>`_)
 - ``block.chainid`` (``uint``): 当前链 id
 - ``block.coinbase`` ( ``address`` ): 挖出当前区块的矿工地址
 - ``block.difficulty`` ( ``uint`` ): 当前区块难度
@@ -85,13 +85,16 @@
 - ``msg.sig`` ( ``bytes4`` ): calldata 的前 4 字节（也就是函数标识符）
 - ``msg.value`` ( ``uint`` ): 随消息发送的 wei 的数量
 - ``tx.gasprice`` (``uint``): 交易的 gas 价格
-- ``tx.origin`` (``address payable``): 交易发起者（完全的调用链）
+- ``tx.origin`` ( ``address`` ): 交易发起者（完全的调用链）
 
 .. note::
     对于每一个**外部函数**调用，包括 ``msg.sender`` 和 ``msg.value`` 在内所有 ``msg`` 成员的值都会变化。这里包括对库函数的调用。
 
 .. note::
-    不要依赖 ``block.timestamp`` 和 ``blockhash`` 产生随机数，除非你知道自己在做什么。
+    当合约在链下被评估，而不是在一个区块所包含的交易的背景下被评估时，你不应该假定 `block.*` 和 `tx.*` 是指任何特定区块或交易。这些值是由执行合约的EVM实现提供的，可以是任意的。
+
+.. note::
+    不要依赖 ``block.timestamp`` 和 ``blockhash`` 产生随机数，除非你明确知道自己做的用意。
 
     时间戳和区块哈希在一定程度上都可能受到挖矿矿工影响。例如，挖矿社区中的恶意矿工可以用某个给定的哈希来运行赌场合约的 payout 函数，而如果他们没收到钱，还可以用一个不同的哈希重新尝试。
 
@@ -120,6 +123,7 @@ ABI 编码及解码函数
 - ``abi.encodePacked(...) returns (bytes)``：对给定参数执行 :ref:`紧打包编码 <abi_packed_mode>` ，注意，可以不明确打包编码。
 - ``abi.encodeWithSelector(bytes4 selector, ...) returns (bytes)``： :ref:`ABI <ABI>` - 对给定第二个开始的参数进行编码，并以给定的函数选择器作为起始的 4 字节数据一起返回
 - ``abi.encodeWithSignature(string signature, ...) returns (bytes)``：等价于 ``abi.encodeWithSelector(bytes4(keccak256(signature), ...)``
+- ``abi.encodeCall(function functionPointer, (...)) returns (bytes memory)``: 使用tuple类型参数ABI 编码调用 ``functionPointer`` 。执行完整的类型检查, 确保类型匹配函数签名。结果和 ``abi.encodeWithSelector(functionPointer.selector, (...))`` 一致。
 
 .. note::
     这些编码函数可以用来构造函数调用数据，而不用实际进行调用。此外，``keccak256(abi.encodePacked(a, b))``  是一种计算结构化数据的哈希值（尽管我们也应该关注到：使用不同的函数参数类型也有可能会引起“哈希冲突” ）的方式，不推荐使用的 ``keccak256(a, b)`` 。
@@ -129,6 +133,21 @@ ABI 编码及解码函数
     译者注：关于计算结构化数据的哈希，可以参考 `EIP712 <https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md>`_ ，这里也有一篇中文文章 `理解 EIP712 类型结构化数据 Hash 与签名 <https://learnblockchain.cn/2019/04/24/token-EIP712/>`_ 。
 
 更多详情请参考 :ref:`ABI <ABI>` 和 :ref:`紧打包编码 <abi_packed_mode>`。
+
+.. index:: bytes members
+
+bytes 成员函数
+----------------
+
+- ``bytes.concat(...) returns (bytes memory)``: :ref:`Concatenates variable number of bytes and bytes1, ..., bytes32 arguments to one byte array<bytes-concat>`
+
+.. index:: string members
+
+string 成员函数
+-----------------
+
+- ``string.concat(...) returns (string memory)``: :ref:`Concatenates variable number of string arguments to one string array<string-concat>`
+
 
 .. index:: assert, revert, require
 
@@ -245,6 +264,13 @@ ABI 编码及解码函数
     使用 ``send`` 有很多危险：如果调用栈深度已经达到 1024（这总是可以由调用者所强制指定），转账会失败；并且如果接收者用光了 gas，转账同样会失败。为了保证以太币转账安全，总是检查 ``send`` 的返回值，利用 ``transfer`` 或者下面更好的方式：
     用这种接收者取回钱的模式。
 
+.. warning::
+    由于 EVM 会把对一个不存在的合约的调用作为是成功的。
+    Solidity 会在执行外部调用时使用 `extcodesize` 操作码进行额外检查。
+    这确保了即将被调用的合约要么实际存在（它包含代码）或者触发一个异常。
+
+    对地址而不是合约实例进行操作的低级调用（如 ``.call()``, ``.delegatecall()``, ``.staticcall()``, ``.send()`` 和 ``.transfer()``) 时，**不**包括这个检查，这使得它们在GAS方面更便宜，但也更不安全。
+    
 .. note::
 
    在版本0.5.0之前，Solidity允许通过合约实例来访问地址的成员，例如 ``this.balance`` ，不过现在禁止这样做，必须显式转换为地址后访问，如： ``address（this）.balance`` 。
@@ -296,15 +322,15 @@ ABI 编码及解码函数
     获得合约名
 
 ``type(C).creationCode``:
-    获得包含创建合同字节码的内存字节数组。它可以在内联汇编中构建自定义创建例程，尤其是使用 ``create2`` 操作码。
-    不能在合同本身或派生的合同访问此属性。 因为会引起循环引用。
+    获得包含创建合约字节码的内存字节数组。它可以在内联汇编中构建自定义创建例程，尤其是使用 ``create2`` 操作码。
+    不能在合约本身或派生的合约访问此属性。 因为会引起循环引用。
 
 
 ``type(C).runtimeCode``
-    获得合同的运行时字节码的内存字节数组。这是通常由 ``C`` 的构造函数部署的代码。
+    获得合约的运行时字节码的内存字节数组。这是通常由 ``C`` 的构造函数部署的代码。
     如果 ``C`` 有一个使用内联汇编的构造函数，那么可能与实际部署的字节码不同。 还要注意库在部署时修改其运行时字节码以防范定期调用（guard against
     regular calls）。
-    与 ``.creationCode`` 有相同的限制，不能在合同本身或派生的合同访问此属性。 因为会引起循环引用。
+    与 ``.creationCode`` 有相同的限制，不能在合约本身或派生的合约访问此属性。 因为会引起循环引用。
 
 
 除上面的属性, 下面的属性在接口类型``I``下可使用:
