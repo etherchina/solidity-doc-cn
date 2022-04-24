@@ -20,19 +20,19 @@ Solidity编译器自动生成JSON文件，即合约的元数据，其中包含�
 正确格式化的元数据应正确使用引号，将空白减少到最小，并对所有对象的键值进行排序以得到唯一的格式。
 代码注释当然也是不允许的，这里仅用于解释目的。
 
-.. code-block:: none
+.. code-block:: javascript
 
     {
       // 必选：元数据格式的版本
-      version: "1",
+      "version": "1",
       // 必选：源代码的编程语言，一般会选择规范的“子版本”
-      language: "Solidity",
+      "language": "Solidity",
       // 必选：编译器的细节，内容视语言而定。
-      compiler: {
+      "compiler": {
         // 对 Solidity 来说是必须的：编译器的版本
-        version: "0.4.6+commit.2dabbdf0.Emscripten.clang",
+        "version": "0.4.6+commit.2dabbdf0.Emscripten.clang",
         // 可选： 生成此输出的编译器二进制文件的哈希值
-        keccak256: "0x123..."
+        "keccak256": "0x123..."
       },
       // 必选：编译的源文件／源单位，键值为文件名
       sources:
@@ -53,58 +53,60 @@ Solidity编译器自动生成JSON文件，即合约的元数据，其中包含�
           "content": "contract mortal is owned { function kill() { if (msg.sender == owner) selfdestruct(owner); } }"
         }
       },
-      // 必选：编译器的设置
-      settings:
+      // 必选：编译器的设置 
+      "settings":
       {
         // 对 Solidity 来说是必须的： 已排序的重定向列表
-        remappings: [ ":g/dir" ],
+        "remappings": [ ":g/dir" ],
         // 可选： 优化器的设置（ enabled 默认设为 false ）
-        optimizer: {
-          enabled: true,
-          runs: 500,
-          details: {
+        "optimizer": {
+          "enabled": true,
+          "runs": 500,
+          "details": {
             // peephole defaults to "true"
-            peephole: true,
+            "peephole": true,
+            // inliner defaults to "true"
+            "inliner": true,
             // jumpdestRemover defaults to "true"
-            jumpdestRemover: true,
-            orderLiterals: false,
-            deduplicate: false,
-            cse: false,
-            constantOptimizer: false,
-            yul: true,
+            "jumpdestRemover": true,
+            "orderLiterals": false,
+            "deduplicate": false,
+            "cse": false,
+            "constantOptimizer": false,
+            "yul": true,
             // Optional: Only present if "yul" is "true"
-            yulDetails: {
-              stackAllocation: false,
-              optimizerSteps: "dhfoDgvulfnTUtnIf..."
+            "yulDetails": {
+              "stackAllocation": false,
+              "optimizerSteps": "dhfoDgvulfnTUtnIf..."
             }
           }
         }
       },
-      metadata: {
+      "metadata": {
           // Reflects the setting used in the input json, defaults to false
-          useLiteralContent: true,
+          "useLiteralContent": true,
           // Reflects the setting used in the input json, defaults to "ipfs"
-          bytecodeHash: "ipfs"
+          "bytecodeHash": "ipfs"
         }
         // Required for Solidity: File and name of the contract or library this
         // metadata is created for.
-        compilationTarget: {
+        "compilationTarget": {
           "myFile.sol": "MyContract"
         },
         // Required for Solidity: Addresses for libraries used
-        libraries: {
+        "libraries": {
           "MyLib": "0x123123..."
         }
       },
       // 必选：合约的生成信息
-      output:
+      "output":
       {
         // 必选：合约的 ABI 定义
-        abi: [ ... ],
+        "abi": [ /*...*/ ],
         // 必选：合约的 NatSpec 用户文档
-        userdoc: [ ... ],
+        "userdoc": [ /*...*/ ],
         // 必选：合约的 NatSpec 开发者文档
-        devdoc: [ ... ],
+        "devdoc": [ /*...*/ ],
       }
     }
 
@@ -124,33 +126,57 @@ Solidity编译器自动生成JSON文件，即合约的元数据，其中包含�
 由于在将来我们可能会支持其他方式来获取元数据文件，
 类似 ``{"bzzr0"：<Swarm hash>}`` 的键值对，将会以 `CBOR <https://tools.ietf.org/html/rfc7049>`_ 编码来存储。
 由于这种编码的起始位不容易找到，因此添加两个字节来表述其长度，以大端方式编码。
-所以，当前版本的Solidity编译器，将以下内容添加到部署的字节码的末尾::
+所以，当前版本的Solidity编译器，将以下内容添加到部署的字节码的末尾
 
-    0xa1 0x65 'b' 'z' 'z' 'r' '0' 0x58 0x20 <32 bytes swarm hash> 0x00 0x29
 
-因此，为了获取数据，可以检查部署的字节码的末尾以匹配该模式，并使用 Swarm 哈希来获取元数据文件。
+.. code-block:: text
+    0xa2
+    0x64 'i' 'p' 'f' 's' 0x58 0x22 <34 bytes IPFS hash>
+    0x64 's' 'o' 'l' 'c' 0x43 <3 byte version encoding>
+    0x00 0x33
+
+So in order to retrieve the data, the end of the deployed bytecode can be checked
+to match that pattern and use the IPFS hash to retrieve the file.
+
+Whereas release builds of solc use a 3 byte encoding of the version as shown
+above (one byte each for major, minor and patch version number), prerelease builds
+will instead use a complete version string including commit hash and build date.
+
+.. note::
+  The CBOR mapping can also contain other keys, so it is better to fully
+  decode the data instead of relying on it starting with ``0xa264``.
+  For example, if any experimental features that affect code generation
+  are used, the mapping will also contain ``"experimental": true``.
+
+.. note::
+  The compiler currently uses the IPFS hash of the metadata by default, but
+  it may also use the bzzr1 hash or some other hash in the future, so do
+  not rely on this sequence to start with ``0xa2 0x64 'i' 'p' 'f' 's'``.  We
+  might also add additional data to this CBOR structure, so the best option
+  is to use a proper CBOR parser.
 
 自动化接口生成和 |natspec| 的使用方法
 ====================================================
 
-元数据以下列方式被使用：想要与合约交互的组件（例如，Mist）读取合约的字节码，
-从中获取元数据文件的 Swarm 哈希，然后从 Swarm 获取该文件。该文件被解码为上面的 JSON 结构。
+The metadata is used in the following way: A component that wants to interact with a contract (e.g. Mist or any wallet) retrieves the code of the contract,
+from that the IPFS/Swarm hash of a file which is then retrieved.  That file is JSON-decoded into a structure like above.
 
-然后该组件可以使用ABI自动生成合约的基本用户接口。
+The component can then use the ABI to automatically generate a rudimentary user interface for the contract.
 
-此外，Mist可以使用 userdoc 在用户与合约进行交互时向用户显示确认消息。
+Furthermore, the wallet can use the NatSpec user documentation to display a confirmation message to the user
+whenever they interact with the contract, together with requesting authorization for the transaction signature.
 
-有关 |natspec| 的其他信息可以在 `这里 <https://github.com/ethereum/wiki/wiki/Ethereum-Natural-Specification-Format>`_ 找到。
+有关 |natspec| 的更多信息, read :doc:`Ethereum Natural Language Specification (NatSpec) format <natspec-format>`.
+
 
 源代码验证的使用方法
 ==================================
 
-为了验证编译，可以通过元数据文件中的链接从 Swarm 中获取源代码。
+为了验证编译，可以通过元数据文件中的链接从 IPFS/Swarm 中获取源代码。
 获取到的源码，会根据元数据中指定的设置，被正确版本的编译器（应该为“官方”编译器之一）所处理。
 处理得到的字节码会与创建交易的数据或者 ``CREATE`` 操作码使用的数据进行比较。
 这会自动验证元数据，因为它的哈希值是字节码的一部分。
 而额外的数据，则是与基于接口进行编码并展示给用户的构造输入数据相符的。
 
-In the repository `sourcify <https://github.com/ethereum/sourcify>`_
-(`npm package <https://www.npmjs.com/package/source-verify>`_) you can see
-example code that shows how to use this feature.
+在 `sourcify <https://github.com/ethereum/sourcify>`_ 库 (`npm package <https://www.npmjs.com/package/source-verify>`_) 
+可以看到如何使用该特性的示例代码。

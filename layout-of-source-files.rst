@@ -4,15 +4,15 @@
 Solidity 源文件结构
 ********************************
 
+源文件中可以包含任意数量的
+:ref:`合约定义<contract_structure>` , 源文件引入 , :ref:`pragma<pragma>` 、 :ref:`using for<using-for>` 指令和 :ref:`struct<structs>` , :ref:`enum<enums>` , :ref:`function<functions>` , :ref:`error<errors>`
+以及 :ref:`常量<constants>` 定义。
 
-
-源文件中可以包含任意多个 :ref:`合约定义 <contract_structure>` 、:ref:`导入源文件指令 <import>` 、 :ref:`版本标识 <pragma>` 指令、
-:ref:`结构体<structs>` , :ref:`枚举<enums>` 和 :ref:`函数<functions>` 定义.
 
 SPDX License Identifier
 =======================
 
-Trust in smart contract can be better established if their source code
+Trust in smart contracts can be better established if their source code
 is available. Since making source code available always touches on legal problems
 with regards to copyright, the Solidity compiler encourages the use
 of machine-readable `SPDX license identifiers <https://spdx.org>`_.
@@ -26,6 +26,10 @@ it does include the supplied string in the :ref:`bytecode metadata <metadata>`_.
 
 If you do not want to specify a license or if the source code is
 not open-source, please use the special value ``UNLICENSED``.
+
+Note that ``UNLICENSED`` (no usage allowed, not present in SPDX license list)
+is different from ``UNLICENSE`` (grants all rights to everyone).
+Solidity follows `the npm recommendation <https://docs.npmjs.com/cli/v7/configuring-npm/package-json#license>`_.
 
 Supplying this comment of course does not free you from other
 obligations related to licensing like having to mention
@@ -71,7 +75,7 @@ Pragmas
 这种做法的考虑是，编译器在 0.6.0 版本之前不会有重大变更，所以可确保源代码始终按预期被编译。
 上面例子中不固定编译器的具体版本号，因此编译器的补丁版也可以使用。
 
-可以使用更复杂的规则来指定编译器的版本，表达式遵循 `npm <https://docs.npmjs.com/misc/semver>`_ 版本语义。
+可以使用更复杂的规则来指定编译器的版本，表达式遵循 `npm <https://docs.npmjs.com/cli/v6/using-npm/semver>`_ 版本语义。
 
 .. note::
   Pragma 是 pragmatic information 的简称，微软 Visual C++ `文档 <https://msdn.microsoft.com/zh-cn/library/d9x1s805.aspx>`_ 中译为标识。
@@ -150,7 +154,7 @@ SMTChecker
 
 使用 ``pragma experimental SMTChecker;``, 就可以获得 SMT solver 额外的安全检查。但是这个模块目前不支持 Solidity 的全部语法特性，因此有可能输出一些警告信息。
 
-.. index:: source file, ! import
+.. index:: source file, ! import, module, source unit
 
 .. _import:
 
@@ -169,10 +173,12 @@ Solidity 支持的导入语句来模块化代码，其语法跟 JavaScript（从
   ——译者注
 
 在全局层面上，可使用如下格式的导入语句：
-::
+
+.. code-block:: solidity
 
   import "filename";
 
+``filename`` 部分称为导入路径（ *import path*）。
 此语句将从 “filename” 中**导入所有的全局符号到当前全局作用域**中（不同于 ES6，Solidity 是向后兼容的）。
 
 这种形式已经不建议使用，因为它会无法预测地污染当前命名空间。
@@ -180,108 +186,54 @@ Solidity 支持的导入语句来模块化代码，其语法跟 JavaScript（从
 符号。
 
 像下面这样，创建了新的 ``symbolName`` 全局符号，他的成员都来自与导入的 ``"filename"`` 文件中的全局符号，如：
-::
+.. code-block:: solidity
 
   import * as symbolName from "filename";
 
 然后所有全局符号都以``symbolName.symbol``格式提供。
 此语法的变体不属于ES6，但可能有用：
 
-::
+.. code-block:: solidity
 
   import "filename" as symbolName;
 
 它等价于 ``import * as symbolName from "filename";``。
 
 
-如果存在命名冲突，则可以在导入时重命名符号。例如，下面的代码创建了新的全局符号 ``alias`` 和 ``symbol2`` ，引用的
-``symbol1`` 和 ``symbol2`` 来自 "filename" 。
+如果存在命名冲突，则可以在导入时重命名符号。例如，下面的代码创建了新的全局符号 ``alias`` 和 ``symbol2`` ，引用的 ``symbol1`` 和 ``symbol2`` 来自 "filename" 。
 
-::
+.. code-block:: solidity
 
   import {symbol1 as alias, symbol2} from "filename";
 
-路径
------
+.. index:: virtual filesystem, source unit name, import; path, filesystem path, import callback, Remix IDE
 
-上文中的 filename 总是会按路径来处理，以 ``/`` 作为目录分割符、以 ``.`` 标示当前目录、以 ``..`` 表示父目录。 
-当 ``.`` 或 ``..`` 后面跟随的字符是 ``/`` 时，它们才能被当做当前目录或父目录。
-只有路径以当前目录 ``.`` 或父目录 ``..`` 开头时，才能被视为相对路径。
+导入路径
+---------
 
+In order to be able to support reproducible builds on all platforms, the Solidity compiler has to
+abstract away the details of the filesystem where source files are stored.
+For this reason import paths do not refer directly to files in the host filesystem.
+Instead the compiler maintains an internal database (*virtual filesystem* or *VFS* for short) where
+each source unit is assigned a unique *source unit name* which is an opaque and unstructured identifier.
+The import path specified in an import statement is translated into a source unit name and used to
+find the corresponding source unit in this database.
 
-用 ``import "./filename" as symbolName;`` 语句导入当前源文件同目录下的文件 ``filename`` 。
-如果用 ``import "filename" as symbolName;`` 代替，可能会引入不同的（如在全局 ``include directory`` 中）文件。
+Using the :ref:`Standard JSON <compiler-api>` API it is possible to directly provide the names and
+content of all the source files as a part of the compiler input.
+In this case source unit names are truly arbitrary.
+If, however, you want the compiler to automatically find and load source code into the VFS, your
+source unit names need to be structured in a way that makes it possible for an :ref:`import callback
+<import-callback>` to locate them.
+When using the command-line compiler the default import callback supports only loading source code
+from the host filesystem, which means that your source unit names must be paths.
+Some environments provide custom callbacks that are more versatile.
+For example the `Remix IDE <https://remix.ethereum.org/>`_ provides one that
+lets you `import files from HTTP, IPFS and Swarm URLs or refer directly to packages in NPM registry
+<https://remix-ide.readthedocs.io/en/latest/import.html>`_.
 
-最终导入哪个文件取决于编译器（见下文 :ref:`import-compiler`）到底是怎样解析路径的。
-通常，目录层次不必严格映射到本地文件系统，
-它也可以映射到能通过诸如 ipfs，http 或者 git 发现的资源。
+For a complete description of the virtual filesystem and the path resolution logic used by the compiler see :ref:`Path Resolution <path-resolution>`.
 
-.. note::
-    通常使用相对引用 ``import "./filename.sol";`` 并且避免使用 ``..`` ，后面这种方式可以使用全局路径并设置映射，下面会有解释。
-
-.. _import-compiler:
-
-在实际的编译器中使用
------------------------
-
-当运行编译器时，它不仅能指定如何发现路径的第一个元素，还可指定路径前缀 |remapping|。
-例如，``github.com/ethereum/dapp-bin/library`` 会被重映射到 ``/usr/local/dapp-bin/library`` ，
-此时编译器将从重映射位置读取文件。如果重映射到多个路径，优先尝试重映射路径最长的一个。
-这允许将比如 ``""`` 被映射到 ``"/usr/local/include/solidity"`` 来进行“回退重映射”。
-同时，这些重映射可取决于上下文，允许你配置要导入的包，比如同一个库的不同版本。
-
-**solc**:
-
-对于 solc（命令行编译器），这些重映射以 ``context:prefix=target`` 形式的参数提供。
-其中，``context:`` 和 ``=target`` 部分是可选的（此时 target 默认为 prefix ）。
-所有重映射的值都是被编译过的常规文件（包括他们的依赖），这个机制完全是向后兼容的（只要文件名不包含 = 或 : ），
-因此这不是一个破坏性修改。
-在 ``content`` 目录或其子目录中的源码文件中，所有导入语句里以 ``prefix`` 开头的导入文件都将被用 ``target`` 替换 ``prefix`` 来重定向。
-
-举个例子，如果你已克隆 ``github.com/ethereum/dapp-bin/`` 到本地 ``/usr/local/dapp-bin`` ，
-可在源文件中使用：
-
-::
-
-  import "github.com/ethereum/dapp-bin/library/iterable_mapping.sol" as it_mapping;
-
-然后运行编译器：
-
-.. code-block:: bash
-
-  solc github.com/ethereum/dapp-bin/=/usr/local/dapp-bin/ source.sol
-
-举个更复杂的例子，假设你依赖了一些使用了非常旧版本的 dapp-bin 的模块。
-旧版本的 dapp-bin 已经被 checkout 到 ``/usr/local/dapp-bin_old`` ，此时你可使用：
-
-.. code-block:: bash
-
-  solc module1:github.com/ethereum/dapp-bin/=/usr/local/dapp-bin/ \
-  module2:github.com/ethereum/dapp-bin/=/usr/local/dapp-bin_old/ \
-  source.sol
-
-这样， ``module2`` 中的所有导入都指向旧版本，而 ``module1`` 中的导入则获取新版本。
-
-
-.. note::
-
-  solc 只允许包含来自特定目录的文件：它们必须位于显式地指定的源文件目录（或子目录）中，或者重映射的目标目录（或子目录）中。
-  如果你想直接用绝对路径来包含文件，只需添加重映射 ``/=/``。
-
-如果有多个重映射指向一个有效文件，那么具有最长公共前缀的重映射会被选用。
-
-**Remix**:
-
-`Remix <https://remix.ethereum.org/>`_ 提供一个为 github 源代码平台的自动重映射，它将通过网络自动获取文件：
-比如，你可以使用:
-
-.. code-block::
-
-  import "github.com/ethereum/dapp-bin/library/iterable_mapping.sol" as it_mapping;
-
-导入一个 map 迭代器。
-
-未来， Remix 可能支持其他源代码平台。
 
 .. index:: ! comment, natspec
 
@@ -290,7 +242,7 @@ Solidity 支持的导入语句来模块化代码，其语法跟 JavaScript（从
 
 可以使用单行注释（``//``）和多行注释（``/*...*/``）
 
-::
+.. code-block:: solidity
 
   // 这是一个单行注释。
 
@@ -302,31 +254,8 @@ Solidity 支持的导入语句来模块化代码，其语法跟 JavaScript（从
 
 .. note::
   
-  单行注释由任何 unicode 行终止符(如采用utf8编码的：LF，VF，FF，CR，NEL，LS或PS) 终止。 在注释之后终止符代码仍然是源码的一部分。如果它不是ascii符号（NEL，LS和PS），它会导致解析器错误。
+  单行注释由任何 unicode 行终止符(如采用UTF-8编码的：LF，VF，FF，CR，NEL，LS或PS) 终止。 在注释之后终止符代码仍然是源码的一部分。如果它不是ASCII符号（NEL，LS和PS），它会导致解析器错误。
 
-此外，有另一种注释称为 natspec 注释，可参考 :ref:`风格指南- 描述注释 <natspec>`。
+此外，有另一种注释称为 NatSpec 注释，详细可参考 :ref:`编程风格指南<style_guide_natspec>` 。
 
-
-它们是用三个反斜杠（``///``）或双星号开头的块（``/** ... */``）书写，它们应该直接在函数声明或语句上使用。
-可在注释中使用 `Doxygen <https://en.wikipedia.org/wiki/Doxygen>`_ 样式的标签来文档化函数、
-标注形式校验通过的条件，和提供一个当用户试图调用一个函数时显示给用户的 **确认性文字**。
-
-在下面的例子中，我们记录了合约的标题，并解释了两个传入参书和两个返回值的翻译。
-
-::
-
-  // SPDX-License-Identifier: GPL-3.0
-  pragma solidity >=0.4.21 <0.9.0;
-
-  /** @title 形状计算器。 */
-  contract tinyCalculator {
-      /// @dev 求矩形表明面积与周长。
-      /// @param w 矩形宽度。
-      /// @param h 矩形高度。
-      /// @return s 求得表面积。
-      /// @return p 求得周长。
-      function rectangle(uint w, uint h) returns (uint s, uint p) {
-          s = w * h;
-          p = 2 * (w + h);
-      }
-  }
+NatSpec注释使用 3 斜杠(``///``) 或两个星号注释，应该直接在函数声明和语句上方使用。
