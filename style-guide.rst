@@ -8,7 +8,7 @@
 概述
 ************
 
-本指南旨在约定 solidity 代码的编码规范。本指南是不断变化演进的，旧的、过时的编码规范会被淘汰，
+本指南旨在约定 Solidity 代码的编码规范。本指南是不断变化演进的，旧的、过时的编码规范会被淘汰，
 而新的、有用的规范会被添加进来。
 
 许多项目会实施他们自己的编码风格指南。如遇冲突，应优先使用具体项目的风格指南。
@@ -17,7 +17,7 @@
 
 
 
-本指南并 *不是* 以指导正确或最佳的 solidity 编码方式为目的。本指南的目的是保持代码的 *一致性* 。
+本指南并 *不是* 以指导正确或最佳的 Solidity 编码方式为目的。本指南的目的是保持代码的 *一致性* 。
 来自 python 的参考文档 `pep8 <https://www.python.org/dev/peps/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds>`_ 。很好地阐述了这个概念。
 
 .. note::
@@ -46,10 +46,15 @@
 空行
 ===========
 
-在 solidity 源码中合约声明之间留出两个空行。
+在 Solidity 源码中合约声明之间留出两个空行。
 
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
+
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.4.0 <0.9.0;
 
     contract A {
         ...
@@ -65,7 +70,11 @@
         ...
     }
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.4.0 <0.9.0;
 
     contract A {
         ...
@@ -82,9 +91,12 @@
 
 在相关联的各组单行语句之间可以省略空行。（例如抽象合约的 stub 函数）。
 
-正确写法::
+正确写法:
 
-    pragma solidity ^0.6.0;
+.. code-block:: solidity
+
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.6.0 <0.9.0;
 
     abstract contract A {
         function spam() public virtual pure;
@@ -102,7 +114,7 @@
         }
     }
 
-错误写法::
+错误写法:
 
     pragma solidity >=0.4.0 <0.9.0;
 
@@ -127,7 +139,7 @@
 代码行的最大长度
 ===================
 
-基于 `PEP 8 recommendation <https://www.python.org/dev/peps/pep-0008/#maximum-line-length>`_ ，将代码行的字符长度控制在 79（或 99）字符来帮助读者阅读代码。
+基于 `PEP 8 规范 <https://www.python.org/dev/peps/pep-0008/#maximum-line-length>`_ ，将代码行的字符长度控制在 79（或 99）字符来帮助读者阅读代码。
 
 折行时应该遵从以下指引：
 
@@ -138,7 +150,9 @@
 
 函数调用
 
-Yes::
+正确写法:
+
+.. code-block:: solidity
 
     thisFunctionCallIsReallyLong(
         longArgument1,
@@ -146,7 +160,9 @@ Yes::
         longArgument3
     );
 
-No::
+错误写法:
+
+.. code-block:: solidity
 
     thisFunctionCallIsReallyLong(longArgument1,
                                   longArgument2,
@@ -176,25 +192,31 @@ No::
 
 赋值语句
 
-Yes::
+正确写法:
 
-    thisIsALongNestedMapping[being][set][to_some_value] = someFunction(
+.. code-block:: solidity
+
+    thisIsALongNestedMapping[being][set][toSomeValue] = someFunction(
         argument1,
         argument2,
         argument3,
         argument4
     );
 
-No::
+错误写法:
 
-    thisIsALongNestedMapping[being][set][to_some_value] = someFunction(argument1,
+.. code-block:: solidity
+
+    thisIsALongNestedMapping[being][set][toSomeValue] = someFunction(argument1,
                                                                        argument2,
                                                                        argument3,
                                                                        argument4);
 
-事件定义和事件发生
+定义事件和触发事件
 
-Yes::
+正确写法:
+
+.. code-block:: solidity
 
     event LongAndLotsOfArgs(
         adress sender,
@@ -204,7 +226,7 @@ Yes::
         bytes32[] options
     );
 
-    LongAndLotsOfArgs(
+    emit LongAndLotsOfArgs(
         sender,
         recipient,
         publicKey,
@@ -212,7 +234,9 @@ Yes::
         options
     );
 
-No::
+错误写法:
+
+.. code-block:: solidity
 
     event LongAndLotsOfArgs(adress sender,
                             adress recipient,
@@ -231,15 +255,19 @@ No::
 
 首选 UTF-8 或 ASCII 编码。
 
-Imports 规范
+导入文件规范
 ====================
 
 Import 语句应始终放在文件的顶部。
 
-正确写法::
+正确写法:
 
-    import "owned";
+.. code-block:: solidity
 
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.4.0 <0.9.0;
+
+    import "./Owned.sol";
 
     contract A {
         ...
@@ -250,14 +278,16 @@ Import 语句应始终放在文件的顶部。
         ...
     }
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
     contract A {
         ...
     }
 
 
-    import "owned";
+    import "./Owned.sol";
 
 
     contract B is owned {
@@ -276,15 +306,18 @@ Import 语句应始终放在文件的顶部。
 - fallback 函数（如果存在）
 - 外部函数(external)
 - 公共函数(public)
-- 内部(internal)
-- 私有(private)
+- 内部函数(internal)
+- 私有函数(private)
 
 在一个分组中，把 ``view`` 和 ``pure`` 函数放在最后。
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity ^0.6.0;
+    pragma solidity >=0.7.0 <0.9.0;
+
     contract A {
         function A() public {
             ...
@@ -317,10 +350,12 @@ Import 语句应始终放在文件的顶部。
         // ...
     }
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity ^0.6.0;
+    pragma solidity >=0.7.0 <0.9.0;
     contract A {
 
         // External functions
@@ -355,41 +390,55 @@ Import 语句应始终放在文件的顶部。
 表达式中的空格
 =========================
 
-在以下情况下避免无关的空格：
+在以下情况下避免无不必要的空格：
 
 除单行函数声明外，紧接着小括号，中括号或者大括号的内容应该避免使用空格。
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
 
     spam(ham[1], Coin({name: "ham"}));
 
-错误写法::
+错误写法:
 
+.. code-block:: solidity
+    
     spam( ham[ 1 ], Coin( { name: "ham" } ) );
 
-除外::
+例外情况:
 
+.. code-block:: solidity
     function singleLine() public { spam(); }
 
-紧接在逗号，分号之前：
 
-正确写法::
+紧接在逗号，分号之前不需要有空格：
+
+正确写法:
+
+.. code-block:: solidity
 
     function spam(uint i, Coin coin) public;
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
     function spam(uint i , Coin coin) public ;
 
-赋值或其他操作符两边多于一个的空格：
+赋值或其他操作符两边一个的空格：
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
 
     x = 1;
     y = 2;
     long_variable = 3;
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
     x             = 1;
     y             = 2;
@@ -397,7 +446,10 @@ Import 语句应始终放在文件的顶部。
 
 fallback 和 receive 函数中不要包含空格：
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
+
     receive() external payable {
         ...
     }
@@ -406,7 +458,9 @@ fallback 和 receive 函数中不要包含空格：
         ...
     }
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
     receive () external payable {
         ...
@@ -426,7 +480,9 @@ fallback 和 receive 函数中不要包含空格：
 * 闭括号在与之前函数声明对应的开括号保持同一缩进级别上另起一行。
 * 开括号前应该有一个空格。
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
 
     contract Coin {
         struct Bank {
@@ -435,7 +491,9 @@ fallback 和 receive 函数中不要包含空格：
         }
     }
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
     contract Coin
     {
@@ -450,7 +508,9 @@ fallback 和 receive 函数中不要包含空格：
 另外，诸如 ``if``， ``else``， ``while``， ``for`` 这类的控制结构和条件表达式的块之间应该有一个单独的空格，
 同样的，条件表达式的块和开括号之间也应该有一个空格。
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
 
     if (...) {
         ...
@@ -460,7 +520,9 @@ fallback 和 receive 函数中不要包含空格：
         ...
     }
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
     if (...)
     {
@@ -475,12 +537,16 @@ fallback 和 receive 函数中不要包含空格：
 
 对于控制结构， *如果* 其主体内容只包含一行，则可以省略括号。
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
 
     if (x < 10)
         x += 1;
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
     if (x < 10)
         someArray.push(Coin({
@@ -491,7 +557,9 @@ fallback 和 receive 函数中不要包含空格：
 对于具有 ``else`` 或 ``else if`` 子句的 ``if`` 块， ``else`` 应该是与 ``if`` 的闭大括号放在同一行上。 这一规则区别于
 其他块状结构。
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
 
     if (x < 3) {
         x += 1;
@@ -507,7 +575,9 @@ fallback 和 receive 函数中不要包含空格：
     else
         x -= 1;
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
     if (x < 3) {
         x += 1;
@@ -525,7 +595,9 @@ fallback 和 receive 函数中不要包含空格：
 
 开大括号之前应该有一个空格。
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
 
     function increment(uint x) public pure returns (uint) {
         return x + 1;
@@ -535,7 +607,9 @@ fallback 和 receive 函数中不要包含空格：
         return x + 1;
     }
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
     function increment(uint x) public pure returns (uint)
     {
@@ -557,13 +631,17 @@ fallback 和 receive 函数中不要包含空格：
 
 
 
-Yes::
+正确写法:
+
+.. code-block:: solidity
 
     function explicitlyPublic(uint val) public {
         doSomething();
     }
 
-No::
+错误写法:
+
+.. code-block:: solidity
 
     function implicitlyPublic(uint val) {
         doSomething();
@@ -572,13 +650,15 @@ No::
 
 函数修改器的顺序应该是:
 
-1. Visibility
-2. Mutability
-3. Virtual
-4. Override
-5. Custom modifiers
+1. 可见性（Visibility）
+2. 可变性（Mutability）
+3. 虚拟（Virtual）
+4. 重载（Override）
+5. 自定义修改器（Custom modifiers）
 
-Yes::
+正确写法:
+
+.. code-block:: solidity
 
     function balance(uint from) public view override returns (uint)  {
         return balanceOf[from];
@@ -588,7 +668,9 @@ Yes::
         selfdestruct(owner);
     }
 
-No::
+错误写法:
+
+.. code-block:: solidity
 
     function balance(uint from) public override view returns (uint)  {
         return balanceOf[from];
@@ -602,7 +684,9 @@ No::
 对于长函数声明，建议将每个参数独立一行并与函数体保持相同的缩进级别。闭括号和开括号也应该
 独立一行并保持与函数声明相同的缩进级别。
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
 
     function thisFunctionHasLotsOfArguments(
         address a,
@@ -617,7 +701,9 @@ No::
         doSomething();
     }
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
     function thisFunctionHasLotsOfArguments(address a, address b, address c,
         address d, address e, address f) public {
@@ -646,7 +732,9 @@ No::
 
 如果一个长函数声明有修饰符，那么每个修饰符应该下沉到独立的一行。
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
 
     function thisFunctionNameIsReallyLong(address x, address y, address z)
         public
@@ -660,7 +748,7 @@ No::
     function thisFunctionNameIsReallyLong(
         address x,
         address y,
-        address z,
+        address z
     )
         public
         onlyowner
@@ -670,7 +758,9 @@ No::
         doSomething();
     }
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
     function thisFunctionNameIsReallyLong(address x, address y, address z)
                                           public
@@ -696,7 +786,9 @@ No::
 
 多行输出参数和返回值语句应该遵从 :ref:`代码行的最大长度 <maximum_line_length>` 一节的说明。
 
-Yes::
+正确写法:
+
+.. code-block:: solidity
 
     function thisFunctionNameIsReallyLong(
         address a,
@@ -719,7 +811,9 @@ Yes::
         );
     }
 
-No::
+错误写法:
+
+.. code-block:: solidity
 
     function thisFunctionNameIsReallyLong(
         address a,
@@ -741,7 +835,9 @@ No::
 对于继承合约中需要参数的构造函数，如果函数声明很长或难以阅读，建议将基础构造函数像多个修饰符的风格那样
 每个下沉到一个新行上书写。
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity ^0.7.0;
@@ -773,7 +869,9 @@ No::
         }
     }
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.4.22 <0.9.0;
@@ -826,9 +924,11 @@ No::
 
 当用单个语句声明简短函数时，允许在一行中完成。
 
-允许::
+允许的写法:
 
-  function shortFunction() public { doSomething(); }
+.. code-block:: solidity
+
+    function shortFunction() public { doSomething(); }
 
 这些函数声明的准则旨在提高可读性。
 因为本指南不会涵盖所有内容，作者应该自行作出最佳判断。
@@ -836,18 +936,21 @@ No::
 映射
 ========
 
-In variable declarations, do not separate the keyword ``mapping`` from its
-type by a space. Do not separate any nested ``mapping`` keyword from its type by
-whitespace.
+在变量声明中，不要用空格将关键字 ``mapping`` 和其类型分开。
+类型之间用一个空格隔开。不要用空格分隔任何嵌套的 ``mapping`` 关键词和它的类型。
 
-Yes::
+正确写法:
+
+.. code-block:: solidity
 
     mapping(uint => uint) map;
     mapping(address => bool) registeredAddresses;
     mapping(uint => mapping(bool => Data[])) public data;
     mapping(uint => mapping(uint => s)) data;
 
-No::
+错误写法:
+
+.. code-block:: solidity
 
     mapping (uint => uint) map;
     mapping( address => bool ) registeredAddresses;
@@ -860,11 +963,15 @@ No::
 
 数组变量的声明在变量类型和括号之间不应该有空格。
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
 
     uint[] x;
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
     uint [] x;
 
@@ -874,26 +981,34 @@ No::
 
 * 字符串应该用双引号而不是单引号。
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
 
       str = "foo";
       str = "Hamlet says, 'To be or not to be...'";
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
       str = 'bar';
       str = '"Be yourself; everyone else is already taken." -Oscar Wilde';
 
 * 操作符两边应该各有一个空格。
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
 
     x = 3;
     x = 100 / 10;
     x += 3 + 4;
     x |= y && z;
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
     x=3;
     x = 100/10;
@@ -902,41 +1017,45 @@ No::
 
 * 为了表示优先级，高优先级操作符两边可以省略空格。这样可以提高复杂语句的可读性。你应该在操作符两边总是使用相同的空格数：
 
-正确写法::
+正确写法:
+
+.. code-block:: solidity
 
     x = 2**3 + 5;
     x = 2*y + 3*z;
     x = (a+b) * (a-b);
 
-错误写法::
+错误写法:
+
+.. code-block:: solidity
 
     x = 2** 3 + 5;
     x = y+z;
     x +=1;
 
 ***************
-Order of Layout
+布局顺序
 ***************
 
-Layout contract elements in the following order:
+函数的各元素建议布局的顺序如下：
 
-1. Pragma statements
-2. Import statements
-3. Interfaces
-4. Libraries
-5. Contracts
+1. Pragma 语句
+2. Import 语句
+3. 接口
+4. 库
+5. 合约
 
-Inside each contract, library or interface, use the following order:
+在每个合约、库或接口内，使用如下顺序：
 
-1. Type declarations
-2. State variables
-3. Events
-4. Functions
+1. 类型声明
+2. 状态声明
+3. 事件
+4. 修改器
+5. 函数
 
 .. note::
 
-    It might be clearer to declare types close to their use in events or state
-    variables.
+    在声明类型时，挨着其使用的时间或状态时，会更清晰。
 
 ******************
 命名规范
@@ -957,14 +1076,14 @@ Inside each contract, library or interface, use the following order:
 * ``b`` (单个小写字母)
 * ``B`` (单个大写字母)
 * ``lowercase`` （小写）
-* ``lower_case_with_underscores`` （小写和下划线）
 * ``UPPERCASE`` （大写）
 * ``UPPER_CASE_WITH_UNDERSCORES`` （大写和下划线）
 * ``CapitalizedWords`` (驼峰式，首字母大写）
 * ``mixedCase`` (混合式，与驼峰式的区别在于首字母小写！)
-* ``Capitalized_Words_With_Underscores`` (首字母大写和下划线)
 
-..note:: 当在驼峰式命名中使用缩写时，应该将缩写中的所有字母都大写。 因此 HTTPServerError 比 HttpServerError 好。
+..note:: 
+    
+    当在驼峰式命名中使用缩写时，应该将缩写中的所有字母都大写。 因此 HTTPServerError 比 HttpServerError 好。
  当在混合式命名中使用缩写时，除了第一个缩写中的字母小写（如果它是整个名称的开头的话）以外，其他缩写中的字母均大写。
  因此 xmlHTTPRequest 比 XMLHTTPRequest 更好。
 
@@ -981,13 +1100,15 @@ Inside each contract, library or interface, use the following order:
 合约和库名称
 ==========================
 
-合约和库名称应该使用驼峰式风格。比如：``SimpleToken``，``SmartBank``，``CertificateHashRepository``，``Player``，``Congress``, ``Owned``。
-* Contract and library names should also match their filenames.
-* If a contract file includes multiple contracts and/or libraries, then the filename should match the *core contract*. This is not recommended however if it can be avoided.
+合约和库名称应该使用驼峰式风格。比如： ``SimpleToken`` ， ``SmartBank`` ， ``CertificateHashRepository`` ， ``Player`` ， ``Congress``, ``Owned``。
+* 合约和库的名称应该和他们的文件名一致。
+* 如果合约文件包含多个合约或库，则文件名应该匹配 *核心合约* ，但我们应该尽量避免这个情况。
 
-As shown in the example below, if the contract name is ``Congress`` and the library name is ``Owned``, then their associated filenames should be ``Congress.sol`` and ``Owned.sol``.
+如下面的例子所示，如果合约名称是 ``Congress`` ，库名称是 ``Owned``，那么它们的相关文件名应该是 ``Congress.sol`` 和 ``Owned.sol`` 。
 
-Yes::
+正确写法:
+
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity ^0.7.0;
@@ -1011,7 +1132,9 @@ Yes::
         }
     }
 
-and in ``Congress.sol``::
+在 ``Congress.sol`` 文件中:
+
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.4.0 <0.9.0;
@@ -1023,7 +1146,9 @@ and in ``Congress.sol``::
         //...
     }
 
-No::
+错误写法:
+
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity ^0.7.0;
@@ -1047,7 +1172,9 @@ No::
         }
     }
 
-and in ``Congress.sol``::
+在 ``Congress.sol`` 中:
+
+.. code-block:: solidity
 
     import "./owned.sol";
 
@@ -1101,23 +1228,22 @@ and in ``Congress.sol``::
 避免命名冲突
 ==========================
 
-* ``single_trailing_underscore_``
+* ``singleTrailingUnderscore_``
 
 当所起名称与内建或保留关键字相冲突时，建议照此惯例在名称后边添加下划线。
 
+.. _style_guide_natspec:
 
 ************************
 描述注释 NatSpec
 ************************
 
-Solidity 智能合约有一种基于以太坊自然语言说明格式（Ethereum Natural Language Specification Format）的注释形式。
+Solidity 智能合约包含了NatSpec注释形式。
+单行使用  ``///`` 开始，多行使用 ``/**`` 开头以 ``*/`` 结尾。
 
-Add comments above functions or contracts following `doxygen <https://www.doxygen.nl>`_ notation
-of one or multiple lines starting with ``///`` or a
-multiline comment starting with ``/**`` and ending with ``*/``.
+例如, 以来自 :ref:`简单合约 <simple-smart-contract>`_ 加上注释为例，看上去是这样：
 
-For example, the contract from :ref:`a simple smart contract <simple-smart-contract>`_ with the comments
-added looks like the one below::
+.. code-block:: solidity
 
     pragma solidity >=0.4.16 <0.9.0;
 
@@ -1142,6 +1268,7 @@ added looks like the one below::
     }
 
 
-It is recommended that Solidity contracts are fully annontated using :ref:`NatSpec <natspec>`_ for all public interfaces (everything in the ABI).
+推荐使用  :ref:`NatSpec <natspec>`_ 为所有的开放接口（在 ABI 里呈现的内容）进行完整的注释。
 
-Please see the sectian about :ref:`NatSpec <natspec>`_ for a detailed explanation.
+参考  :ref:`NatSpec <natspec>`_ 部分了解更多。
+

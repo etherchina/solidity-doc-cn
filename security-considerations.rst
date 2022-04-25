@@ -51,7 +51,7 @@
 这使得合约 B 能够在交互结束前回调 A 中的代码。
 举个例子，下面的代码中有一个 bug（这只是一个代码段，不是完整的合约）：
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.6.0 <0.9.0;
@@ -72,7 +72,7 @@
 这就会使其多次得到退款，从而将合约中的全部 |ether| 提取。
 特别地，下面的合约将允许一个攻击者多次得到退款，因为它使用了 ``call`` ，默认发送所有剩余的 gas。
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.6.2 <0.9.0;
@@ -90,7 +90,7 @@
 
 为了避免重入，你可以使用下面撰写的“检查-生效-交互”（Checks-Effects-Interactions）模式：
 
-::
+.. code-block:: solidity
 
     pragma solidity  >=0.6.0 <0.9.0;
 
@@ -154,19 +154,51 @@ gas 限制和循环
 调用栈深度
 ===============
 
-外部函数调用随时会失败，因为它们超过了调用栈的上限 1024。
-在这种情况下，Solidity 会抛出一个异常。
-恶意行为者也许能够在与你的合约交互之前强制将调用栈设置成一个比较高的值。
+如果调用栈超过了1024上限，外部函数调用随时会失败。在这种情况下，Solidity 会抛出一个异常。
+
+恶意行为者也许能够在与你的合约交互之前就强制将调用栈设置在一个比较高的值。
+
+注意，由于 `Tangerine Whistle<https://eips.ethereum.org/EIPS/eip-608>`_ 硬分叉， `63/64规则<https://eips.ethereum.org/EIPS/eip-150>`_ 使得调用栈深度攻击无法实施。还要注意的是，调用栈和表达式栈是不相关的，尽管两者都有1024个栈槽的大小限制。
+
 
 请注意，使用 ``.send()`` 时如果超出调用栈 **并不会** 抛出异常，而是会返回 ``false``。
-低级的函数比如 ``.call()``，``.callcode()`` 和 ``.delegatecall()`` 也都是这样的。
+低级的函数比如 ``.call()``， ``.callcode()`` 和 ``.delegatecall()`` 也都是这样的。
+
+
+授权代理 Proxies
+==================
+
+如果你的合约可以作为一个代理，也就是说，如果它可以用用户提供的数据调用任意的合约，那么用户基本上可以承担代理合约的身份。即使你有其他的保护措施，最好是建立你的合约系统，使代理没有任何权限（甚至对自己也没有）。如果需要，你可以使用第二个代理来完成。
+
+.. code-block:: solidity
+
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity ^0.8.0;
+    contract ProxyWithMoreFunctionality {
+        PermissionlessProxy proxy;
+
+        function callOther(address addr, bytes memory payload) public
+                returns (bool, bytes memory) {
+            return proxy.callOther(addr, payload);
+        }
+        // Other functions and other functionality
+    }
+
+    // 这是完整的合约，它没有其他功能，不需要任何权限就可以工作。
+    contract PermissionlessProxy {
+        function callOther(address addr, bytes memory payload) public
+                returns (bool, bytes memory) {
+            return addr.call(payload);
+        }
+    }
+
 
 tx.origin问题
 =============
 
 永远不要使用 tx.origin 做身份认证。假设你有一个如下的钱包合约：
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.7.0 <0.9.0;
@@ -180,6 +212,7 @@ tx.origin问题
         }
 
         function transferTo(address dest, uint amount) public {
+            // BUG 在这里，你应该使用 msg.sender 取代 tx.origin
             require(tx.origin == owner);
             dest.transfer(amount);
         }
@@ -187,7 +220,7 @@ tx.origin问题
 
 现在有人欺骗你，将 |ether| 发送到了这个恶意钱包的地址：
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.7.0 <0.9.0;
@@ -217,68 +250,59 @@ tx.origin问题
 整型溢出问题
 =========================================
 
-As in many programming languages, Solidity's integer types are not actually integers.
-They resemble integers when the values are small, but cannot represent arbitrarily large numbers.
+与许多编程语言一样，Solidity的整数类型上并不是真实整数。
+当值很小时，它们类似于整数，但不能表示任意大的数字。
 
-The following code causes an overflow because the result of the addition is too large
-to be stored in the type ``uint8``:
+以下代码导致溢出，因为 ``uint8`` 中加法的的结果太大:
 
-::
+.. code-block:: solidity
 
   uint8 x = 255;
   uint8 y = 1;
   return x + y;
 
-Solidity has two modes in which it deals with these overflows: Checked and Unchecked or "wrapping" mode.
+Solidity 有两种模式来处理这些溢出。检查和不检查或 "wrapping" 模式。
 
-The default checked mode will detect overflows and cause a failing assertion. You can disable this check
-using ``unchecked { ... }``, causing the overflow to be silently ignored. The above code would return
-``0`` if wrapped in ``unchecked { ... }``.
+默认的检查模式将检测到溢出并触发失败断言。你可以使用 ``unchecked { ... }``停用检查，使溢出被无声地忽略。
+如果用 ``unchecked { ... }`` ，上面的代码将返回 ``0`` 
 
-Even in checked mode, do not assume you are protected from overflow bugs.
-In this mode, overflows will always revert. If it is not possible to avoid the
-overflow, this can lead to a smart contract being stuck in a certain state.
+即使在检查模式下，也不要认为你受到了保护，不会出现溢出错误。
+在这种模式下，溢出总是会被还原。如果不可能避免溢出，这可能会导致智能合约被卡在某个状态下。
 
-In general, read about the limits of two's complement representation, which even has some
-more special edge cases for signed numbers.
+通常，你的了解补码的限制，它甚至对有符号的数字有一些更特殊的边缘情况。
 
-Try to use ``require`` to limit the size of inputs to a reasonable range and use the
-:ref:`SMT checker<smt_checker>` to find potential overflows.
+试着用 ``require`` 去限制输入值的大小在一个合理的范围，并且使用 :ref:`SMT checker<smt_checker>` 查找潜在的溢出错误。
 
 .. _clearing-mappings:
 
-Clearing Mappings
+清理映射
 =================
 
-The Solidity type ``mapping`` (see :ref:`mapping-types`) is a storage-only
-key-value data structure that does not keep track of the keys that were
-assigned a non-zero value.  Because of that, cleaning a mapping without extra
-information about the written keys is not possible.
-If a ``mapping`` is used as the base type of a dynamic storage array, deleting
-or popping the array will have no effect over the ``mapping`` elements.  The
-same happens, for example, if a ``mapping`` is used as the type of a member
-field of a ``struct`` that is the base type of a dynamic storage array.  The
-``mapping`` is also ignored in assignments of structs or arrays containing a
-``mapping``.
+Solidity 类型 ``mapping``（见 :ref:`mapping-types` ）是一个仅在存储空间有效的键值数据结构，它不会跟踪被赋值的键。 正因为如此，如果没有键的额外信息是没法清理映射的。
 
-::
+如果一个 ``mapping`` 被用作动态存储数组的基本类型，删除或弹出数组时对 ``mapping`` 元素是没有影响的。 
+还有类似的情况，例如，如果 ``mapping`` 被用作一个 ``struct`` 的成员字段的类型，而该结构作为是动态存储数组的基本类型。
+在包含了 ``mapping`` 的结构体或数组的赋值时， ``mapping`` 也会被忽略。
+
+
+.. code-block:: solidity
 
     pragma solidity >=0.6.0 <0.9.0;
 
     contract Map {
         mapping (uint => uint)[] array;
 
-        function allocate(uint _newMaps) public {
-            for (uint i = 0; i < _newMaps; i++)
+        function allocate(uint newMaps) public {
+            for (uint i = 0; i < newMaps; i++)
                 array.push();
         }
 
-        function writeMap(uint _map, uint _key, uint _value) public {
-            array[_map][_key] = _value;
+        function writeMap(uint map, uint key, uint value) public {
+            array[map][key] = value;
         }
 
-        function readMap(uint _map, uint _key) public view returns (uint) {
-            return array[_map][_key];
+        function readMap(uint map, uint key) public view returns (uint) {
+            return array[map][key];
         }
 
         function eraseMaps() public {
@@ -286,19 +310,14 @@ field of a ``struct`` that is the base type of a dynamic storage array.  The
         }
     }
 
-Consider the example above and the following sequence of calls: ``allocate(10)``,
-``writeMap(4, 128, 256)``.
-At this point, calling ``readMap(4, 128)`` returns 256.
-If we call ``eraseMaps``, the length of state variable ``array`` is zeroed, but
-since its ``mapping`` elements cannot be zeroed, their information stays alive
-in the contract's storage.
-After deleting ``array``, calling ``allocate(5)`` allows us to access
-``array[4]`` again, and calling ``readMap(4, 128)`` returns 256 even without
-another call to ``writeMap``.
 
-If your ``mapping`` information must be deleted, consider using a library similar to
-`iterable mapping <https://github.com/ethereum/dapp-bin/blob/master/library/iterable_mapping.sol>`_,
-allowing you to traverse the keys and delete their values in the appropriate ``mapping``.
+考虑一下上面的例子和下面的调用序列： ``allocate(10)`` , ``writeMap(4, 128, 256)``， 此时，调用 ``readMap(4, 128)`` 返回256。
+
+如果我们调用 ``eraseMaps``，状态变量 ``array`` 的长度被清零，但是因为它的 ``mapping`` 元素不能被清零，映射的信息在合约的存储中保持不变。
+
+删除 ``array`` 后，调用 ``allocate(5)`` 允许我们访问 ``array[4]``，调用 ``readMap(4, 128)`` 返回256， 甚至不需要再调用 ``writeMap``。
+
+如果你的  ``mapping`` 信息需要被删除，可以考虑使用一个类似于 `iterable mapping <https://github.com/ethereum/dapp-bin/blob/master/library/iterable_mapping.sol>`_, 允许你遍历键，并在适当的 ``mapping`` 中删除它们的值。
 
 
 
@@ -319,12 +338,12 @@ allowing you to traverse the keys and delete their values in the appropriate ``m
 认真对待警告
 =======================
 
-如果编译器警告了你什么事，你最好修改一下，即使你不认为这个特定的警告不会产生安全隐患，因为那也有可能埋藏着其他的问题。
+如果编译器警告了你什么事，你应该修改它，即使你不认为这个特定的警告不会产生安全隐患，因为那也有可能埋藏着其他的问题。
 我们给出的任何编译器警告，都可以通过轻微的修改来去掉。
 
-同时也请尽早添加 ``pragma experimental "v0.5.0";`` 来允许 0.5.0 版本的安全特性。
-注意在这种情况下，``experimental`` 并不意味着任何有风险的安全特性，
-它只是可以允许一些在当前版本还不支持的 Solidity 特性，来提供向后的兼容。
+始终使用最新版本的编译器，以了解所有最近引入的警告。
+
+编译器发出的 ``info`` 类型的信息并不危险，它只是代表额外的建议和可选信息，编译器认为这些信息可能对用户有用。
 
 
 限定 |ether| 的数量
@@ -369,275 +388,10 @@ allowing you to traverse the keys and delete their values in the appropriate ``m
 如果自检查没有通过，合约就会自动切换到某种“故障安全”模式，
 例如，关闭大部分功能，将控制权交给某个固定的可信第三方，或者将合约转换成一个简单的“退回我的钱”合约。
 
-Ask for Peer Review
+请求同行 Review
 ===================
 
-The more people examine a piece of code, the more issues are found.
-Asking people to review your code also helps as a cross-check to find out whether your code
-is easy to understand - a very important criterion for good smart contracts.
+越多的人检查代码，发现的问题就越多。
+请别人检查你的代码也有助于交叉检查你的代码
+这很容易理解 —— 这也是优秀智能合约的一个非常重要的标准。
 
-.. _formal_verification:
-
-*******************
-形式化验证
-*******************
-
-使用形式化验证可以执行自动化的数学证明，保证源代码符合特定的正式规范。
-规范仍然是正式的（就像源代码一样），但通常要简单得多。
-
-请注意形式化验证本身只能帮助你理解你做的（规范）和你怎么做（实际的实现）的之间的差别。
-你仍然需要检查这个规范是否是想要的，而且没有漏掉由它产生的任何非计划内的效果。
-
-Solidity implements a formal verification approach based on SMT solving.  The
-SMTChecker module automatically tries to prove that the code satisfies the
-specification given by ``require/assert`` statements. That is, it considers
-``require`` statements as assumptions and tries to prove that the conditions
-inside ``assert`` statements are always true.  If an assertion failure is
-found, a counterexample is given to the user, showing how the assertion can be
-violated.
-
-The SMTChecker also checks automatically for arithmetic underflow/overflow,
-trivial conditions and unreachable code.
-It is currently an experimental feature, therefore in order to use it you need
-to enable it via :ref:`a pragma directive<smt_checker>`.
-
-The SMTChecker traverses the Solidity AST creating and collecting program constraints.
-When it encounters a verification target, an SMT solver is invoked to determine the outcome.
-If a check fails, the SMTChecker provides specific input values that lead to the failure.
-
-While the SMTChecker encodes Solidity code into SMT constraints, it contains two
-reasoning engines that use that encoding in different ways.
-
-SMT Encoding
-============
-
-The SMT encoding tries to be as precise as possible, mapping Solidity types
-and expressions to their closest `SMT-LIB <http://smtlib.cs.uiowa.edu/>`_
-representation, as shown in the table below.
-
-+-----------------------+--------------------------------+-----------------------------+
-|Solidity type          |SMT sort                        |Theories (quantifier-free)   |
-+=======================+================================+=============================+
-|Boolean                |Bool                            |Bool                         |
-+-----------------------+--------------------------------+-----------------------------+
-|intN, uintN, address,  |Integer                         |LIA, NIA                     |
-|bytesN, enum           |                                |                             |
-+-----------------------+--------------------------------+-----------------------------+
-|array, mapping, bytes, |Tuple                           |Datatypes, Arrays, LIA       |
-|string                 |(Array elements, Integer length)|                             |
-+-----------------------+--------------------------------+-----------------------------+
-|struct                 |Tuple                           |Datatypes                    |
-+-----------------------+--------------------------------+-----------------------------+
-|other types            |Integer                         |LIA                          |
-+-----------------------+--------------------------------+-----------------------------+
-
-Types that are not yet supported are abstracted by a single 256-bit unsigned
-integer, where their unsupported operations are ignored.
-
-For more details on how the SMT encoding works internally, see the paper
-`SMT-based Verification of Solidity Smart Contracts <https://github.com/leonardoalt/text/blob/master/solidity_isola_2018/main.pdf>`_.
-
-Model Checking Engines
-======================
-
-The SMTChecker module implements two different reasoning engines that use the
-SMT encoding above, a Bounded Model Checker (BMC) and a system of Constrained
-Horn Clauses (CHC).  Both engines are currently under development, and have
-different characteristics.
-
-Bounded Model Checker (BMC)
----------------------------
-
-The BMC engine analyzes functions in isolation, that is, it does not take the
-overall behavior of the contract throughout many transactions into account when
-analyzing each function.  Loops are also ignored in this engine at the moment.
-Internal function calls are inlined as long as they are not recursive, direct
-or indirectly. External function calls are inlined if possible, and knowledge
-that is potentially affected by reentrancy is erased.
-
-The characteristics above make BMC easily prone to reporting false positives,
-but it is also lightweight and should be able to quickly find small local bugs.
-
-Constrained Horn Clauses (CHC)
-------------------------------
-
-The Solidity contract's Control Flow Graph (CFG) is modelled as a system of
-Horn clauses, where the lifecycle of the contract is represented by a loop
-that can visit every public/external function non-deterministically. This way,
-the behavior of the entire contract over an unbounded number of transactions
-is taken into account when analyzing any function. Loops are fully supported
-by this engine. Internal function calls are supported, but external function
-calls are currently unsupported.
-
-The CHC engine is much more powerful than BMC in terms of what it can prove,
-and might require more computing resources.
-
-Abstraction and False Positives
-===============================
-
-The SMTChecker implements abstractions in an incomplete and sound way: If a bug
-is reported, it might be a false positive introduced by abstractions (due to
-erasing knowledge or using a non-precise type). If it determines that a
-verification target is safe, it is indeed safe, that is, there are no false
-negatives (unless there is a bug in the SMTChecker).
-
-In the BMC engine, function calls to the same contract (or base contracts) are
-inlined when possible, that is, when their implementation is available.  Calls
-to functions in other contracts are not inlined even if their code is
-available, since we cannot guarantee that the actual deployed code is the same.
-
-The CHC engine creates nonlinear Horn clauses that use summaries of the called
-functions to support internal function calls. The same approach can and will be
-used for external function calls, but the latter requires more work regarding
-the entire state of the blockchain and is still unimplemented.
-
-Complex pure functions are abstracted by an uninterpreted function (UF) over
-the arguments.
-
-+-----------------------------------+--------------------------------------+
-|Functions                          |SMT behavior                          |
-+===================================+======================================+
-|``assert``                         |Verification target                   |
-+-----------------------------------+--------------------------------------+
-|``require``                        |Assumption                            |
-+-----------------------------------+--------------------------------------+
-|internal                           |BMC: Inline function call             |
-|                                   |CHC: Function summaries               |
-+-----------------------------------+--------------------------------------+
-|external                           |BMC: Inline function call or          |
-|                                   |erase knowledge about state variables |
-|                                   |and local storage references.         |
-|                                   |CHC: Function summaries and erase     |
-|                                   |state knowledge.                      |
-+-----------------------------------+--------------------------------------+
-|``gasleft``, ``blockhash``,        |Abstracted with UF                    |
-|``keccak256``, ``ecrecover``       |                                      |
-|``ripemd160``, ``addmod``,         |                                      |
-|``mulmod``                         |                                      |
-+-----------------------------------+--------------------------------------+
-|pure functions without             |Abstracted with UF                    |
-|implementation (external or        |                                      |
-|complex)                           |                                      |
-+-----------------------------------+--------------------------------------+
-|external functions without         |BMC: Unsupported                      |
-|implementation                     |CHC: Nondeterministic summary         |
-+-----------------------------------+--------------------------------------+
-|others                             |Currently unsupported                 |
-+-----------------------------------+--------------------------------------+
-
-Using abstraction means loss of precise knowledge, but in many cases it does
-not mean loss of proving power.
-
-::
-
-    // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.5.0;
-    pragma experimental SMTChecker;
-    // This may report a warning if no SMT solver available.
-
-    contract Recover
-    {
-        function f(
-            bytes32 hash,
-            uint8 _v1, uint8 _v2,
-            bytes32 _r1, bytes32 _r2,
-            bytes32 _s1, bytes32 _s2
-        ) public pure returns (address) {
-            address a1 = ecrecover(hash, _v1, _r1, _s1);
-            require(_v1 == _v2);
-            require(_r1 == _r2);
-            require(_s1 == _s2);
-            address a2 = ecrecover(hash, _v2, _r2, _s2);
-            assert(a1 == a2);
-            return a1;
-        }
-    }
-
-In the example above, the SMTChecker is not expressive enough to actually
-compute ``ecrecover``, but by modelling the function calls as uninterpreted
-functions we know that the return value is the same when called on equivalent
-parameters. This is enough to prove that the assertion above is always true.
-
-Abstracting a function call with an UF can be done for functions known to be
-deterministic, and can be easily done for pure functions.  It is however
-difficult to do this with general external functions, since they might depend
-on state variables.
-
-External function calls also imply that any current knowledge that the
-SMTChecker might have regarding mutable state variables needs to be erased to
-guarantee no false negatives, since the called external function might direct
-or indirectly call a function in the analyzed contract that changes state
-variables.
-
-Reference Types and Aliasing
-=============================
-
-Solidity implements aliasing for reference types with the same :ref:`data
-location<data-location>`.
-That means one variable may be modified through a reference to the same data
-area.
-The SMTChecker does not keep track of which references refer to the same data.
-This implies that whenever a local reference or state variable of reference
-type is assigned, all knowledge regarding variables of the same type and data
-location is erased.
-If the type is nested, the knowledge removal also includes all the prefix base
-types.
-
-::
-
-    // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.5.0;
-    pragma experimental ABIEncoderV2;
-    pragma experimental SMTChecker;
-    // This will report a warning
-
-    contract Aliasing
-    {
-        uint[] array1;
-        uint[][] array2;
-        function f(
-            uint[] memory a,
-            uint[] memory b,
-            uint[][] memory c,
-            uint[] storage d
-        ) internal {
-            array1[0] = 42;
-            a[0] = 2;
-            c[0][0] = 2;
-            b[0] = 1;
-            // Erasing knowledge about memory references should not
-            // erase knowledge about state variables.
-            assert(array1[0] == 42);
-            // However, an assignment to a storage reference will erase
-            // storage knowledge accordingly.
-            d[0] = 2;
-            // Fails as false positive because of the assignment above.
-            assert(array1[0] == 42);
-            // Fails because `a == b` is possible.
-            assert(a[0] == 2);
-            // Fails because `c[i] == b` is possible.
-            assert(c[0][0] == 2);
-            assert(d[0] == 2);
-            assert(b[0] == 1);
-        }
-        function g(
-            uint[] memory a,
-            uint[] memory b,
-            uint[][] memory c,
-            uint x
-        ) public {
-            f(a, b, c, array2[x]);
-        }
-    }
-
-
-After the assignment to ``b[0]``, we need to clear knowledge about ``a`` since
-it has the same type (``uint[]``) and data location (memory).  We also need to
-clear knowledge about ``c``, since its base type is also a ``uint[]`` located
-in memory. This implies that some ``c[i]`` could refer to the same data as
-``b`` or ``a``.
-
-Notice that we do not clear knowledge about ``array`` and ``d`` because they
-are located in storage, even though they also have type ``uint[]``.  However,
-if ``d`` was assigned, we would need to clear knowledge about ``array`` and
-vice-versa.
