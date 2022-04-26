@@ -1,8 +1,8 @@
 .. _natspec:
 
-#################
-注释描述规范
-#################
+#######################
+NatSpec(注释描述)规范
+#######################
 
 Solidity contracts can use a special form of comments to provide rich
 documentation for functions, return variables and more. This special form is

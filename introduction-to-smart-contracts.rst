@@ -1,5 +1,5 @@
 ###############################
-入门智能合约
+智能合约入门
 ###############################
 
 .. _simple-smart-contract:
@@ -10,11 +10,13 @@
 
 让我们先看一下最基本的例子。现在就算你都不理解也不要紧，后面我们会有更深入的讲解。
 
-存储合约
+存储合约示例
 ====================================
 
 把一个数据保存到链上
-::
+
+.. code-block:: solidity
+
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.4.16 <0.9.0;
 
@@ -36,7 +38,8 @@
 
 Solidity中智能合约的含义就是一组代码（它的 *功能* )和数据（它的 *状态* ）的集合，并且它们是位于以太坊区块链的一个特定地址上的。 ``uint storedData;`` 这一行代码声明了一个名为``storedData``的状态变量，其类型为 ``uint`` (256位无符号整数）。 你也可以认为它是数据库里的一个插槽，并且可以通过调用管理数据库代码的函数进行查询和更改。在这个例子中，上述的合约定义了``set``和``get`` 函数，可以用来修改或检索变量的值。
 
-要访问一个状态变量，你通常并不需要像添加 ``this.`` 这样的前缀，你只需要通过它的名字就可以直接访问它。与其他一些语言不同的是，省略它不仅仅是一个风格问题，因为它会导致了一种完全不同的访问成员的方式，这一块后面会详细介绍。
+要访问当前合约的成员（如：状态变量），通常不需要像添加 ``this.`` 这样的前缀，你只需要通过名字就可以直接访问它。
+与其他一些语言不同的是，省略它不仅仅是一个风格问题，因为它会导致了一种完全不同的访问成员的方式，这一块后面会详细介绍。
 
 该合约能完成的事情并不多（由于以太坊构建的基础架构的原因）：它能允许任何人在合约中存储一个单独的数字，并且这个数字可以被世界上任何人访问，且没有可行的办法阻止你发布这个数字。当然，任何人都可以再次调用 ``set`` ，传入不同的值，覆盖你的数字，但是这个数字仍会被存储在区块链的历史记录中。随后，我们会看到怎样施加访问限制，以确保只有你才能改变这个数字。
 
@@ -52,9 +55,11 @@ Solidity中智能合约的含义就是一组代码（它的 *功能* )和数据�
 ==============================
 
 下面的合约实现了一个最简单的加密货币。这里，币确实可以无中生有地产生，但是只有创建合约的人才能做到（实现一个不同的发行计划也不难）。而且，任何人都可以给其他人转币，不需要注册用户名和密码 —— 所需要的只是以太坊密钥对。
-::
+
+.. code-block:: solidity
+
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity  >=0.7.0 <0.9.0;
+    pragma solidity ^0.8.4;
 
     contract Coin {
         // 关键字“public”让这些变量可以从外部读取
@@ -71,12 +76,22 @@ Solidity中智能合约的含义就是一组代码（它的 *功能* )和数据�
 
         function mint(address receiver, uint amount) public {
             require(msg.sender == minter);
-            require(amount < 1e60);
             balances[receiver] += amount;
         }
 
+        // Errors allow you to provide information about
+        // why an operation failed. They are returned
+        // to the caller of the function.
+        error InsufficientBalance(uint requested, uint available);
+
+
         function send(address receiver, uint amount) public {
-            require(amount <= balances[msg.sender], "Insufficient balance.");
+            if (amount > balances[msg.sender])
+                revert InsufficientBalance({
+                    requested: amount,
+                    available: balances[msg.sender]
+                });
+
             balances[msg.sender] -= amount;
             balances[receiver] += amount;
             emit Sent(msg.sender, receiver, amount);
@@ -86,7 +101,8 @@ Solidity中智能合约的含义就是一组代码（它的 *功能* )和数据�
 这个合约引入了一些新的概念，让我们逐一解读。
 
 ``address public minter;`` 这一行声明了一个可以被公开访问的 ``address`` 类型的状态变量。 ``address`` 类型是一个160位的值，且不允许任何算数操作。这种类型适合存储合约地址或外部人员的密钥对。关键字 ``public`` 自动生成一个函数，允许你在这个合约之外访问这个状态变量的当前值。如果没有这个关键字，其他的合约没有办法访问这个变量。由编译器生成的函数的代码大致如下所示（暂时忽略 external 和 view）：
-::
+
+.. code-block:: solidity
 
     function minter() external view returns (address) { return minter; }
 
@@ -97,10 +113,11 @@ Solidity中智能合约的含义就是一组代码（它的 *功能* )和数据�
 下一行， ``mapping (address => uint) public balances;`` 也创建一个公共状态变量，但它是一个更复杂的数据类型。
 该类型将address映射为无符号整数。
 Mappings 可以看作是一个 `哈希表 <https://en.wikipedia.org/wiki/Hash_table>`_ 它会执行虚拟初始化，以使所有可能存在的键都映射到一个字节表示为全零的值。 但是，这种类比并不太恰当，因为它既不能获得映射的所有键的列表，也不能获得所有值的列表。 因此，要么记住你添加到mapping中的数据（使用列表或更高级的数据类型会更好），要么在不需要键列表或值列表的上下文中使用它，就如本例。 而由 ``public`` 关键字创建的getter函数 :ref:`getter function<getter-functions>` 则是更复杂一些的情况， 它大致如下所示：
-::
 
-    function balances(address _account) external view returns (uint) {
-        return balances[_account];
+.. code-block:: solidity
+
+    function balances(address account) external view returns (uint) {
+        return balances[account];
     }
 
 正如你所看到的，你可以通过该函数轻松地查询到账户的余额。
@@ -125,11 +142,33 @@ Mappings 可以看作是一个 `哈希表 <https://en.wikipedia.org/wiki/Hash_ta
 
 .. index:: coin
 
-特殊函数 ``constructor`` 是仅在创建合约期间运行的构造函数，不能在事后调用。
-它永久存储创建合约的人的地址: ``msg`` (以及 ``tx`` 和 ``block`` ) 是一个特殊的全局变量，其中包含一些允许访问区块链的属性。 ``msg.sender`` 始终是当前（外部）函数调用的来源地址。
+特殊函数 ``constructor`` 是仅在创建合约期间运行的构造函数，不能在创建之后调用。
+在 Coin 合约中，构造函数永久存储创建合约的人的地址: ``msg`` (类似的还有 ``tx`` 和 ``block`` ) 是一个特殊的全局变量， 参考 :ref:`特殊变量和函数 <special-variables-functions>` ，这些变量允许我们访问区块链的属性。
+``msg.sender`` 始终记录当前（外部）函数调用是来自于哪一个地址。
 
 最后，真正被用户或其他合约所调用的，以完成本合约功能的方法是 ``mint`` 和 ``send``。
-如果 ``mint`` 被合约创建者外的其他人调用则什么也不会发生。 另一方面， ``send`` 函数可被任何人用于向他人发送币 (当然，前提是发送者拥有这些币)。记住，如果你使用合约发送币给一个地址，当你在区块链浏览器上查看该地址时是看不到任何相关信息的。因为，实际上你发送币和更改余额的信息仅仅存储在特定合约的数据存储器中。通过使用事件，你可以非常简单地为你的新币创建一个“区块链浏览器”来追踪交易和余额。
+
+
+``mint`` 函数用来新发行一定数量的币到一个地址。
+:ref:`require <assert-and-require>` 用来检查某些条件，如果不满足这些条件就会回推所有的状态变化。
+在这个例子中, ``require(msg.sender == minter);`` 确保只有合约的创建者可以调用 ``mint``。 一般来说，创建者可以随心所欲地铸造代币，但在某些时候，这将导致一种叫做 "溢出" 的现象。
+
+请注意，由于默认的 :ref:`算术检查模式 <unchecked>`，如果表达式 ``balances[receiver] += amount;`` 溢出交易将被还原。
+即当任意精度算术中的 ``balances[receiver]+ amount`` 大于 ``uint`` (``2**256 - 1``)。同样在在函数 ``send``中的 ``balances[receiver] += amount;`` 这对语句来说也是如此。
+
+
+:ref:`Errors <errors>` 用来向调用者描述错误信息。Errors与 :ref:`revert 语句 <revert-statement>`一起使用。
+``revert`` 语句无条件地中止执行并回退所有的变化，类似于 ``require`` 函数，它也同样允许你提供一个错误的名称和额外的数据，这些额外数据将提供给调用者(并最终提供给前端应用程序或区块资源管理器），这样就可以更容易地调试或应对失败。
+
+任何人（已经拥有一些代币）都可以使用 ``send`` 函数来向其他人发送代币。如果发送者没有足够的代币可以发送， ``if`` 条件为真 ``revert`` 将触发失败，并通过 ``InsufficientBalance`` 向发送者提供错误细节。
+
+.. note::
+    如果你用这个合约向一个地址发送代币，当你在区块链浏览器上看这个地址时，你不会看到任何东西，因为你发送代币的记录和余额的变化只存储在这个特定的Coin合约的数据存储中。
+    通过使用事件，你可以让 "区块链浏览器"，跟踪代币的交易和余额变化，但你必须查看代币合约地址（下的交易记录），而不是持有人的地址。
+
+
+如果 ``mint`` 被合约创建者外的其他人调用则什么也不会发生。
+另一方面， ``send`` 函数可被任何人用于向他人发送币 (当然，前提是发送者拥有这些币)。记住，如果你使用合约发送币给一个地址，当你在区块链浏览器上查看该地址时是看不到任何相关信息的。因为，实际上你发送币和更改余额的信息仅仅存储在特定合约的数据存储器中。通过使用事件，你可以非常简单地为你的新币创建一个“区块链浏览器”来追踪交易和余额。
 
 .. _blockchain-basics:
 
@@ -171,7 +210,7 @@ Mappings 可以看作是一个 `哈希表 <https://en.wikipedia.org/wiki/Hash_ta
 .. note::
     不能保证交易会包含在下一个区块或任何特定的未来区块中，因为这不是由交易的提交者决定，而是由矿工决定将交易包含在哪个区块中。
 
-    如果你要安排合约的未来的时间点调用，可以使用`alarm clock <https://www.ethereum-alarm-clock.com/>`_ 或类似的oracle服务。
+    如果你要安排合约的未来的时间点调用，可以使用合约自动化工具或类似的oracle服务。
 
 .. _the-ethereum-virtual-machine:
 
@@ -296,10 +335,33 @@ EVM的指令集量应尽量少，以最大限度地避免可能导致共识问�
 
 合约代码从区块链上移除的唯一方式是合约在合约地址上的执行自毁操作 ``selfdestruct`` 。合约账户上剩余的以太币会发送给指定的目标，然后其存储和代码从状态中被移除。移除一个合约听上去不错，但其实有潜在的危险，如果有人发送以太币到移除的合约，这些以太币将永远丢失。
 
-.. note:: 尽管一个合约的代码中没有显式地调用 ``selfdestruct`` ，它仍然有可能通过 ``delegatecall`` 或 ``callcode`` 执行自毁操作。
+.. warning::
+    即使一个合约被 ``selfdestruct`` 删除，它仍然是区块链历史的一部分，可能被大多数以太坊节点保留。
+    因此，使用 ``selfdestruct`` 与从硬盘上删除数据是不同的。
+    
 
-如果要使合同失效，则应通过更改内部状态来禁用合约，这样可以在使用函数无法执行从而进行 revert，从而达到返还以太的目的。
+.. note::
+    即便一个合约的代码中没有显式地调用 ``selfdestruct`` ，它仍然有可能通过 ``delegatecall`` 或 ``callcode`` 执行自毁操作。
 
-.. note:: 旧合约的删减可能会，也可能不会被以太坊的各种客户端程序实现。另外，归档节点可选择无限期保留合约存储和代码。
+如果要禁用合约，可以通过修改某个内部状态让所有函数无法执行，而是直接回退，这样也可以达到返还以太的目的。
 
-.. note:: 目前， **外部账户** 不能从状态中移除。
+
+.. index:: ! precompiled contracts, ! precompiles, ! contract;precompiled
+
+.. _precompiledContracts:
+
+预编译合约
+=====================
+
+There is a small set of contract addresses that are special:
+The address range between ``1`` and (including) ``8`` contains
+"precompiled contracts" that can be called as any other contract
+but their behaviour (and their gas consumption) is not defined
+by EVM code stored at that address (they do not contain code)
+but instead is implemented in the EVM execution environment itself.
+
+Different EVM-compatible chains might use a different set of
+precompiled contracts. It might also be possible that new
+precompiled contracts are added to the Ethereum main chain in the future,
+but you can reasonably expect them to always be in the range between
+``1`` and ``0xffff`` (inclusive).
