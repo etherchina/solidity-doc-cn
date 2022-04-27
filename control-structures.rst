@@ -9,11 +9,10 @@
 ===================
 
 JavaScript 中的大部分控制结构在 Solidity 中都是可用的，除了 ``switch`` 和 ``goto``。
-因此 Solidity 中有 ``if``，``else``，``while``，``do``，``for``，``break``，``continue``，``return``，``? :`` 这些与在 C 或者 JavaScript 中表达相同语义的关键词。
+因此 Solidity 中有 ``if``， ``else``， ``while``， ``do``， ``for``， ``break``， ``continue``， ``return``， ``? :`` 这些与在 C 或者 JavaScript 中表达相同语义的关键词。
 
-Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
-但仅用于 :ref:`外部函数调用 <external-function-calls>`　和　合约创建调用．
-
+Solidity还支持 ``try``/ ``catch`` 语句形式的异常处理，但仅用于 :ref:`外部函数调用 <external-function-calls>`　和合约创建调用。
+使用:ref:`revert 语句 <revert-statement>` 可以触发一个"错误"。
 
 用于表示条件的括号 *不可以* 被省略，单语句体两边的花括号可以被省略。
 
@@ -34,11 +33,14 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 内部函数调用
 -----------------------
 
-当前合约中的函数可以直接（“从内部”）调用，也可以递归调用，就像下边这个荒谬的例子一样
-::
+当前合约中的函数可以直接（“从内部”）调用，也可以递归调用，就像下边这个无意义的例子一样。
+
+.. code-block:: solidity
+
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.4.22 <0.9.0;
 
+    // 编译器会有警告提示
     contract C {
         function g(uint a) public pure returns (uint ret) { return f(); }
         function f() internal pure returns (uint ret) { return g(7) + f(); }
@@ -54,7 +56,7 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 外部函数调用
 -----------------------
 
-表达式 ``this.g(8);`` 和 ``c.g(2);`` （其中 ``c`` 是合约实例）也是有效的函数调用，但是这种情况下，函数将会通过一个消息调用来进行“外部调用”，而不是直接的跳转。
+方式也可以使用表达式 ``this.g(8);`` 和 ``c.g(2);`` 进行调用，其中 ``c`` 是合约实例， ``g`` 合约内实现的函数，但是这两种方式调用函数，称为“外部调用”，它是通过消息调用来进行，而不是直接的代码跳转。
 请注意，不可以在构造函数中通过 this 来调用函数，因为此时真实的合约实例还没有被创建。
 
 
@@ -63,11 +65,13 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 .. note::
     从一个合约到另一个合约的函数调用不会创建自己的交易, 它是作为整个交易的一部分的消息调用。
 
-当调用其他合约的函数时，随函数调用发送的 Wei 和 gas 的数量可以分别由特定选项　``{value: 10, gas: 10000}``
+当调用其他合约的函数时，需要在函数调用是指定发送的 Wei 和 gas 数量，可以使用特定选项　``{value: 10, gas: 10000}``
 
-请注意，不建议明确指定gas，因为操作码的gas 消耗将来可能会发生变化。
-任何发送给合约 Wei  将被添加到该合约的总余额中：
-::
+请注意，不建议明确指定gas，因为操作码的 gas 消耗将来可能会发生变化。
+任何发送给合约 Wei  将被添加到目标合约的总余额中：
+
+.. code-block:: solidity
+
     pragma solidity >=0.6.2 <0.9.0;
 
     contract InfoFeed {
@@ -83,10 +87,18 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 ``payable`` 修饰符要用于修饰 ``info`` 函数，否则，`value` 选项将不可用。
 
 .. warning::
-  注意一个事实，``feed.info{value: 10, gas: 800}`` 只（局部地）设置了与函数调用一起发送的 ``Wei`` 值和 ``gas`` 的数量，只有最后的圆括号执行了真正的调用。
-  因此，如果函数没有调用() ``value`` 和 ``gas`` 设置是无效的。
+  注意 ``feed.info{value: 10, gas: 800}`` 仅（局部地）设置了与函数调用一起发送的 ``Wei`` 值和 ``gas`` 的数量，只有最后的小括号才执行了真正的调用。
+  因此， ``feed.info{value: 10, gas: 800}`` 是没有调用函数的， ``value`` 和 ``gas`` 设置是无效的。
 
-由于EVM认为可以调用不存在的合约的调用，Solidity 里会使用 ``extcodesize`` 操作码来检查要调用的合约是否确实存在（包含代码），如果不存在该合约，则抛出异常。
+由于EVM认为可以调用不存在的合约的调用，因此在 Solidity 语言层面里会使用 ``extcodesize`` 操作码来检查要调用的合约是否确实存在（包含代码），如果不存在该合约，则抛出异常。
+
+如果返回数据在调用后被解码，则跳过这个检查，因此ABI解码器将捕捉到不存在的合约的情况。
+
+请注意，这个检查在 :ref:`低级别调用<address_related>` 时不被执行，这些调用是对地址而不是合约实例进行操作。
+
+.. note::
+    
+    当使用高级别的方式调用 :ref:`预编译合约时 <precompiledContracts>` 也需要注意，因为因为根据上面的逻辑，编译器认为它们不存在，即使它们执行代码并返回数据。
 
 如果被调用合约本身抛出异常或者 gas 用完等，函数调用也会抛出异常。
 
@@ -101,7 +113,7 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 
 .. note::
     在Solidity 0.6.2之前，建议指定余额和gas的方法是使用f.value（x）.gas（g）()。
-    在0.6.2已弃用，在Solidity 0.7.0中开始不再使用。
+    这个方式在0.6.2时被弃用，在Solidity 0.7.0中开始不再允许使用。
 
 
 具名调用和匿名函数参数
@@ -109,7 +121,8 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 
 函数调用参数也可以按照任意顺序由名称给出，如果它们被包含在 ``{ }`` 中，
 如以下示例中所示。参数列表必须按名称与函数声明中的参数列表相符，但可以按任意顺序排列。
-::
+
+.. code-block:: solidity
 
     pragma solidity >=0.4.0 <0.9.0;
 
@@ -130,7 +143,8 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 --------------------------------
 
 未使用参数的名称（特别是返回参数）可以省略。这些参数仍然存在于堆栈中，但它们无法访问。
-::
+
+.. code-block:: solidity
 
     pragma solidity >=0.4.22 <0.9.0;
 
@@ -149,9 +163,11 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 ==============================
 
 使用关键字 ``new`` 可以创建一个新合约。待创建合约的完整代码必须事先知道，因此递归的创建依赖是不可能的。
-::
 
-    pragma solidity ^0.7.0;
+.. code-block:: solidity
+
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.7.0 <0.9.0;
 
     contract D {
         uint x;
@@ -177,21 +193,21 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 如果创建失败（可能因为栈溢出，或没有足够的余额或其他问题），会引发异常。
 
 
-加“盐”的合约创建  create2
+加“盐”的合约创建 / create2
 -----------------------------------
 
 在创建合约时，将根据创建合约的地址和每次创建合约交易时的计数器(nonce)来计算合约的地址。
 
-如果你指定了一个可选的 ``salt``（一个bytes32值），那么合约创建将使用另一种机制来生成新合约的地址：
+如果你指定了一个可选的 ``salt``（一个bytes32值），那么合约创建将使用另一种机制(create2)来生成新合约的地址：
 
 它将根据给定的盐值，创建合约的字节码和构造函数参数来计算创建合约的地址。
 
 
-特别注意，不使用计数器（“nonce”）。 这样可以在创建合约时提供更大的灵活性：你可以在创建新合约之前就推导出（将要创建的）合约地址。 
+特别注意，这里不再使用计数器（“nonce”）。 这样可以在创建合约时提供更大的灵活性：你可以在创建新合约之前就推导出（将要创建的）合约地址。 
 甚至是，还可以依赖此地址（即便它还不存在）来创建其他合约。一个主要用例场景是充当链下交互仲裁合约，仅在有争议时才需要创建。
 
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity ^0.7.0;
@@ -225,8 +241,8 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 
 .. warning::
 
-    关于加盐的合约创建有一些特殊之处。 合约销毁后可以在同一地址重新创建。不过，即使创建字节码相同（这是一个要求，因为否则地址会发生变化），该新创建的合约也可能有不同的部署字节码（deployed bytecode）。 
-    这是因为编译器可以查询两次创建合约之间可能已更改的外部状态，并在存储合约之前将其合并到部署字节码中。
+    使用create2 创建合约还有一些特别之处。 合约销毁后可以在同一地址重新创建。不过，即使创建字节码（creation bytecode）相同（这是要求，因为否则地址会发生变化），该新创建的合约也可能有不同的部署字节码（deployed bytecode）。 
+    这是因为构造函数可以使用两次创建合约之间可能已更改的外部状态，并在存储合约时将其合并到部署字节码中。
 
 
 
@@ -248,7 +264,7 @@ Solidity还支持 ``try``/``catch`` 语句形式的异常处理，
 
 Solidity 内部允许元组 (tuple) 类型，也就是一个在编译时元素数量固定的对象列表，列表中的元素可以是不同类型的对象。这些元组可以用来同时返回多个数值，也可以用它们来同时给多个新声明的变量或者既存的变量（或通常的 LValues）：
 
-::
+.. code-block:: solidity
 
     pragma solidity >=0.5.0 <0.9.0;
 
@@ -289,7 +305,7 @@ Solidity 内部允许元组 (tuple) 类型，也就是一个在编译时元素�
 在下面的示例中, 对 ``g(x)`` 的调用对 ``x`` 没有影响, 因为它在内存中创建了存储值独立副本。但是, ``h(x)`` 成功修改 ``x`` , 因为只传递引用而不传递副本。
 
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.4.22 <0.9.0;
@@ -333,7 +349,7 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
 
 基于以上的规则，下边的例子不会出现编译警告，因为那两个变量虽然名字一样，但却在不同的作用域里。
 
-::
+.. code-block:: solidity
 
     pragma solidity >=0.5.0 <0.9.0;
     contract C {
@@ -352,7 +368,7 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
 
 作为 C99 作用域规则的特例，请注意在下边的例子里，第一次对 ``x`` 的赋值会改变上一层中声明的变量值。如果外层声明的变量被“影子化”（就是说被在内部作用域中由一个同名变量所替代）你会得到一个警告。
 
-::
+.. code-block:: solidity
 
     pragma solidity >=0.5.0 <0.9.0;
     // 有警告
@@ -370,7 +386,7 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
 .. warning::
     在 Solidity 0.5.0 之前的版本，作用域规则都沿用了 Javascript 的规则，即一个变量可以声明在函数的任意位置，都可以使他在整个函数范围内可见。而这种规则会从 0.5.0 版本起被打破。从 0.5.0 版本开始，下面例子中的代码段会导致编译错误。
 
- ::
+.. code-block:: solidity
 
     // 这将无法编译通过
 
@@ -384,7 +400,7 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
     }
 
 
-
+.. index:: ! safe math, safemath, checked, unchecked
 .. _unchecked:
 
 算术运算的检查模式与非检查模式
@@ -399,13 +415,13 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
 如果想要之前“截断”的效果，可以使用 ``unchecked`` 代码块：
 
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >0.7.99;
+    pragma solidity ^0.8.0;
     contract C {
         function f(uint a, uint b) pure public returns (uint) {
-            // 溢出会返回“截断”的结果
+            // 减法溢出会返回“截断”的结果
             unchecked { return a - b; }
         }
         function g(uint a, uint b) pure public returns (uint) {
@@ -419,14 +435,14 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
 
 ``unchecked`` 代码块可以在代码块中的任何位置使用，但不可以替代整个函数代码块，同样不可以嵌套。
 
-此设置仅影响语法上位于``unchecked``块内的语句。
+此设置仅影响语法上位于 ``unchecked`` 块内的语句。
 在块中调用的函数不会此影响。
 
 .. note::
-    为避免歧义，不能在 ``unchecked`` 块中使用 ' _;' 。
+    为避免歧义，不能在 ``unchecked`` 块中使用 `` _;`` 。
 
 下面的这个运算操作符会进行溢出检查，如果上溢出或下溢会触发失败异常。
-如果在费检查模式代码块中使用，将不会出现错误:
+如果在非检查模式代码块中使用，将不会出现错误:
 
 
 ``++``, ``--``, ``+``, binary ``-``, unary ``-``, ``*``, ``/``, ``%``, ``**``
@@ -436,6 +452,11 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
 .. warning::
     除 0（或除 0取模）的异常是不能被 ``unchecked`` 忽略的。
 
+.. note::
+
+    位运算不会执行上溢或下溢检查。
+    这在使用位移位(``<<``, ``>>``, ``<<=``, ``>>=``)来代替整数除法和2指数时尤其明显。
+    例如 ``type(uint256).max << 3`` 不会回退，而 ``type(uint256).max * 8`` 会失败回退。
 
 .. note::
     ``int x = type(int).min; -x;`` 中的第 2 句会溢出，因为负数的范围比正整数的范围大 1（译者注：这样最小的负数就没有对应的正整数了） 。
@@ -452,24 +473,19 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
 
 Solidity 使用状态恢复异常来处理错误。这种异常将撤消对当前调用（及其所有子调用）中的状态所做的所有更改，并且还向调用者标记错误。
 
-如果异常在子调用发生，那么异常会自动冒泡到顶层（异常会重新抛出）。
-但是如果是在 ``send`` 和 低级别如：``call``, ``delegatecall`` 和 ``staticcall`` 的调用里发生异常时， 他们会返回 ``false`` （第一个返回值） 而不是冒泡异常。 
+如果异常在子调用发生，那么异常会自动冒泡到顶层（例如：异常会重新抛出），除非他们在 ``try/catch`` 语句中捕获了错误。
+但是如果是在 ``send`` 和 低级别如： ``call``, ``delegatecall`` 和 ``staticcall`` 的调用里发生异常时， 他们会返回 ``false`` （第一个返回值） 而不是冒泡异常。 
 
 .. warning::
     注意：根据 EVM 的设计，如果被调用的地址不存在，低级别函数 ``call``, ``delegatecall`` 和 ``staticcall`` 也或第一个返回值同样是 ``true``。
     如果需要，请在调用之前检查账号的存在性。
 
-外部调用的异常可以被 ``try``/``catch`` 捕获。
 
-Exceptions can contain data that is passed back to the caller.
-This data consists of a 4-byte selector and subsequent :ref:`ABI-encoded<abi>` data.
-The selector is computed in the same way as a function selector, i.e.,
-the first four bytes of the keccak256-hash of a function
-signature - in this case an error signature.
-
-Currently, Solidity supports two error signatures: ``Error(string)``
-and ``Panic(uint256)``. The first ("error") is used for "regular" error conditions
-while the second ("panic") is used for errors that should not be present in bug-free code.
+Exceptions can contain error data that is passed back to the caller
+in the form of :ref:`error instances <errors>`.
+The built-in errors ``Error(string)`` and ``Panic(uint256)`` are
+used by special functions, as explained below. ``Error`` is used for "regular" error conditions
+while ``Panic`` is used for errors that should not be present in bug-free code.
 
 
 
@@ -487,7 +503,7 @@ The same error is created by the compiler in certain situations as listed below.
 下列情况将会产生一个Panic异常：
 提供的错误码编号，用来指示Panic的类型。
 
-
+#. 0x00: Used for generic compiler inserted panics.
 #. 0x01: 如果你调用 ``assert`` 的参数（表达式）结果为 false 。
 #. 0x11: 在``unchecked { ... }``外，如果算术运算结果向上或向下溢出。
 #. 0x12; 如果你用零当除数做除法或模运算（例如 ``5 / 0`` 或 ``23 % 0`` ）。
@@ -499,13 +515,17 @@ The same error is created by the compiler in certain situations as listed below.
 #. 0x51: 如果你调用了零初始化内部函数类型变量。
 
 
- ``require`` 函数要么创建一个 ``Error(string)`` 类型的错误，或者没有错误数据的错误并且 ``require`` 函数应该用于确认条件有效性，例如输入变量，或合约状态变量是否满足条件，或验证外部合约调用返回的值。
+ ``require`` 函数可以没有错误提示数据的错误，也可以创建一个 ``Error(string)`` 类型的错误。 ``require`` 函数应该用于确认条件有效性，例如输入变量，或合约状态变量是否满足条件，或验证外部合约调用返回的值。
 
+.. note::
+
+    当前不可以使用混合使用 require 和自定义错误，而是需要使用  ``if (!condition) revert CustomError();``  。
 
 下列情况将会产生一个 ``Error(string)`` （或没有数据）的错误：
 
 
-#. 如果你调用 ``require`` 的参数（表达式）最终结果为 ``false`` 。
+#. 如果你调用 ``require(x)`` ，而 ``x`` 结果为 ``false`` 。
+#. 如果你使用 ``revert()`` 或者 ``revert("description")`` 。
 #. 如果你在不包含代码的合约上执行外部函数调用。
 #. 如果你通过合约接收以太币，而又没有 ``payable`` 修饰符的公有函数（包括构造函数和 fallback 函数）。
 #. 如果你的合约通过公有 getter 函数接收 Ether 。
@@ -524,7 +544,7 @@ The same error is created by the compiler in certain situations as listed below.
     If you do not provide a string argument to ``require``, it will revert
     with empty error data, not even including the error selector.
 
-::
+.. code-block:: solidity
 
     pragma solidity >=0.5.0 <0.9.0;
 
@@ -543,40 +563,70 @@ The same error is created by the compiler in certain situations as listed below.
 在内部， Solidity 对异常执行回退操作（指令 ``0xfd`` ），从而让 EVM 回退对状态所做的所有更改。回退的原因是不能继续安全地执行，因为没有实现预期的效果。
 因为我们想要保持交易的原子性，最安全的动作是回退所有的更改，并让整个交易（或至少调用）没有任何新影响。
 
-在这两种情况下，调用者都可以使用 ``try``/``catch`` 来应对此类失败，但是调用者中的更改将始终被还原。
+在这两种情况下，调用者都可以使用 ``try``/ ``catch`` 来应对此类失败，但是被调用函数的更改将始终被还原。
 
 .. note::
 
-  请注意， 在0.8.0 之前，Panic异常使用``invalid`` 指令，其会消耗了所有可用的 gas。
+  请注意， 在0.8.0 之前，Panic异常使用 ``invalid`` 指令，其会消耗了所有可用的 gas。
   使用 ``require`` 的异常，在 Metropolis 版本之前会消耗所有的 gas。
+
+
+.. _revert-statement:
 
 ``revert``
 ----------
 
-``revert`` 函数是另一个可以在代码块中处理异常的方法, 可以用来标记错误并回退当前的调用。
-``revert`` 调用中还可以包含有关错误信息的参数，这个信息会被返回给调用者，并且产生一个 ``Error(string)`` 错误。
+A direct revert can be triggered using the ``revert`` statement and the ``revert`` function.
 
+The ``revert`` statement takes a custom error as direct argument without parentheses:
 
-下边的例子展示了错误字符串如何使用 revert (等价于 require )  ：
+    revert CustomError(arg1, arg2);
 
-::
+For backwards-compatibility reasons, there is also the ``revert()`` function, which uses parentheses
+and accepts a string:
 
-    pragma solidity >=0.5.0 <0.9.0;
+    revert();
+    revert("description");
+
+The error data will be passed back to the caller and can be caught there.
+Using ``revert()`` causes a revert without any error data while ``revert("description")``
+will create an ``Error(string)`` error.
+
+Using a custom error instance will usually be much cheaper than a string description,
+because you can use the name of the error to describe it, which is encoded in only
+four bytes. A longer description can be supplied via NatSpec which does not incur
+any costs.
+
+The following example shows how to use an error string and a custom error instance
+together with ``revert`` and the equivalent ``require``:
+
+.. code-block:: solidity
 
     contract VendingMachine {
-        function buy(uint amount) payable {
+        address owner;
+        error Unauthorized();
+        function buy(uint amount) public payable {
             if (amount > msg.value / 2 ether)
                 revert("Not enough Ether provided.");
-            // 下边是等价的方法来做同样的检查：
+            // Alternative way to do it:
             require(
                 amount <= msg.value / 2 ether,
                 "Not enough Ether provided."
             );
-            // 执行购买操作
+            // Perform the purchase.
+        }
+        function withdraw() public {
+            if (msg.sender != owner)
+                revert Unauthorized();
+
+            payable(msg.sender).transfer(address(this).balance);
         }
     }
 
-如果直接提供错误原因字符串，则这两个语法是等效的，根据开发人员的偏好选择。
+
+The two ways ``if (!condition) revert(...);`` and ``require(condition, ...);`` are
+equivalent as long as the arguments to ``revert`` and ``require`` do not have side-effects,
+for example if they are just strings.
 
 
 .. note::
@@ -602,14 +652,15 @@ The same error is created by the compiler in certain situations as listed below.
 
 .. _try-catch:
 
-``try``/``catch``
+``try``/ ``catch``
 -----------------
 
 外部调用的失败，可以通过  try/catch 语句来捕获，如下：
 
-::
+.. code-block:: solidity
 
-    pragma solidity ^0.6.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity >=0.8.1;
 
     interface DataFeed { function getData(address token) external returns (uint value); }
 
@@ -625,6 +676,13 @@ The same error is created by the compiler in certain situations as listed below.
                 // This is executed in case
                 // revert was called inside getData
                 // and a reason string was provided.
+                errorCount++;
+                return (0, false);
+            }  catch Panic(uint /*errorCode*/) {
+                // This is executed in case of a panic,
+                // i.e. a serious error like division by zero
+                // or overflow. The error code can be used
+                // to determine the kind of error.
                 errorCount++;
                 return (0, false);
             } catch (bytes memory /*lowLevelData*/) {
@@ -644,22 +702,28 @@ matching the types returned by the external call. In case there was no error,
 these variables are assigned and the contract's execution continues inside the
 first success block. If the end of the success block is reached, execution continues after the ``catch`` blocks.
 
-Currently, Solidity supports different kinds of catch blocks depending on the
-type of error. If the error was caused by ``revert("reasonString")`` or
-``require(false, "reasonString")`` (or an internal error that causes such an
-exception), then the catch clause
-of the type ``catch Error(string memory reason)`` will be executed.
+Solidity supports different kinds of catch blocks depending on the
+type of error:
+
+- ``catch Error(string memory reason) { ... }``: This catch clause is executed if the error was caused by ``revert("reasonString")`` or
+  ``require(false, "reasonString")`` (or an internal error that causes such an
+  exception).
+
+- ``catch Panic(uint errorCode) { ... }``: If the error was caused by a panic, i.e. by a failing ``assert``, division by zero,
+  invalid array access, arithmetic overflow and others, this catch clause will be run.
+
+- ``catch (bytes memory lowLevelData) { ... }``: This clause is executed if the error signature
+  does not match any other clause, if there was an error while decoding the error
+  message, or
+  if no error data was provided with the exception.
+  The declared variable provides access to the low-level error data in that case.
+
+- ``catch { ... }``: If you are not interested in the error data, you can just use
+  ``catch { ... }`` (even as the only catch clause) instead of the previous clause.
+
 
 It is planned to support other types of error data in the future.
-The string ``Error`` is currently parsed as is and is not treated as an identifier.
-
-The clause ``catch (bytes memory lowLevelData)`` is executed if the error signature
-does not match any other clause, if there was an error while decoding the error
-message, or if no error data was provided with the exception.
-The declared variable provides access to the low-level error data in that case.
-
-If you are not interested in the error data, you can just use
-``catch { ... }`` (even as the only catch clause).
+The strings ``Error`` and ``Panic`` are currently parsed as is and are not treated as identifiers.
 
 In order to catch all error cases, you have to have at least the clause
 ``catch { ...}`` or the clause ``catch (bytes memory lowLevelData) { ... }``.
@@ -691,6 +755,6 @@ in scope in the block that follows.
     The error might have happened deeper down in the call chain and the
     called contract just forwarded it. Also, it could be due to an
     out-of-gas situation and not a deliberate error condition:
-    The caller always retains 63/64th of the gas in a call and thus
+    The caller always retains at least 1/64th of the gas in a call and thus
     even if the called contract goes out of gas, the caller still
     has some gas left.
