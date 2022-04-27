@@ -84,7 +84,7 @@ Solidity还支持 ``try``/ ``catch`` 语句形式的异常处理，但仅用于 
         function callFeed() public { feed.info{value: 10, gas: 800}(); }
     }
 
-``payable`` 修饰符要用于修饰 ``info`` 函数，否则，`value` 选项将不可用。
+``payable`` 修饰符要用于修饰 ``info`` 函数，否则， ``value`` 选项将不可用。
 
 .. warning::
   注意 ``feed.info{value: 10, gas: 800}`` 仅（局部地）设置了与函数调用一起发送的 ``Wei`` 值和 ``gas`` 的数量，只有最后的小括号才执行了真正的调用。
@@ -112,7 +112,7 @@ Solidity还支持 ``try``/ ``catch`` 语句形式的异常处理，但仅用于 
     一个建议的函数写法是，例如，在合约中状态变量进行各种变化后再调用外部函数，这样，你的合约就不会轻易被滥用的重入攻击 (reentrancy) 所影响
 
 .. note::
-    在Solidity 0.6.2之前，建议指定余额和gas的方法是使用f.value（x）.gas（g）()。
+    在Solidity 0.6.2之前，建议指定余额和gas的方法是使用 ``f.value(x).gas(g)()`` 。
     这个方式在0.6.2时被弃用，在Solidity 0.7.0中开始不再允许使用。
 
 
@@ -241,7 +241,7 @@ Solidity还支持 ``try``/ ``catch`` 语句形式的异常处理，但仅用于 
 
 .. warning::
 
-    使用create2 创建合约还有一些特别之处。 合约销毁后可以在同一地址重新创建。不过，即使创建字节码（creation bytecode）相同（这是要求，因为否则地址会发生变化），该新创建的合约也可能有不同的部署字节码（deployed bytecode）。 
+    使用 create2 创建合约还有一些特别之处。 合约销毁后可以在同一地址重新创建。不过，即使创建字节码（creation bytecode）相同（这是要求，因为否则地址会发生变化），该新创建的合约也可能有不同的部署字节码（deployed bytecode）。 
     这是因为构造函数可以使用两次创建合约之间可能已更改的外部状态，并在存储合约时将其合并到部署字节码中。
 
 
@@ -300,7 +300,7 @@ Solidity 内部允许元组 (tuple) 类型，也就是一个在编译时元素�
 赋值语义对于像数组和结构体(包括 ``bytes`` 和 ``string``) 这样的非值类型来说会有些复杂。
 
 
-参考 :ref:`Data location and assignment behaviour <data-location-assignment>` for details.
+参考 :ref:`数据位置及赋值行为 <data-location-assignment>` 了解更多 。
 
 在下面的示例中, 对 ``g(x)`` 的调用对 ``x`` 没有影响, 因为它在内存中创建了存储值独立副本。但是, ``h(x)`` 成功修改 ``x`` , 因为只传递引用而不传递副本。
 
@@ -445,7 +445,7 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
 如果在非检查模式代码块中使用，将不会出现错误:
 
 
-``++``, ``--``, ``+``, binary ``-``, unary ``-``, ``*``, ``/``, ``%``, ``**``
+``++``, ``--``, ``+``, 减 ``-``,  负 ``-``, ``*``, ``/``, ``%``, ``**``
 
 ``+=``, ``-=``, ``*=``, ``/=``, ``%=``
 
@@ -481,31 +481,29 @@ Solidity 使用状态恢复异常来处理错误。这种异常将撤消对当�
     如果需要，请在调用之前检查账号的存在性。
 
 
-Exceptions can contain error data that is passed back to the caller
-in the form of :ref:`error instances <errors>`.
-The built-in errors ``Error(string)`` and ``Panic(uint256)`` are
-used by special functions, as explained below. ``Error`` is used for "regular" error conditions
-while ``Panic`` is used for errors that should not be present in bug-free code.
+异常可以包含错误数据，以 :ref:`error 示例 <errors>` 的形式传回给调用者。
+内置的错误 ``Error(string)`` 和 ``Panic(uint256)`` 被作为特殊函数使用，下面将解释。
+``Error`` 用于 "常规" 错误条件，而 ``Panic`` 用于在（无bug）代码中不应该出现的错误。
 
 
 
-用``assert``检查异常(Panic) 和 ``require`` 检查错误(Error)
+用 ``assert`` 检查异常(Panic) 和 ``require`` 检查错误(Error)
 ----------------------------------------------------------
 
 函数 ``assert`` 和 ``require`` 可用于检查条件并在条件不满足时抛出异常。
 
-The ``assert`` function creates an error of type ``Panic(uint256)``.
-The same error is created by the compiler in certain situations as listed below.
+``assert`` 函数会创建一个 ``Panic(uint256)`` 类型的错误。
+同样的错误在以下列出的特定情形会被编译器创建。
 
-``assert`` 函数只能用于测试内部错误，检查不变量，正常的函数代码永远不会产生Panic, 甚至是基于一个无效的外部输入时。
+``assert`` 函数应该只用于测试内部错误，检查不变量，正常的函数代码永远不会产生Panic, 甚至是基于一个无效的外部输入时。
 如果发生了，那就说明出现了一个需要你修复的 bug。如果使用得当，语言分析工具可以识别出那些会导致 Panic 的 ``assert`` 条件和函数调用。
 
 下列情况将会产生一个Panic异常：
-提供的错误码编号，用来指示Panic的类型。
+错误数据会提供的错误码编号，用来指示Panic的类型：
 
-#. 0x00: Used for generic compiler inserted panics.
+#. 0x00: 用于常规编译器插入的Panic。
 #. 0x01: 如果你调用 ``assert`` 的参数（表达式）结果为 false 。
-#. 0x11: 在``unchecked { ... }``外，如果算术运算结果向上或向下溢出。
+#. 0x11: 在 ``unchecked { ... }``外，如果算术运算结果向上或向下溢出。
 #. 0x12; 如果你用零当除数做除法或模运算（例如 ``5 / 0`` 或 ``23 % 0`` ）。
 #. 0x21: 如果你将一个太大的数或负数值转换为一个枚举类型。
 #. 0x22: 如果你访问一个没有正确编码的存储byte数组.
@@ -515,13 +513,13 @@ The same error is created by the compiler in certain situations as listed below.
 #. 0x51: 如果你调用了零初始化内部函数类型变量。
 
 
- ``require`` 函数可以没有错误提示数据的错误，也可以创建一个 ``Error(string)`` 类型的错误。 ``require`` 函数应该用于确认条件有效性，例如输入变量，或合约状态变量是否满足条件，或验证外部合约调用返回的值。
+ ``require`` 函数可以创建无错误提示的错误，也可以创建一个 ``Error(string)`` 类型的错误。 ``require`` 函数应该用于确认条件有效性，例如输入变量，或合约状态变量是否满足条件，或验证外部合约调用返回的值。
 
 .. note::
 
     当前不可以使用混合使用 require 和自定义错误，而是需要使用  ``if (!condition) revert CustomError();``  。
 
-下列情况将会产生一个 ``Error(string)`` （或没有数据）的错误：
+下列情况将会产生一个 ``Error(string)`` （或无错误提示）的错误：
 
 
 #. 如果你调用 ``require(x)`` ，而 ``x`` 结果为 ``false`` 。
@@ -537,15 +535,17 @@ The same error is created by the compiler in certain situations as listed below.
 #. 如果你使用 ``new`` 关键字创建合约，但合约创建 :ref:`没有正确结束<creating-contracts>` 。
 
 
-可以给 ``require`` 提供一个消息字符串，而 ``assert`` 不行。
-在下例中，你可以看到如何轻松使用``require`` 检查输入条件以及如何使用 ``assert`` 检查内部错误.
+你可以选择给 ``require`` 提供一个消息字符串，但 ``assert`` 不行。
 
 .. note::
-    If you do not provide a string argument to ``require``, it will revert
-    with empty error data, not even including the error selector.
+    
+    如果你没有为 ``require`` 提供一个字符串参数，它会用空错误数据进行 revert， 甚至不包括错误选择器。
+
+在下例中，你可以看到如何轻松使用 ``require`` 检查输入条件以及如何使用 ``assert`` 检查内部错误.
 
 .. code-block:: solidity
 
+    // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.5.0 <0.9.0;
 
     contract Sharer {
@@ -553,14 +553,14 @@ The same error is created by the compiler in certain situations as listed below.
             require(msg.value % 2 == 0, "Even value required.");
             uint balanceBeforeTransfer = this.balance;
             addr.transfer(msg.value / 2);
-			//由于转移函数在失败时抛出异常并且不能在这里回调，因此我们应该没有办法仍然有一半的钱。
+			// 由于转账函数在失败时抛出异常并且不会调用到以下代码，因此我们应该没有办法检查仍然有一半的钱。
             assert(this.balance == balanceBeforeTransfer - msg.value / 2);
             return this.balance;
         }
     }
 
 
-在内部， Solidity 对异常执行回退操作（指令 ``0xfd`` ），从而让 EVM 回退对状态所做的所有更改。回退的原因是不能继续安全地执行，因为没有实现预期的效果。
+在内部， Solidity 对异常执行回退操作（指令 ``0xfd`` ），从而让 EVM 回退对状态所做的所有更改。回退的原因是无法安全地继续执行，因为无法达到预期的结果。
 因为我们想要保持交易的原子性，最安全的动作是回退所有的更改，并让整个交易（或至少调用）没有任何新影响。
 
 在这两种情况下，调用者都可以使用 ``try``/ ``catch`` 来应对此类失败，但是被调用函数的更改将始终被还原。
@@ -576,29 +576,24 @@ The same error is created by the compiler in certain situations as listed below.
 ``revert``
 ----------
 
-A direct revert can be triggered using the ``revert`` statement and the ``revert`` function.
+可以使用 ``revert`` 语句和 ``revert`` 函数来直接触发回退。
 
-The ``revert`` statement takes a custom error as direct argument without parentheses:
+``revert`` 语句将一个自定义的错误作为直接参数，没有括号：
 
     revert CustomError(arg1, arg2);
 
-For backwards-compatibility reasons, there is also the ``revert()`` function, which uses parentheses
-and accepts a string:
+由于向后兼容，还有一个 ``revert()``函数，它使用圆括号接受一个字符串：
 
     revert();
     revert("description");
 
-The error data will be passed back to the caller and can be caught there.
-Using ``revert()`` causes a revert without any error data while ``revert("description")``
-will create an ``Error(string)`` error.
+错误数据将被传回给调用者，以便在那里捕获到错误数据。
+使用 ``revert()`` 会触发一个没有任何错误数据的回退，而 ``revert("description")`` 会产生一个 ``Error(string)`` 错误。
 
-Using a custom error instance will usually be much cheaper than a string description,
-because you can use the name of the error to describe it, which is encoded in only
-four bytes. A longer description can be supplied via NatSpec which does not incur
-any costs.
 
-The following example shows how to use an error string and a custom error instance
-together with ``revert`` and the equivalent ``require``:
+使用一个自定义的错误实例通常会比字符串描述便宜得多。因为你可以使用错误名来描述它，它只被编码为四个字节。更长的描述可以通过NatSpec提供，这不会产生任何费用。
+
+下面的例子显示了如何使用一个错误字符串和一个自定义错误实例，他们和 ``revert`` 或相应的 ``require`` 一起使用。
 
 .. code-block:: solidity
 
@@ -608,12 +603,13 @@ together with ``revert`` and the equivalent ``require``:
         function buy(uint amount) public payable {
             if (amount > msg.value / 2 ether)
                 revert("Not enough Ether provided.");
-            // Alternative way to do it:
+            // 另一个可选的方式:
             require(
                 amount <= msg.value / 2 ether,
                 "Not enough Ether provided."
             );
-            // Perform the purchase.
+
+            // 以下执行购买逻辑
         }
         function withdraw() public {
             if (msg.sender != owner)
@@ -624,18 +620,16 @@ together with ``revert`` and the equivalent ``require``:
     }
 
 
-The two ways ``if (!condition) revert(...);`` and ``require(condition, ...);`` are
-equivalent as long as the arguments to ``revert`` and ``require`` do not have side-effects,
-for example if they are just strings.
+只要参数没有额外的附加效果，使用 ``if (!condition) revert(...);`` 和 ``require(condition, ...);`` 是等价的，例如当参数是字符串的情况。
 
 
 .. note::
     ``require`` 是一个像其他函数一样可被执行的函数。
-    意味着，所有的参数在函数被执行之前就都会被计算（执行）。
+    意味着，所有的参数在函数被执行之前就都会被执行。
     尤其，在 ``require(condition, f())`` 里，函数 ``f`` 会被执行，即便 ``condition`` 为 True .
 
-这里提供的字符串将经过 :ref:`ABI 编码 <ABI>` 如果它调用 ``Error(string)`` 函数。
-在上边的例子里，``revert("Not enough Ether provided.");`` 会产生如下的十六进制错误返回值：
+如果是调用 ``Error(string)`` 函数，这里提供的字符串将经过 :ref:`ABI 编码 <ABI>` 。
+在上边的例子里， ``revert("Not enough Ether provided.");`` 会产生如下的十六进制错误返回值：
 
 .. code::
 
@@ -644,10 +638,10 @@ for example if they are just strings.
     0x000000000000000000000000000000000000000000000000000000000000001a // 字符串长度（26）
     0x4e6f7420656e6f7567682045746865722070726f76696465642e000000000000 // 字符串数据（"Not enough Ether provided." 的 ASCII 编码，26字节）
 
-提示信息可以通过 ``try``/``catch``（下面介绍）来获取到。
+提示信息可以通过 ``try``/ ``catch``（下面介绍）来获取到。
 
 .. note::
-    ``revert()``之前有一个同样用法的``throw``，它在0.4.13版本弃用，在0.5.0移除。
+    ``revert()``之前有一个同样用法的 ``throw``，它在0.4.13版本弃用，在0.5.0移除。
 
 
 .. _try-catch:
@@ -655,7 +649,7 @@ for example if they are just strings.
 ``try``/ ``catch``
 -----------------
 
-外部调用的失败，可以通过  try/catch 语句来捕获，如下：
+外部调用的失败，可以通过  try/catch 语句来捕获，例如：
 
 .. code-block:: solidity
 
@@ -693,68 +687,47 @@ for example if they are just strings.
         }
     }
 
-The ``try`` keyword has to be followed by an expression representing an external function call
-or a contract creation (``new ContractName()``).
-Errors inside the expression are not caught (for example if it is a complex expression
-that also involves internal function calls), only a revert happening inside the external
-call itself. The ``returns`` part (which is optional) that follows declares return variables
-matching the types returned by the external call. In case there was no error,
-these variables are assigned and the contract's execution continues inside the
-first success block. If the end of the success block is reached, execution continues after the ``catch`` blocks.
+``try`` 关键词后面必须有一个表达式，代表外部函数调用或合约创建（ ``new ContractName()``）。
 
-Solidity supports different kinds of catch blocks depending on the
-type of error:
+在表达式上的错误不会被捕获（例如，如果它是一个复杂的表达式，还涉及内部函数调用），只有外部调用本身发生的revert 可以捕获。
+接下来的 ``returns`` 部分（是可选的）声明了与外部调用返回的类型相匹配的返回变量。
+在没有错误的情况下，这些变量被赋值，合约将继续执行第一个成功块内代码。
+如果到达成功块的末尾，则在 ``catch`` 块之后继续执行。
 
-- ``catch Error(string memory reason) { ... }``: This catch clause is executed if the error was caused by ``revert("reasonString")`` or
-  ``require(false, "reasonString")`` (or an internal error that causes such an
-  exception).
-
-- ``catch Panic(uint errorCode) { ... }``: If the error was caused by a panic, i.e. by a failing ``assert``, division by zero,
-  invalid array access, arithmetic overflow and others, this catch clause will be run.
-
-- ``catch (bytes memory lowLevelData) { ... }``: This clause is executed if the error signature
-  does not match any other clause, if there was an error while decoding the error
-  message, or
-  if no error data was provided with the exception.
-  The declared variable provides access to the low-level error data in that case.
-
-- ``catch { ... }``: If you are not interested in the error data, you can just use
-  ``catch { ... }`` (even as the only catch clause) instead of the previous clause.
+Solidity 根据错误的类型，支持不同种类的捕获代码块：
 
 
-It is planned to support other types of error data in the future.
-The strings ``Error`` and ``Panic`` are currently parsed as is and are not treated as identifiers.
+- ``catch Error(string memory reason) { ... }``: 如果错误是由 ``revert("reasonString")`` 或 ``require(false, "reasonString")`` （或导致这种异常的内部错误）引起的，则执行这个catch子句。
 
-In order to catch all error cases, you have to have at least the clause
-``catch { ...}`` or the clause ``catch (bytes memory lowLevelData) { ... }``.
+- ``catch Panic(uint errorCode) { ... }``: 如果错误是由 panic 引起的（如： ``assert`` 失败，除以0，无效的数组访问，算术溢出等），将执行这个catch子句。
 
-The variables declared in the ``returns`` and the ``catch`` clause are only
-in scope in the block that follows.
+- ``catch (bytes memory lowLevelData) { ... }``: 如果错误签名不符合任何其他子句，如果在解码错误信息时出现了错误，或者如果异常没有一起提供错误数据。在这种情况下，子句声明的变量提供了对低级错误数据的访问。
+
+- ``catch { ... }``: 如果你对错误数据不感兴趣，你可以直接使用 ``catch { ... }`` (甚至是作为唯一的catch子句) 而不是前面几个catch子句。
+
+
+有计划在未来支持其他类型的错误数据。
+``Error``和 ``Panic`` 字符串目前是按原样解析的，不作为标识符处理。
+
+为了捕捉所有的错误情况，你至少要有子句 ``catch { ... }``或 ``catch (bytes memory lowLevelData) { ... }``.
+
+在 ``returns`` 和 ``catch`` 子句中声明的变量只在后面的块的范围内有效。
+
 
 .. note::
 
-    If an error happens during the decoding of the return data
-    inside a try/catch-statement, this causes an exception in the currently
-    executing contract and because of that, it is not caught in the catch clause.
-    If there is an error during decoding of ``catch Error(string memory reason)``
-    and there is a low-level catch clause, this error is caught there.
+    如果在 try/catch 语句内部返回的数据解码过程中发生错误，这将导致当前执行的合约出现异常，如此，它不会在catch子句中被捕获到。
+    如果在 ``catch Error(string memory reason)`` 的解码过程中出现错误，并且有一个低级的catch子句，那么这个错误就会在低级catch子句被捕获。
+
+.. note::
+    
+    如果执行到一个catch子句，那么外部调用的状态改变已经被回退了。
+    如果执行到了成功块，那么外部调用的状态改变是有效的。
+    如果状态改变已经被回退，那么要么在catch块中继续执行，要么是try/catch语句的执行本身被回退（例如由于上面提到的解码失败或由于没有提供低级别的catch子句时）。
 
 .. note::
 
-    If execution reaches a catch-block, then the state-changing effects of
-    the external call have been reverted. If execution reaches
-    the success block, the effects were not reverted.
-    If the effects have been reverted, then execution either continues
-    in a catch block or the execution of the try/catch statement itself
-    reverts (for example due to decoding failures as noted above or
-    due to not providing a low-level catch clause).
-
-.. note::
-    The reason behind a failed call can be manifold. Do not assume that
-    the error message is coming directly from the called contract:
-    The error might have happened deeper down in the call chain and the
-    called contract just forwarded it. Also, it could be due to an
-    out-of-gas situation and not a deliberate error condition:
-    The caller always retains at least 1/64th of the gas in a call and thus
-    even if the called contract goes out of gas, the caller still
-    has some gas left.
+    调用失败背后的原因可能是多方面的。请不要认为错误信息是直接来自被调用的合约。
+    错误可能发生在调用链的更深处，而被调用的合约只是转发了（冒泡）错误。
+    另外，这可能是由于 out-of-gas 情况，而不是一个逻辑错误状况：
+    调用者总是在调用中保留至少1/64的gas，这样即使被调合约gas用完，调用方仍有一些gas预留（处理剩余逻辑）。
