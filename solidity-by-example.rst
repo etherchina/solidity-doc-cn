@@ -116,7 +116,7 @@
                 // 若被委托者已经投过票了，直接增加得票数
                 proposals[delegate_.vote].voteCount += sender.weight;
             } else {
-                // 若被委托者还没投票，增加委托者的权重
+                // 若被委托者还没投票，增加被委托者的权重
                 delegate_.weight += sender.weight;
             }
         }
