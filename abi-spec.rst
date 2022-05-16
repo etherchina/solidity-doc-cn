@@ -13,7 +13,7 @@
 在 |ethereum| 生态系统中， |ABI| 是从区块链外部与合约进行交互以及合约与合约间进行交互的一种标准方式。
 数据会根据其类型按照这份手册中说明的方法进行编码。这种编码并不是可以自描述的，而是需要一种特定的概要（schema）来进行解码。
 
-我们假定合约函数的接口都是强类型的，且在编译时是可知的和静态的；不提供自我检查机制。我们假定在编译时，所有合约要调用的其他合约接口定义都是可用的。
+我们假定合约函数的接口都是强类型的，且在编译时可确定的和静态的；不提供自我检查机制。同时假定在编译时，所有合约要调用的其他合约接口定义都是可用的。
 
 这份手册并不针对那些动态合约接口或者仅在运行时才可获知的合约接口。如果这种场景变得很重要，你可以使用 |ethereum| 生态系统中其他更合适的基础设施来处理它们。
 
@@ -25,7 +25,7 @@
 
 一个函数调用数据的前 4 字节，指定了要调用的函数。这就是某个函数签名的 Keccak 哈希的前 4 字节（高位在左的大端序）
 （译注：这里的“高位在左的大端序“，指最高位字节存储在最低位地址上的一种串行化编码方式，即高位字节在左）。
-这种签名被定义为基础原型的规范表达，基础原型即是函数名称加上由括号括起来的参数类型列表，参数类型间由一个逗号分隔开，且没有空格。
+函数签名被定义为基础原型的规范表达，而基础原型是函数名称加上由括号括起来的参数类型列表，参数类型间由一个逗号分隔开，且没有空格。
 
 .. note::
     函数的返回类型并不是这个签名的一部分。在 :ref:`Solidity 的函数重载 <overload-function>` 中，返回值并没有被考虑。这是为了使对函数调用的解析保持上下文无关。
@@ -34,36 +34,36 @@
 参数编码
 =================================
 
-从第5字节开始是被编码的参数。这种编码也被用在其他地方，比如，返回值和事件的参数也会被用同样的方式进行编码，而用来指定函数的4个字节则不需要再进行编码。
+从第5字节开始是被编码的参数。这种编码方式也被用在其他地方，比如，返回值和事件的参数也会被用同样的方式进行编码，而用来指定函数的4个字节则不需要再进行编码。
 
-类型
+类型编码
 =============
 
 以下是基础类型：
 
-- ``uint<M>``：``M`` 位的无符号整数，``0 < M <= 256``、``M % 8 == 0``。例如：``uint32``，``uint8``，``uint256``。
+- ``uint<M>``： ``M`` 位的无符号整数， ``0 < M <= 256``、 ``M % 8 == 0``。例如： ``uint32``， ``uint8``， ``uint256``。
 
-- ``int<M>``：以 2 的补码作为符号的 ``M`` 位整数，``0 < M <= 256``、``M % 8 == 0``。
+- ``int<M>``：以 2 的补码作为符号的 ``M`` 位整数， ``0 < M <= 256``、 ``M % 8 == 0``。
 
 - ``address``：除了字面上的意思和语言类型的区别以外，等价于 ``uint160``。在计算和 |function_selector| 中，通常使用 ``address``。
 
-- ``uint``、``int``：``uint256``、``int256`` 各自的同义词。在计算和 |function_selector| 中，通常使用 ``uint256`` 和 ``int256``。
+- ``uint``、 ``int``： ``uint256``、 ``int256`` 各自的同义词。在计算和 |function_selector| 中，通常使用 ``uint256`` 和 ``int256``。
 
 - ``bool``：等价于 ``uint8``，取值限定为 0 或 1 。在计算和 |function_selector| 中，通常使用 ``bool``。
 
-- ``fixed<M>x<N>``：``M`` 位的有符号的固定小数位的十进制数字 ``8 <= M <= 256``、``M % 8 == 0``、且 ``0 < N <= 80``。其值 ``v`` 即是 ``v / (10 ** N)``。（也就是说，这种类型是由 M 位的二进制数据所保存的，有 N 位小数的十进制数值。译者注。）
+- ``fixed<M>x<N>``： ``M`` 位的有符号的固定小数位的十进制数字 ``8 <= M <= 256``、 ``M % 8 == 0``、且 ``0 < N <= 80``。其值 ``v`` 即是 ``v / (10 ** N)``。（也就是说，这种类型是由 M 位的二进制数据所保存的，有 N 位小数的十进制数值。译者注。）
 
 - ``ufixed<M>x<N>``：无符号的 ``fixed<M>x<N>``。
 
-- ``fixed``、``ufixed``：``fixed128x18``、``ufixed128x18`` 各自的同义词。在计算和 |function_selector| 中，通常使用 ``fixed128x18`` 和 ``ufixed128x18``。
+- ``fixed``、 ``ufixed``： ``fixed128x18``、 ``ufixed128x18`` 各自的同义词。在计算和 |function_selector| 中，通常使用 ``fixed128x18`` 和 ``ufixed128x18``。
 
-- ``bytes<M>``：``M`` 字节的二进制类型，``0 < M <= 32``。
+- ``bytes<M>``： ``M`` 字节的二进制类型， ``0 < M <= 32``。
 
 - ``function``：一个地址（20 字节）之后紧跟一个 |function_selector| （4 字节）。编码之后等价于 ``bytes24``。
 
 以下是定长数组类型：
 
-- ``<type>[M]``：有 ``M`` 个元素的定长数组，``M >= 0``，数组元素为给定类型。
+- ``<type>[M]``：有 ``M`` 个元素的定长数组， ``M >= 0``，数组元素为给定类型。
 
   .. note::
   
@@ -79,19 +79,16 @@
 
 可以将若干类型放到一对括号中，用逗号分隔开，以此来构成一个 |tuple|：
 
-- ``(T1,T2,...,Tn)``：由 ``T1``，...，``Tn``，``n >= 0`` 构成的 |tuple|。
+- ``(T1,T2,...,Tn)``：由 ``T1``，...， ``Tn``， ``n >= 0`` 构成的 |tuple|。
 
 用 |tuple| 构成 |tuple|、用 |tuple| 构成数组等等也是可能的。另外也可以构成“零元组（zero-tuples）”，就是 ``n = 0`` 的情况。
 
 
-Mapping 到 ABI 类型
+Solidity 到 ABI 类型 映射
 -----------------------------
 
-Solidity supports all the types presented above with the same names with the
-exception of tuples. On the other hand, some Solidity types are not supported
-by the ABI. The following table shows on the left column Solidity types that
-are not part of the ABI, and on the right column the ABI types that represent
-them.
+Solidity 支持上面介绍的所有同名称的类型，除元组外。
+另一方面，一些 Solidity 类型不被 ABI 支持。下表在左栏显示了不支持 ABI 的 Solidity 类型，以及在右栏显示可以代表它们的 ABI 类型。
 
 +-------------------------------+-----------------------------------------------------------------------------+
 |      Solidity                 |                                           ABI                               |
@@ -109,34 +106,20 @@ them.
 +-------------------------------+-----------------------------------------------------------------------------+
 
 .. warning::
-    Before version ``0.8.0`` enums could have more than 256 members and were represented by the
-    smallest integer type just big enough to hold the value of any member.
+    在 ``0.8.0`` 版本之前，枚举（enums） 可以多余 256 个成员并且可以使用最小可保存的整型来保存他们。
 
 编码的设计准则
 ================================
 
-The encoding is designed to have the following properties, which are especially useful if some arguments are nested arrays:
+我们现在来正式讲述编码，它具有如下属性，如果参数是嵌套的数组，这些属性非常有用：
 
-  1. The number of reads necessary to access a value is at most the depth of the value
-  inside the argument array structure, i.e. four reads are needed to retrieve ``a_i[k][l][r]``. In a
-  previous version of the ABI, the number of reads scaled linearly with the total number of dynamic
-  parameters in the worst case.
+  1. 读取的次数取决于参数数组结构中的最大深度；也就是说，要取得 ``a_i[k][l][r]`` 需要读取 4 次。在先前的ABI版本中，在最糟的情况下，读取的次数会随着动态参数的总数而线性地增长。
 
-  2. The data of a variable or array element is not interleaved with other data and it is
-  relocatable, i.e. it only uses relative "addresses".
-
+  2. 变量或数组元素的数据不与其他数据交错(不会被插入其他的数据，)，并且它是可以再定位的。它们只会使用相对的“地址”。
 
 
 编码的形式化说明
 ====================================
-
-我们现在来正式讲述编码，它具有如下属性，如果参数是嵌套的数组，这些属性非常有用：
-
-属性：
-
-  1、读取的次数取决于参数数组结构中的最大深度；也就是说，要取得 ``a_i[k][l][r]`` 需要读取 4 次。在先前的ABI版本中，在最糟的情况下，读取的次数会随着动态参数的总数而线性地增长。
-
-  2、一个变量或数组元素的数据，不会被插入其他的数据，并且是可以再定位的；也就是说，它们只会使用相对的“地址”。
 
 我们需要区分静态和动态类型。静态类型会被直接编码，动态类型则会在当前数据块之后单独分配的位置被编码。
 
@@ -145,14 +128,14 @@ The encoding is designed to have the following properties, which are especially 
 * ``bytes``
 * ``string``
 * 任意类型 `T` 的变长数组 ``T[]``
-* 任意动态类型 `T` 的定长数组 ``T[k]`` （``k >= 0``）
-* 由动态的 ``Ti`` （``1 <= i <= k``）构成的 |tuple| ``(T1,...,Tk)``
+* 任意动态类型 `T` 的定长数组 ``T[k]`` （ ``k >= 0``）
+* 由动态的 ``Ti`` （ ``1 <= i <= k``）构成的 |tuple| ``(T1,...,Tk)``
 
 所有其他类型都被称为“静态”。
 
-**定义：** ``len(a)`` 是一个二进制字符串 ``a`` 的字节长度。``len(a)`` 的类型被呈现为 ``uint256``。
+**定义：** ``len(a)`` 是一个二进制字符串 ``a`` 的字节长度。 ``len(a)`` 的类型被呈现为 ``uint256``。
 
-我们把实际的编码 ``enc`` 定义为一个由ABI类型到二进制字符串的值的映射；因而，当且仅当 ``X`` 的类型是动态的，``len(enc(X))`` （即 ``X`` 经编码后的实际长度，译者注）才会依赖于 ``X`` 的值。
+我们把实际的编码 ``enc`` 定义为一个由ABI类型到二进制字符串的值的映射；因而，当且仅当 ``X`` 的类型是动态的， ``len(enc(X))`` （即 ``X`` 经编码后的实际长度，译者注）才会依赖于 ``X`` 的值。
 
 **定义：** 对任意ABI值 ``X``，我们根据 ``X`` 的实际类型递归地定义 ``enc(X)``。
 
@@ -160,8 +143,8 @@ The encoding is designed to have the following properties, which are especially 
 
   ``enc(X) = head(X(1)) ... head(X(k)) tail(X(1)) ... tail(X(k))``
 
-  这里，``X = (X(1), ..., X(k))``，并且
-  当 ``Ti`` 为静态类型时，``head`` 和 ``tail`` 被定义为
+  这里， ``X = (X(1), ..., X(k))``，并且
+  当 ``Ti`` 为静态类型时， ``head`` 和 ``tail`` 被定义为
 
     ``head(X(i)) = enc(X(i))`` and ``tail(X(i)) = ""`` （空字符串）
 
@@ -178,7 +161,7 @@ The encoding is designed to have the following properties, which are especially 
 
   即是说，它就像是个由相同类型的 ``k`` 个元素组成的 |tuple| 那样被编码的。
 
-- ``T[]`` 当 ``X`` 有 ``k`` 个元素（``k`` 被呈现为类型 ``uint256``）：
+- ``T[]`` 当 ``X`` 有 ``k`` 个元素（ ``k`` 被呈现为类型 ``uint256``）：
 
   ``enc(X) = enc(k) enc([X[1], ..., X[k]])``
 
@@ -190,19 +173,19 @@ The encoding is designed to have the following properties, which are especially 
 
 - ``string``：
 
-  ``enc(X) = enc(enc_utf8(X))``，即是说，``X`` 被 UFT-8 编码，且在后续编码中将这个值解释为 ``bytes`` 类型。注意，在随后的编码中使用的长度是其 UFT-8 编码的字符串的字节数，而不是其字符数。
+  ``enc(X) = enc(enc_utf8(X))``，即是说， ``X`` 被 UFT-8 编码，且在后续编码中将这个值解释为 ``bytes`` 类型。注意，在随后的编码中使用的长度是其 UFT-8 编码的字符串的字节数，而不是其字符数。
 
-- ``uint<M>``：``enc(X)`` 是在 ``X`` 的大端序编码的高位（左侧）补充若干 0 值字节以使其长度成为 32 字节。
+- ``uint<M>``： ``enc(X)`` 是在 ``X`` 的大端序编码的高位（左侧）补充若干 0 值字节以使其长度成为 32 字节。
 - ``address``：与 ``uint160`` 的情况相同。
-- ``int<M>``：``enc(X)`` 是在 ``X`` 的大端序的 2 的补码编码的高位（左侧）添加若干字节数据以使其长度成为 32 字节；对于负数，添加值为 ``0xff`` （即 8 位全为 1，译者注）的字节数据，对于非负数，添加 0 值（即 8 位全为 0，译者注）字节数据。
-- ``bool``：与 ``uint8`` 的情况相同，``1`` 用来表示 ``true``，``0`` 表示 ``false``。
-- ``fixed<M>x<N>``：``enc(X)`` 就是 ``enc(X * 10**N)``，其中 ``X * 10**N`` 可以理解为 ``int256``。
+- ``int<M>``： ``enc(X)`` 是在 ``X`` 的大端序的 2 的补码编码的高位（左侧）添加若干字节数据以使其长度成为 32 字节；对于负数，添加值为 ``0xff`` （即 8 位全为 1，译者注）的字节数据，对于非负数，添加 0 值（即 8 位全为 0，译者注）字节数据。
+- ``bool``：与 ``uint8`` 的情况相同， ``1`` 用来表示 ``true``， ``0`` 表示 ``false``。
+- ``fixed<M>x<N>``： ``enc(X)`` 就是 ``enc(X * 10**N)``，其中 ``X * 10**N`` 可以理解为 ``int256``。
 - ``fixed``：与 ``fixed128x18`` 的情况相同。
-- ``ufixed<M>x<N>``：``enc(X)`` 就是 ``enc(X * 10**N)``，其中 ``X * 10**N`` 可以理解为 ``uint256``。
+- ``ufixed<M>x<N>``： ``enc(X)`` 就是 ``enc(X * 10**N)``，其中 ``X * 10**N`` 可以理解为 ``uint256``。
 - ``ufixed``：与 ``ufixed128x18`` 的情况相同。
-- ``bytes<M>``：``enc(X)`` 就是 ``X`` 的字节序列加上为使长度成为 32 字节而添加的若干 0 值字节。
+- ``bytes<M>``： ``enc(X)`` 就是 ``X`` 的字节序列加上为使长度成为 32 字节而添加的若干 0 值字节。
 
-注意，对于任意的 ``X``，``len(enc(X))`` 都是 32 的倍数。
+注意，对于任意的 ``X``， ``len(enc(X))`` 都是 32 的倍数。
 
 |function_selector| 和参数编码
 =======================================
@@ -258,14 +241,14 @@ The encoding is designed to have the following properties, which are especially 
 
     0xfce353f661626300000000000000000000000000000000000000000000000000000000006465660000000000000000000000000000000000000000000000000000000000
 
-如果我们想用 ``"dave"``、``true`` 和 ``[1,2,3]`` 作为参数调用 ``sam``，我们总共需要传送 292 字节，可以分解为：
+如果我们想用 ``"dave"``、 ``true`` 和 ``[1,2,3]`` 作为参数调用 ``sam``，我们总共需要传送 292 字节，可以分解为：
 
-- ``0xa5643bf2``：方法ID。源自 ``sam(bytes,bool,uint256[])`` 的签名。注意，``uint`` 被替换为了它的权威代表 ``uint256``。
+- ``0xa5643bf2``：方法ID。源自 ``sam(bytes,bool,uint256[])`` 的签名。注意， ``uint`` 被替换为了它的权威代表 ``uint256``。
 - ``0x0000000000000000000000000000000000000000000000000000000000000060``：第一个参数（动态类型）的数据部分的位置，即从参数编码块开始位置算起的字节数。在这里，是 ``0x60`` 。
 - ``0x0000000000000000000000000000000000000000000000000000000000000001``：第二个参数：boolean 的 true。
 - ``0x00000000000000000000000000000000000000000000000000000000000000a0``：第三个参数（动态类型）的数据部分的位置，由字节数计量。在这里，是 ``0xa0``。
 - ``0x0000000000000000000000000000000000000000000000000000000000000004``：第一个参数的数据部分，以字节数组的元素个数作为开始，在这里，是 4。
-- ``0x6461766500000000000000000000000000000000000000000000000000000000``：第一个参数的内容：``"dave"`` 的 UTF-8 编码（在这里等同于 ASCII 编码），并在右侧（低位）用 0 值字节补充到 32 字节。
+- ``0x6461766500000000000000000000000000000000000000000000000000000000``：第一个参数的内容： ``"dave"`` 的 UTF-8 编码（在这里等同于 ASCII 编码），并在右侧（低位）用 0 值字节补充到 32 字节。
 - ``0x0000000000000000000000000000000000000000000000000000000000000003``：第三个参数的数据部分，以数组的元素个数作为开始，在这里，是 3。
 - ``0x0000000000000000000000000000000000000000000000000000000000000001``：第三个参数的第一个数组元素。
 - ``0x0000000000000000000000000000000000000000000000000000000000000002``：第三个参数的第二个数组元素。
@@ -422,27 +405,24 @@ The encoding is designed to have the following properties, which are especially 
 这样，一个使用 ABI 的日志项就可以描述为：
 
 - ``address``：合约地址（由 |ethereum| 真正提供）；
-- ``topics[0]``：``keccak(EVENT_NAME+"("+EVENT_ARGS.map(canonical_type_of).join(",")+")")`` （``canonical_type_of`` 是一个可以返回给定参数的权威类型的函数，例如，对 ``uint indexed foo`` 它会返回 ``uint256``）。如果事件被声明为 ``anonymous``，那么 ``topics[0]`` 不会被生成；
-- ``topics[n]``：如果不是匿名事件，为 ``abi_encode(EVENT_INDEXED_ARGS[n - 1])`` ，否则则为 ``abi_encode(EVENT_INDEXED_ARGS[n])``（``EVENT_INDEXED_ARGS`` 是已索引的 ``EVENT_ARGS``）；
-- ``data``：``abi_serialise(EVENT_NON_INDEXED_ARGS)`` （``EVENT_NON_INDEXED_ARGS`` 是未索引的 ``EVENT_ARGS``，``abi_serialise`` 是一个用来从某个函数返回一系列类型值的ABI序列化函数，就像上文所讲的那样）。
+- ``topics[0]``： ``keccak(EVENT_NAME+"("+EVENT_ARGS.map(canonical_type_of).join(",")+")")`` （ ``canonical_type_of`` 是一个可以返回给定参数的权威类型的函数，例如，对 ``uint indexed foo`` 它会返回 ``uint256``）。如果事件被声明为 ``anonymous``，那么 ``topics[0]`` 不会被生成；
+- ``topics[n]``：如果不是匿名事件，为 ``abi_encode(EVENT_INDEXED_ARGS[n - 1])`` ，否则则为 ``abi_encode(EVENT_INDEXED_ARGS[n])``（ ``EVENT_INDEXED_ARGS`` 是已索引的 ``EVENT_ARGS``）；
+- ``data``： ``abi_serialise(EVENT_NON_INDEXED_ARGS)`` （ ``EVENT_NON_INDEXED_ARGS`` 是未索引的 ``EVENT_ARGS``， ``abi_serialise`` 是一个用来从某个函数返回一系列类型值的ABI序列化函数，就像上文所讲的那样）。
 
-对于所有定长的Solidity类型，``EVENT_INDEXED_ARGS`` 数组会直接包含32字节的编码值。然而，对于 *动态长度的类型* ，包含 ``string``、``bytes`` 和数组，
+对于所有定长的Solidity类型， ``EVENT_INDEXED_ARGS`` 数组会直接包含32字节的编码值。然而，对于 *动态长度的类型* ，包含 ``string``、``bytes`` 和数组，
 ``EVENT_INDEXED_ARGS`` 会包含编码值的 *Keccak 哈希* 而不是直接包含编码值。这样就允许应用程序更有效地查询动态长度类型的值（通过把编码值的哈希设定为主题），
 但也使应用程序不能对它们还没查询过的已索引的值进行解码。对于动态长度的类型，应用程序开发者面临在对预先设定的值（如果参数已被索引）的快速检索和对任意数据的清晰处理（需要参数不被索引）之间的权衡。
 开发者们可以通过定义两个参数（一个已索引、一个未索引）保存同一个值的方式来解决这种权衡，从而既获得高效的检索又能清晰地处理任意数据。
 
 .. _abi_errors:
 
-Errors
-======
+错误编码
+=========
 
-In case of a failure inside a contract, the contract can use a special opcode to abort execution and revert
-all state changes. In addition to these effects, descriptive data can be returned to the caller.
-This descriptive data is the encoding of an error and its arguments in the same way as data for a function
-call.
+在合约内部发生错误的情况下，合约可以使用一个特殊的操作码来中止执行，并恢复所有的状态变化。除了这些效果之外，可以返回描述性数据给调用者。
+这种描述性数据是对错误及其参数的编码，其方式与函数调用的数据相同。
 
-As an example, let us consider the following contract whose ``transfer`` function always
-reverts with a custom error of "insufficient balance":
+例如，让我们考虑以下合约，其 ``transfer`` 功能在出现 "余额不足"时，提示自定义错误:
 
 .. code-block:: solidity
 
@@ -456,20 +436,16 @@ reverts with a custom error of "insufficient balance":
         }
     }
 
-The return data would be encoded in the same way as the function call
-``InsufficientBalance(0, amount)`` to the function ``InsufficientBalance(uint256,uint256)``,
-i.e. ``0xcf479181``, ``uint256(0)``, ``uint256(amount)``.
+返回数据是以函数调用相同的方式编码， ``InsufficientBalance(0, amount)`` 与函数 ``InsufficientBalance(uint256,uint256)`` 编码一样。
+例如为： ``0xcf479181``, ``uint256(0)``, ``uint256(amount)``.
 
-The error selectors ``0x00000000`` and ``0xffffffff`` are reserved for future use.
+错误的选择器 ``0x00000000`` 和 ``0xffffffff`` 被保留将来使用。
 
 .. warning::
-    Never trust error data.
-    The error data by default bubbles up through the chain of external calls, which
-    means that a contract may receive an error not defined in any of the contracts
-    it calls directly.
-    Furthermore, any contract can fake any error by returning data that matches
-    an error signature, even if the error is not defined anywhere.
-
+    永远不要相信错误数据。
+    默认情况下，错误数据会通过外部调用链向上冒泡，这意味着一个合约可能会收到一个它直接调用的任何合约中没有定义的错误。
+    此外，任何合约都可以通过返回与错误签名相匹配的数据来伪造任何错误，即使该错误没有在任何地方定义。
+    
 .. _abi_json:
 
 JSON
@@ -477,7 +453,7 @@ JSON
 
 合约接口的JSON格式是用来描述函数，事件或错误描述的一个数组。一个函数的描述是一个有如下字段的JSON对象：
 
-- ``type``：``"function"``、``"constructor"`` 或 ``"fallback"`` （:ref:`未命名的 "缺省" 函数 <fallback-function>`）
+- ``type``： ``"function"``、 ``"constructor"`` 或 ``"fallback"`` （:ref:`未命名的 "缺省" 函数 <fallback-function>`）
 - ``name``：函数名称；
 - ``inputs``：对象数组，每个数组对象会包含：
 
@@ -487,7 +463,7 @@ JSON
 
 - ``outputs``：一个类似于 ``inputs`` 的对象数组，如果函数无返回值时可以被省略；
 - ``payable``：如果函数接受 |ether| ，为 ``true``；缺省为 ``false``；
-- ``stateMutability``：为下列值之一：``pure`` （:ref:`指定为不读取区块链状态 <pure-functions>`），``view`` （:ref:`指定为不修改区块链状态 <view-functions>`），``nonpayable`` （默认值：不接收 Ether）和 ``payable`` （与上文 ``payable`` 一样）。
+- ``stateMutability``：为下列值之一： ``pure`` （:ref:`指定为不读取区块链状态 <pure-functions>`）， ``view`` （:ref:`指定为不修改区块链状态 <view-functions>`）， ``nonpayable`` （默认值：不接收 Ether）和 ``payable`` （与上文 ``payable`` 一样）。
 
 ``type`` 可以被省略，缺省为 ``"function"``。
 
@@ -577,7 +553,7 @@ Errors look as follows:
 
 一个拥有 ``name``、 ``type`` 和潜在的 ``components`` 成员的对象描述了某种类型的变量。
 直至到达一个 |tuple| 类型且到那点的存储在 ``type`` 属性中的字符串以 ``tuple`` 为前缀，也就是说，在 ``tuple`` 之后紧跟一个 ``[]`` 或有整数 ``k`` 的 ``[k]``，才能确定一个 |tuple|。
-|tuple| 的组件元素会被存储在成员 ``components`` 中，它是一个数组类型，且与顶级对象具有同样的结构，只是在这里不允许已索引的（``indexed``）数组元素。
+|tuple| 的组件元素会被存储在成员 ``components`` 中，它是一个数组类型，且与顶级对象具有同样的结构，只是在这里不允许已索引的（ ``indexed``）数组元素。
 
 作为例子，代码
 
