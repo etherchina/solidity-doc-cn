@@ -69,8 +69,7 @@
         uint public mostSent;
 
 
-        /// The amount of Ether sent was not higher than
-        /// the currently highest amount.
+        /// 发送的数量比当前最大的数量少时，触发这个错误
         error NotEnoughEther();
 
         constructor() payable {
@@ -119,25 +118,20 @@
 
     contract AccessRestriction {
         // 这些将在构造阶段被赋值
-        // 其中，`msg.sender` 是
-        // 创建这个合约的账户。
+        // 其中，`msg.sender` 是创建这个合约的账户。
         address public owner = msg.sender;
         uint public creationTime = block.timestamp;
 
 
-        // Now follows a list of errors that
-        // this contract can generate together
-        // with a textual explanation in special
-        // comments.
+        // 下面列出了该合约可能产生的错误
 
-        /// Sender not authorized for this
-        /// operation.
+        /// 当前操作者没有被授权
         error Unauthorized();
 
-        /// Function called too early.
+        /// 被过早调用
         error TooEarly();
 
-        /// Not enough Ether sent with function call.
+        /// 没有足够的Ether
         error NotEnoughEther();
 
         // 修改器可以用来更改

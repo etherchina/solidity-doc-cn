@@ -280,7 +280,7 @@ Solidity 支持上面介绍的所有同名称的类型，除元组外。
 最后，我们将第二个动态参数的数据部分 ``"Hello, world!"`` 进行编码：
 
  - ``0x000000000000000000000000000000000000000000000000000000000000000d`` （元素个数，在这里是字节数：13）
- - ``0x48656c6c6f2c20776f726c642100000000000000000000000000000000000000`` （``"Hello, world!"`` 从右边补充到 32 字节）
+ - ``0x48656c6c6f2c20776f726c642100000000000000000000000000000000000000`` （ ``"Hello, world!"`` 从右边补充到 32 字节）
 
 最后，合并到一起的编码就是（为了清晰，在 |function_selector| 和每 32 字节之后加了换行）：
 
@@ -409,7 +409,7 @@ Solidity 支持上面介绍的所有同名称的类型，除元组外。
 - ``topics[n]``：如果不是匿名事件，为 ``abi_encode(EVENT_INDEXED_ARGS[n - 1])`` ，否则则为 ``abi_encode(EVENT_INDEXED_ARGS[n])``（ ``EVENT_INDEXED_ARGS`` 是已索引的 ``EVENT_ARGS``）；
 - ``data``： ``abi_serialise(EVENT_NON_INDEXED_ARGS)`` （ ``EVENT_NON_INDEXED_ARGS`` 是未索引的 ``EVENT_ARGS``， ``abi_serialise`` 是一个用来从某个函数返回一系列类型值的ABI序列化函数，就像上文所讲的那样）。
 
-对于所有定长的Solidity类型， ``EVENT_INDEXED_ARGS`` 数组会直接包含32字节的编码值。然而，对于 *动态长度的类型* ，包含 ``string``、``bytes`` 和数组，
+对于所有定长的Solidity类型， ``EVENT_INDEXED_ARGS`` 数组会直接包含32字节的编码值。然而，对于 *动态长度的类型* ，包含 ``string``、 ``bytes`` 和数组，
 ``EVENT_INDEXED_ARGS`` 会包含编码值的 *Keccak 哈希* 而不是直接包含编码值。这样就允许应用程序更有效地查询动态长度类型的值（通过把编码值的哈希设定为主题），
 但也使应用程序不能对它们还没查询过的已索引的值进行解码。对于动态长度的类型，应用程序开发者面临在对预先设定的值（如果参数已被索引）的快速检索和对任意数据的清晰处理（需要参数不被索引）之间的权衡。
 开发者们可以通过定义两个参数（一个已索引、一个未索引）保存同一个值的方式来解决这种权衡，从而既获得高效的检索又能清晰地处理任意数据。
@@ -489,22 +489,20 @@ JSON
 - ``anonymous``：如果事件被声明为 ``anonymous``，则为 ``true``。
 
 
-Errors look as follows:
+错误这是一下类似的形式：
 
-- ``type``: always ``"error"``
-- ``name``: the name of the error.
-- ``inputs``: an array of objects, each of which contains:
+- ``type``: 为 ``"error"``
+- ``name``: 错误的名称。
+- ``inputs``: 对象数组，每个元素包含：
 
-  * ``name``: the name of the parameter.
-  * ``type``: the canonical type of the parameter (more below).
-  * ``components``: used for tuple types (more below).
+  * ``name``: 参数名称。
+  * ``type``: 参数的规范类型（更多详细内容见下文）。
+  * ``components``: 用于元组类型 (更多详细内容见下文).
 
 .. note::
-  There can be multiple errors with the same name and even with identical signature
-  in the JSON array, for example if the errors originate from different
-  files in the smart contract or are referenced from another smart contract.
-  For the ABI, only the name of the error itself is relevant and not where it is
-  defined.
+  在 JSON 数组中可能有多个名称相同、甚至签名相同的错误。
+  例如，如果错误来自智能合约中的不同文件，或引用自另一个智能合约。
+  对于ABI来说，它仅取决于错误的名称，而不是它的定义位置。
 
 
 例如，
@@ -631,26 +629,24 @@ Errors look as follows:
 
 .. _abi_packed_mode:
 
-Strict Encoding Mode
+严格编码模式
 ====================
 
-Strict encoding mode is the mode that leads to exactly the same encoding as defined in the formal specification above.
-This means offsets have to be as small as possible while still not creating overlaps in the data areas and thus no gaps are
-allowed.
+严格的编码模式与上述正式规范中定义的编码完全相同，但使偏移量必须尽可能小，同时不能在数据区域产生重叠，也不允许有间隙。
 
-Usually, ABI decoders are written in a straightforward way just following offset pointers, but some decoders
-might enforce strict mode. The Solidity ABI decoder currently does not enforce strict mode, but the encoder
-always creates data in strict mode.
+通常，ABI解码器是以直接的方式编写的，只是遵循偏移量指针，但有些解码器可能强制执行严格模式。
+Solidity ABI 解码器目前并不强制执行严格模式，但编码器总是以严格模式创建数据。
 
 
-非标准打包模式
-========================
+非标准打包模式（Non-standard Packed Mode）
+============================================
 
 通过 ``abi.encodePacked()``, Solidity 支持一种非标准打包模式处理以下情形：
 
-- :ref:`函数选择器<abi_function_selector>` 不进行编码，
-- 长度低于 32 字节的类型，会直接拼接，既不会进行补 0 操作，也不会进行符号扩展，
+- 长度低于 32 字节的类型，会直接拼接，既不会进行补 0 操作，也不会进行符号扩展
 - 动态类型会直接进行编码，并且不包含长度信息。
+- 数组元素会填充，但仍旧会就地编码。
+
 
 例如，对 ``int1, bytes1, uint16, string`` 用数值 ``-1, 0x42, 0x2424, "Hello, world!"`` 进行编码将生成如下结果 ::
 
@@ -661,61 +657,45 @@ always creates data in strict mode.
               ^^^^^^^^^^^^^^^^^^^^^^^^^^ string("Hello, world!") without a length field
 
 
-More specifically:
+更具体地说:
 
-- During the encoding, everything is encoded in-place. This means that there is
-  no distinction between head and tail, as in the ABI encoding, and the length
-  of an array is not encoded.
-- The direct arguments of ``abi.encodePacked`` are encoded without padding,
-  as long as they are not arrays (or ``string`` or ``bytes``).
-- The encoding of an array is the concatenation of the
-  encoding of its elements **with** padding.
-- Dynamically-sized types like ``string``, ``bytes`` or ``uint[]`` are encoded
-  without their length field.
-- The encoding of ``string`` or ``bytes`` does not apply padding at the end
-  unless it is part of an array or struct (then it is padded to a multiple of
-  32 bytes).
+- 在编码过程中，所有内容均是就地编码，因此在编码中，没有头和尾的区别，而且数组的长度也不会被编码。
+- ``abi.encodePacked`` 的参数以不填充的方式编码，只要它们不是数组（或 ``string`` 或 ``bytes``）。
+- 数组的编码是由其元素的编码及其填充（padding）的拼接
+- 动态大小的类型如 ``string``, ``bytes`` 或 ``uint[]`` 在编码时，不包含长度字段
+- ``string`` 或 ``bytes`` 的编码不会在末尾进行填充（padding），除非它是一个数组或结构的一部分（此时会填充为 32 个自己的整数倍 ）
 
-In general, the encoding is ambiguous as soon as there are two dynamically-sized elements,
-because of the missing length field.
+一般来说，只要有两个动态大小的元素，因为缺少长度字段，编码就会模糊有歧义。
 
-If padding is needed, explicit type conversions can be used: ``abi.encodePacked(uint16(0x12)) == hex"0012"``.
+如果需要填充，可以使用明确的类型转换： ``abi.encodePacked(uint16(0x12)) == hex"0012"``.
 
-Since packed encoding is not used when calling functions, there is no special support
-for prepending a function selector. Since the encoding is ambiguous, there is no decoding function.
+由于在调用函数时没有使用打包模式编码，所以没有特别支持预留函数选择器。
+由于编码是模糊有歧义的，所以也没有解码方法。
 
 .. warning::
 
-    If you use ``keccak256(abi.encodePacked(a, b))`` and both ``a`` and ``b`` are dynamic types,
-    it is easy to craft collisions in the hash value by moving parts of ``a`` into ``b`` and
-    vice-versa. More specifically, ``abi.encodePacked("a", "bc") == abi.encodePacked("ab", "c")``.
-    If you use ``abi.encodePacked`` for signatures, authentication or data integrity, make
-    sure to always use the same types and check that at most one of them is dynamic.
-    Unless there is a compelling reason, ``abi.encode`` should be preferred.
+    如果你使用 ``keccak256(abi.encodePacked(a, b))`` 并且 ``a`` 和 ``b`` 都是动态类型， 很容易通过把 ``a`` 的一部分移到 ``b``中，从而发生哈希碰撞，反之亦然。
+    更具体地说， ``abi.encodePacked("a", "bc") == abi.encodePacked("ab", "c")`` 。
+    如果你使用 ``abi.encodePacked`` 进行签名，认证或数据完整性检验，请确保总是使用相同的类型并且其中只有最多一个动态类型。
+    除非有令人信服的理由，否则应首选 ``abi.encode`` 。
 
 
 .. _indexed_event_encoding:
 
-Encoding of Indexed Event Parameters
+事件索引参数的编码
 ====================================
 
-Indexed event parameters that are not value types, i.e. arrays and structs are not
-stored directly but instead a keccak256-hash of an encoding is stored. This encoding
-is defined as follows:
+对于不是值类型的事件索引参数，如：数组和结构，是不直接存储的，而是存储一个keccak256-hash编码。
+这个编码被定义如下：
 
-- the encoding of a ``bytes`` and ``string`` value is just the string contents
-  without any padding or length prefix.
-- the encoding of a struct is the concatenation of the encoding of its members,
-  always padded to a multiple of 32 bytes (even ``bytes`` and ``string``).
-- the encoding of an array (both dynamically- and statically-sized) is
-  the concatenation of the encoding of its elements, always padded to a multiple
-  of 32 bytes (even ``bytes`` and ``string``) and without any length prefix
+- ``bytes`` 和 ``string`` 的编码只是字符串的内容，没有任何填充或长度前缀。
+- 结构体的编码是其成员编码的拼接，总是填充为32字节的倍数（即便是 ``bytes`` 和 ``string`` 类型）。 
+- 数组(包含动态和静态大小的数组)的编码是其元素的编码的拼接，总是填充为32字节的倍数（即便是 ``bytes`` 和 ``string`` 类型），并且没有长度前缀
 
-In the above, as usual, a negative number is padded by sign extension and not zero padded.
-``bytesNN`` types are padded on the right while ``uintNN`` / ``intNN`` are padded on the left.
+上面的规范，像往常一样，负数会符号扩展填充，而不是零填充。
+``bytesNN`` 类型在右边填充，而 ``uintNN`` / ``intNN`` 在左边填充。
+
 
 .. warning::
 
-    The encoding of a struct is ambiguous if it contains more than one dynamically-sized
-    array. Because of that, always re-check the event data and do not rely on the search result
-    based on the indexed parameters alone.
+    如果一个结构体包含一个以上的动态大小的数组，那么其编码会模糊有歧义。正因为如此，要经常重新检查事件数据，不能仅仅依靠索引参数的结果。

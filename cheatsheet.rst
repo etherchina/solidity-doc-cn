@@ -15,7 +15,7 @@
 +------------+-------------------------------------+--------------------------------------------+
 | 优先级      | 描述                                 | 运算符                                      |
 +============+=====================================+============================================+
-| *1*        | Postfix increment and decrement     | ``++``, ``--``                             |
+| *1*        | 后缀自加和自减                         | ``++``, ``--``                             |
 +            +-------------------------------------+--------------------------------------------+
 |            | New expression                      | ``new <typename>``                         |
 +            +-------------------------------------+--------------------------------------------+
@@ -73,24 +73,19 @@
 ================
 
 
-- ``abi.decode(bytes memory encodedData, (...)) returns (...)``: :ref:`ABI <ABI>`-decodes
-  the provided data. The types are given in parentheses as second argument.
-  Example: ``(uint a, uint[2] memory b, bytes memory c) = abi.decode(data, (uint, uint[2], bytes))``
-- ``abi.encode(...) returns (bytes memory)``: :ref:`ABI <ABI>`-encodes the given arguments
-- ``abi.encodePacked(...) returns (bytes memory)``: Performs :ref:`packed encoding <abi_packed_mode>` of
-  the given arguments. Note that this encoding can be ambiguous!
-- ``abi.encodeWithSelector(bytes4 selector, ...) returns (bytes memory)``: :ref:`ABI <ABI>`-encodes
-  the given arguments starting from the second and prepends the given four-byte selector
-- ``abi.encodeCall(function functionPointer, (...)) returns (bytes memory)``: ABI-encodes a call to ``functionPointer`` with the arguments found in the
-  tuple. Performs a full type-check, ensuring the types match the function signature. Result equals ``abi.encodeWithSelector(functionPointer.selector, (...))``
-- ``abi.encodeWithSignature(string memory signature, ...) returns (bytes memory)``: Equivalent
-  to ``abi.encodeWithSelector(bytes4(keccak256(bytes(signature)), ...)``
-- ``bytes.concat(...) returns (bytes memory)``: :ref:`Concatenates variable number of arguments to one byte array<bytes-concat>`
-- ``string.concat(...) returns (string memory)``: :ref:`Concatenates variable number of arguments to one string array<string-concat>`
-- ``block.basefee`` (``uint``): current block's base fee (`EIP-3198 <https://eips.ethereum.org/EIPS/eip-3198>`_ and `EIP-1559 <https://eips.ethereum.org/EIPS/eip-1559>`_)
-- ``block.chainid`` (``uint``): current chain id
-- ``block.coinbase`` (``address payable``): current block miner's address
-- ``block.difficulty`` (``uint``): current block difficulty
+- ``abi.decode(bytes memory encodedData, (...)) returns (...)``: :ref:`ABI <ABI>`- 对提供的数据进行解码，类型在括号中作为第二个参数给出。
+  示例: ``(uint a, uint[2] memory b, bytes memory c) = abi.decode(data, (uint, uint[2], bytes))``
+- ``abi.encode(...) returns (bytes memory)``: :ref:`ABI <ABI>` - 对给定的参数进行编码
+- ``abi.encodePacked(...) returns (bytes memory)``: 给指定的参数执行 :ref:`packed encoding <abi_packed_mode>` ， 请注意，这种编码可能会有歧义!（参数和编码可能出现多对一的情况）
+- ``abi.encodeWithSelector(bytes4 selector, ...) returns (bytes memory)``: :ref:`ABI <ABI>`- 为给定的 4 字节选择器和随后的参数进行编码。
+- ``abi.encodeCall(function functionPointer, (...)) returns (bytes memory)``: 对 ``functionPointer`` 指向的函数调用及元组中的参数进行编码，执行完整的类型检查，确保类型与函数签名相符。结果等于 ``abi.encodeWithSelector(functionPointer.selector, (...))``
+- ``abi.encodeWithSignature(string memory signature, ...) returns (bytes memory)``: 等于 ``abi.encodeWithSelector(bytes4(keccak256(bytes(signature)), ...)``
+- ``bytes.concat(...) returns (bytes memory)``: :ref:`将可变数量的参数串联成一个字节数组<bytes-concat>`
+- ``string.concat(...) returns (string memory)``: :ref:`将可变数量的参数串联成一个字符串<string-concat>`
+- ``block.basefee`` (``uint``): 当前区块的基础gas fee ， 参考 (`EIP-3198 <https://eips.ethereum.org/EIPS/eip-3198>`_ 和 `EIP-1559 <https://eips.ethereum.org/EIPS/eip-1559>`_)
+- ``block.chainid`` (``uint``): 当前 chain id
+- ``block.coinbase`` (``address payable``): 当前区块矿工的地址
+- ``block.difficulty`` (``uint``): 当前区块难度
 - ``block.gaslimit`` (``uint``): current block gaslimit
 - ``block.number`` (``uint``): current block number
 - ``block.timestamp`` (``uint``): current block timestamp in seconds since Unix epoch
