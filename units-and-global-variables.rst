@@ -32,11 +32,11 @@
 
 秒是缺省时间单位，在时间单位之间，数字后面带有 ``seconds``、 ``minutes``、 ``hours``、 ``days`` 和 ``weeks`` 的可以进行换算，基本换算关系如下：
 
- * ``1 == 1 seconds``
- * ``1 minutes == 60 seconds``
- * ``1 hours == 60 minutes``
- * ``1 days == 24 hours``
- * ``1 weeks == 7 days``
+* ``1 == 1 seconds``
+* ``1 minutes == 60 seconds``
+* ``1 hours == 60 minutes``
+* ``1 days == 24 hours``
+* ``1 weeks == 7 days``
 
 由于闰秒造成的每年不都是 365 天、每天不都是 24 小时 `leap seconds <https://en.wikipedia.org/wiki/Leap_second>`_，所以如果你要使用这些单位计算日期和时间，请注意这个问题。因为闰秒是无法预测的，所以需要借助外部的预言机（oracle，是一种链外数据服务，译者注）来对一个确定的日期代码库进行时间矫正。
 
