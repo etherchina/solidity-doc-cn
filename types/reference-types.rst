@@ -23,22 +23,20 @@
 ---------
 
 所有的引用类型，如 *数组* 和 *结构体* 类型，都有一个额外注解 ``数据位置`` ，来说明数据存储位置。
-有三种位置： |memory| 、 |storage| 以及 |calldata| 。|calldata|  是不可修改的、非持久的函数参数存储区域，效果大多类似 |memory| 。
+有三种位置： |memory| 、 |storage| 以及 |calldata| 。
+|calldata|  是不可修改的、非持久的函数参数存储区域，效果大多类似 |memory| 。
+主要用于外部函数的参数，但也可用于其他变量。
 
 .. note::
     如果可以的话，请尽量使用 ``calldata`` 作为数据位置，因为它将避免复制，并确保不能修改数据。
     函数的返回值中也可以使用 ``calldata`` 数据位置的数组和结构，但是无法给其分配空间。
 
 .. note::
-    Prior to version 0.6.9 data location for reference-type arguments was limited to
-    ``calldata`` in external functions, ``memory`` in public functions and either
-    ``memory`` or ``storage`` in internal and private ones.
-    Now ``memory`` and ``calldata`` are allowed in all functions regardless of their visibility.
+    在0.6.9版本之前，引用类型参数的数据位置有限制，外部函数中使用 ``calldata``，公共函数中使用 ``memory``，以及内部和私有函数中的 ``memory``或 ``storage``。
+    现在 ``memory``和 ``calldata``在所有函数中都被允许使用，无论其可见性如何。
 
 .. note::
     在版本0.5.0之前，数据位置可以省略，并且根据变量的类型，函数类型等有默认数据位置，但是所有复杂类型现在必须提供明确的数据位置。
-
-
 
 
 .. _data-location-assignment:
@@ -187,7 +185,7 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 
 必须提前计算所需的大小或者创建一个新的内存数组并复制每个元素。
 
-在Solidity中的所有变量，新分配的数组元素总是以 :ref:`default value<default-value>` 初始化。
+在Solidity中的所有变量，新分配的数组元素总是以 :ref:`默认值<default-value>` 初始化。
 
 .. code-block:: solidity
 

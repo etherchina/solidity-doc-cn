@@ -6,11 +6,11 @@
 映射
 =====
 
-映射类型在声明时的形式为 ``mapping(_KeyType => _ValueType)``。
-其中 ``_KeyType`` 可以是任何基本类型，即可以是任何的内建类型， ``bytes`` 和 ``string`` 或合约类型、枚举类型。
-而其他用户定义的类型或复杂的类型如：映射、结构体、即除 ``bytes`` 和 ``string`` 之外的数组类型是不可以作为 ``_KeyType`` 的类型的。
+映射类型在声明时的形式为 ``mapping(KeyType => ValueType)``。
+其中 ``KeyType`` 可以是任何基本类型，即可以是任何的内建类型， ``bytes`` 和 ``string`` 或合约类型、枚举类型。
+而其他用户定义的类型或复杂的类型如：映射、结构体、即除 ``bytes`` 和 ``string`` 之外的数组类型是不可以作为 ``KeyType`` 的类型的。
 
-``_ValueType`` 可以是包括映射类型在内的任何类型。
+``ValueType`` 可以是包括映射类型在内的任何类型。
 
 映射可以视作 `哈希表 <https://en.wikipedia.org/wiki/Hash_table>`_ ，它们在实际的初始化过程中创建每个可能的 key，
 并将其映射到字节形式全是零的值：一个类型的 :ref:`默认值 <default-value>`。然而下面是映射与哈希表不同的地方：
@@ -26,9 +26,9 @@
 这些限制同样适用于包含映射的数组和结构体。
 
 可以将映射声明为 ``public`` ，然后来让 Solidity 创建一个 :ref:`getter 函数 <visibility-and-getters>`。
-``_KeyType`` 将成为 getter 的必须参数，并且 getter 会返回 ``_ValueType`` 。
+``KeyType`` 将成为 getter 的必须参数，并且 getter 会返回 ``ValueType`` 。
 
-如果 ``_ValueType`` 是一个映射。这时在使用 getter 时将需要递归地传入每个 ``_KeyType`` 参数，　
+如果 ``ValueType`` 是一个映射。这时在使用 getter 时将需要递归地传入每个 ``KeyType`` 参数，　
 
 
 在下面的示例中，　``MappingExample`` 　合约定义了一个公共　``balances``　映射，键类型为 ``address``，值类型为 ``uint``，　
@@ -36,7 +36,7 @@
 可以在　``MappingLBC``　合约中看到合约在指定地址返回该值。
 
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.4.0 <0.9.0;
@@ -63,7 +63,7 @@
 ``_allowances`` 用来记录其他的账号，可以允许从其账号使用多少数量的币．
 
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.4.22 <0.9.0;
@@ -81,23 +81,24 @@
         }
 
         function transferFrom(address sender, address recipient, uint256 amount) public returns (bool) {
+            require(_allowances[sender][msg.sender] >= amount, "ERC20: Allowance not high enough.");
+            _allowances[sender][msg.sender] -= amount;
             _transfer(sender, recipient, amount);
-            approve(sender, msg.sender, amount);
             return true;
         }
 
-        function approve(address owner, address spender, uint256 amount) public returns (bool) {
-            require(owner != address(0), "ERC20: approve from the zero address");
+        function approve(address spender, uint256 amount) public returns (bool) {
             require(spender != address(0), "ERC20: approve to the zero address");
 
-            _allowances[owner][spender] = amount;
-            emit Approval(owner, spender, amount);
+            _allowances[msg.sender][spender] = amount;
+            emit Approval(msg.sender, spender, amount);
             return true;
         }
 
         function _transfer(address sender, address recipient, uint256 amount) internal {
             require(sender != address(0), "ERC20: transfer from the zero address");
             require(recipient != address(0), "ERC20: transfer to the zero address");
+            require(_balances[sender] >= amount, "ERC20: Not enough funds.");
 
             _balances[sender] -= amount;
             _balances[recipient] += amount;
@@ -117,10 +118,10 @@
 ``IterableMapping`` 库，然后　``User`` 合约可以添加数据，　``sum``　函数迭代求和所有值。
 
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.6.0 <0.9.0;
+    pragma solidity ^0.8.8;
 
     struct IndexValue { uint keyIndex; uint value; }
     struct KeyFlag { uint key; bool deleted; }
@@ -130,6 +131,8 @@
         KeyFlag[] keys;
         uint size;
     }
+
+    type Iterator is uint;
 
     library IterableMapping {
         function insert(itmap storage self, uint key, uint value) internal returns (bool replaced) {
@@ -161,24 +164,28 @@
             return self.data[key].keyIndex > 0;
         }
 
-        function iterate_start(itmap storage self) internal view returns (uint keyIndex) {
-            return iterate_next(self, type(uint).max);
+        function iterateStart(itmap storage self) internal view returns (Iterator) {
+            return iteratorSkipDeleted(self, 0);
         }
 
-        function iterate_valid(itmap storage self, uint keyIndex) internal view returns (bool) {
-            return keyIndex < self.keys.length;
+        function iterateValid(itmap storage self, Iterator iterator) internal view returns (bool) {
+            return Iterator.unwrap(iterator) < self.keys.length;
         }
 
-        function iterate_next(itmap storage self, uint keyIndex) internal view returns (uint r_keyIndex) {
-            keyIndex++;
-            while (keyIndex < self.keys.length && self.keys[keyIndex].deleted)
-                keyIndex++;
-            return keyIndex;
+        function iterateNext(itmap storage self, Iterator iterator) internal view returns (Iterator) {
+            return iteratorSkipDeleted(self, Iterator.unwrap(iterator) + 1);
         }
 
-        function iterate_get(itmap storage self, uint keyIndex) internal view returns (uint key, uint value) {
+        function iterateGet(itmap storage self, Iterator iterator) internal view returns (uint key, uint value) {
+            uint keyIndex = Iterator.unwrap(iterator);
             key = self.keys[keyIndex].key;
             value = self.data[key].value;
+        }
+
+        function iteratorSkipDeleted(itmap storage self, uint keyIndex) private view returns (Iterator) {
+            while (keyIndex < self.keys.length && self.keys[keyIndex].deleted)
+                keyIndex++;
+            return Iterator.wrap(keyIndex);
         }
     }
 
@@ -201,11 +208,11 @@
         // Computes the sum of all stored data.
         function sum() public view returns (uint s) {
             for (
-                uint i = data.iterate_start();
-                data.iterate_valid(i);
-                i = data.iterate_next(i)
+                Iterator i = data.iterateStart();
+                data.iterateValid(i);
+                i = data.iterateNext(i)
             ) {
-                (, uint value) = data.iterate_get(i);
+                (, uint value) = data.iterateGet(i);
                 s += value;
             }
         }
