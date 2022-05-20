@@ -19,7 +19,7 @@ Solidity 支持多重继承包括多态。
 
 下面的例子进行了详细的说明。
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.7.0 <0.9.0;
@@ -95,7 +95,9 @@ Solidity 支持多重继承包括多态。
     }
 
 注意，在上边的代码中，我们调用 ``Destructible.destroy()`` 来“转发”销毁请求。
-这样做法是有问题的，在下面的例子中可以看到::
+这样做法是有问题的，在下面的例子中可以看到：
+
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.7.0 <0.9.0;
@@ -127,7 +129,9 @@ Solidity 支持多重继承包括多态。
 。 解决此问题的方法是使用超级：
 
 调用 ``Final.destroy()`` 时会调用  ``Base2.destroy``， 因为我们在最终重写中显式指定了它。
-但是此函数将绕过 ``Base1.destroy``, 解决这个问题的方法是使用 ``super``::
+但是此函数将绕过 ``Base1.destroy``, 解决这个问题的方法是使用 ``super``：
+
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.7.0 <0.9.0;
@@ -180,7 +184,7 @@ Solidity 支持多重继承包括多态。
 
 以下示例演示了可变性和可见性的变化：
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.7.0 <0.9.0;
@@ -201,7 +205,7 @@ Solidity 支持多重继承包括多态。
 
 例如：
 
-::
+.. code-block:: solidity
 
     pragma solidity >=0.7.0 <0.9.0;
 
@@ -225,7 +229,7 @@ Solidity 支持多重继承包括多态。
 不过如果（重写的）函数继承自一个公共的父合约， ``override`` 是可以不用显示指定的。
 例如：
 
-::
+.. code-block:: solidity
 
     pragma solidity >=0.7.0 <0.9.0;
 
@@ -250,10 +254,14 @@ Solidity 支持多重继承包括多态。
 
   除接口之外（因为接口会自动作为 ``virtual`` ），没有实现的函数必须标记为 ``virtual``
 
+.. note::
+
+  从 Solidity 0.8.8 开始, 在重写接口函数时不再要求 ``override`` 关键字，除非函数在多个父合约定义。
+
 
 如果getter 函数的参数和返回值都和外部函数一致时，外部（external）函数是可以被 public 的状态变量被重写的，例如：
 
-::
+.. code-block:: solidity
 
     pragma solidity >=0.7.0 <0.9.0;
 
@@ -282,7 +290,7 @@ Solidity 支持多重继承包括多态。
 修改器重写也可以被重写，工作方式和 :ref:`函数重写 <function-overriding>`_ 类似。
 需要被重写的修改器也需要使用 ``virtual`` 修饰，``override`` 则同样修饰重载，例如：
 
-::
+.. code-block:: solidity
 
     pragma solidity >=0.7.0 <0.9.0;
 
@@ -299,7 +307,7 @@ Solidity 支持多重继承包括多态。
 
 如果是多重继承，所有直接父合约必须显示指定override， 例如：
 
-::
+.. code-block:: solidity
 
     pragma solidity >=0.7.0 <0.9.0;
 
@@ -320,7 +328,6 @@ Solidity 支持多重继承包括多态。
 
 
 
-
 .. index:: ! constructor
 
 .. _constructor:
@@ -330,7 +337,7 @@ Solidity 支持多重继承包括多态。
 
 构造函数是使用 ``constructor`` 关键字声明的一个可选函数, 它在创建合约时执行, 可以在其中运行合约初始化代码。
 
-在执行构造函数代码之前, 如果状态变量可以初始化为指定值; 如果不初始化, 则为零。
+在执行构造函数代码之前, 如果状态变量可以初始化为指定值; 如果不初始化, 则为 :ref:`默认值<default-value>` 。
 
 构造函数运行后, 将合约的最终代码部署到区块链。代码的部署需要 gas 与代码的长度线性相关。
 此代码包括所有函数部分是公有接口以及可以通过函数调用访问的所有函数。它不包括构造函数代码或仅从构造函数调用的内部函数。
@@ -340,7 +347,7 @@ Solidity 支持多重继承包括多态。
 
 举例：
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >0.6.99 <0.8.0;
@@ -348,8 +355,8 @@ Solidity 支持多重继承包括多态。
     abstract contract A {
         uint public a;
 
-        constructor(uint _a) {
-            a = _a;
+        constructor(uint a) {
+            a = a;
         }
     }
 
@@ -374,14 +381,16 @@ Solidity 支持多重继承包括多态。
 
 
 所有基类合约的构造函数将在下面解释的线性化规则被调用。如果基构造函数有参数,
-派生合约需要指定所有参数。这可以通过两种方式来实现 ::
+派生合约需要指定所有参数。这可以通过两种方式来实现：
+
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >0.6.99 <0.8.0;
 
     contract Base {
         uint x;
-        constructor(uint _x) { x = _x; }
+        constructor(uint x) { x = x; }
     }
 
     // 直接在继承列表中指定参数
@@ -391,12 +400,12 @@ Solidity 支持多重继承包括多态。
 
     // 或通过派生的构造函数中用 修饰符 "modifier"
     contract Derived2 is Base {
-        constructor(uint _y) Base(_y * _y) {}
+        constructor(uint y) Base(y * y) {}
     }
 
 一种方法直接在继承列表中调用基类构造函数（``is Base(7)``）。
 另一种方法是像 |modifier| 使用方法一样，
-作为派生合约构造函数定义头的一部分，（``Base(_y * _y)``)。
+作为派生合约构造函数定义头的一部分，（``Base(y * y)``)。
 如果构造函数参数是常量并且定义或描述了合约的行为，使用第一种方法比较方便。
 如果基类构造函数的参数依赖于派生合约，那么必须使用第二种方法。
 
@@ -426,7 +435,7 @@ Solidity 借鉴了 Python 的方式并且使用“ `C3 线性化 <https://en.wik
 
 在下面的代码中，Solidity 会给出“ Linearization of inheritance graph impossible ”这样的错误。
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.4.0 <0.8.0;
@@ -446,7 +455,7 @@ Solidity 借鉴了 Python 的方式并且使用“ `C3 线性化 <https://en.wik
 
 当继承层次结构中有多个构造函数时，继承线性化特别重要。 构造函数将始终以线性化顺序执行，无论在继承合约的构造函数中提供其参数的顺序如何。 例如：
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >0.6.99 <0.8.0;

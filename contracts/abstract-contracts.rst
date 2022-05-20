@@ -11,7 +11,9 @@
 即使实现了所有功能，合同也可能被标记为abstract。
 
 
-如下例所示,使用关键字 ``abstract`` 定义抽象合约合约, ``utterance()`` 函数了,但没有实现.(由 ``;`` 结尾）::
+如下例所示，可以使用关键字 ``abstract`` 定义抽象合约合约, 由于``utterance()`` 函数没有具体的实现（没有实现体 ``{ }`` , 而是以 ``;`` 结尾：
+
+.. code-block:: solidity
 
     pragma solidity >=0.6.0 <0.9.0;
 
@@ -21,7 +23,9 @@
 
 
 这样的抽象合约不能直接实例化。 如果抽象合约本身确实都有实现所有定义的函数，也是正确的。
-下例显示了抽象合约作为基类的用法::
+下例显示了抽象合约作为基类的用法：
+
+.. code-block:: solidity
 
     pragma solidity >=0.6.0 <0.9.0;
 
@@ -39,12 +43,15 @@
 
 请注意，没有实现的函数与 :ref:`Function Type <function_types>` 不同，即使它们的语法看起来非常相似。
 
-没有实现的函数示例（函数声明）::
+没有实现的函数示例（函数声明）：
+
+.. code-block:: solidity
 
     function foo(address) external returns (address);
 
-函数类型的示例（变量声明，其中变量的类型为“函数”）::
+函数类型的示例（变量声明，其中变量的类型为“函数”）：
 
+.. code-block:: solidity
 
     function(address) external returns (address) foo;
 

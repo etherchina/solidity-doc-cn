@@ -3,7 +3,7 @@
 .. _errors:
 
 *******************************
-Errors and the Revert Statement
+错误和回退语句
 *******************************
 
 Errors in Solidity provide a convenient and gas-efficient way to explain to the

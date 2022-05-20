@@ -24,7 +24,7 @@
 如果一个合约想要创建另一个合约，那么创建者必须知晓被创建合约的源代码(和二进制代码)。
 这意味着不可能循环创建依赖项。
 
-::
+.. code-block:: solidity
 
     pragma solidity >=0.4.22 <0.9.0;
 
@@ -36,7 +36,7 @@
         bytes32 name;
 
         // 这是注册 creator 和设置名称的构造函数。
-        constructor(bytes32 _name) {
+        constructor(bytes32 name_) {
             // 状态变量通过其名称访问，而不是通过例如 this.owner 的方式访问。
             // 这也适用于函数，特别是在构造函数中，你只能像这样（“内部地”）调用它们，
             // 因为合约本身还不存在。
@@ -44,7 +44,7 @@
             // 从 `address` 到 `TokenCreator` ，是做显式的类型转换
             // 并且假定调用合约的类型是 TokenCreator，没有真正的方法来检查这一点。
             creator = TokenCreator(msg.sender);
-            name = _name;
+            name = name_;
         }
 
         function changeName(bytes32 newName) public {

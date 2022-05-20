@@ -23,7 +23,7 @@ Constant 和 Immutable  状态变量
 不是所有类型的状态变量都支持用 constant 或 ``immutable`` 来修饰，当前仅支持 :ref:`字符串 <strings>`_ (仅常量) 和 :ref:`值类型 <value-types>`_.
 
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >0.7.4;
@@ -37,10 +37,10 @@ Constant 和 Immutable  状态变量
         uint immutable maxBalance;
         address immutable owner = msg.sender;
 
-        constructor(uint _decimals, address _reference) {
-            decimals = _decimals;
+        constructor(uint decimals_, address ref) {
+            decimals = decimals_;
             // Assignments to immutables can even access the environment.
-            maxBalance = _reference.balance;
+            maxBalance = ref.balance;
         }
 
         function isBalanceTooHigh(address _other) public view returns (bool) {
@@ -66,9 +66,19 @@ Constant
 Immutable
 ==========
 
-声明为不可变量(``immutable``)的变量的限制要比声明为常量(``constant``) 的变量的限制少：可以在合约的构造函数中或声明时为不可变的变量分配任意值。 不可变量在构造期间无法读取其值，并且只能赋值一次。
+声明为不可变量(``immutable``)的变量的限制要比声明为常量(``constant``) 的变量的限制少：可以在合约的构造函数中或声明时为不可变的变量分配任意值。
+不可变量只能赋值一次，并且在赋值之后才可以读取。
 
 编译器生成的合约创建代码将在返回合约之前修改合约的运行时代码，方法是将对不可变量的所有引用替换为分配给它们的值。 如果要将编译器生成的运行时代码与实际存储在区块链中的代码进行比较，则这一点很重要。
+
+
+.. note::
+  不可变量可以在声明时赋值，不过只有在合约的构造函数执行时才被视为视为初始化。
+  这意味着，你不能用一个依赖于不可变量的值在行内初始化另一个不可变量。
+  不过，你可以在合约的构造函数中这样做。
+
+  这是为了防止对状态变量初始化和构造函数顺序的不同解释，特别是继承时，出现问题。
+
 
 .. note::
   译者注：不可变量(Immutable) 是 Solidity 0.6.5 引入的，因此0.6.5 之前的版本不可用。

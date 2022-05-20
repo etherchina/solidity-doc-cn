@@ -7,26 +7,36 @@
 库
 ************
 
-库与合约类似，它们只需要在特定的地址部署一次，并且它们的代码可以通过 EVM 的 ``DELEGATECALL``
-(Homestead 之前使用 ``CALLCODE`` 关键字)特性进行重用。
-这意味着如果库函数被调用，它的代码在调用合约的上下文中执行，即 ``this`` 指向调用合约，特别是可以访问调用合约的存储。
+库与合约类似，库的目的是只需要在特定的地址部署一次，而它们的代码可以通过 EVM 的 ``DELEGATECALL`` (Homestead 之前使用 ``CALLCODE`` 关键字)特性进行重用。
+
+这意味着如果库函数被调用，它的代码在调用合约的上下文中执行，即 ``this`` 指向调用合约，特别注意，他访问的是调用合约存储的状态。
 因为每个库都是一段独立的代码，所以它仅能访问调用合约明确提供的状态变量（否则它就无法通过名字访问这些变量）。
-因为我们假定库是无状态的，所以如果它们不修改状态（也就是说，如果它们是 ``view`` 或者 ``pure`` 函数），
-库函数仅可以通过直接调用来使用（即不使用 ``DELEGATECALL`` 关键字），
-特别是，除非能规避 Solidity 的类型系统，否则是不可能销毁任何库的。
 
-库可以看作是使用他们的合约的隐式的基类合约。虽然它们在继承关系中不会显式可见，但调用库函数与调用显式的基类合约十分类似
-（可以使用 ``L.f()`` 调用）。
+因为我们假定库是无状态的，所以如果它们不修改状态（如果它们是 ``view`` 或者 ``pure`` 函数），库函数仅能通过直接调用来使用（即不使用 ``DELEGATECALL`` 关键字），
+特别是，任何库不可能被销毁。
 
-当然，需要使用内部调用约定来调用内部函数，这意味着所有内部类型，内存类型都是通过引用而不是复制来传递。
-为了在 EVM 中实现这些，内部库函数的代码和从其中调用的所有函数都在编译阶段被包含到调用合约中，然后使用一个 ``JUMP`` 调用来代替 ``DELEGATECALL``。
+.. note::
+    在0.4.20版本之前，可以通过绕过Solidity的类型系统来销毁库。
+    从0.4.20版本开始，库包含一个 :ref:`调用保护机制<call-protection>`，该机制不允许修改状态的函数被直接调用（即不使用 ``DELEGATECALL`` ）。
+
+使用库就显示是使用基类合约方法类似。虽然它们在继承关系中不会显式可见，但调用库函数与调用显式的基类合约十分类似（可以使用 ``L.f()`` 调用）。
+
+当然，使用内部调用约定来调用库的内部函数，这意味着所有的 internal 类型，和 :ref:`保存在内存类型 <data-location>`  都是通过引用而不是复制来传递。
+
+EVM 为了实现这些，合约所调用的内部库函数的代码及内部调用的所有函数都在编译阶段被包含到调用合约中，然后使用一个 ``JUMP`` 指令调用来代替 ``DELEGATECALL``。
+
+
+.. note::
+    当涉及到 public 函数时，继承的类比就失效了。
+    用 ``L.f()``调用一个公共库函数的与外部调用（准确的说是 ``DELEGATECALL``调用） 差不多。
+    相反，使用 ``A.f()``时，当 ``A``是合约的基类合约时， ``A.f()`` 是一个内部调用。
 
 
 .. index:: using for, set
 
 下面的示例说明如何使用库（但也请务必看看 :ref:`using for <using-for>` 有一个实现 set 更好的例子）。
 
-::
+.. code-block:: solidity
 
     pragma solidity >=0.6.0 <0.9.0;
 
@@ -89,9 +99,10 @@
 
 以下示例展示了如何在库中使用内存类型和内部函数来实现自定义类型，而无需支付外部函数调用的开销：
 
-::
+.. code-block:: solidity
 
-    pragma solidity  >=0.6.8 <0.9.0;
+    // SPDX-License-Identifier: GPL-3.0
+    pragma solidity ^0.8.0;
 
     struct bigint {
         uint[] limbs;
@@ -104,21 +115,25 @@
             r.limbs[0] = x;
         }
 
-        function add(bigint _a, bigint _b) internal pure returns (bigint r) {
-            r.limbs = new uint[](max(_a.limbs.length, _b.limbs.length));
+        function add(bigint memory a, bigint memory b) internal pure returns (bigint memory r) {
+            r.limbs = new uint[](max(a.limbs.length, b.limbs.length));
             uint carry = 0;
             for (uint i = 0; i < r.limbs.length; ++i) {
-                uint a = limb(_a, i);
-                uint b = limb(_b, i);
-                r.limbs[i] = a + b + carry;
-                if (a + b < a || (a + b == type(uint).max && carry > 0))
-                    carry = 1;
-                else
-                    carry = 0;
+                uint limbA = limb(a, i);
+                uint limbB = limb(b, i);
+                unchecked {
+                    r.limbs[i] = limbA + limbB + carry;
+
+                    if (limbA + limbB < limbA || (limbA + limbB == type(uint).max && carry > 0))
+                        carry = 1;
+                    else
+                        carry = 0;
+                }
             }
             if (carry > 0) {
-                // 太差了，我们需要增加一个 limb
+                // too bad, we have to add a limb
                 uint[] memory newLimbs = new uint[](r.limbs.length + 1);
+                uint i;
                 for (i = 0; i < r.limbs.length; ++i)
                     newLimbs[i] = r.limbs[i];
                 newLimbs[i] = carry;
@@ -126,8 +141,8 @@
             }
         }
 
-        function limb(bigint _a, uint _limb) internal pure returns (uint) {
-            return _limb < _a.limbs.length ? _a.limbs[_limb] : 0;
+        function limb(bigint memory a, uint index) internal pure returns (uint) {
+            return index < a.limbs.length ? a.limbs[index] : 0;
         }
 
         function max(uint a, uint b) private pure returns (uint) {
@@ -167,6 +182,7 @@
 （将来有可能会解除这些限制）
 
 .. _library-selectors:
+.. index:: selector
 
 库的函数签名与选择器
 ==============================================
@@ -181,18 +197,18 @@
 以下标识符可以作为函数签名中的类型：
 
  - 值类型, 非存储的（non-storage） ``string`` 及非存储的 ``bytes`` 使用和合约 ABI 中同样的标识符。
- - 非存储的数组类型遵循合约 ABI 中同样的规则，例如 ``<type>[]`` 为动态数组以及 ``<type>[M]`` 为``M``个元素的动态数组。
+ - 非存储的数组类型遵循合约 ABI 中同样的规则，例如 ``<type>[]`` 为动态数组以及 ``<type>[M]`` 为 ``M``个元素的动态数组。
  - 非存储的结构体使用完整的命名引用，例如 ``C.S`` 用于 ``contract C { struct S { ... } }``.
  - 存储的映射指针使用 ``mapping(<keyType> => <valueType>) storage`` 当 ``<keyType>`` 和 ``<valueType>`` 是映射的键和值类型。
- - 其他的存储的指针类型使用其对应的非存储类型的类型标识符，但在其后面附加一个空格及``storage``。
+ - 其他的存储的指针类型使用其对应的非存储类型的类型标识符，但在其后面附加一个空格及 ``storage``。
 
 
-除了指向存储的指针以外，参数编码与常规合约ABI相同，存储指针被编码为``uint256``值，指向它们所指向的存储插槽。
+除了指向存储的指针以外，参数编码与常规合约ABI相同，存储指针被编码为 ``uint256``值，指向它们所指向的存储插槽。
 
 
 与合约 ABI 相似，选择器由签名的Keccak256哈希的前四个字节组成。可以使用 .selector 成员从Solidity中获取其值，如下所示：
 
-::
+.. code-block:: solidity
 
     pragma solidity >=0.5.14 <0.9.0;
 

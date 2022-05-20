@@ -15,22 +15,22 @@
 
 合约之外的函数（也称为“自由函数”）始终具有隐式的 ``internal`` :ref:`可见性<visibility-and-getters>`。 它们的代码包含在所有调用它们合约中，类似于内部库函数。
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >0.7.0 <0.9.0;
+    pragma solidity >=0.7.1 <0.9.0;
 
-    function sum(uint[] memory _arr) pure returns (uint s) {
-        for (uint i = 0; i < _arr.length; i++)
-            s += _arr[i];
+    function sum(uint[] memory arr) pure returns (uint s) {
+        for (uint i = 0; i < arr.length; i++)
+            s += arr[i];
     }
 
     contract ArrayExample {
         bool found;
-        function f(uint[] memory _arr) public {
+        function f(uint[] memory arr) public {
             // This calls the free function internally.
             // The compiler will add its code to the contract.
-            uint s = sum(_arr);
+            uint s = sum(arr);
             require(s >= 10);
             found = true;
         }
@@ -57,15 +57,16 @@
 
 函数参数的声明方式与变量相同。不过未使用的参数可以省略参数名。
 
-例如，如果我们希望合约接受有两个整数形参的函数的外部调用，可以像下面这样写::
+例如，如果我们希望合约接受有两个整数形参的函数的外部调用，可以像下面这样写：
 
+.. code-block:: solidity
 
     pragma solidity >=0.4.16 <0.9.0;
 
     contract Simple {
         uint sum;
-        function taker(uint _a, uint _b) public {
-            sum = _a + _b;
+        function taker(uint a, uint b) public {
+            sum = a + b;
         }
     }
 
@@ -89,19 +90,20 @@
 
 函数返回变量的声明方式在关键词 ``returns`` 之后，与参数的声明方式相同。
 
-例如，如果我们需要返回两个结果：两个给定整数的和与积，我们应该写作
-::
+例如，如果我们需要返回两个结果：两个给定整数的和与积，我们应该写作：
+
+.. code-block:: solidity
 
     pragma solidity >=0.4.16 <0.9.0;
 
     contract Simple {
-        function arithmetic(uint _a, uint _b)
+        function arithmetic(uint a, uint b)
             public
             pure
-            returns (uint o_sum, uint o_product)
+            returns (uint sum, uint product)
         {
-            o_sum = _a + _b;
-            o_product = _a * _b;
+            sum = a + b;
+            product = a * b;
         }
     }
 
@@ -110,17 +112,17 @@
 返回变量可以当作为函数中的本地变量，没有显式设置的话，会使用 :ref:` 默认值 <default-value>`
 返回变量可以显式给它附一个值(像上面)，也可以使用 ``return`` 语句指定，使用 ``return`` 语句可以一个或多个值，参阅 :ref:`multiple ones<multi-return>` 。
 
-::
+.. code-block:: solidity
 
     pragma solidity >=0.4.16 <0.9.0;
 
     contract Simple {
-        function arithmetic(uint _a, uint _b)
+        function arithmetic(uint a, uint b)
             public
             pure
-            returns (uint o_sum, uint o_product)
+            returns (uint sum, uint product)
         {
-            return (_a + _b, _a * _b);
+            return (a + b, a * b);
         }
     }
 
@@ -142,12 +144,18 @@
 当函数需要使用多个值，可以用语句 ``return (v0, v1, ..., vn)`` 。
 参数的数量需要和声明时候一致。
 
+
+.. _state-mutability:
+
+状态可变性
+================
+
 .. index:: ! view function, function;view
 
 .. _view-functions:
 
 View 视图函数
-==============
+--------------
 
 可以将函数声明为 ``view`` 类型，这种情况下要保证不修改状态。
 
@@ -169,7 +177,7 @@ View 视图函数
 #. 使用低级调用。
 #. 使用包含特定操作码的内联汇编。
 
-::
+.. code-block:: solidity
 
     pragma solidity  >=0.5.0 <0.9.0;
 
@@ -197,13 +205,16 @@ View 视图函数
 .. _pure-functions:
 
 Pure 纯函数
-==============
+--------------
 
-函数可以声明为 ``pure`` ，在这种情况下，承诺不读取也不修改状态。
+函数可以声明为 ``pure`` ，在这种情况下，承诺不读取也不修改状态变量。
+
+特别是，应该可以在编译时确定一个 ``pure``函数，它仅处理输入参数和 ``msg.data``，对当前区块链状态没有任何了解。
+这也意味着读取 ``immutable`` 变量也不是一个 ``pure``操作。
 
 
 .. note::
-  如果编译器的 EVM 目标是 Byzantium 或更新的 (默认), 则使用操作码 ``STATICCALL`` , 这并不保证状态未被读取, 但至少不被修改。
+    如果编译器的 EVM 编译目标设置为 Byzantium 或之后的版本 (默认), 则使用操作码 ``STATICCALL`` , 这并不保证状态未被读取, 但至少不被修改。
 
 
 除了上面解释的状态修改语句列表之外，以下被认为是读取状态：
@@ -214,7 +225,7 @@ Pure 纯函数
 #. 调用任何未标记为 ``pure`` 的函数。
 #. 使用包含某些操作码的内联汇编。
 
-::
+.. code-block:: solidity
 
     pragma solidity >=0.5.0 <0.9.0;
 
@@ -243,13 +254,17 @@ Pure 纯函数
 
   在0.4.17版本之前，编译器不会强制 ``pure`` 函数不读取状态。它是一个编译时类型检查, 可以避免在合约类型之间进行无效的显式转换, 因为编译器可以验证合约类型没有状态更改操作, 但它不会在运行时能检查调用实际的类型。
 
+.. _special-functions:
+
+特别的函数
+=================
 
 .. index:: ! receive ether function, function;receive ! receive
 
 .. _receive-ether-function:
 
 receive 接收以太函数
-======================
+----------------------
 
 一个合约最多有一个 ``receive`` 函数, 声明函数为：
 ``receive() external payable { ... }``
@@ -286,7 +301,7 @@ receive 接收以太函数
 
 下面是一个例子：
 
-::
+.. code-block:: solidity
 
     pragma solidity ^0.6.0;
 
@@ -304,9 +319,9 @@ receive 接收以太函数
 .. _fallback-function:
 
 Fallback 回退函数
-=================
+-----------------
 
-合约可以最多有一个回退函数。函数声明为： ``fallback () external [payable]`` 或 ``fallback (bytes calldata _input) external [payable] returns (bytes memory _output)`` 
+合约可以最多有一个回退函数。函数声明为： ``fallback () external [payable]`` 或 ``fallback (bytes calldata input) external [payable] returns (bytes memory output)`` 
 
 没有　``function``　关键字。　必须是　``external``　可见性，它可以是 ``virtual`` 的，可以被重载也可以有 |modifier| 。
 
@@ -316,7 +331,7 @@ Fallback 回退函数
 
 fallback　函数始终会接收数据，但为了同时接收以太时，必须标记为　``payable`` 。
 
-如果使用了带参数的版本，``_input`` 将包含发送到合约的完整数据（等于 ``msg.data`` ），并且通过 ``_output`` 返回数据。
+如果使用了带参数的版本， ``input`` 将包含发送到合约的完整数据（等于 ``msg.data`` ），并且通过 ``output`` 返回数据。
 返回数据不是 ABI 编码过的数据，相反，它返回不经过修改的数据。
 
 
@@ -330,14 +345,15 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
 
 .. note::
     如果想要解码输入数据，那么前四个字节用作函数选择器，然后用 ``abi.decode`` 与数组切片语法一起使用来解码ABI编码的数据：
-     ``(c, d) = abi.decode(__input[4:], (uint256, uint256));``
+     ``(c, d) = abi.decode(_input[4:], (uint256, uint256));``
 
      请注意，这仅应作为最后的手段，而应使用对应的函数。
 
 
 
-::
+.. code-block:: solidity
 
+    // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.6.2 <0.9.0;
 
     contract Test {
@@ -350,6 +366,9 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
 
     // 这个合约会保留所有发送给它的以太币，没有办法返还。
     contract TestPayable {
+        uint x;
+        uint y;
+
         // 除了纯转账外，所有的调用都会调用这个函数．
         // (因为除了 receive 函数外，没有其他的函数).
         // 任何对合约非空calldata 调用会执行回退函数(即使是调用函数附加以太).
@@ -357,8 +376,6 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
 
         // 纯转账调用这个函数，例如对每个空empty calldata的调用
         receive() external payable { x = 2; y = msg.value; }
-        uint x;
-        uint y;
     }
 
     contract Caller {
@@ -385,7 +402,12 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
             // 结果test.x 为1 而 test.y 为 1.
 
             // 发送以太币, TestPayable 的 receive　函数被调用．
-            require(payable(test).send(2 ether));
+            
+            // 因为函数有存储写入, 会比简单的使用 ``send`` or ``transfer``消耗更多的 gas。
+            // 因此使用底层的call调用
+            (success,) = address(test).call{value: 2 ether}("");
+            require(success);
+
             // 结果 test.x 为 2 而 test.y 为 2 ether.
 
             return true;
@@ -402,35 +424,35 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
 
 合约可以具有多个不同参数的同名函数，称为“重载”（overloading），这也适用于继承函数。以下示例展示了合约 ``A`` 中的重载函数 ``f``。
 
-::
+.. code-block:: solidity
 
     pragma solidity >=0.4.16 <0.9.0;
 
     contract A {
-        function f(uint _in) public pure returns (uint out) {
-            out = _in;
+        function f(uint value) public pure returns (uint out) {
+            out = value;
         }
 
-        function f(uint _in, bool _really) public pure returns (uint out) {
-            if (_really)
-                out = _in;
+        function f(uint value, bool really) public pure returns (uint out) {
+            if (really)
+                out = value;
         }
     }
 
 重载函数也存在于外部接口中。如果两个外部可见函数仅区别于 Solidity 内的类型而不是它们的外部类型则会导致错误。
 
-::
+.. code-block:: solidity
 
     // 以下代码无法编译
     pragma solidity >=0.4.16 <0.9.0;
 
     contract A {
-        function f(B _in) public pure returns (B out) {
-            out = _in;
+        function f(B value) public pure returns (B out) {
+            out = value;
         }
 
-        function f(address _in) public pure returns (address out) {
-            out = _in;
+        function f(address value) public pure returns (address out) {
+            out = value;
         }
     }
 
@@ -449,17 +471,17 @@ fallback　函数始终会接收数据，但为了同时接收以太时，必须
 .. note::
     返回参数不作为重载解析的依据。
 
-::
+.. code-block:: solidity
 
     pragma solidity >=0.4.16 <0.9.0;
 
     contract A {
-        function f(uint8 _in) public pure returns (uint8 out) {
-            out = _in;
+        function f(uint8 val) public pure returns (uint8 out) {
+            out = val;
         }
 
-        function f(uint256 _in) public pure returns (uint256 out) {
-            out = _in;
+        function f(uint256 val) public pure returns (uint256 out) {
+            out = val;
         }
     }
 

@@ -24,17 +24,16 @@ Solidity 事件是EVM的日志功能之上的抽象。
 对日志的证明是可能的，如果一个外部实体提供了一个带有这种证明的合约，它可以检查日志是否真实存在于区块链中。
 
 
-最多三个参数可以接收 ``indexed`` 属性（它是一个特殊的名为:ref:`"主题" <abi_events>` 的数据结构， 而不是日志的数据部分）。
-如果数组（包括 ``string`` 和 ``bytes``）类型被标记为索引项，则它们的 keccak-256 哈希值会被作为 |topic| 保存，这是因为主题仅仅可以保存单个字（32个字节）。
+最多三个参数可以接收 ``indexed`` 属性（它是一个特殊的名为:ref:`"主题" <abi_events>` 的数据结构， 而不作为日志的数据部分）。
+主题仅有 32 字节， 因此如果 :ref:`引用类型<reference-types>` 标记为索引项，则它们的 keccak-256 哈希值会被作为 |topic| 保存。
 
 所有非索引 ``indexed`` 参数是  :ref:`ABI-encoded <ABI>` 都将存储在日志的数据部分中。
-
 
 |topic| 让我们可以可以搜索事件，比如在为某些事件过滤一些区块，还可以按发起事件的合同地址来过滤事件。
 
 
 例如, 使用如下的 web3.js ``subscribe("logs")``
-`方法 <https://web3js.readthedocs.io/en/1.0/web3-eth-subscribe.html#subscribe-logs>`_ 去过滤符合特定地址的|topic| ：
+`方法 <https://learnblockchain.cn/docs/web3.js/web3-eth-subscribe.html#subscribe-logs>`_ 去过滤符合特定地址的|topic| ：
 
 
 .. code-block:: javascript
@@ -56,65 +55,71 @@ Solidity 事件是EVM的日志功能之上的抽象。
 
 
 
-除非你用 ``anonymous`` 说明符声明事件，否则事件签名的哈希值是一个 |topic| 。
-同时也意味着对于匿名事件无法通过名字来过滤。您可以仅按合约地址过滤。 匿名事件的优势是他们部署和调用的成本更低。
+除非你用 ``anonymous`` 声明事件，否则事件签名的哈希值是一个 |topic| 。
+同时也意味着对于匿名事件无法通过名字来过滤，仅能按合约地址过滤。
+匿名事件的优势是他们部署和调用的成本更低。它也允许你声明 4 个索引参与而不是 3 个。
 
-::
+.. note::
+    由于交易日志只存储事件数据而不存储类型。你必须知道事件的类型，包括哪个参数被索引，以及该事件是否是匿名的，以便正确解释数据。
+    尤其是，有可能使用一个匿名事件来"伪造"另一个事件的签名。
+
+.. code-block:: solidity
 
     pragma solidity  >=0.4.21 <0.9.0;
 
     contract ClientReceipt {
         event Deposit(
-            address indexed _from,
-            bytes32 indexed _id,
-            uint _value
+            address indexed from,
+            bytes32 indexed id,
+            uint value
         );
 
-        function deposit(bytes32 _id) public payable {
+        function deposit(bytes32 id) public payable {
             // 事件使用 emit 触发事件。
             // 我们可以过滤对 `Deposit` 的调用，从而用 Javascript API 来查明对这个函数的任何调用（甚至是深度嵌套调用）。
-            emit Deposit(msg.sender, _id, msg.value);
+            emit Deposit(msg.sender, id, msg.value);
         }
     }
 
 使用 JavaScript API 调用事件的用法如下：
 
-::
+.. code-block:: javascript
 
     var abi = /* abi 由编译器产生 */;
     var ClientReceipt = web3.eth.contract(abi);
     var clientReceipt = ClientReceipt.at("0x1234...xlb67" /* 地址 */);
 
-    var event = clientReceipt.Deposit();
+    var depositEvent = clientReceipt.Deposit();
 
     // 监听变化
-    event.watch(function(error, result) {
+    depositEvent.watch(function(error, result) {
         // 结果包含 非索引参数 以及 主题 topic
         if (!error)
             console.log(result);
     });
 
     // 或者通过传入回调函数，立即开始听监
-    var event = clientReceipt.Deposit(function(error, result) {
+    var depositEvent = clientReceipt.Deposit(function(error, result) {
         if (!error)
             console.log(result);
     });
 
 上面的输出如下所示（有删减）：
 
+
 .. code-block:: json
 
-  {
-     "returnValues": {
-         "_from": "0x1111…FFFFCCCC",
-         "_id": "0x50…sd5adb20",
-         "_value": "0x420042"
-     },
-     "raw": {
-         "data": "0x7f…91385",
-         "topics": ["0xfd4…b4ead7", "0x7f…1a91385"]
-     }
-  }
+    {
+       "returnValues": {
+           "from": "0x1111…FFFFCCCC",
+           "id": "0x50…sd5adb20",
+           "value": "0x420042"
+       },
+       "raw": {
+           "data": "0x7f…91385",
+           "topics": ["0xfd4…b4ead7", "0x7f…1a91385"]
+       }
+    }
 
 
 
