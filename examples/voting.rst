@@ -19,7 +19,7 @@
 在投票时间结束时，``winningProposal()`` 将返回获得最多投票的提案。
 
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.7.0 <0.9.0;
@@ -67,7 +67,7 @@
 
         // 授权 `voter` 对这个（投票）表决进行投票
         // 只有 `chairperson` 可以调用该函数。
-        function giveRightToVote(address voter) public {
+        function giveRightToVote(address voter) external {
             // 若 `require` 的第一个参数的计算结果为 `false`，
             // 则终止执行，撤销所有对状态和以太币余额的改动。
             // 在旧版的 EVM 中这曾经会消耗所有 gas，但现在不会了。
@@ -86,7 +86,7 @@
         }
 
         /// 把你的投票委托到投票者 `to`。
-        function delegate(address to) public {
+        function delegate(address to) external {
             // 传引用
             Voter storage sender = voters[msg.sender];
             require(!sender.voted, "You already voted.");
@@ -106,9 +106,14 @@
             }
 
             // `sender` 是一个引用, 相当于对 `voters[msg.sender].voted` 进行修改
+            Voter storage delegate_ = voters[to];
+            
+            // Voters cannot delegate to wallets that cannot vote.
+            require(delegate_.weight >= 1);
+
             sender.voted = true;
             sender.delegate = to;
-            Voter storage delegate_ = voters[to];
+            
             if (delegate_.voted) {
                 // 若被委托者已经投过票了，直接增加得票数
                 proposals[delegate_.vote].voteCount += sender.weight;
@@ -120,7 +125,7 @@
 
         /// 把你的票(包括委托给你的票)，
         /// 投给提案 `proposals[proposal].name`.
-        function vote(uint proposal) public {
+        function vote(uint proposal) external {
             Voter storage sender = voters[msg.sender];
             require(!sender.voted, "Already voted.");
             sender.voted = true;
@@ -131,7 +136,7 @@
         }
 
         /// @dev 结合之前所有的投票，计算出最终胜出的提案
-        function winningProposal() public view
+        function winningProposal() external view
                 returns (uint winningProposal_)
         {
             uint winningVoteCount = 0;

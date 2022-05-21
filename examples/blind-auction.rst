@@ -20,10 +20,10 @@
 如果最高出价提高了（被其他出价者的出价超过），之前出价最高的出价者可以拿回她的钱。
 在投标期结束后，受益人需要手动调用合约来接收他的钱 - 合约不能自己激活接收。
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity ^0.7.0;
+    pragma solidity ^0.8.4;
 
     contract SimpleAuction {
         // 拍卖的参数。
@@ -46,36 +46,43 @@
         event HighestBidIncreased(address bidder, uint amount);
         event AuctionEnded(address winner, uint amount);
 
-        // 以下是所谓的 natspec 注释，可以通过三个斜杠来识别。
-        // 当用户被要求确认交易时将显示。
+        // Errors 用来定义失败
 
-        /// 以受益者地址 `_beneficiary` 的名义，
-        /// 创建一个简单的拍卖，拍卖时间为 `_biddingTime` 秒。
+        // 以下称为 natspec 注释，可以通过三个斜杠来识别。
+        // 当用户被要求确认交易时或错误发生时将显示。
+
+        /// The auction has already ended.
+        error AuctionAlreadyEnded();
+        /// There is already a higher or equal bid.
+        error BidNotHighEnough(uint highestBid);
+        /// The auction has not ended yet.
+        error AuctionNotYetEnded();
+        /// The function auctionEnd has already been called.
+        error AuctionEndAlreadyCalled();
+
+        /// 以受益者地址 `beneficiaryAddress` 的名义，
+        /// 创建一个简单的拍卖，拍卖时间为 `biddingTime` 秒。
         constructor(
-            uint _biddingTime,
-            address payable _beneficiary
+            uint biddingTime,
+            address payable beneficiaryAddress
         ) {
-            beneficiary = _beneficiary;
-            auctionEnd = block.timestamp + _biddingTime;
+            beneficiary = beneficiaryAddress;
+            auctionEnd = block.timestamp + biddingTime;
         }
 
         /// 对拍卖进行出价，具体的出价随交易一起发送。
         /// 如果没有在拍卖中胜出，则返还出价。
-        function bid() public payable {
+        function bid() external payable {
             // 参数不是必要的。因为所有的信息已经包含在了交易中。
             // 对于能接收以太币的函数，关键字 payable 是必须的。
 
             // 如果拍卖已结束，撤销函数的调用。
-            require(
-                block.timestamp <= auctionEnd,
-                "Auction already ended."
-            );
+            if (block.timestamp > auctionEndTime)
+                revert AuctionAlreadyEnded();
 
             // 如果出价不够高，返还你的钱
-            require(
-                msg.value > highestBid,
-                "There already is a higher bid."
-            );
+            if (msg.value <= highestBid)
+                revert BidNotHighEnough(highestBid);
 
             if (highestBid != 0) {
                 // 返还出价时，简单地直接调用 highestBidder.send(highestBid) 函数，
@@ -89,7 +96,7 @@
         }
 
         /// 取回出价（当该出价已被超越）
-        function withdraw() public returns (bool) {
+        function withdraw() external returns (bool) {
             uint amount = pendingReturns[msg.sender];
             if (amount > 0) {
                 // 这里很重要，首先要设零值。
@@ -97,6 +104,9 @@
                 // 接收者可以在 `send` 返回之前，重新调用该函数。
                 pendingReturns[msg.sender] = 0;
 
+                // msg.sender is not of type `address payable` and must be
+                // explicitly converted using `payable(msg.sender)` in order
+                // use the member function `send()`.
                 if (!payable(msg.sender).send(amount)) {
                     // 这里不需抛出异常，只需重置未付款
                     pendingReturns[msg.sender] = amount;
@@ -107,7 +117,7 @@
         }
 
         /// 结束拍卖，并把最高的出价发送给受益人
-        function auctionEnd() public {
+        function auctionEnd() external {
             // 对于可与其他合约交互的函数（意味着它会调用其他函数或发送以太币），
             // 一个好的指导方针是将其结构分为三个阶段：
             // 1. 检查条件
@@ -119,8 +129,10 @@
             // 则它也会被认为是与外部合约有交互的。
 
             // 1. 条件
-            require(block.timestamp >= auctionEnd, "Auction not yet ended.");
-            require(!ended, "auctionEnd has already been called.");
+            if (block.timestamp < auctionEndTime)
+                revert AuctionNotYetEnded();
+            if (ended)
+                revert AuctionEndAlreadyCalled();
 
             // 2. 生效
             ended = true;
@@ -151,10 +163,10 @@
 并且，这是故意的(与高出价一起，它甚至提供了一个明确的标志来标识无效的出价):
 投标人可以通过设置几个或高或低的无效出价来迷惑竞争对手。
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.7.0 <0.9.0;
+    pragma solidity ^0.8.4;
 
     contract BlindAuction {
         struct Bid {
@@ -177,35 +189,53 @@
 
         event AuctionEnded(address winner, uint highestBid);
 
+
+        // Errors that describe failures.
+
+        /// The function has been called too early.
+        /// Try again at `time`.
+        error TooEarly(uint time);
+        /// The function has been called too late.
+        /// It cannot be called after `time`.
+        error TooLate(uint time);
+        /// The function auctionEnd has already been called.
+        error AuctionEndAlreadyCalled();
+
         /// 使用 modifier 可以更便捷的校验函数的入参。
         /// `onlyBefore` 会被用于后面的 `bid` 函数：
         /// 新的函数体是由 modifier 本身的函数体，并用原函数体替换 `_;` 语句来组成的。
-        modifier onlyBefore(uint _time) { require(block.timestamp < _time); _; }
-        modifier onlyAfter(uint _time) { require(block.timestamp > _time); _; }
-
-        constructor(
-            uint _biddingTime,
-            uint _revealTime,
-            address payable _beneficiary
-        ) public {
-            beneficiary = _beneficiary;
-            biddingEnd = block.timestamp + _biddingTime;
-            revealEnd = biddingEnd + _revealTime;
+        modifier onlyBefore(uint time) {
+            if (block.timestamp >= time) revert TooLate(time);
+            _;
+        }
+        modifier onlyAfter(uint time) {
+            if (block.timestamp <= time) revert TooEarly(time);
+            _;
         }
 
-        /// 可以通过 `_blindedBid` = keccak256(value, fake, secret)
+        constructor(
+            uint biddingTime,
+            uint revealTime,
+            address payable beneficiaryAddress
+        ) {
+            beneficiary = beneficiaryAddress;
+            biddingEnd = block.timestamp + biddingTime;
+            revealEnd = biddingEnd + revealTime;
+        }
+
+        /// 可以通过 `blindedBid` = keccak256(value, fake, secret)
         /// 设置一个秘密竞拍。
         /// 只有在出价披露阶段被正确披露，已发送的以太币才会被退还。
         /// 如果与出价一起发送的以太币至少为 “value” 且 “fake” 不为真，则出价有效。
         /// 将 “fake” 设置为 true ，然后发送满足订金金额但又不与出价相同的金额是隐藏实际出价的方法。
         /// 同一个地址可以放置多个出价。
-        function bid(bytes32 _blindedBid)
-            public
+        function bid(bytes32 blindedBid)
+            external
             payable
             onlyBefore(biddingEnd)
         {
             bids[msg.sender].push(Bid({
-                blindedBid: _blindedBid,
+                blindedBid: blindedBid,
                 deposit: msg.value
             }));
         }
@@ -213,24 +243,24 @@
         /// 披露你的秘密竞拍出价。
         /// 对于所有正确披露的无效出价以及除最高出价以外的所有出价，你都将获得退款。
         function reveal(
-            uint[] _values,
-            bool[] _fake,
-            bytes32[] _secret
+            uint[] calldata values,
+            bool[] calldata fake,
+            bytes32[] calldata secret
         )
-            public
+            external
             onlyAfter(biddingEnd)
             onlyBefore(revealEnd)
         {
             uint length = bids[msg.sender].length;
-            require(_values.length == length);
-            require(_fake.length == length);
-            require(_secret.length == length);
+            require(values.length == length);
+            require(fake.length == length);
+            require(secret.length == length);
 
             uint refund;
             for (uint i = 0; i < length; i++) {
                 Bid storage bid = bids[msg.sender][i];
                 (uint value, bool fake, bytes32 secret) =
-                        (_values[i], _fake[i], _secret[i]);
+                        (values[i], fake[i], secret[i]);
                 if (bid.blindedBid != keccak256(value, fake, secret)) {
                     // 出价未能正确披露
                     // 不返还订金
@@ -264,7 +294,7 @@
         }
 
         /// 取回出价（当该出价已被超越）
-        function withdraw() public {
+        function withdraw() external {
             uint amount = pendingReturns[msg.sender];
             if (amount > 0) {
                 // 这里很重要，首先要设零值。
@@ -278,10 +308,10 @@
 
         /// 结束拍卖，并把最高的出价发送给受益人
         function auctionEnd()
-            public
+            external
             onlyAfter(revealEnd)
         {
-            require(!ended);
+            if (ended) revert AuctionEndAlreadyCalled();
             emit AuctionEnded(highestBidder, highestBid);
             ended = true;
             beneficiary.transfer(highestBid);

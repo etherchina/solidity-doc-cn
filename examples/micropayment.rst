@@ -29,9 +29,9 @@ Alice 和 Bob 用签名去授权交易，这可以通过以太坊智能合约来
 ----------------------
 
 Alice 不需要和以太坊网络进行交互就可以完成签名，这个过程是完全离线的。
-在这个指引里, 我们将通过使用 `web3.js <https://github.com/ethereum/web3.js>`_ and `MetaMask <https://metamask.io>`_ 在浏览器里完成签名, 方法在 `EIP-762 <https://github.com/ethereum/EIPs/pull/712>`_ 有描述。
+在这个指引里, 我们将通过使用 `web3.js <https://github.com/ethereum/web3.js>`_ and `MetaMask <https://metamask.io>`_ 在浏览器里完成签名, 方法在 `EIP-712 <https://github.com/ethereum/EIPs/pull/712>`_ 有描述。
 
-::
+.. code-block:: javascript
 
     /// 先计算一个hash
     var hash = web3.utils.sha3("message to sign");
@@ -63,7 +63,7 @@ Alice 可以通过在签名信息中加入合约地址来阻止这个攻击。
 我们已经知道哪些信息需要包含到签名消息里，我们需要把这些信息合并在一起，计算 hash 然后 签名。很简单，先拼接数据，然后 `ethereumjs-abi <https://github.com/ethereumjs/ethereumjs-abi>`_ 库提供了  ``soliditySHA3`` that mimics the behaviour of
 函数类似于 Solidity 的 ``keccak256`` 函数应用在 ``abi.encodePacked`` 的输出结果上，下面是JavaScript 为  ``ReceiverPays`` 实现签名的代码：
 
-::
+.. code-block:: javascript
 
     // recipient 表示向谁付款.
     // amount, 单位 wei, 指定发送金额数量.
@@ -98,7 +98,7 @@ Solidity 提供了一个内建函数 :ref:`ecrecover <mathematical-and-cryptogra
 ReceiverPays 完整合约代码
 ----------------------------------
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.7.0 <0.9.0;
@@ -111,7 +111,7 @@ ReceiverPays 完整合约代码
         constructor() payable {}
 
         // 收款方认领付款
-        function claimPayment(uint256 amount, uint256 nonce, bytes memory signature) public {
+        function claimPayment(uint256 amount, uint256 nonce, bytes memory signature) external {
             require(!usedNonces[nonce]);
             usedNonces[nonce] = true;
 
@@ -124,7 +124,7 @@ ReceiverPays 完整合约代码
         }
 
         /// destroy the contract and reclaim the leftover funds.
-        function kill() public {
+        function kill() external {
             require(msg.sender == owner);
             selfdestruct(payable(msg.sender));
         }
@@ -210,7 +210,7 @@ Alice 通过向 Bob 发送签名消息来付款。该步骤完全在以太坊网
 
 以下是修改后的JavaScript代码，用于对上一节中的消息进行加密签名：
 
-::
+.. code-block:: javascript
 
     function constructPaymentMessage(contractAddress, amount) {
         return abi.soliditySHA3(
@@ -264,7 +264,7 @@ Bob可以随时关闭支付通道，但如果他没有这样做，Alice 需要�
 完整合约代码
 -----------------
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.7.0 <0.9.0;
@@ -274,12 +274,12 @@ Bob可以随时关闭支付通道，但如果他没有这样做，Alice 需要�
         address payable public recipient;   // The account receiving the payments.
         uint256 public expiration;  // Timeout in case the recipient never closes.
 
-        constructor (address payable _recipient, uint256 duration)
+        constructor (address payable recipientAddress, uint256 duration)
             public
             payable
         {
             sender = payable(msg.sender);
-            recipient = _recipient;
+            recipient = recipientAddress;
             expiration = block.timestamp + duration;
         }
 
@@ -297,7 +297,7 @@ Bob可以随时关闭支付通道，但如果他没有这样做，Alice 需要�
         /// the recipient can close the channel at any time by presenting a
         /// signed amount from the sender. the recipient will be sent that amount,
         /// and the remainder will go back to the sender
-        function close(uint256 amount, bytes memory signature) public {
+        function close(uint256 amount, bytes memory signature) external {
             require(msg.sender == recipient);
             require(isValidSignature(amount, signature));
 
@@ -306,7 +306,7 @@ Bob可以随时关闭支付通道，但如果他没有这样做，Alice 需要�
         }
 
         /// the sender can extend the expiration at any time
-        function extend(uint256 newExpiration) public {
+        function extend(uint256 newExpiration) external {
             require(msg.sender == sender);
             require(newExpiration > expiration);
 
@@ -314,7 +314,7 @@ Bob可以随时关闭支付通道，但如果他没有这样做，Alice 需要�
         }
 
         /// 如果过期过期时间已到，而收款人没有关闭通道，可执行此函数，销毁合约并返还余额
-        function claimTimeout() public {
+        function claimTimeout() external {
             require(block.timestamp >= expiration);
             selfdestruct(sender);
         }
@@ -359,7 +359,7 @@ Bob可以随时关闭支付通道，但如果他没有这样做，Alice 需要�
 
 
 .. note::
-  函数 ``splitSignature`` 没有做足够的安全检查，完整的产品里应该使用严格测试的库，如：`openzepplin 的版本  <https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/ECRecovery.sol>`_ 。
+  函数 ``splitSignature`` 没有做足够的安全检查，完整的产品里应该使用严格测试的库，如： `openzepplin 的实现版本  <https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/cryptography/ECDSA.sol>`_ 。
 
 
 验证支付
@@ -377,9 +377,9 @@ Bob可以随时关闭支付通道，但如果他没有这样做，Alice 需要�
 
 
 我们使用 `ethereumjs-util <https://github.com/ethereumjs/ethereumjs-util>`_
-库来编写验证过程，这里使用 JavaScript ，当然实现的方式有很多。下面的代码借鉴了 上面的 `constructMessage` 函数:
+库来编写验证过程，这里使用 JavaScript ，当然实现的方式有很多。下面的代码借鉴了 上面的 ``constructMessage`` 函数:
 
-::
+.. code-block:: javascript
 
     // this mimics the prefixing behavior of the eth_sign JSON-RPC method.
     function prefixed(hash) {

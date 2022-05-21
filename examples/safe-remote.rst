@@ -25,10 +25,10 @@ This contract of course does not solve the problem, but gives an overview of how
 you can use state machine-like constructs inside a contract.
 
 
-::
+.. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
-    pragma solidity >=0.7.0  <0.9.0;
+    pragma solidity ^0.8.4;
 
     contract Purchase {
         uint public value;
@@ -40,10 +40,20 @@ you can use state machine-like constructs inside a contract.
         State public state;
 
 
-        modifier condition(bool _condition) {
-            require(_condition);
+        modifier condition(bool condition_) {
+            require(condition_);
             _;
         }
+
+        /// Only the buyer can call this function.
+        error OnlyBuyer();
+        /// Only the seller can call this function.
+        error OnlySeller();
+        /// The function cannot be called at the current state.
+        error InvalidState();
+        /// The provided value has to be even.
+        error ValueNotEven();
+
 
         modifier onlyBuyer() {
             require(
@@ -80,14 +90,15 @@ you can use state machine-like constructs inside a contract.
         constructor() payable {
             seller = payable(msg.sender);
             value = msg.value / 2;
-            require((2 * value) == msg.value, "Value has to be even.");
+            if ((2 * value) != msg.value)
+                revert ValueNotEven();
         }
 
 
         ///中止购买并回收以太币。
         ///只能在合约被锁定之前由卖家调用。
         function abort()
-            public
+            external
             onlySeller
             inState(State.Created)
         {
@@ -100,7 +111,7 @@ you can use state machine-like constructs inside a contract.
         /// 交易必须包含 `2 * value` 个以太币。
         /// 以太币会被锁定，直到 confirmReceived 被调用。
         function confirmPurchase()
-            public
+            external
             inState(State.Created)
             condition(msg.value == (2 * value))
             payable
@@ -113,7 +124,7 @@ you can use state machine-like constructs inside a contract.
         /// 确认你（买家）已经收到商品。
         /// 这会释放被锁定的以太币。
         function confirmReceived()
-            public
+            external
             onlyBuyer
             inState(State.Locked)
         {
@@ -129,7 +140,7 @@ you can use state machine-like constructs inside a contract.
         /// This function refunds the seller, i.e.
         /// pays back the locked funds of the seller.
         function refundSeller()
-            public
+            external
             onlySeller
             inState(State.Release)
         {
