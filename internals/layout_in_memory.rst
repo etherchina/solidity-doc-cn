@@ -2,7 +2,7 @@
 .. index: memory layout
 
 ****************
-内存布局
+变量在内存布局
 ****************
 
 Solidity保留了四个32字节的插槽，字节范围(包括端点)特定用途如下：
@@ -12,12 +12,12 @@ Solidity保留了四个32字节的插槽，字节范围(包括端点)特定用�
 - ``0x40`` - ``0x5f`` (32 字节): 当前分配的内存大小(也作为空闲内存指针)
 - ``0x60`` - ``0x7f`` (32 字节): 零位插槽
 
-暂存空间可以在语句之间使用 (例如在内联汇编中)。 零位插槽用作动态内存数组的初始值，并且永远不应写入（空闲内存指针最初指向``0x80``）.
+暂存空间可以在语句之间使用 (例如在内联汇编中)。 零位插槽用作动态内存数组的初始值，并且永远不应写入（空闲内存指针最初指向 ``0x80``）.
 
 
 Solidity 总是将新对象放在空闲内存指针上，并且内存永远不会被释放(将来可能会改变)。
 
-Solidity 中的内存数组中的元素始终占据32字节的倍数（对于 ``byte[]`` 总是这样，但对于 ``bytes`` 和 ``string`` 而言则不是）。
+Solidity 中的内存数组中的元素始终占据32字节的倍数（对于 ``bytes1[]`` 总是这样，但不适用与 ``bytes`` 和 ``string`` ）。
 
 多维内存数组是指向内存数组的指针，动态数组的长度存储在数组的第一个插槽中，然后是数组元素。
 
@@ -27,34 +27,31 @@ Solidity 中的内存数组中的元素始终占据32字节的倍数（对于 ``
   它们将被放置在空闲内存指向的位置，但是由于使用寿命短，指针不会更新。
   内存可以归零，也可以不归零。 因此，不应指望空闲内存指针指向归零内存区域。
 
-  尽管使用``msize``到达绝对归零的内存区域似乎是一个好主意，但使用此类非临时指针而不更新空闲内存指针可能会产生意外结果。
+  尽管使用 ``msize``到达绝对归零的内存区域似乎是一个好主意，但使用此类非临时指针而不更新空闲内存指针可能会产生意外结果。
 
-Differences to Layout in Storage
+与存储中布局的不同
 ==================================
 
-As described above the layout in memory is different from the layout in
-:ref:`storage<storage-inplace-encoding>`. Below there are some examples.
+如上所述，在内存中的布局与在:ref:`存储中<storage-inplace-encoding>`有一些不同。下面是一些例子：
 
-Example for Difference in Arrays
+
+数组的不同
 --------------------------------
 
-The following array occupies 32 bytes (1 slot) in storage, but 128
-bytes (4 items with 32 bytes each) in memory.
+下面的数组在存储中占用32字节（1个槽），但在内存中占用128字节（4个元素，每个32字节）。
 
-::
+.. code-block:: solidity
 
     uint8[4] a;
 
 
 
-Example for Difference in Struct Layout
+结构体的不同
 ---------------------------------------
 
-The following struct occupies 96 bytes (3 slots of 32 bytes) in storage,
-but 128 bytes (4 items with 32 bytes each) in memory.
+下面的结构体在存储中占用 96  (1个槽，每个32字节) ，但在内存中占用 128 个字节（4 个元素每个 32 字节）。
 
-
-::
+.. code-block:: solidity
 
     struct S {
         uint a;
