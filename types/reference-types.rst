@@ -205,9 +205,8 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
 
 .. index:: ! array;literals, !inline;arrays
 
-数组常量 / 内联数组
+数组常量
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 
 数组常量（字面量）是在方括号中（ ``[...]`` ） 包含一个或多个逗号分隔的表达式。例如 ``[1, a, f(3)]`` 。 
 
@@ -387,16 +386,16 @@ Solidity没有字符串操作函数，但是可以使用第三方字符串库，
             pairsOfFlags.length = new bool[2][](0);
         }
 
-        bytes m_byteData;
+        bytes byteData;
 
         function byteArrays(bytes memory data) public {
             // 字节数组（bytes）不一样，它们在没有填充的情况下存储。
             // 可以被视为与 uint8 [] 相同
-            m_byteData = data;
+            byteData = data;
             for (uint i = 0; i < 7; i++)
-                m_byteData.push();
-            m_byteData[3] = 0x08;
-            delete m_byteData[2];
+                byteData.push();
+            byteData[3] = 0x08;
+            delete byteData[2];
         }
 
         function addFlag(bool[2] memory flag) public returns (uint) {
