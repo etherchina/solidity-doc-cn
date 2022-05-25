@@ -6,21 +6,16 @@
 错误和回退语句
 *******************************
 
-Errors in Solidity provide a convenient and gas-efficient way to explain to the
-user why an operation failed. They can be defined inside and outside of contracts (including interfaces and libraries).
+Solidity 中的错误（关键字error）提供了一种方便且省gas的方式来向用户解释为什么一个操作会失败。它们可以被定义在合约（包括接口和库）内部和外部。
 
-They have to be used together with the :ref:`revert statement <revert-statement>`
-which causes
-all changes in the current call to be reverted and passes the error data back to the
-caller.
+错误必须与 :ref:`revert 语句 <revert-statement>`一起使用。它会还原当前调用中的发生的所有变化，并将错误数据传回给调用者。
 
 .. code-block:: solidity
 
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity ^0.8.4;
 
-    /// Insufficient balance for transfer. Needed `required` but only
-    /// `available` available.
+    /// 转账时，没有足够的余额。
     /// @param available balance available.
     /// @param required requested amount to transfer.
     error InsufficientBalance(uint256 available, uint256 required);
@@ -39,25 +34,19 @@ caller.
         // ...
     }
 
-Errors cannot be overloaded or overridden but are inherited.
-The same error can be defined in multiple places as long as the scopes are distinct.
-Instances of errors can only be created using ``revert`` statements.
 
-The error creates data that is then passed to the caller with the revert operation
-to either return to the off-chain component or catch it in a :ref:`try/catch statement <try-catch>`.
-Note that an error can only be caught when coming from an external call,
-reverts happening in internal calls or inside the same function cannot be caught.
+错误不能被重写或覆盖，但是可以继承。只要作用域不同，同一个错误可以在多个地方定义。
+只能使用 ``revert`` 语句创建错误实例。
 
-If you do not provide any parameters, the error only needs four bytes of
-data and you can use :ref:`NatSpec <natspec>` as above
-to further explain the reasons behind the error, which is not stored on chain.
-This makes this a very cheap and convenient error-reporting feature at the same time.
+错误产生的数据，会通过revert操作传递给调用者，可以交由链外组件处理或在 :ref:`try/catch 语句 <try-catch>` 中捕获它。
+注意，只有外部调用的错误才能被捕获。发生在内部调用或同一函数内的 revert 不能被捕获。
 
-More specifically, an error instance is ABI-encoded in the same way as
-a function call to a function of the same name and types would be
-and then used as the return data in the ``revert`` opcode.
-This means that the data consists of a 4-byte selector followed by :ref:`ABI-encoded<abi>` data.
-The selector consists of the first four bytes of the keccak256-hash of the signature of the error type.
+如果错误没有任何参数，错误只需要四个字节的数据，你可以使用:ref:`NatSpec <natspec>`，来进一步解释错误背后的原因，NatSpec 不会存储在链上。
+这个方式使得它同时也是一个非常便宜和方便的错误报告功能。
+
+更具体地说，一个错误实例的ABI编码方式与调用相同名称和类型的函数的方式相同，它作为 ``revert`` 操作码的返回数据使用。
+这意味着错误数据由一个4字节的选择器和 :ref:`ABI-encoded<abi>` 数据组成。
+选择器是错误的签名的keccak256哈希的前四个字节组成。
 
 .. note::
     It is possible for a contract to revert
