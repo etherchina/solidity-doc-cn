@@ -87,19 +87,18 @@
 - ``block.chainid`` (``uint``): 当前 chain id
 - ``block.coinbase`` (``address payable``): 当前区块矿工的地址
 - ``block.difficulty`` (``uint``): 当前区块难度
-- ``block.gaslimit`` (``uint``): current block gaslimit
-- ``block.number`` (``uint``): current block number
-- ``block.timestamp`` (``uint``): current block timestamp in seconds since Unix epoch
-- ``gasleft() returns (uint256)``: remaining gas
-- ``msg.data`` (``bytes``): complete calldata
-- ``msg.sender`` (``address``): sender of the message (current call)
-- ``msg.sig`` (``bytes4``): first four bytes of the calldata (i.e. function identifier)
-- ``msg.value`` (``uint``): number of wei sent with the message
-- ``tx.gasprice`` (``uint``): gas price of the transaction
-- ``tx.origin`` (``address``): sender of the transaction (full call chain)
-- ``assert(bool condition)``: abort execution and revert state changes if condition is ``false`` (use for internal error)
-- ``require(bool condition)``: abort execution and revert state changes if condition is ``false`` (use
-  for malformed input or error in external component)
+- ``block.gaslimit`` (``uint``): 当前区块gaslimit
+- ``block.number`` (``uint``): 当前区块号
+- ``block.timestamp`` (``uint``): 当前区块时间戳（以Unix epoch依赖的秒数）
+- ``gasleft() returns (uint256)``: 剩余 gas
+- ``msg.data`` (``bytes``): 完整的 calldata 数据
+- ``msg.sender`` (``address``): 消息调用者 (当前调用)
+- ``msg.sig`` (``bytes4``): calldata的前 4 个字节 (如：函数签名)
+- ``msg.value`` (``uint``): 与消息一起发送的以太币（wei为单位）
+- ``tx.gasprice`` (``uint``): 交易的gas 价格
+- ``tx.origin`` (``address``): 交易的发起者 (完整的调用链下，最初的发起者)
+- ``assert(bool condition)``: 如果条件为 ``false`` ， 终止执行并回退状态改变 (用于内部错误)
+- ``require(bool condition)``: 如果条件为 ``false`` ， 终止执行并回退状态改变  (用于检查错误输入，或外部组件的错误)
 - ``require(bool condition, string memory message)``: abort execution and revert state changes if
   condition is ``false`` (use for malformed input or error in external component). Also provide error message.
 - ``revert()``: abort execution and revert state changes
