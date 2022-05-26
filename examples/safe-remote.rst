@@ -6,23 +6,14 @@
 安全的远程购买合约
 ********************
 
-Purchasing goods remotely currently requires multiple parties that need to trust each other.
-The simplest configuration involves a seller and a buyer. The buyer would like to receive
-an item from the seller and the seller would like to get money (or an equivalent)
-in return. The problematic part is the shipment here: There is no way to determine for
-sure that the item arrived at the buyer.
+目前，远程购买商品需要多方相互信任。
+最简单的情况涉及一个卖家和一个买家。买方希望从卖方那里收到一件物品，卖方希望得到金钱（或等价物）作为回报。有问题的部分是快递。没有办法确定物品是否到达买方手中。
 
-There are multiple ways to solve this problem, but all fall short in one or the other way.
-In the following example, both parties have to put twice the value of the item into the
-contract as escrow. As soon as this happened, the money will stay locked inside
-the contract until the buyer confirms that they received the item. After that,
-the buyer is returned the value (half of their deposit) and the seller gets three
-times the value (their deposit plus the value). The idea behind
-this is that both parties have an incentive to resolve the situation or otherwise
-their money is locked forever.
+有多种方法来解决这个问题，但都有这样或那样的不足之处。
+在下面的例子中，双方都要把物品价值的两倍作为担保费放入合约。只要发生状况，钱就会一直锁在合约里面，直到买方确认收到物品。
+而这之后，买方可以退回物品价值（他担保费的一半），卖方得到三倍的价值（他们的押金加上价值）。这背后的想法是，双方都有动力去解决这个问题，否则他们的钱就永远被锁定了。
 
-This contract of course does not solve the problem, but gives an overview of how
-you can use state machine-like constructs inside a contract.
+这个合约当然不能解决问题，但它概述了你如何在合约中使用类似状态机的结构。
 
 
 .. code-block:: solidity
@@ -152,8 +143,4 @@ you can use state machine-like constructs inside a contract.
 
             seller.transfer(3 * value);
         }
-    }
-
-
-
     }

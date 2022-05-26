@@ -49,23 +49,17 @@ Solidity 中的错误（关键字error）提供了一种方便且省gas的方式
 选择器是错误的签名的keccak256哈希的前四个字节组成。
 
 .. note::
-    It is possible for a contract to revert
-    with different errors of the same name or even with errors defined in different places
-    that are indistinguishable by the caller. For the outside, i.e. the ABI,
-    only the name of the error is relevant, not the contract or file where it is defined.
+    合约有可能出现以下情况：在不同地方定义的相同名称的错误。而这些错误对调用者来说是无法区分的。
+    对于外部来说，如 ABI 仅关联了错误的名字，而没有定义它的合约或文件。
 
-The statement ``require(condition, "description");`` would be equivalent to
-``if (!condition) revert Error("description")`` if you could define
-``error Error(string)``.
-Note, however, that ``Error`` is a built-in type and cannot be defined in user-supplied code.
 
-Similarly, a failing ``assert`` or similar conditions will revert with an error
-of the built-in type ``Panic(uint256)``.
+如果你可以定义 ``error Error(string)`` 的话， ``require(condition, "description");``  与  ``if (!condition) revert Error("description")`` 等效。
+不过， ``Error`` 是内建类型，不可以通过用户代码定义。
+
+同样的，一个 ``assert`` 的错误或类似的失败将以 ``Panic(uint256)`` 类型的错误的方式回退。
+
 
 .. note::
-    Error data should only be used to give an indication of failure, but
-    not as a means for control-flow. The reason is that the revert data
-    of inner calls is propagated back through the chain of external calls
-    by default. This means that an inner call
-    can "forge" revert data that looks like it could have come from the
-    contract that called it.
+    错误数据应该只用于指示错误，而不是作为控制流的一种手段。原因是默认情况下内部调用的获得的错误数据可能是通过外部调用链冒泡过来。
+
+    当这意味着，一个内部调用可以 "伪造"错误数据，使它看起来像是来自被调用的合约。
