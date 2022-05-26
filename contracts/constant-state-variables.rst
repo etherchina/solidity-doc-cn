@@ -20,7 +20,7 @@ Constant 和 Immutable  状态变量
 
 不可变变量在构造时进行一次求值，并将其值复制到代码中访问它们的所有位置。 对于这些值，将保留32个字节，即使它们适合较少的字节也是如此。 因此，常量有时可能比不可变量更便宜。
 
-不是所有类型的状态变量都支持用 constant 或 ``immutable`` 来修饰，当前仅支持 :ref:`字符串 <strings>`_ (仅常量) 和 :ref:`值类型 <value-types>`_.
+不是所有类型的状态变量都支持用 constant 或 ``immutable`` 来修饰，当前仅支持 :ref:`字符串 <strings>` (仅常量) 和 :ref:`值类型 <value-types>` .
 
 
 .. code-block:: solidity

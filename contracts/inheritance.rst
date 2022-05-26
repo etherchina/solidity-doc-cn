@@ -287,8 +287,8 @@ Solidity 支持多重继承包括多态。
 修改器重写
 ===================
 
-修改器重写也可以被重写，工作方式和 :ref:`函数重写 <function-overriding>`_ 类似。
-需要被重写的修改器也需要使用 ``virtual`` 修饰，``override`` 则同样修饰重载，例如：
+修改器重写也可以被重写，工作方式和 :ref:`函数重写 <function-overriding>` 类似。
+需要被重写的修改器也需要使用 ``virtual`` 修饰， ``override`` 则同样修饰重载，例如：
 
 .. code-block:: solidity
 

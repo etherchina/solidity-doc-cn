@@ -196,7 +196,8 @@
 
 允许从 ``address payable`` 到 ``address`` 的隐式转换，而从 ``address`` 到 ``address payable`` 必须显示的转换, 通过 ``payable(<address>)`` 进行转换。
 .. note::
-  在0.5版本,执行这种转换的唯一方法是使用中间类型，先转换为 ``uint160`` 如,  address payable ap = address(uint160(addr)); 
+  
+    在0.5版本,执行这种转换的唯一方法是使用中间类型，先转换为 ``uint160`` 如,  address payable ap = address(uint160(addr)); 
 
 ``address`` 允许和 ``uint160``、 整型字面常量、``bytes20`` 及合约类型相互转换。
 
@@ -222,7 +223,7 @@
 
 .. note::
     ``address`` 和 ``address payable`` 的区别是在 0.5.0 版本引入的，同样从这个版本开始，合约类型不再继承自地址类型，
-     不过如果合约有可支付的回退（ payable fallback ）函数或receive 函数，合约类型仍然可以显示转换为
+    不过如果合约有可支付的回退（ payable fallback ）函数或receive 函数，合约类型仍然可以显示转换为
     ``address`` 或 ``address payable`` 。
 
 .. _members-of-addresses:
@@ -329,8 +330,8 @@
 
 * ``code`` 和 ``codehash`` 成员
 
-你可以查询任何智能合约的部署代码。使用 ``.code`` 来获取EVM的字节码，其返回 ``bytes memory``，值可能是空。
-使用 ``.codehash`` 获得该代码的 Keccak-256哈希值 (为 ``bytes32`` )。注意， ``addr.codehash`` 比使用 ``keccak256(addr.code)``更便宜。
+你可以查询任何智能合约的部署代码。使用 ``.code`` 来获取EVM的字节码，其返回 ``bytes memory`` ，值可能是空。
+使用 ``.codehash`` 获得该代码的 Keccak-256哈希值 (为 ``bytes32`` )。注意， ``addr.codehash`` 比使用 ``keccak256(addr.code)`` 更便宜。
 
 
 .. note::
@@ -433,7 +434,7 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
 十进制小数字面常量带有一个 ``.``，至少在其一边会有一个数字。
 比如： ``1.``， ``.1``，和 ``1.3``。
 
- ``2e10`` 形式的科学符号也是支持的，尽管指数必须是整数，但底数可以是小数， ``MeE`` 的值 ``M * 10**E`` 。
+``2e10`` 形式的科学符号也是支持的，尽管指数必须是整数，但底数可以是小数， ``MeE`` 的值 ``M * 10**E`` 。
 比如：， ``-2e10``， ``2e-10``， ``2.5e1``。
 
 
@@ -611,7 +612,8 @@ Unicode 字面常量
     }
 
 .. note::
-     枚举还可以在合约或库定义之外的文件级别上声明。
+
+    枚举还可以在合约或库定义之外的文件级别上声明。
 
 .. index:: ! user defined value type, custom type
 
@@ -680,8 +682,8 @@ Unicode 字面常量
 
 函数类型是一种表示函数的类型。可以将一个函数赋值给另一个函数类型的变量，也可以将一个函数作为参数进行传递，还能在函数调用中返回函数类型变量。
 函数类型有两类：
- - *内部（internal）* 函数类型
- - *外部（external）* 函数类型
+- *内部（internal）* 函数类型
+- *外部（external）* 函数类型
 
 内部函数只能在当前合约内被调用（更具体来说，在当前代码块内，包括内部库函数和继承的函数中），因为它们不能在当前合约上下文的外部被执行。
 调用一个内部函数是通过跳转到它的入口标签来实现的，就像在当前合约的内部调用一个函数。

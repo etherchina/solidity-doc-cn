@@ -54,7 +54,7 @@
     }
 
 
-.. _special-variables-and-functions:
+.. _special-variables-functions:
 
 特殊变量和函数
 ===============================
@@ -235,7 +235,7 @@ string 成员函数
     在 :ref:`address` 上的代码(可以为空)
 
 ``<address>.codehash`` (``bytes32``)
-    :ref:`address`的codehash
+    :ref:`address` 的codehash
 
 ``<address payable>.transfer(uint256 amount)``
     向 :ref:`address` 发送数量为 amount 的 Wei，失败时抛出异常，使用固定（不可调节）的 2300 gas 的矿工费。
@@ -269,7 +269,7 @@ string 成员函数
     Solidity 会在执行外部调用时使用 `extcodesize` 操作码进行额外检查。
     这确保了即将被调用的合约要么实际存在（它包含代码）或者触发一个异常。
 
-    对地址而不是合约实例进行操作的低级调用（如 ``.call()``, ``.delegatecall()``, ``.staticcall()``, ``.send()`` 和 ``.transfer()``) 时，**不**包括这个检查，这使得它们在GAS方面更便宜，但也更不安全。
+    对地址而不是合约实例进行操作的低级调用(如 ``.call()`` , ``.delegatecall()`` , ``.staticcall()`` , ``.send()`` 和 ``.transfer()`` ) 时， **不** 包括这个检查，这使得它们在GAS方面更便宜，但也更不安全。
     
 .. note::
 

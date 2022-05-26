@@ -73,6 +73,7 @@
 错误写法:
 
 .. code-block:: solidity
+
     // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.4.0 <0.9.0;
 
@@ -115,6 +116,8 @@
     }
 
 错误写法:
+
+.. code-block:: solidity
 
     pragma solidity >=0.4.0 <0.9.0;
 
@@ -409,6 +412,7 @@ Import 语句应始终放在文件的顶部。
 例外情况:
 
 .. code-block:: solidity
+
     function singleLine() public { spam(); }
 
 
@@ -1241,7 +1245,7 @@ fallback 和 receive 函数中不要包含空格：
 Solidity 智能合约包含了NatSpec注释形式。
 单行使用  ``///`` 开始，多行使用 ``/**`` 开头以 ``*/`` 结尾。
 
-例如, 以来自 :ref:`简单合约 <simple-smart-contract>`_ 加上注释为例，看上去是这样：
+例如, 以来自 :ref:`简单合约 <simple-smart-contract>` 加上注释为例，看上去是这样：
 
 .. code-block:: solidity
 
@@ -1268,7 +1272,7 @@ Solidity 智能合约包含了NatSpec注释形式。
     }
 
 
-推荐使用  :ref:`NatSpec <natspec>`_ 为所有的开放接口（在 ABI 里呈现的内容）进行完整的注释。
+推荐使用 :ref:`NatSpec <natspec>` 为所有的开放接口（在 ABI 里呈现的内容）进行完整的注释。
 
-参考  :ref:`NatSpec <natspec>`_ 部分了解更多。
+参考 :ref:`NatSpec <natspec>` 部分了解更多。
 

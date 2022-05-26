@@ -8,7 +8,7 @@
 
 Solidity 中的错误（关键字error）提供了一种方便且省gas的方式来向用户解释为什么一个操作会失败。它们可以被定义在合约（包括接口和库）内部和外部。
 
-错误必须与 :ref:`revert 语句 <revert-statement>`一起使用。它会还原当前调用中的发生的所有变化，并将错误数据传回给调用者。
+错误必须与 :ref:`revert 语句 <revert-statement>` 一起使用。它会还原当前调用中的发生的所有变化，并将错误数据传回给调用者。
 
 .. code-block:: solidity
 

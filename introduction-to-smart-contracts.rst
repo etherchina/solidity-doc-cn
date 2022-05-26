@@ -153,11 +153,11 @@ Mappings 可以看作是一个 `哈希表 <https://en.wikipedia.org/wiki/Hash_ta
 :ref:`require <assert-and-require>` 用来检查某些条件，如果不满足这些条件就会回推所有的状态变化。
 在这个例子中, ``require(msg.sender == minter);`` 确保只有合约的创建者可以调用 ``mint``。 一般来说，创建者可以随心所欲地铸造代币，但在某些时候，这将导致一种叫做 "溢出" 的现象。
 
-请注意，由于默认的 :ref:`算术检查模式 <unchecked>`，如果表达式 ``balances[receiver] += amount;`` 溢出交易将被还原。
-即当任意精度算术中的 ``balances[receiver]+ amount`` 大于 ``uint`` (``2**256 - 1``)。同样在在函数 ``send``中的 ``balances[receiver] += amount;`` 这对语句来说也是如此。
+请注意，由于默认的 :ref:`算术检查模式 <unchecked>` ，如果表达式 ``balances[receiver] += amount;`` 溢出交易将被还原。
+即当任意精度算术中的 ``balances[receiver]+ amount`` 大于 ``uint`` (``2**256 - 1``)。同样在在函数 ``send`` 中的 ``balances[receiver] += amount;`` 这对语句来说也是如此。
 
 
-:ref:`Errors <errors>` 用来向调用者描述错误信息。Errors与 :ref:`revert 语句 <revert-statement>`一起使用。
+:ref:`Errors <errors>` 用来向调用者描述错误信息。Error与 :ref:`revert 语句 <revert-statement>` 一起使用。
 ``revert`` 语句无条件地中止执行并回退所有的变化，类似于 ``require`` 函数，它也同样允许你提供一个错误的名称和额外的数据，这些额外数据将提供给调用者(并最终提供给前端应用程序或区块资源管理器），这样就可以更容易地调试或应对失败。
 
 任何人（已经拥有一些代币）都可以使用 ``send`` 函数来向其他人发送代币。如果发送者没有足够的代币可以发送， ``if`` 条件为真 ``revert`` 将触发失败，并通过 ``InsufficientBalance`` 向发送者提供错误细节。

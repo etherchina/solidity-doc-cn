@@ -75,12 +75,11 @@
 
 .. note::
 
-   :ref:`外部函数<external-function-calls>` 不可以接受多维数组作为参数
-  如果原文件加入 `pragma abicoder v2;` 可以启用ABI v2版编码功能，这此功能可用。
-  （注：在 0.7.0 之前是使用``pragma experimental ABIEncoderV2;``）
+    :ref:`外部函数<external-function-calls>` 不可以接受多维数组作为参数
+    如果原文件加入 `pragma abicoder v2;` 可以启用ABI v2版编码功能，这此功能可用。
+    （注：在 0.7.0 之前是使用 ``pragma experimental ABIEncoderV2;`` ）
 
-
-   :ref:`内部函数<external-function-calls>` 则不需要启用ABI v2 就接受多维数组作为参数。
+    :ref:`内部函数<external-function-calls>` 则不需要启用ABI v2 就接受多维数组作为参数。
 
 .. index:: return array, return string, array, string, array of strings, dynamic array, variably sized array, return struct, struct
 
@@ -128,7 +127,7 @@
 
 这个形式等同于赋值给返回参数，然后用 ``return;`` 退出。
 
-如果使用  ``return `` 提前退出有返回值的函数， 必须在用 return 时提供返回值。
+如果使用 ``return`` 提前退出有返回值的函数， 必须在用 return 时提供返回值。
 
 
 .. note::
@@ -209,8 +208,8 @@ Pure 纯函数
 
 函数可以声明为 ``pure`` ，在这种情况下，承诺不读取也不修改状态变量。
 
-特别是，应该可以在编译时确定一个 ``pure``函数，它仅处理输入参数和 ``msg.data``，对当前区块链状态没有任何了解。
-这也意味着读取 ``immutable`` 变量也不是一个 ``pure``操作。
+特别是，应该可以在编译时确定一个 ``pure`` 函数，它仅处理输入参数和 ``msg.data`` ，对当前区块链状态没有任何了解。
+这也意味着读取 ``immutable`` 变量也不是一个 ``pure`` 操作。
 
 
 .. note::

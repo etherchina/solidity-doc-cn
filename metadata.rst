@@ -1,3 +1,5 @@
+.. include:: glossaries.rst
+  
 .. _metadata:
 
 #################
@@ -130,6 +132,7 @@ Solidity编译器自动生成JSON文件，即合约的元数据，其中包含�
 
 
 .. code-block:: text
+
     0xa2
     0x64 'i' 'p' 'f' 's' 0x58 0x22 <34 bytes IPFS hash>
     0x64 's' 'o' 'l' 'c' 0x43 <3 byte version encoding>
