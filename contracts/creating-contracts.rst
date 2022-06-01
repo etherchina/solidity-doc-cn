@@ -25,11 +25,13 @@
 这意味着不可能循环创建依赖项。
 
 .. code-block:: solidity
-
+    
+    // SPDX-License-Identifier: GPL-3.0
     pragma solidity >=0.4.22 <0.9.0;
 
     contract OwnedToken {
-        // TokenCreator 是如下定义的合约类型.
+
+        // TokenCreator 是后面定义的合约类型.
         // 不创建新合约的话，也可以引用它。
         TokenCreator creator;
         address owner;
@@ -37,6 +39,7 @@
 
         // 这是注册 creator 和设置名称的构造函数。
         constructor(bytes32 name_) {
+            
             // 状态变量通过其名称访问，而不是通过例如 this.owner 的方式访问。
             // 这也适用于函数，特别是在构造函数中，你只能像这样（“内部地”）调用它们，
             // 因为合约本身还不存在。
@@ -48,6 +51,7 @@
         }
 
         function changeName(bytes32 newName) public {
+            
             // 只有 creator （即创建当前合约的合约）能够更改名称 —— 因为合约是隐式转换为地址的，
             // 所以这里的比较是可行的。
             if (msg.sender == address(creator))
@@ -67,9 +71,8 @@
 
     contract TokenCreator {
         function createToken(bytes32 name)
-           public
-           returns (OwnedToken tokenAddress)
-        {
+        public
+        returns (OwnedToken tokenAddress) {
             // 创建一个新的 Token 合约并且返回它的地址。
             // 从 JavaScript 方面来说，返回类型是简单的 `address` 类型，因为
             // 这是在 ABI 中可用的最接近的类型。

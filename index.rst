@@ -129,5 +129,4 @@ Solidity 是静态类型语言，支持继承、库和复杂的用户定义类�
    common-patterns.rst
    bugs.rst
    contributing.rst
-   brand-guide.rst
    language-influences.rst

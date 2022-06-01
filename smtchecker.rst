@@ -1,7 +1,7 @@
 .. _formal_verification:
 
 ##################################
-SMTChecker and Formal Verification
+SMTChecker和形式化验证
 ##################################
 
 Using formal verification it is possible to perform an automated mathematical

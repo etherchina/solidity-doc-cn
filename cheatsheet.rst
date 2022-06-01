@@ -99,65 +99,52 @@
 - ``tx.origin`` (``address``): 交易的发起者 (完整的调用链下，最初的发起者)
 - ``assert(bool condition)``: 如果条件为 ``false`` ， 终止执行并回退状态改变 (用于内部错误)
 - ``require(bool condition)``: 如果条件为 ``false`` ， 终止执行并回退状态改变  (用于检查错误输入，或外部组件的错误)
-- ``require(bool condition, string memory message)``: abort execution and revert state changes if
-  condition is ``false`` (use for malformed input or error in external component). Also provide error message.
-- ``revert()``: abort execution and revert state changes
-- ``revert(string memory message)``: abort execution and revert state changes providing an explanatory string
-- ``blockhash(uint blockNumber) returns (bytes32)``: hash of the given block - only works for 256 most recent blocks
-- ``keccak256(bytes memory) returns (bytes32)``: compute the Keccak-256 hash of the input
-- ``sha256(bytes memory) returns (bytes32)``: compute the SHA-256 hash of the input
-- ``ripemd160(bytes memory) returns (bytes20)``: compute the RIPEMD-160 hash of the input
-- ``ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address)``: recover address associated with
-  the public key from elliptic curve signature, return zero on error
-- ``addmod(uint x, uint y, uint k) returns (uint)``: compute ``(x + y) % k`` where the addition is performed with
-  arbitrary precision and does not wrap around at ``2**256``. Assert that ``k != 0`` starting from version 0.5.0.
-- ``mulmod(uint x, uint y, uint k) returns (uint)``: compute ``(x * y) % k`` where the multiplication is performed
-  with arbitrary precision and does not wrap around at ``2**256``. Assert that ``k != 0`` starting from version 0.5.0.
-- ``this`` (current contract's type): the current contract, explicitly convertible to ``address`` or ``address payable``
-- ``super``: the contract one level higher in the inheritance hierarchy
-- ``selfdestruct(address payable recipient)``: destroy the current contract, sending its funds to the given address
-- ``<address>.balance`` (``uint256``): balance of the :ref:`address` in Wei
-- ``<address>.code`` (``bytes memory``): code at the :ref:`address` (can be empty)
-- ``<address>.codehash`` (``bytes32``): the codehash of the :ref:`address`
-- ``<address payable>.send(uint256 amount) returns (bool)``: send given amount of Wei to :ref:`address`,
-  returns ``false`` on failure
-- ``<address payable>.transfer(uint256 amount)``: send given amount of Wei to :ref:`address`, throws on failure
-- ``type(C).name`` (``string``): the name of the contract
-- ``type(C).creationCode`` (``bytes memory``): creation bytecode of the given contract, see :ref:`Type Information<meta-type>`.
-- ``type(C).runtimeCode`` (``bytes memory``): runtime bytecode of the given contract, see :ref:`Type Information<meta-type>`.
-- ``type(I).interfaceId`` (``bytes4``): value containing the EIP-165 interface identifier of the given interface, see :ref:`Type Information<meta-type>`.
-- ``type(T).min`` (``T``): the minimum value representable by the integer type ``T``, see :ref:`Type Information<meta-type>`.
-- ``type(T).max`` (``T``): the maximum value representable by the integer type ``T``, see :ref:`Type Information<meta-type>`.
+- ``require(bool condition, string memory message)``: 如果条件为 ``false`` ， 终止执行并回退状态改变  (用于检查错误输入，或外部组件的错误)，同时提供错误信息。
+- ``revert()``: 终止执行并回退状态改变
+- ``revert(string memory message)``: 终止执行并回退状态改变，同时提供错误解释信息。
+- ``blockhash(uint blockNumber) returns (bytes32)``: 指定块的区块hash - 仅最近 256 个区块有效
+- ``keccak256(bytes memory) returns (bytes32)``: 计算输入参数的 Keccak-256 哈希
+- ``sha256(bytes memory) returns (bytes32)``: 计算输入参数的 SHA-256 哈希
+- ``ripemd160(bytes memory) returns (bytes20)``: 计算输入参数的 RIPEMD-160 哈希
+- ``ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address)``: 从椭圆曲线签名中恢复出与公钥关联的地址，出错时返回零。
+- ``addmod(uint x, uint y, uint k) returns (uint)``: 计算 ``(x + y) % k`` ，其中加法以任意精度执行，不会在 ``2**256`` 处溢出。从 0.5.0 开始要求 ``k != 0`` 。
+- ``mulmod(uint x, uint y, uint k) returns (uint)``: 计算 ``(x * y) % k`` ，其中乘法以任意精度执行，不会在 ``2**256`` 处溢出。从 0.5.0 开始要求 ``k != 0`` 。
+- ``this`` (current contract's type): 当前合约，可以显式转换为 ``address`` 或 ``address payable``
+- ``super``: 继承树的上层合约
+- ``selfdestruct(address payable recipient)``: 销毁合约，把合约的剩余资金（以太币）发送到指定的地址。
+- ``<address>.balance`` (``uint256``):  :ref:`address` 的余额，以 wei 为单位
+- ``<address>.code`` (``bytes memory``): :ref:`address` 的代码 (可以为空)
+- ``<address>.codehash`` (``bytes32``): :ref:`address` 的代码 hash
+- ``<address payable>.send(uint256 amount) returns (bool)``:  发送 ``amount`` 数量（单位wei）的以太币到 :ref:`address` ， 失败返回 ``false`` 。
+- ``<address payable>.transfer(uint256 amount)``: 发送 ``amount`` 数量（单位wei）的以太币到 :ref:`address` ， 失败时抛出异常。
+- ``type(C).name`` (``string``): 合约的名称
+- ``type(C).creationCode`` (``bytes memory``): 合约的创建字节码，参考 :ref:`类型信息<meta-type>`.
+- ``type(C).runtimeCode`` (``bytes memory``): 合约的运行时字节码，参考 :ref:`类型信息<meta-type>`.
+- ``type(I).interfaceId`` (``bytes4``): 包含给定接口的EIP-165接口标识符 , 参考 :ref:`类型信息<meta-type>`.
+- ``type(T).min`` (``T``): 所在整型 ``T`` 的最小值, 参考 :ref:`类型信息<meta-type>`.
+- ``type(T).max`` (``T``): 所在整型 ``T`` 的最大值, 参考 :ref:`类型信息<meta-type>`.
 
 .. note::
-    When contracts are evaluated off-chain rather than in context of a transaction included in a
-    block, you should not assume that ``block.*`` and ``tx.*`` refer to values from any specific
-    block or transaction. These values are provided by the EVM implementation that executes the
-    contract and can be arbitrary.
+    当合约在链外而不是在包含的交易的区块中下被执行时，你不应该假定 ``block.*`` 和 ``tx.*`` 是某特定区块或交易的值。这些值是由执行合约的EVM实现提供的，其值可以是任意的。
 
 .. note::
-    Do not rely on ``block.timestamp`` or ``blockhash`` as a source of randomness,
-    unless you know what you are doing.
+    不要依赖 ``block.timestamp`` 或 ``blockhash`` 作为随机源，除非你明确知道你所做的事情。
 
-    Both the timestamp and the block hash can be influenced by miners to some degree.
-    Bad actors in the mining community can for example run a casino payout function on a chosen hash
-    and just retry a different hash if they did not receive any money.
+    时间戳和区块哈希值都可以在一定程度上受到矿工的影响。例如，矿工团体中的不良行为者可以在某个依赖随机数的赌场支付功能上，在没有获利情况下重试另一个哈希值。
 
-    The current block timestamp must be strictly larger than the timestamp of the last block,
-    but the only guarantee is that it will be somewhere between the timestamps of two
-    consecutive blocks in the canonical chain.
+    当前区块的时间戳必须严格大于上一个区块的时间戳。
+    但唯一的能保证是：它将规范链中两个连续区块的时间戳。
+
 
 .. note::
-    The block hashes are not available for all blocks for scalability reasons.
-    You can only access the hashes of the most recent 256 blocks, all other
-    values will be zero.
+    由于可扩展的原因，不是所有块哈希都可用。你只能访问最近256个块的哈希值，其他所有值将为零。
+
 
 .. note::
-    In version 0.5.0, the following aliases were removed: ``suicide`` as alias for ``selfdestruct``,
-    ``msg.gas`` as alias for ``gasleft``, ``block.blockhash`` as alias for ``blockhash`` and
-    ``sha3`` as alias for ``keccak256``.
+    在 0.5.0 版本，以下别名移除了: ``suicide``（作为 ``selfdestruct`` 的别名）, 
+    ``msg.gas`` （ ``gasleft`` 的的别名）, ``block.blockhash`` （ ``blockhash`` 的别名）以及 ``sha3`` （ ``keccak256`` 的别名）。
 .. note::
-    In version 0.7.0, the alias ``now`` (for ``block.timestamp``) was removed.
+    在0.7.0版本，别名 ``now`` ( ``block.timestamp`` 的别名) 被移除了。
 
 .. index:: visibility, public, private, external, internal
 

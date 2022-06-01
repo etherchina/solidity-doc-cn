@@ -366,7 +366,7 @@ Solidity 中的作用域规则遵循了 C99（与其他很多语言一样）：�
         }
     }
 
-作为 C99 作用域规则的特例，请注意在下边的例子里，第一次对 ``x`` 的赋值会改变上一层中声明的变量值。如果外层声明的变量被“影子化”（就是说被在内部作用域中由一个同名变量所替代）你会得到一个警告。
+作为 C99 作用域规则的特例，请注意在下边的例子里，第一次对 ``x`` 的赋值会改变上一层中声明的变量值。如果外层声明的变量被“覆盖”（就是说被在内部作用域中由一个同名变量所替代）你会得到一个警告。
 
 .. code-block:: solidity
 
@@ -553,7 +553,8 @@ Solidity 使用状态恢复异常来处理错误。这种异常将撤消对当�
             require(msg.value % 2 == 0, "Even value required.");
             uint balanceBeforeTransfer = this.balance;
             addr.transfer(msg.value / 2);
-			// 由于转账函数在失败时抛出异常并且不会调用到以下代码，因此我们应该没有办法检查仍然有一半的钱。
+			
+            // 由于转账函数在失败时抛出异常并且不会调用到以下代码，因此我们应该没有办法检查仍然有一半的钱。
             assert(this.balance == balanceBeforeTransfer - msg.value / 2);
             return this.balance;
         }
@@ -707,9 +708,9 @@ Solidity 根据错误的类型，支持不同种类的捕获代码块：
 
 
 有计划在未来支持其他类型的错误数据。
-``Error``和 ``Panic`` 字符串目前是按原样解析的，不作为标识符处理。
+``Error`` 和 ``Panic`` 字符串目前是按原样解析的，不作为标识符处理。
 
-为了捕捉所有的错误情况，你至少要有子句 ``catch { ... }``或 ``catch (bytes memory lowLevelData) { ... }``.
+为了捕捉所有的错误情况，你至少要有子句 ``catch { ... }`` 或 ``catch (bytes memory lowLevelData) { ... }``.
 
 在 ``returns`` 和 ``catch`` 子句中声明的变量只在后面的块的范围内有效。
 

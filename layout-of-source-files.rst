@@ -9,37 +9,29 @@ Solidity 源文件结构
 以及 :ref:`常量<constants>` 定义。
 
 
-SPDX License Identifier
+SPDX 版权许可标识
 =======================
 
-Trust in smart contracts can be better established if their source code
-is available. Since making source code available always touches on legal problems
-with regards to copyright, the Solidity compiler encourages the use
-of machine-readable `SPDX license identifiers <https://spdx.org>`_.
-Every source file should start with a comment indicating its license:
+如果开源智能合约的源代码，就可以更好地建立对其的信任。由于提供源代码总是涉及到版权方面的法律问题，Solidity编译器鼓励使用机器可读的 `SPDX 许可标识 <https://spdx.org>`_ 。
+每个源文件都应该以这样的注释开始以说明其版权许可证。
+
 
 ``// SPDX-License-Identifier: MIT``
 
-The compiler does not validate that the license is part of the `list allowed by SPDX <https://spdx.org/licenses/>`_, but
-it does include the supplied string in the :ref:`bytecode metadata <metadata>` .
+编译器不会验证许可证是否属于 `SPDX版权许可列表 <https://spdx.org/licenses/>`_ ，但它会在 :ref:`bytecode metadata <metadata>` 中包含提供的字符串。
 
-If you do not want to specify a license or if the source code is
-not open-source, please use the special value ``UNLICENSED``.
+如果你不想指定一个许可证，或者如果源代码不开源，请使用特殊值 ``UNLICENSED`` 。
 
-Note that ``UNLICENSED`` (no usage allowed, not present in SPDX license list)
-is different from ``UNLICENSE`` (grants all rights to everyone).
-Solidity follows `the npm recommendation <https://docs.npmjs.com/cli/v7/configuring-npm/package-json#license>`_.
+请注意， ``UNLICENSED`` （不存在于SPDX许可证列表中）与 ``UNLICENSE`` （授予所有人所有权利）不同。
 
-Supplying this comment of course does not free you from other
-obligations related to licensing like having to mention
-a specific license header in each source file or the
-original copyright holder.
 
-The comment is recognized by the compiler anywhere in the file at the
-file level, but it is recommended to put it at the top of the file.
+Solidity 遵循 `the npm 建议 <https://docs.npmjs.com/cli/v7/configuring-npm/package-json#license>`_ 。
+当然，提供这个注释并不能使你摆脱与许可有关的其他义务，比如必须在每个源文件中声明一个特定的许可标识符或原始版权人。
 
-More information about how to use SPDX license identifiers
-can be found at the `SPDX website <https://spdx.org/ids-how>`_.
+版权注释在文件的任何位置都可以被编译器识别，但建议把它放在文件的顶部。
+
+关于如何使用SPDX许可标识符的更多信息可以在 `SPDX website <https://spdx.org/ids-how>`_ 找到。
+
 
 
 .. index:: ! pragma
