@@ -599,7 +599,7 @@ Solidity 中是没有八进制的，因此前置 0 是无效的。
         function f() public pure {
             g([uint(1), 2, 3]);
         }
-        function g(uint[3] _data) public pure {
+        function g(uint[3] memory _data) public pure {
             // ...
         }
     }
